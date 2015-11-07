@@ -1,0 +1,63 @@
+parameters:
+    sidus_eav_model.attribute_type.default.class: Sidus\EAVModelBundle\Model\AttributeType
+
+services:
+    sidus_eav_model.attribute_type.string:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [string, stringValue, text]
+        tags:
+            - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.text:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [text, textValue, textarea]
+        tags:
+            - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.number:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [number, floatValue, number]
+        tags:
+            - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.html:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [html, textValue, textarea]
+        tags:
+            - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.unique:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [unique, stringValue, text]
+        tags:
+            - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.date:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [date, dateValue, date]
+        tags:
+            - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.datetime:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [datetime, datetimeValue, datetime]
+        tags:
+            - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.choice:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [choice, stringValue, choice]
+        tags:
+            - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.data:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [data, dataValue, sidus_simple_data_selector]
+        tags:
+            - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.autocomplete_data:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [autocomplete_data, dataValue, sidus_autocomplete_data_selector]
+        tags:
+            - { name: sidus.attribute_type }

@@ -1,0 +1,51 @@
+{% block bootstrap_collection_widget %}
+    {% spaceless %}
+        {% if prototype is defined %}
+            {% set prototype_vars = {} %}
+            {% if style is defined %}
+                {% set prototype_vars = prototype_vars|merge({'style': style}) %}
+            {% endif %}
+            {% set field = prototype %}
+            {% set prototype_html = block('bootstrap_collection_item') %}
+            {% set attr = attr|merge({'data-prototype': prototype_html }) %}
+            {% set attr = attr|merge({'data-prototype-name': prototype_name }) %}
+        {% endif %}
+        <div {{ block('widget_container_attributes') }}>
+            <ul class="nav nav-pills nav-stacked bootstrap-collection"
+                data-input-pattern="{{ prototype.vars.full_name }}">
+                {% for field in form %}
+                    <li{% if form_has_error(field) %} class="has-error"{% endif %}>{{ block('bootstrap_collection_item') }}</li>
+                {% endfor %}
+            </ul>
+            {{ form_errors(form) }}
+            {% if form.vars.allow_add %}
+                <a href="#{{ form.vars.id }}" class="btn btn-success btn-small sm-bottom-margin"
+                   data-addfield="collection" data-collection="{{ form.vars.id }}"
+                   data-prototype-name="{{ prototype_name }}">
+                    <i class="fa fa-plus"></i>
+                </a>
+            {% endif %}
+        </div>
+    {% endspaceless %}
+{% endblock %}
+
+{% block bootstrap_collection_item %}
+    {% if form_has_error(field) %}
+        <i class="fa fa-warning"></i>
+    {% endif %}
+    {% if not form.vars.disabled %}
+        <i class="fa fa-bars position-handler"></i>
+    {% endif %}
+    {{ form_widget(field) }}
+    {% if form.vars.allow_delete %}
+        <a href="#" class="btn btn-danger pull-right remove-action" data-removefield="collection"
+           data-field="{{ field.vars.id }}">
+            <i class="fa fa-trash-o"></i>
+        </a>
+    {% endif %}
+    {{ form_errors(field) }}
+{% endblock %}
+
+{% block autocomplete_row %}
+    {{ block('form_row') }}
+{% endblock %}

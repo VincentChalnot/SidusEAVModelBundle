@@ -1,0 +1,46 @@
+parameters:
+    # Both Data and Value classes MUST be overloaded in order for the bundle to work
+    sidus_eav_model.entity.data.class: Sidus\EAVModelBundle\Entity\Data
+    sidus_eav_model.entity.value.class: Sidus\EAVModelBundle\Entity\Value
+
+    sidus_eav_model.attribute.class: Sidus\EAVModelBundle\Model\Attribute
+    sidus_eav_model.family.class: Sidus\EAVModelBundle\Model\Family
+    sidus_eav_model.attribute_type_configuration.handler.class: Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler
+    sidus_eav_model.attribute_configuration.handler.class: Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler
+    sidus_eav_model.family_configuration.handler.class: Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler
+    sidus_eav_model.manager.data.class: Sidus\EAVModelBundle\Manager\DataManager
+    sidus_eav_model.event.data_event_subscriber.class: Sidus\EAVModelBundle\Event\DataEventSubscriber
+    sidus_eav_model.twig.extension.class: Sidus\EAVModelBundle\Twig\SidusTwigExtension
+    sidus_eav_model.doctrine.repository.data.class: Sidus\EAVModelBundle\Entity\DataRepository
+
+services:
+    sidus_eav_model.attribute_type_configuration.handler:
+        class: %sidus_eav_model.attribute_type_configuration.handler.class%
+
+    sidus_eav_model.attribute_configuration.handler:
+        class: %sidus_eav_model.attribute_configuration.handler.class%
+
+    sidus_eav_model.family_configuration.handler:
+        class: %sidus_eav_model.family_configuration.handler.class%
+
+    sidus_eav_model.manager.data:
+        class: %sidus_eav_model.manager.data.class%
+        arguments: [@doctrine]
+
+    sidus_eav_model.event.data_event_subscriber:
+        class: %sidus_eav_model.event.data_event_subscriber.class%
+        arguments: [ @sidus_eav_model.family_configuration.handler, %sidus_eav_model.entity.value.class% ]
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }
+
+    sidus_eav_model.twig.extension:
+        class: %sidus_eav_model.twig.extension.class%
+        arguments: [@sidus_eav_model.family_configuration.handler]
+        tags:
+            - { name: 'twig.extension' }
+
+    sidus_eav_model.doctrine.repository.data:
+        class: %sidus_eav_model.doctrine.repository.data.class%
+        factory_service: doctrine.orm.default_entity_manager
+        factory_method: getRepository
+        arguments: ['SidusEAVModelBundle:Data']
