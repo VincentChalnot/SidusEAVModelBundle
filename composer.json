@@ -13,9 +13,9 @@
       "role": "Developer"
     }
   ],
-  "target-dir": "Sidus/SidusEAVModelBundle",
+  "target-dir": "Sidus/EAVModelBundle",
   "autoload": {
-    "psr-0": { "Sidus\\SidusEAVModelBundle": "" }
+    "psr-0": { "Sidus\\EAVModelBundle": "" }
   },
   "require": {
     "php": ">=5.4",
