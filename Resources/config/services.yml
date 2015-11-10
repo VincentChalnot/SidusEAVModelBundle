@@ -43,4 +43,4 @@ services:
         class: %sidus_eav_model.doctrine.repository.data.class%
         factory_service: doctrine.orm.default_entity_manager
         factory_method: getRepository
-        arguments: ['SidusEAVModelBundle:Data']
+        arguments: [%sidus_eav_model.entity.data.class%]
