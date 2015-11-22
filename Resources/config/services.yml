@@ -12,6 +12,7 @@ parameters:
     sidus_eav_model.event.data_event_subscriber.class: Sidus\EAVModelBundle\Event\DataEventSubscriber
     sidus_eav_model.twig.extension.class: Sidus\EAVModelBundle\Twig\SidusTwigExtension
     sidus_eav_model.doctrine.repository.data.class: Sidus\EAVModelBundle\Entity\DataRepository
+    sidus_eav_model.exception.handler.class: Sidus\EAVModelBundle\Event\ExceptionListener
 
 services:
     sidus_eav_model.attribute_type_configuration.handler:
@@ -44,3 +45,9 @@ services:
         factory_service: doctrine.orm.default_entity_manager
         factory_method: getRepository
         arguments: [%sidus_eav_model.entity.data.class%]
+
+    sidus_eav_model.exception.handler:
+        class: %sidus_eav_model.exception.handler.class%
+        arguments: [ @service_container ]
+        tags:
+            - { name: kernel.event_subscriber }

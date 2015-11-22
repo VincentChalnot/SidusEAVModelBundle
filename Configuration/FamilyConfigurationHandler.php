@@ -2,6 +2,7 @@
 
 namespace Sidus\EAVModelBundle\Configuration;
 
+use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 
 class FamilyConfigurationHandler
@@ -33,13 +34,21 @@ class FamilyConfigurationHandler
     }
 
     /**
+     * @return array
+     */
+    public function getFamilyCodes()
+    {
+        return array_keys($this->families);
+    }
+
+    /**
      * @param $code
      * @return FamilyInterface
      */
     public function getFamily($code)
     {
         if (empty($this->families[$code])) {
-            throw new \UnexpectedValueException("No family with code : {$code}");
+            throw new MissingFamilyException($code);
         }
         return $this->families[$code];
     }

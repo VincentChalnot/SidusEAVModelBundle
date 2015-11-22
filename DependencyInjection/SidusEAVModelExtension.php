@@ -49,5 +49,6 @@ class SidusEAVModelExtension extends Extension
         $loader->load('services.yml');
         $loader->load('attribute_types.yml');
         $loader->load('forms.yml');
+        $loader->load('filters.yml');
     }
 }
