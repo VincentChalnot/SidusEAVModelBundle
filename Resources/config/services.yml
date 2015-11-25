@@ -8,7 +8,6 @@ parameters:
     sidus_eav_model.attribute_type_configuration.handler.class: Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler
     sidus_eav_model.attribute_configuration.handler.class: Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler
     sidus_eav_model.family_configuration.handler.class: Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler
-    sidus_eav_model.manager.data.class: Sidus\EAVModelBundle\Manager\DataManager
     sidus_eav_model.event.data_event_subscriber.class: Sidus\EAVModelBundle\Event\DataEventSubscriber
     sidus_eav_model.twig.extension.class: Sidus\EAVModelBundle\Twig\SidusTwigExtension
     sidus_eav_model.doctrine.repository.data.class: Sidus\EAVModelBundle\Entity\DataRepository
@@ -23,10 +22,6 @@ services:
 
     sidus_eav_model.family_configuration.handler:
         class: %sidus_eav_model.family_configuration.handler.class%
-
-    sidus_eav_model.manager.data:
-        class: %sidus_eav_model.manager.data.class%
-        arguments: [@doctrine]
 
     sidus_eav_model.event.data_event_subscriber:
         class: %sidus_eav_model.event.data_event_subscriber.class%
