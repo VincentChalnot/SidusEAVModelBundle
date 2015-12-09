@@ -292,13 +292,21 @@ abstract class Data
         return $this;
     }
 
+    protected function getLabelValue()
+    {
+        if (!$this->getFamily()) {
+            throw new \UnexpectedValueException("Missing family code");
+        }
+        return (string)$this->getValueData($this->getFamily()->getAttributeAsLabel());
+    }
+
     /**
      * @return string
      */
     public function getLabel()
     {
         try {
-            return (string)$this->getValueData($this->getFamily()->getAttributeAsLabel());
+            return $this->getLabelValue();
         } catch (\Exception $e) {
             return "[{$this->getId()}]";
         }
@@ -310,7 +318,7 @@ abstract class Data
     public function __toString()
     {
         try {
-            return (string)$this->getValueData($this->getFamily()->getAttributeAsLabel());
+            return $this->getLabelValue();
         } catch (\Exception $e) {
             return '';
         }
