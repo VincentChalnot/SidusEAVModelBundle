@@ -40,4 +40,9 @@ interface FamilyInterface
      * @return FamilyInterface[]
      */
     public function getChildren();
+
+    /**
+     * @return array
+     */
+    public function getMatchingCodes();
 }

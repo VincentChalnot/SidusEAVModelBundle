@@ -281,4 +281,12 @@ class Attribute implements AttributeInterface
     {
         $this->localizable = $localizable;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return 'sidus.attribute.' . $this->getCode();
+    }
 }

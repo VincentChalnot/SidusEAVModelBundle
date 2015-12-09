@@ -209,4 +209,18 @@ class Family implements FamilyInterface
     {
         return 'sidus.family.' . $this->getCode();
     }
+
+    /**
+     * Return current family code and all it's sub-families codes
+     *
+     * @return array
+     */
+    public function getMatchingCodes()
+    {
+        $codes = [$this->getCode()];
+        foreach ($this->getChildren() as $child) {
+            $codes = array_merge($codes, $child->getMatchingCodes());
+        }
+        return $codes;
+    }
 }
