@@ -324,6 +324,19 @@ abstract class Data
         }
     }
 
+    public function __call($methodName, $arguments)
+    {
+        if (substr($methodName, 0, 3) === 'get') {
+            return $this->__get(substr($methodName, 3));
+        }
+        $attribute = $this->getAttribute($methodName);
+        if ($attribute) {
+            return $this->__get($methodName);
+        }
+        $class = get_class($this);
+        throw new \BadMethodCallException("Method '{$methodName}' for object '{$class}' with family '{$this->getFamilyCode()}' does not exist");
+    }
+
     /**
      * Used to seemingly get values as if they were normal properties of this class
      *
