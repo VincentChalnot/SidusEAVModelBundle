@@ -70,6 +70,6 @@ class BootstrapCollectionType extends AbstractType
      */
     public function getName()
     {
-        return 'bootstrap_collection';
+        return 'sidus_bootstrap_collection';
     }
 }

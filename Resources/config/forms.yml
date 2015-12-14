@@ -2,7 +2,7 @@ parameters:
     sidus_eav_model.form.type.data.class: Sidus\EAVModelBundle\Form\DataType
     sidus_eav_model.form.type.simple_data_selector.class: Sidus\EAVModelBundle\Form\SimpleDataSelectorType
     sidus_eav_model.form.type.autocomplete_data_selector.class: Sidus\EAVModelBundle\Form\AutocompleteDataSelectorType
-    sidus_eav_model.form.type.bootstrap_collection.class: Sidus\EAVModelBundle\Form\BootstrapCollectionType
+    sidus_eav_model.form.type.sidus_bootstrap_collection.class: Sidus\EAVModelBundle\Form\BootstrapCollectionType
 
 services:
     sidus_eav_model.form.type.data:
@@ -26,7 +26,7 @@ services:
         tags:
             - { name: form.type, alias: sidus_autocomplete_data_selector }
 
-    sidus_eav_model.form.type.bootstrap_collection:
-        class: %sidus_eav_model.form.type.bootstrap_collection.class%
+    sidus_eav_model.form.type.sidus_bootstrap_collection:
+        class: %sidus_eav_model.form.type.sidus_bootstrap_collection.class%
         tags:
-            - { name: form.type, alias: bootstrap_collection }
+            - { name: form.type, alias: sidus_bootstrap_collection }

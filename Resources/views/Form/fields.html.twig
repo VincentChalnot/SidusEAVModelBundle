@@ -1,4 +1,4 @@
-{% block bootstrap_collection_widget %}
+{% block sidus_bootstrap_collection_widget %}
     {% spaceless %}
         {% if prototype is defined %}
             {% set prototype_vars = {} %}
@@ -6,7 +6,7 @@
                 {% set prototype_vars = prototype_vars|merge({'style': style}) %}
             {% endif %}
             {% set field = prototype %}
-            {% set prototype_html = block('bootstrap_collection_item') %}
+            {% set prototype_html = block('sidus_bootstrap_collection_item') %}
             {% set attr = attr|merge({'data-prototype': prototype_html }) %}
             {% set attr = attr|merge({'data-prototype-name': prototype_name }) %}
         {% endif %}
@@ -14,7 +14,7 @@
             <ul class="nav nav-pills nav-stacked bootstrap-collection"
                 data-input-pattern="{{ prototype.vars.full_name }}">
                 {% for field in form %}
-                    <li{% if form_has_error(field) %} class="has-error"{% endif %}>{{ block('bootstrap_collection_item') }}</li>
+                    <li{% if form_has_error(field) %} class="has-error"{% endif %}>{{ block('sidus_bootstrap_collection_item') }}</li>
                 {% endfor %}
             </ul>
             {{ form_errors(form) }}
@@ -29,7 +29,7 @@
     {% endspaceless %}
 {% endblock %}
 
-{% block bootstrap_collection_item %}
+{% block sidus_bootstrap_collection_item %}
     {% if form_has_error(field) %}
         <i class="fa fa-warning"></i>
     {% endif %}
@@ -44,6 +44,11 @@
         </a>
     {% endif %}
     {{ form_errors(field) }}
+{% endblock %}
+
+{% block sidus_bootstrap_collection_label %}
+    {% set widget_add_btn = false %}
+    {{ block('form_label') }}
 {% endblock %}
 
 {% block autocomplete_row %}

@@ -90,7 +90,7 @@ class DataType extends AbstractType
             if ($attribute->isMultiple()) {
                 $formOptions = $attribute->getFormOptions();
                 $formOptions['label'] = false;
-                $builder->add($attribute->getCode(), 'bootstrap_collection', [
+                $builder->add($attribute->getCode(), 'sidus_bootstrap_collection', [
                     'label' => $label,
                     'type' => $attributeType->getFormType(),
                     'options' => $formOptions,

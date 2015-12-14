@@ -70,11 +70,12 @@ abstract class Data
     /**
      * Initialize the data with an optional (but recommended family code)
      *
-     * @param string|null $familyCode
+     * @param FamilyInterface $family
      */
-    public function __construct($familyCode = null)
+    public function __construct(FamilyInterface $family)
     {
-        $this->familyCode = $familyCode;
+        $this->family = $family;
+        $this->familyCode = $family->getCode();
         $this->createdAt = new \DateTime();
         $this->values = new ArrayCollection();
         $this->children = new ArrayCollection();
