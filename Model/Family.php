@@ -199,10 +199,7 @@ class Family implements FamilyInterface
      */
     public function hasAttribute($code)
     {
-        if (empty($this->attributes[$code])) {
-            return false;
-        }
-        return true;
+        return !empty($this->attributes[$code]);
     }
 
     public function __toString()

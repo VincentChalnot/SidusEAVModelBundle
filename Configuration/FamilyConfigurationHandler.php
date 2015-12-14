@@ -10,6 +10,7 @@ class FamilyConfigurationHandler
     /** @var FamilyInterface[] */
     protected $families;
 
+    /** @var FamilyConfigurationHandler */
     protected static $instance;
 
     public function __construct()
@@ -42,7 +43,7 @@ class FamilyConfigurationHandler
     }
 
     /**
-     * @param $code
+     * @param string $code
      * @return FamilyInterface
      */
     public function getFamily($code)
@@ -53,6 +54,18 @@ class FamilyConfigurationHandler
         return $this->families[$code];
     }
 
+    /**
+     * @param string $code
+     * @return bool
+     */
+    public function hasFamily($code)
+    {
+        return !empty($this->families[$code]);
+    }
+
+    /**
+     * @return FamilyConfigurationHandler
+     */
     public static function getInstance()
     {
         return self::$instance;
