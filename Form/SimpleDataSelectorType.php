@@ -36,9 +36,12 @@ class SimpleDataSelectorType extends AbstractType
         $queryBuilder = function (EntityRepository $repository, $options) {
             $qb = $repository->createQueryBuilder('d');
             if (isset($options['family_code'])) {
-                $qb->andWhere('d.familyCode = :familyCode')
+                $qb->addSelect('v')
+                    ->leftJoin('d.values', 'v')
+                    ->andWhere('d.familyCode = :familyCode')
                     ->setParameter('familyCode', $options['family_code']);
             }
+            $qb->setMaxResults(100);
             return $qb;
         };
         $resolver->setDefaults([
