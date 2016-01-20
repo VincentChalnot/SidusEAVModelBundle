@@ -34,13 +34,13 @@ services:
 
     sidus_eav_model.attribute_type.date:
         class: %sidus_eav_model.attribute_type.default.class%
-        arguments: [date, dateValue, date]
+        arguments: [date, dateValue, sidus_date_picker]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.datetime:
         class: %sidus_eav_model.attribute_type.default.class%
-        arguments: [datetime, datetimeValue, datetime]
+        arguments: [datetime, datetimeValue, sidus_datetime_picker]
         tags:
             - { name: sidus.attribute_type }
 

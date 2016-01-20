@@ -96,6 +96,7 @@ class DataType extends AbstractType
                     'options' => $formOptions,
                     'allow_add' => true,
                     'allow_delete' => true,
+                    'required' => false,
                 ]);
             } else {
                 $formOptions = array_merge(['label' => $label], $attribute->getFormOptions());

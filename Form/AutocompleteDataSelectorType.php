@@ -37,6 +37,11 @@ class AutocompleteDataSelectorType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        if (empty($view->vars['attr']['class'])) {
+            $view->vars['attr']['class'] = 'select2';
+        } else {
+            $view->vars['attr']['class'] .= ' select2';
+        }
         $view->vars['attr']['data-placeholder'] = $options['placeholder'];
     }
 
