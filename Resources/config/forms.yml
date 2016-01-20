@@ -1,15 +1,11 @@
 parameters:
     sidus_eav_model.form.type.data.class: Sidus\EAVModelBundle\Form\DataType
     sidus_eav_model.form.type.simple_data_selector.class: Sidus\EAVModelBundle\Form\SimpleDataSelectorType
-    sidus_eav_model.form.type.autocomplete_data_selector.class: Sidus\EAVModelBundle\Form\AutocompleteDataSelectorType
-    sidus_eav_model.form.type.sidus_bootstrap_collection.class: Sidus\EAVModelBundle\Form\BootstrapCollectionType
-    sidus_eav_model.form.type.sidus_date_picker.class: Sidus\EAVModelBundle\Form\DatePickerType
-    sidus_eav_model.form.type.sidus_datetime_picker.class: Sidus\EAVModelBundle\Form\DateTimePickerType
 
 services:
     sidus_eav_model.form.type.data:
         class: %sidus_eav_model.form.type.data.class%
-        arguments: [%sidus_eav_model.entity.data.class%]
+        arguments: [%sidus_eav_model.entity.data.class%, %sidus_eav_model.form.collection_type%]
         calls:
             - [setFamilyConfiguration, [@sidus_eav_model.family_configuration.handler]]
             - [setTranslator, [@translator]]
@@ -21,24 +17,3 @@ services:
         arguments: [%sidus_eav_model.entity.data.class%]
         tags:
             - { name: form.type, alias: sidus_simple_data_selector }
-
-    sidus_eav_model.form.type.autocomplete_data_selector:
-        class: %sidus_eav_model.form.type.autocomplete_data_selector.class%
-        arguments: [%sidus_eav_model.entity.data.class%, @sidus_eav_model.doctrine.repository.data, @sidus_eav_model.family_configuration.handler]
-        tags:
-            - { name: form.type, alias: sidus_autocomplete_data_selector }
-
-    sidus_eav_model.form.type.sidus_bootstrap_collection:
-        class: %sidus_eav_model.form.type.sidus_bootstrap_collection.class%
-        tags:
-            - { name: form.type, alias: sidus_bootstrap_collection }
-
-    sidus_eav_model.form.type.sidus_date_picker:
-        class: %sidus_eav_model.form.type.sidus_date_picker.class%
-        tags:
-            - { name: form.type, alias: sidus_date_picker }
-
-    sidus_eav_model.form.type.sidus_datetime_picker:
-        class: %sidus_eav_model.form.type.sidus_datetime_picker.class%
-        tags:
-            - { name: form.type, alias: sidus_datetime_picker }

@@ -2,8 +2,11 @@
 
 namespace Sidus\EAVModelBundle\Event;
 
+use InvalidArgumentException;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -40,6 +43,9 @@ class ExceptionListener implements EventSubscriberInterface
      * Quick and dirty way to handle data with missing family, please feel free to override !
      *
      * @param GetResponseForExceptionEvent $event
+     * @throws ServiceCircularReferenceException
+     * @throws ServiceNotFoundException
+     * @throws InvalidArgumentException
      */
     protected function handleMissingFamilyException(GetResponseForExceptionEvent $event)
     {

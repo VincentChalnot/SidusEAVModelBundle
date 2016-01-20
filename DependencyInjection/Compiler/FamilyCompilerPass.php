@@ -4,6 +4,7 @@ namespace Sidus\EAVModelBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Reference;
 
 class FamilyCompilerPass implements CompilerPassInterface
@@ -13,6 +14,7 @@ class FamilyCompilerPass implements CompilerPassInterface
      *
      * @param ContainerBuilder $container
      * @api
+     * @throws InvalidArgumentException
      */
     public function process(ContainerBuilder $container)
     {

@@ -3,9 +3,13 @@
 namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler;
+use Symfony\Component\PropertyAccess\Exception\AccessException;
+use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
+use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UnexpectedValueException;
 
 class Attribute implements AttributeInterface
 {
@@ -14,6 +18,9 @@ class Attribute implements AttributeInterface
 
     /** @var AttributeType */
     protected $type;
+
+    /** @var string */
+    protected $group;
 
     /** @var array */
     protected $formOptions = [];
@@ -55,6 +62,10 @@ class Attribute implements AttributeInterface
      * @param string $code
      * @param AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler
      * @param array $configuration
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function __construct($code, AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler, array $configuration = null)
     {
@@ -280,6 +291,22 @@ class Attribute implements AttributeInterface
     public function setLocalizable($localizable)
     {
         $this->localizable = $localizable;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGroup()
+    {
+        return $this->group;
+    }
+
+    /**
+     * @param string $group
+     */
+    public function setGroup($group)
+    {
+        $this->group = $group;
     }
 
     /**

@@ -34,13 +34,13 @@ services:
 
     sidus_eav_model.attribute_type.date:
         class: %sidus_eav_model.attribute_type.default.class%
-        arguments: [date, dateValue, sidus_date_picker]
+        arguments: [date, dateValue, date]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.datetime:
         class: %sidus_eav_model.attribute_type.default.class%
-        arguments: [datetime, datetimeValue, sidus_datetime_picker]
+        arguments: [datetime, datetimeValue, datetime]
         tags:
             - { name: sidus.attribute_type }
 
@@ -53,11 +53,5 @@ services:
     sidus_eav_model.attribute_type.data:
         class: %sidus_eav_model.attribute_type.default.class%
         arguments: [data, dataValue, sidus_simple_data_selector]
-        tags:
-            - { name: sidus.attribute_type }
-
-    sidus_eav_model.attribute_type.autocomplete_data:
-        class: %sidus_eav_model.attribute_type.default.class%
-        arguments: [autocomplete_data, dataValue, sidus_autocomplete_data_selector]
         tags:
             - { name: sidus.attribute_type }

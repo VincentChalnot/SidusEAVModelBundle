@@ -10,6 +10,7 @@ class Configuration implements ConfigurationInterface
     /**
      * @todo Build prototype for families
      * {@inheritdoc}
+     * @throws \RuntimeException
      */
     public function getConfigTreeBuilder()
     {
@@ -17,10 +18,14 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->root('sidus_eav_model');
         $rootNode
             ->children()
+                ->scalarNode('data_class')->isRequired()->end()
+                ->scalarNode('value_class')->isRequired()->end()
+                ->scalarNode('collection_type')->defaultValue('collection')->end()
                 ->arrayNode('attributes')
                     ->prototype('array')
                         ->children()
                             ->scalarNode('type')->defaultValue('string')->end()
+                            ->scalarNode('group')->end()
                             ->variableNode('form_options')->end()
                             ->variableNode('view_options')->end()
                             ->booleanNode('required')->defaultValue(false)->end()

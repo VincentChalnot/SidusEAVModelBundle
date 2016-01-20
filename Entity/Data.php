@@ -296,7 +296,7 @@ abstract class Data
     protected function getLabelValue()
     {
         if (!$this->getFamily()) {
-            throw new \UnexpectedValueException("Missing family code");
+            throw new \UnexpectedValueException('Missing family code');
         }
         return (string)$this->getValueData($this->getFamily()->getAttributeAsLabel());
     }

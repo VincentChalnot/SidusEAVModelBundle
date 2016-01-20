@@ -15,6 +15,11 @@ interface AttributeInterface
     public function getType();
 
     /**
+     * @return string
+     */
+    public function getGroup();
+
+    /**
      * @return array
      */
     public function getFormOptions();

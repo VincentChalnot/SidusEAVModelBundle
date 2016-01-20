@@ -5,6 +5,7 @@ namespace Sidus\EAVModelBundle\DependencyInjection;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Exception\BadMethodCallException;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
@@ -16,11 +17,16 @@ class SidusEAVModelExtension extends Extension
      * Generate automatically services for attributes and families from configuration
      *
      * {@inheritdoc}
+     * @throws \Exception
      */
     public function load(array $configs, ContainerBuilder $container)
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
+
+        $container->setParameter('sidus_eav_model.entity.data.class', $config['data_class']);
+        $container->setParameter('sidus_eav_model.entity.value.class', $config['value_class']);
+        $container->setParameter('sidus_eav_model.form.collection_type', $config['collection_type']);
 
         // Automatically declare a service for each attribute configured
         foreach ($config['attributes'] as $code => $attributeConfiguration) {
@@ -42,6 +48,7 @@ class SidusEAVModelExtension extends Extension
      * @param string $code
      * @param array $familyConfiguration
      * @param ContainerBuilder $container
+     * @throws BadMethodCallException
      */
     protected function addFamilyServiceDefinition($code, $familyConfiguration, ContainerBuilder $container)
     {
@@ -59,6 +66,7 @@ class SidusEAVModelExtension extends Extension
      * @param string $code
      * @param array $attributeConfiguration
      * @param ContainerBuilder $container
+     * @throws BadMethodCallException
      */
     protected function addAttributeServiceDefinition($code, $attributeConfiguration, ContainerBuilder $container)
     {

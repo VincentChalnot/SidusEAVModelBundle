@@ -45,6 +45,7 @@ class FamilyConfigurationHandler
     /**
      * @param string $code
      * @return FamilyInterface
+     * @throws MissingFamilyException
      */
     public function getFamily($code)
     {

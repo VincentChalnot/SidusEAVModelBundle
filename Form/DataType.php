@@ -7,7 +7,9 @@ use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -22,17 +24,23 @@ class DataType extends AbstractType
     /** @var string */
     protected $dataClass;
 
+    /** @var string */
+    protected $collectionType;
+
     /**
-     * @param $dataClass
+     * @param string $dataClass
+     * @param string $collectionType
      */
-    public function __construct($dataClass)
+    public function __construct($dataClass, $collectionType = 'collection')
     {
         $this->dataClass = $dataClass;
+        $this->collectionType = $collectionType;
     }
 
     /**
      * @param FormBuilderInterface $builder
      * @param array $options
+     * @throws \InvalidArgumentException
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -49,6 +57,7 @@ class DataType extends AbstractType
     /**
      * @param FormBuilderInterface $builder
      * @param array $options
+     * @throws \InvalidArgumentException
      */
     public function buildCreateForm(FormBuilderInterface $builder, array $options)
     {
@@ -77,6 +86,8 @@ class DataType extends AbstractType
     /**
      * @param FormBuilderInterface $builder
      * @param array $options
+     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function buildValuesForm(FormBuilderInterface $builder, array $options)
     {
@@ -84,29 +95,35 @@ class DataType extends AbstractType
         $data = $builder->getData();
         $family = $this->familyConfigurationHandler->getFamily($data->getFamilyCode());
         foreach ($family->getAttributes() as $attribute) {
-            $attributeType = $attribute->getType();
-            $label = $this->getFieldLabel($family, $attribute);
+            $this->addAttribute($builder, $attribute, $family);
+        }
+    }
 
-            if ($attribute->isMultiple()) {
-                $formOptions = $attribute->getFormOptions();
-                $formOptions['label'] = false;
-                $builder->add($attribute->getCode(), 'sidus_bootstrap_collection', [
-                    'label' => $label,
-                    'type' => $attributeType->getFormType(),
-                    'options' => $formOptions,
-                    'allow_add' => true,
-                    'allow_delete' => true,
-                    'required' => false,
-                ]);
-            } else {
-                $formOptions = array_merge(['label' => $label], $attribute->getFormOptions());
-                $builder->add($attribute->getCode(), $attributeType->getFormType(), $formOptions);
-            }
+    protected function addAttribute(FormBuilderInterface $builder, AttributeInterface $attribute, FamilyInterface $family)
+    {
+        $attributeType = $attribute->getType();
+        $label = $this->getFieldLabel($family, $attribute);
+
+        if ($attribute->isMultiple()) {
+            $formOptions = $attribute->getFormOptions();
+            $formOptions['label'] = false;
+            $builder->add($attribute->getCode(), $this->collectionType, [
+                'label' => $label,
+                'type' => $attributeType->getFormType(),
+                'options' => $formOptions,
+                'allow_add' => true,
+                'allow_delete' => true,
+                'required' => false,
+            ]);
+        } else {
+            $formOptions = array_merge(['label' => $label], $attribute->getFormOptions());
+            $builder->add($attribute->getCode(), $attributeType->getFormType(), $formOptions);
         }
     }
 
     /**
      * @param OptionsResolver $resolver
+     * @throws AccessException
      */
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -145,14 +162,32 @@ class DataType extends AbstractType
      * @param FamilyInterface $family
      * @param AttributeInterface $attribute
      * @return string
+     * @throws \InvalidArgumentException
      */
     protected function getFieldLabel(FamilyInterface $family, AttributeInterface $attribute)
     {
-        $transKey = "{$family->getCode()}.attribute.{$attribute->getCode()}";
-        $label = $this->translator->trans($transKey . '.label');
-        if ($label === $transKey . '.label') {
-            $label = ucfirst(preg_replace('/(?!^)[A-Z]{2,}(?=[A-Z][a-z])|[A-Z][a-z]|[0-9]{1,}/', ' $0', $attribute->getCode()));
+        $transKeys = [
+            "{$family->getCode()}.attribute.{$attribute->getCode()}.label",
+            "attributes.{$attribute->getCode()}.label",
+        ];
+        return $this->translateOrDefault($transKeys, $attribute->getCode());
+    }
+
+    /**
+     * @param array $transKeys
+     * @param string $default
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    protected function translateOrDefault(array $transKeys, $default)
+    {
+        foreach ($transKeys as $transKey) {
+            $label = $this->translator->trans($transKey);
+            if ($label !== $transKey) {
+                return $label;
+            }
         }
+        $label = ucfirst(preg_replace('/(?!^)[A-Z]{2,}(?=[A-Z][a-z])|[A-Z][a-z]|\d{1,}/', ' $0', $default));
         return $label;
     }
 }

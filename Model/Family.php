@@ -6,6 +6,7 @@ use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use UnexpectedValueException;
 
 class Family implements FamilyInterface
 {
@@ -49,7 +50,7 @@ class Family implements FamilyInterface
         foreach ($config['attributes'] as $code) {
             $this->attributes[$code] = $attributeConfigurationHandler->getAttribute($code);
         }
-        if (isset($config['attributeAsLabel'])) {
+        if (!empty($config['attributeAsLabel'])) {
             $this->attributeAsLabel = $attributeConfigurationHandler->getAttribute($config['attributeAsLabel']);
         }
         // @todo build from configuration
@@ -184,11 +185,12 @@ class Family implements FamilyInterface
     /**
      * @param $code
      * @return AttributeInterface
+     * @throws UnexpectedValueException
      */
     public function getAttribute($code)
     {
         if (empty($this->attributes[$code])) {
-            throw new \UnexpectedValueException("Unknown attribute {$code} in family {$this->code}");
+            throw new UnexpectedValueException("Unknown attribute {$code} in family {$this->code}");
         }
         return $this->attributes[$code];
     }

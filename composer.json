@@ -20,7 +20,10 @@
   "require": {
     "php": ">=5.4",
     "symfony/symfony": "2.7.*",
-    "doctrine/doctrine-bundle": "~1.4",
-    "samson/autocomplete-bundle": "~2.0.3"
+    "doctrine/doctrine-bundle": "~1.4"
+  },
+  "suggest": {
+    "sidus/eav-bootstrap-bundle" : "Easy Bootstrap integration",
+    "sidus/eav-filter-bundle" : "Data filtering with Elastic Search and Doctrine fallback"
   }
 }
