@@ -1,8 +1,4 @@
 parameters:
-    # Both Data and Value classes MUST be overloaded in order for the bundle to work
-    sidus_eav_model.entity.data.class: Sidus\EAVModelBundle\Entity\Data
-    sidus_eav_model.entity.value.class: Sidus\EAVModelBundle\Entity\Value
-
     sidus_eav_model.attribute.class: Sidus\EAVModelBundle\Model\Attribute
     sidus_eav_model.family.class: Sidus\EAVModelBundle\Model\Family
     sidus_eav_model.attribute_type_configuration.handler.class: Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler
