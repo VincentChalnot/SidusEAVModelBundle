@@ -56,6 +56,12 @@ abstract class Data
     protected $createdAt;
 
     /**
+     * @var \DateTime
+     * @ORM\Column(name="updated_at", type="datetime")
+     */
+    protected $updatedAt;
+
+    /**
      * @var string
      * @ORM\Column(name="family_code", type="string", length=255)
      */
@@ -77,6 +83,7 @@ abstract class Data
         $this->family = $family;
         $this->familyCode = $family->getCode();
         $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
         $this->values = new ArrayCollection();
         $this->children = new ArrayCollection();
     }
@@ -116,6 +123,25 @@ abstract class Data
     public function getCreatedAt()
     {
         return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     * @return Data
+     */
+    public function setUpdatedAt(\DateTime $updatedAt = null)
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
     }
 
     /**
