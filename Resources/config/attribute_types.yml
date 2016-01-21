@@ -14,9 +14,21 @@ services:
         tags:
             - { name: sidus.attribute_type }
 
-    sidus_eav_model.attribute_type.number:
+    sidus_eav_model.attribute_type.integer:
         class: %sidus_eav_model.attribute_type.default.class%
-        arguments: [number, floatValue, number]
+        arguments: [integer, integerValue, number]
+        tags:
+            - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.decimal:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [decimal, decimalValue, number]
+        tags:
+            - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.boolean:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [boolean, boolValue, checkbox]
         tags:
             - { name: sidus.attribute_type }
 
