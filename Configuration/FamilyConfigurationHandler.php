@@ -10,19 +10,15 @@ class FamilyConfigurationHandler
     /** @var FamilyInterface[] */
     protected $families;
 
-    /** @var FamilyConfigurationHandler */
-    protected static $instance;
-
-    public function __construct()
-    {
-        self::$instance = $this;
-    }
+    /** @var bool */
+    protected $isInitialized = false;
 
     /**
      * @param FamilyInterface $family
      */
     public function addFamily(FamilyInterface $family)
     {
+        $this->isInitialized = false;
         $this->families[$family->getCode()] = $family;
     }
 
@@ -31,6 +27,7 @@ class FamilyConfigurationHandler
      */
     public function getFamilies()
     {
+        $this->initialize();
         return $this->families;
     }
 
@@ -52,6 +49,7 @@ class FamilyConfigurationHandler
         if (empty($this->families[$code])) {
             throw new MissingFamilyException($code);
         }
+        $this->initialize();
         return $this->families[$code];
     }
 
@@ -65,10 +63,20 @@ class FamilyConfigurationHandler
     }
 
     /**
-     * @return FamilyConfigurationHandler
+     * Build family tree
      */
-    public static function getInstance()
+    protected function initialize()
     {
-        return self::$instance;
+        if ($this->isInitialized) {
+            return;
+        }
+        $this->isInitialized = true;
+        foreach ($this->families as $family) {
+            foreach ($this->families as $subFamily) {
+                if ($subFamily->getParent() && $subFamily->getParent()->getCode() === $family->getCode()) {
+                    $family->addChild($subFamily);
+                }
+            }
+        }
     }
 }

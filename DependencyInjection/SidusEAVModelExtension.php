@@ -35,6 +35,9 @@ class SidusEAVModelExtension extends Extension
 
         // Automatically declare a service for each family configured
         foreach ($config['families'] as $code => $familyConfiguration) {
+            if (empty($familyConfiguration['value_class'])) {
+                $familyConfiguration['value_class'] = $config['value_class'];
+            }
             $this->addFamilyServiceDefinition($code, $familyConfiguration, $container);
         }
 

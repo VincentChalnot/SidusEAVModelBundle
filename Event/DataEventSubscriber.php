@@ -12,13 +12,9 @@ class DataEventSubscriber implements EventSubscriber
     /** @var FamilyConfigurationHandler */
     protected $familyConfigurationHandler;
 
-    /** @var string */
-    protected $valueClass;
-
-    public function __construct(FamilyConfigurationHandler $familyConfigurationHandler, $valueClass)
+    public function __construct(FamilyConfigurationHandler $familyConfigurationHandler)
     {
         $this->familyConfigurationHandler = $familyConfigurationHandler;
-        $this->valueClass = $valueClass;
     }
 
     public function getSubscribedEvents()
@@ -40,6 +36,5 @@ class DataEventSubscriber implements EventSubscriber
             return;
         }
         $entity->setFamily($this->familyConfigurationHandler->getFamily($entity->getFamilyCode()));
-        $entity->setValueClass($this->valueClass);
     }
 }

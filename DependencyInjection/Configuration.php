@@ -4,6 +4,7 @@ namespace Sidus\EAVModelBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\DependencyInjection\Reference;
 
 class Configuration implements ConfigurationInterface
 {
@@ -34,7 +35,18 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                ->variableNode('families')->end()
+                ->arrayNode('families')
+                    ->prototype('array')
+                        ->children()
+                            ->scalarNode('value_class')->end()
+                            ->scalarNode('attributeAsLabel')->defaultValue('string')->end()
+                            ->scalarNode('parent')->end()
+                            ->arrayNode('attributes')
+                                ->prototype('scalar')->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
             ->end();
 
         return $treeBuilder;

@@ -2,6 +2,9 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
+use Sidus\EAVModelBundle\Entity\Data;
+use Sidus\EAVModelBundle\Entity\Value;
+
 interface FamilyInterface
 {
     /**
@@ -20,13 +23,13 @@ interface FamilyInterface
     public function getAttributes();
 
     /**
-     * @param $code
+     * @param string $code
      * @return AttributeInterface
      */
     public function getAttribute($code);
 
     /**
-     * @param $code
+     * @param string $code
      * @return bool
      */
     public function hasAttribute($code);
@@ -45,4 +48,16 @@ interface FamilyInterface
      * @return array
      */
     public function getMatchingCodes();
+
+    /**
+     * @param FamilyInterface $child
+     */
+    public function addChild(FamilyInterface $child);
+
+    /**
+     * @param Data $data
+     * @param AttributeInterface $attribute
+     * @return Value
+     */
+    public function createValue(Data $data, AttributeInterface $attribute);
 }

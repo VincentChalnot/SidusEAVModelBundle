@@ -20,7 +20,7 @@ services:
 
     sidus_eav_model.event.data_event_subscriber:
         class: %sidus_eav_model.event.data_event_subscriber.class%
-        arguments: [ @sidus_eav_model.family_configuration.handler, %sidus_eav_model.entity.value.class% ]
+        arguments: [ @sidus_eav_model.family_configuration.handler ]
         tags:
             - { name: doctrine.event_subscriber, connection: default }
 

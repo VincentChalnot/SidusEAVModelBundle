@@ -4,6 +4,9 @@ namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Entity\Data;
+use Sidus\EAVModelBundle\Entity\Value;
+use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UnexpectedValueException;
@@ -34,15 +37,21 @@ class Family implements FamilyInterface
     /** @var Family[] */
     protected $children = [];
 
+    /** @var string */
+    protected $valueClass;
+
     /**
      * @param string $code
      * @param AttributeConfigurationHandler $attributeConfigurationHandler
      * @param FamilyConfigurationHandler $familyConfigurationHandler
      * @param array $config
+     * @throws MissingFamilyException
+     * @throws UnexpectedValueException
      */
     public function __construct($code, AttributeConfigurationHandler $attributeConfigurationHandler, FamilyConfigurationHandler $familyConfigurationHandler, array $config = null)
     {
         $this->code = $code;
+        $this->valueClass = $config['value_class'];
         if (!empty($config['parent'])) {
             $this->parent = $familyConfigurationHandler->getFamily($config['parent']);
             $this->copyFromFamily($this->parent);
@@ -158,11 +167,16 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @param Family[] $children
+     * @param FamilyInterface $child
+     * @throws UnexpectedValueException
      */
-    public function setChildren(array $children)
+    public function addChild(FamilyInterface $child)
     {
-        $this->children = $children;
+        if ($child->getParent() && $child->getParent()->getCode() === $this->getCode()) {
+            $this->children[$child->getCode()] = $child;
+        } else {
+            throw new UnexpectedValueException("Child must have it's parent set to the current family");
+        }
     }
 
     /**
@@ -221,5 +235,17 @@ class Family implements FamilyInterface
             $codes = array_merge($codes, $child->getMatchingCodes());
         }
         return $codes;
+    }
+
+    /**
+     * @param Data $data
+     * @param AttributeInterface $attribute
+     * @return Value
+     */
+    public function createValue(Data $data, AttributeInterface $attribute)
+    {
+        $value = new $this->valueClass($data, $attribute);
+        $data->addValue($value);
+        return $value;
     }
 }

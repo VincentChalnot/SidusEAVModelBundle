@@ -5,6 +5,7 @@ namespace Sidus\EAVModelBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -69,9 +70,6 @@ abstract class Data
 
     /** @var FamilyInterface */
     protected $family;
-
-    /** @var string */
-    protected $valueClass;
 
     /**
      * Initialize the data with an optional (but recommended family code)
@@ -223,6 +221,7 @@ abstract class Data
      *
      * @param AttributeInterface $attribute
      * @return mixed
+     * @throws \Exception
      */
     public function getValueData(AttributeInterface $attribute)
     {
@@ -239,6 +238,7 @@ abstract class Data
      *
      * @param AttributeInterface $attribute
      * @return mixed
+     * @throws \Exception
      */
     public function getValuesData(AttributeInterface $attribute)
     {
@@ -261,13 +261,13 @@ abstract class Data
      * @param AttributeInterface $attribute
      * @param $data
      * @return mixed
+     * @throws Exception
      */
     public function setValueData(AttributeInterface $attribute, $data)
     {
         $value = $this->getValue($attribute->getCode());
         if (!$value) {
-            $value = new $this->valueClass($this, $attribute);
-            $this->addValue($value);
+            $value = $this->getFamily()->createValue($this, $attribute);
         }
         $accessor = PropertyAccess::createPropertyAccessor();
         $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $data);
@@ -279,6 +279,7 @@ abstract class Data
      * @param AttributeInterface $attribute
      * @param array|\Traversable $datas
      * @return mixed
+     * @throws Exception
      */
     public function setValuesData(AttributeInterface $attribute, $datas)
     {
@@ -291,8 +292,8 @@ abstract class Data
 
         $position = 0;
         foreach ($datas as $data) {
-            $value = new $this->valueClass($this, $attribute); // @todo Create value in data manager + inject class
-            $this->addValue($value);
+            /** @noinspection DisconnectedForeachInstructionInspection */
+            $value = $this->getFamily()->createValue($this, $attribute);
             $value->setPosition($position++);
             $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $data);
         }
@@ -334,7 +335,7 @@ abstract class Data
     {
         try {
             return $this->getLabelValue();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return "[{$this->getId()}]";
         }
     }
@@ -346,7 +347,7 @@ abstract class Data
     {
         try {
             return $this->getLabelValue();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return '';
         }
     }
@@ -369,6 +370,7 @@ abstract class Data
      *
      * @param string $name
      * @return mixed|null|Value
+     * @throws \Exception
      */
     public function __get($name)
     {
@@ -400,6 +402,7 @@ abstract class Data
      *
      * @param string $name
      * @param mixed|null|Value $value
+     * @throws \Exception
      */
     public function __set($name, $value)
     {
@@ -455,16 +458,6 @@ abstract class Data
     public function setFamily(FamilyInterface $family)
     {
         $this->family = $family;
-        return $this;
-    }
-
-    /**
-     * @param $valueClass
-     * @return $this
-     */
-    public function setValueClass($valueClass)
-    {
-        $this->valueClass = $valueClass;
         return $this;
     }
 }
