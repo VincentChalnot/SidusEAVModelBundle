@@ -6,10 +6,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
+use LogicException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
+/**
+ * @\Sidus\EAVModelBundle\Validator\Constraints\Data()
+ */
 abstract class Data
 {
     /*
@@ -75,9 +79,13 @@ abstract class Data
      * Initialize the data with an optional (but recommended family code)
      *
      * @param FamilyInterface $family
+     * @throws LogicException
      */
     public function __construct(FamilyInterface $family)
     {
+        if (!$family->isInstantiable()) {
+            throw new LogicException("Family {$family->getCode()} is not instantiable");
+        }
         $this->family = $family;
         $this->familyCode = $family->getCode();
         $this->createdAt = new \DateTime();

@@ -34,6 +34,9 @@ class Family implements FamilyInterface
     /** @var Family */
     protected $parent;
 
+    /** @var bool */
+    protected $instantiable;
+
     /** @var Family[] */
     protected $children = [];
 
@@ -62,7 +65,7 @@ class Family implements FamilyInterface
         if (!empty($config['attributeAsLabel'])) {
             $this->attributeAsLabel = $attributeConfigurationHandler->getAttribute($config['attributeAsLabel']);
         }
-        // @todo build from configuration
+        $this->instantiable = $config['instantiable'];
     }
 
     /**
@@ -218,6 +221,14 @@ class Family implements FamilyInterface
         return !empty($this->attributes[$code]);
     }
 
+    /**
+     * @return bool
+     */
+    public function isInstantiable()
+    {
+        return $this->instantiable;
+    }
+
     public function __toString()
     {
         return 'sidus.family.' . $this->getCode();
@@ -238,13 +249,22 @@ class Family implements FamilyInterface
     }
 
     /**
+     * @return string
+     */
+    public function getValueClass()
+    {
+        return $this->valueClass;
+    }
+
+    /**
      * @param Data $data
      * @param AttributeInterface $attribute
      * @return Value
      */
     public function createValue(Data $data, AttributeInterface $attribute)
     {
-        $value = new $this->valueClass($data, $attribute);
+        $valueClass = $this->getValueClass();
+        $value = new $valueClass($data, $attribute);
         $data->addValue($value);
         return $value;
     }

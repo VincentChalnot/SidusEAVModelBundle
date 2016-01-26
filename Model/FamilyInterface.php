@@ -60,4 +60,14 @@ interface FamilyInterface
      * @return Value
      */
     public function createValue(Data $data, AttributeInterface $attribute);
+
+    /**
+     * @return string
+     */
+    public function getValueClass();
+
+    /**
+     * @return bool
+     */
+    public function isInstantiable();
 }

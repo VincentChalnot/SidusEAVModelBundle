@@ -9,6 +9,8 @@ use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -52,6 +54,13 @@ class DataType extends AbstractType
         } else {
             $this->buildCreateForm($builder, $options);
         }
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function(FormEvent $event){
+            /** @var Data $data */
+            $data = $event->getData();
+            if ($data) {
+                $data->setUpdatedAt(new \DateTime());
+            }
+        });
     }
 
     /**

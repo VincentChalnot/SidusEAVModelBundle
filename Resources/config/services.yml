@@ -7,6 +7,7 @@ parameters:
     sidus_eav_model.event.data_event_subscriber.class: Sidus\EAVModelBundle\Event\DataEventSubscriber
     sidus_eav_model.doctrine.repository.data.class: Sidus\EAVModelBundle\Entity\DataRepository
     sidus_eav_model.exception.handler.class: Sidus\EAVModelBundle\Event\ExceptionListener
+    sidus_eav_model.validator.sidus_data.class: Sidus\EAVModelBundle\Validator\Constraints\DataValidator
 
 services:
     sidus_eav_model.attribute_type_configuration.handler:
@@ -35,3 +36,9 @@ services:
         arguments: [ @service_container ]
         tags:
             - { name: kernel.event_subscriber }
+
+    sidus_eav_model.validator.sidus_data:
+        class: %sidus_eav_model.validator.sidus_data.class%
+        arguments: [%sidus_eav_model.entity.data.class%, @sidus_eav_model.family_configuration.handler, @translator, @doctrine]
+        tags:
+            - { name: validator.constraint_validator, alias: sidus_data }

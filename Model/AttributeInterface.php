@@ -33,4 +33,14 @@ interface AttributeInterface
      * @return boolean
      */
     public function isMultiple();
+
+    /**
+     * @return boolean
+     */
+    public function isRequired();
+
+    /**
+     * @return boolean
+     */
+    public function isUnique();
 }

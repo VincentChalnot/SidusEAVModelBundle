@@ -80,6 +80,8 @@ class Attribute implements AttributeInterface
             $this->countrySpecific = true;
             $this->translatable = true;
         }
+
+        $this->checkConflicts();
     }
 
     /**
@@ -314,6 +316,16 @@ class Attribute implements AttributeInterface
      */
     public function __toString()
     {
-        return 'sidus.attribute.' . $this->getCode();
+        return 'sidus.attribute.' . $this->getCode() . '.label';
+    }
+
+    /**
+     * @throws UnexpectedValueException
+     */
+    protected function checkConflicts()
+    {
+        if ($this->isMultiple() && $this->isUnique()) {
+            throw new UnexpectedValueException("Attribute {$this->getCode()} cannot be multiple and unique at the same time");
+        }
     }
 }
