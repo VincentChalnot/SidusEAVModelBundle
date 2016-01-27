@@ -3,15 +3,19 @@
 namespace Sidus\EAVModelBundle\Validator\Constraints;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use Exception;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Entity\Data as SidusData;
 use Sidus\EAVModelBundle\Entity\Value;
 use Sidus\EAVModelBundle\Entity\ValueRepository;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
+use Sidus\EAVModelBundle\Validator\Mapping\Loader\BaseLoader;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Mapping\GenericMetadata;
 
 /**
  * @property ExecutionContextInterface $context
@@ -49,7 +53,7 @@ class DataValidator extends ConstraintValidator
      *
      * @param SidusData $data The value that should be validated
      * @param Constraint $constraint The constraint for the validation
-     * @throws \Exception
+     * @throws Exception
      */
     public function validate($data, Constraint $constraint)
     {
@@ -62,24 +66,66 @@ class DataValidator extends ConstraintValidator
                 $this->buildAttributeViolation($attribute, 'required');
             }
             if ($attribute->isUnique()) {
-                $valueData = $data->getValueData($attribute);
-                /** @var ValueRepository $repo */
-                $repo = $this->doctrine->getRepository($data->getFamily()->getValueClass());
-                $values = $repo->findBy([
-                    'attributeCode' => $attribute->getCode(),
-                    $attribute->getType()->getDatabaseType() => $valueData,
-                ]);
-                /** @var Value $value */
-                foreach ($values as $value) {
-                    if ($value->getData()->getId() !== $data->getId()) {
-                        $this->buildAttributeViolation($attribute, 'unique');
+                $this->checkUnique($attribute, $data);
+            }
+            if (count($attribute->getValidationRules())) {
+                $this->validateRules($attribute, $data);
+            }
+        }
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @param SidusData $data
+     * @throws Exception
+     */
+    protected function checkUnique(AttributeInterface $attribute, SidusData $data)
+    {
+        $valueData = $data->getValueData($attribute);
+        /** @var ValueRepository $repo */
+        $repo = $this->doctrine->getRepository($data->getFamily()->getValueClass());
+        $values = $repo->findBy([
+            'attributeCode' => $attribute->getCode(),
+            $attribute->getType()->getDatabaseType() => $valueData,
+        ]);
+        /** @var Value $value */
+        foreach ($values as $value) {
+            if ($value->getData()->getId() !== $data->getId()) {
+                $this->buildAttributeViolation($attribute, 'unique');
+            }
+        }
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @param SidusData $data
+     * @throws Exception
+     */
+    protected function validateRules(AttributeInterface $attribute, SidusData $data)
+    {
+        if ($attribute->isMultiple()) {
+            $value = $data->getValuesData($attribute);
+        } else {
+            $value = $data->getValueData($attribute);
+        }
+        $loader = new BaseLoader();
+        foreach ($attribute->getValidationRules() as $validationRule) {
+            foreach ($validationRule as $item => $options) {
+                $constraint = $loader->newConstraint($item, $options);
+                $violations = $this->context->getValidator()->validate($value, $constraint);
+                /** @var ConstraintViolationInterface $violation */
+                foreach ($violations as $violation) {
+                    if ($violation->getMessage()) {
+                        $this->context->buildViolation($violation->getMessage())
+                            ->atPath($attribute->getCode())
+                            ->addViolation();
+                    } else {
+                        $this->buildAttributeViolation($attribute, strtolower($item));
                     }
                 }
             }
         }
     }
-
-
 
     /**
      * @param AttributeInterface $attribute

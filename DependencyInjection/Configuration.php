@@ -29,6 +29,7 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('group')->end()
                             ->variableNode('form_options')->end()
                             ->variableNode('view_options')->end()
+                            ->variableNode('validation_rules')->end()
                             ->booleanNode('required')->defaultValue(false)->end()
                             ->booleanNode('unique')->defaultValue(false)->end()
                             ->booleanNode('multiple')->defaultValue(false)->end()
