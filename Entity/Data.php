@@ -191,7 +191,7 @@ abstract class Data
     /**
      * Return all values matching the attribute code
      *
-     * @param null $attributeCode
+     * @param string|null $attributeCode
      * @return Collection|Value[]
      */
     public function getValues($attributeCode = null)
@@ -211,17 +211,12 @@ abstract class Data
     /**
      * Return first value found for attribute code in value collection
      *
-     * @param $attributeCode
-     * @return null|Value
+     * @param string|null $attributeCode
+     * @return Value|null
      */
     public function getValue($attributeCode)
     {
-        foreach ($this->values as $value) {
-            if ($value->getAttributeCode() === $attributeCode) {
-                return $value;
-            }
-        }
-        return null;
+        return $this->getValues($attributeCode)->first();
     }
 
     /**
@@ -275,7 +270,7 @@ abstract class Data
     {
         $value = $this->getValue($attribute->getCode());
         if (!$value) {
-            $value = $this->getFamily()->createValue($this, $attribute);
+            $value = $this->createValue($attribute);
         }
         $accessor = PropertyAccess::createPropertyAccessor();
         $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $data);
@@ -301,7 +296,7 @@ abstract class Data
         $position = 0;
         foreach ($datas as $data) {
             /** @noinspection DisconnectedForeachInstructionInspection */
-            $value = $this->getFamily()->createValue($this, $attribute);
+            $value = $this->createValue($attribute);
             $value->setPosition($position++);
             $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $data);
         }
@@ -467,5 +462,14 @@ abstract class Data
     {
         $this->family = $family;
         return $this;
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @return Value
+     */
+    public function createValue(AttributeInterface $attribute)
+    {
+        return $this->getFamily()->createValue($this, $attribute);
     }
 }
