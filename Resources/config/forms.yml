@@ -1,6 +1,6 @@
 parameters:
-    sidus_eav_model.form.type.data.class: Sidus\EAVModelBundle\Form\DataType
-    sidus_eav_model.form.type.simple_data_selector.class: Sidus\EAVModelBundle\Form\SimpleDataSelectorType
+    sidus_eav_model.form.type.data.class: Sidus\EAVModelBundle\Form\Type\DataType
+    sidus_eav_model.form.type.simple_data_selector.class: Sidus\EAVModelBundle\Form\Type\SimpleDataSelectorType
 
 services:
     sidus_eav_model.form.type.data:

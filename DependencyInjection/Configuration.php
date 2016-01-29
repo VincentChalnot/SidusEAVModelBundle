@@ -4,7 +4,6 @@ namespace Sidus\EAVModelBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
-use Symfony\Component\DependencyInjection\Reference;
 
 class Configuration implements ConfigurationInterface
 {

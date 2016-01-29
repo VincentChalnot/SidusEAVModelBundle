@@ -19,7 +19,7 @@ class BaseLoader extends AbstractLoader
      */
     public function loadClassMetadata(ClassMetadata $metadata)
     {
-        var_dump($metadata);exit;
+        // throw an exception ?
     }
 
     /**

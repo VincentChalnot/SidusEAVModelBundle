@@ -1,13 +1,12 @@
 <?php
 
-namespace Sidus\EAVModelBundle\Form;
+namespace Sidus\EAVModelBundle\Form\Type;
 
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -42,7 +41,7 @@ class DataType extends AbstractType
     /**
      * @param FormBuilderInterface $builder
      * @param array $options
-     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -50,7 +49,7 @@ class DataType extends AbstractType
         $data = $builder->getData();
         if ($data && $data->getFamilyCode()) {
             $this->buildValuesForm($builder, $options);
-            // $this->buildDataForm($builder, $options);
+            $this->buildDataForm($builder, $options);
         } else {
             $this->buildCreateForm($builder, $options);
         }
@@ -81,22 +80,20 @@ class DataType extends AbstractType
     }
 
     /**
+     * For additional fields in data form that are not linked to EAV model
+     *
      * @param FormBuilderInterface $builder
      * @param array $options
      */
     public function buildDataForm(FormBuilderInterface $builder, array $options)
     {
-        $builder
-            ->add('isArchived', 'checkbox', [
-                'required' => false,
-            ]);
+
     }
 
     /**
      * @param FormBuilderInterface $builder
      * @param array $options
-     * @throws InvalidArgumentException
-     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
     public function buildValuesForm(FormBuilderInterface $builder, array $options)
     {

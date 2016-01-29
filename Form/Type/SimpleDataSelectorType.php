@@ -1,6 +1,6 @@
 <?php
 
-namespace Sidus\EAVModelBundle\Form;
+namespace Sidus\EAVModelBundle\Form\Type;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;

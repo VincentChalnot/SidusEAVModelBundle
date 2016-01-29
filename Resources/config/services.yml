@@ -33,7 +33,7 @@ services:
 
     sidus_eav_model.exception.handler:
         class: %sidus_eav_model.exception.handler.class%
-        arguments: [ @service_container ]
+        arguments: [ @sidus_eav_model.family_configuration.handler, @sidus_eav_model.doctrine.repository.data, @session ]
         tags:
             - { name: kernel.event_subscriber }
 

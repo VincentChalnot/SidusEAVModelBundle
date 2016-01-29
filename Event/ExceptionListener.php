@@ -3,26 +3,44 @@
 namespace Sidus\EAVModelBundle\Event;
 
 use InvalidArgumentException;
+use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 class ExceptionListener implements EventSubscriberInterface
 {
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
+    /** @var FamilyConfigurationHandler */
+    protected $familyConfigurationHandler;
 
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
+    /** @var DataRepository */
+    protected $dataRepository;
+
+    /** @var Session */
+    protected $session;
+
+    /**
+     * @param FamilyConfigurationHandler $familyConfigurationHandler
+     * @param DataRepository $dataRepository
+     * @param SessionInterface $session
+     */
+    public function __construct(
+        FamilyConfigurationHandler $familyConfigurationHandler,
+        DataRepository $dataRepository,
+        SessionInterface $session
+    ) {
+        $this->familyConfigurationHandler = $familyConfigurationHandler;
+        $this->dataRepository = $dataRepository;
+        $this->session = $session;
     }
+
 
     public static function getSubscribedEvents()
     {
@@ -49,15 +67,15 @@ class ExceptionListener implements EventSubscriberInterface
      */
     protected function handleMissingFamilyException(GetResponseForExceptionEvent $event)
     {
-        $familyCodes = $this->container->get('sidus_eav_model.family_configuration.handler')->getFamilyCodes();
+        $familyCodes = $this->familyConfigurationHandler->getFamilyCodes();
 
-        $qb = $this->container->get('sidus_eav_model.doctrine.repository.data')->createQueryBuilder('d');
+        $qb = $this->dataRepository->createQueryBuilder('d');
         $qb->delete()
             ->where('d.familyCode NOT IN (:familyCodes)')
             ->setParameter('familyCodes', $familyCodes);
         $qb->getQuery()->execute();
 
-        $this->container->get('session')->getFlashBag()->add('error', 'sidus.exception.missing_family');
+        $this->session->getFlashBag()->add('error', 'sidus.exception.missing_family');
 
         $response = new RedirectResponse($event->getRequest()->getUri());
         $event->setResponse($response); // this will stop event propagation

@@ -15,7 +15,6 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Component\Validator\Mapping\GenericMetadata;
 
 /**
  * @property ExecutionContextInterface $context
@@ -165,7 +164,7 @@ class DataValidator extends ConstraintValidator
     {
         $transKey = 'sidus.missing.translation';
         foreach ($transKeys as $transKey) {
-            $label = $this->translator->trans($transKey);
+            $label = $this->translator->trans($transKey, $parameters);
             if ($label !== $transKey) {
                 return $label;
             }
