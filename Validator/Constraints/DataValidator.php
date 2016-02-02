@@ -150,7 +150,7 @@ class DataValidator extends ConstraintValidator
             "sidus.attribute.{$attribute->getCode()}.validation.{$type}",
             "sidus.attribute.validation.{$type}",
         ], [
-            'attribute' => $this->translator->trans((string) $attribute),
+            '%attribute%' => $this->translator->trans((string) $attribute),
         ]);
     }
 
