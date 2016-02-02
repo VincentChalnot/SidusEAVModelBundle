@@ -47,7 +47,7 @@ class DataType extends AbstractType
     {
         /** @var Data $data */
         $data = $builder->getData();
-        if ($data && $data->getFamilyCode()) {
+        if ($data && $data->getFamily()) {
             $this->buildValuesForm($builder, $options);
             $this->buildDataForm($builder, $options);
         } else {
@@ -74,7 +74,7 @@ class DataType extends AbstractType
             $choices[$family->getCode()] = $this->translator->trans($family->getCode());
         }
 
-        $builder->add('familyCode', 'choice', [
+        $builder->add('family', 'choice', [
             'choices' => $choices,
         ]);
     }
@@ -99,7 +99,7 @@ class DataType extends AbstractType
     {
         /** @var Data $data */
         $data = $builder->getData();
-        $family = $this->familyConfigurationHandler->getFamily($data->getFamilyCode());
+        $family = $data->getFamily();
         foreach ($family->getAttributes() as $attribute) {
             $this->addAttribute($builder, $attribute, $family);
         }

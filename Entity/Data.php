@@ -67,12 +67,9 @@ abstract class Data
     protected $updatedAt;
 
     /**
-     * @var string
-     * @ORM\Column(name="family_code", type="string", length=255)
+     * @var FamilyInterface
+     * @ORM\Column(name="family_code", type="sidus_family", length=255)
      */
-    protected $familyCode;
-
-    /** @var FamilyInterface */
     protected $family;
 
     /**
@@ -87,7 +84,6 @@ abstract class Data
             throw new LogicException("Family {$family->getCode()} is not instantiable");
         }
         $this->family = $family;
-        $this->familyCode = $family->getCode();
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
         $this->values = new ArrayCollection();
@@ -170,22 +166,11 @@ abstract class Data
     }
 
     /**
-     * @param string $familyCode
-     * @return Data
-     */
-    public function setFamilyCode($familyCode)
-    {
-        $this->familyCode = $familyCode;
-
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getFamilyCode()
     {
-        return $this->familyCode;
+        return $this->getFamily()->getCode();
     }
 
     /**
@@ -452,16 +437,6 @@ abstract class Data
     public function getFamily()
     {
         return $this->family;
-    }
-
-    /**
-     * @param FamilyInterface $family
-     * @return $this
-     */
-    public function setFamily(FamilyInterface $family)
-    {
-        $this->family = $family;
-        return $this;
     }
 
     /**

@@ -4,10 +4,10 @@ parameters:
     sidus_eav_model.attribute_type_configuration.handler.class: Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler
     sidus_eav_model.attribute_configuration.handler.class: Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler
     sidus_eav_model.family_configuration.handler.class: Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler
-    sidus_eav_model.event.data_event_subscriber.class: Sidus\EAVModelBundle\Event\DataEventSubscriber
     sidus_eav_model.doctrine.repository.data.class: Sidus\EAVModelBundle\Entity\DataRepository
     sidus_eav_model.exception.handler.class: Sidus\EAVModelBundle\Event\ExceptionListener
     sidus_eav_model.validator.sidus_data.class: Sidus\EAVModelBundle\Validator\Constraints\DataValidator
+    sidus_eav_model.request.family.param_converter.class: Sidus\EAVModelBundle\Request\ParamConverter\FamilyParamConverter
 
 services:
     sidus_eav_model.attribute_type_configuration.handler:
@@ -18,12 +18,8 @@ services:
 
     sidus_eav_model.family_configuration.handler:
         class: %sidus_eav_model.family_configuration.handler.class%
-
-    sidus_eav_model.event.data_event_subscriber:
-        class: %sidus_eav_model.event.data_event_subscriber.class%
-        arguments: [ @sidus_eav_model.family_configuration.handler ]
         tags:
-            - { name: doctrine.event_subscriber, connection: default }
+            - { name: doctrine.event_listener, event: sidus_family_configuration }
 
     sidus_eav_model.doctrine.repository.data:
         class: %sidus_eav_model.doctrine.repository.data.class%
@@ -42,3 +38,9 @@ services:
         arguments: [%sidus_eav_model.entity.data.class%, @sidus_eav_model.family_configuration.handler, @translator, @doctrine]
         tags:
             - { name: validator.constraint_validator, alias: sidus_data }
+
+    sidus_eav_model.request.family.param_converter:
+        class: %sidus_eav_model.request.family.param_converter.class%
+        arguments: [ @sidus_eav_model.family_configuration.handler ]
+        tags:
+            - { name: request.param_converter }

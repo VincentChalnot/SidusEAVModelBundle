@@ -67,12 +67,12 @@ class ExceptionListener implements EventSubscriberInterface
      */
     protected function handleMissingFamilyException(GetResponseForExceptionEvent $event)
     {
-        $familyCodes = $this->familyConfigurationHandler->getFamilyCodes();
+        $familyCodes = $this->familyConfigurationHandler->getFamilyCodes(); // @todo do it directly with families ?
 
         $qb = $this->dataRepository->createQueryBuilder('d');
         $qb->delete()
-            ->where('d.familyCode NOT IN (:familyCodes)')
-            ->setParameter('familyCodes', $familyCodes);
+            ->where('d.family NOT IN (:families)')
+            ->setParameter('families', $familyCodes);
         $qb->getQuery()->execute();
 
         $this->session->getFlashBag()->add('error', 'sidus.exception.missing_family');

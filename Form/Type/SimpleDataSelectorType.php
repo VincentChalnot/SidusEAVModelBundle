@@ -38,8 +38,8 @@ class SimpleDataSelectorType extends AbstractType
             if (!empty($options['family_code'])) {
                 $qb->addSelect('v')
                     ->leftJoin('d.values', 'v')
-                    ->andWhere('d.familyCode = :familyCode')
-                    ->setParameter('familyCode', $options['family_code']);
+                    ->andWhere('d.family = :family')
+                    ->setParameter('family', $options['family_code']);
             }
             $qb->setMaxResults(100);
             return $qb;
