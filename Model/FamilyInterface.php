@@ -55,11 +55,21 @@ interface FamilyInterface
     public function addChild(FamilyInterface $child);
 
     /**
+     * @return Data
+     */
+    public function createData();
+
+    /**
      * @param Data $data
      * @param AttributeInterface $attribute
      * @return Value
      */
     public function createValue(Data $data, AttributeInterface $attribute);
+
+    /**
+     * @return string
+     */
+    public function getDataClass();
 
     /**
      * @return string

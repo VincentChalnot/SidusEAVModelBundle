@@ -8,7 +8,6 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 class Configuration implements ConfigurationInterface
 {
     /**
-     * @todo Build prototype for families
      * {@inheritdoc}
      * @throws \RuntimeException
      */
@@ -38,6 +37,7 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('families')
                     ->prototype('array')
                         ->children()
+                            ->scalarNode('data_class')->end()
                             ->scalarNode('value_class')->end()
                             ->scalarNode('attributeAsLabel')->defaultValue('string')->end()
                             ->scalarNode('parent')->end()

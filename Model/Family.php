@@ -8,7 +8,6 @@ use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Entity\Value;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UnexpectedValueException;
 
 class Family implements FamilyInterface
@@ -22,14 +21,8 @@ class Family implements FamilyInterface
     /** @var Attribute[] */
     protected $attributes = [];
 
-    /** @var bool */
-    protected $versionable = false;
-
     /** @var PermissionMapInterface[] */
     protected $permissions = [];
-
-    /** @var ValidatorInterface[] */
-    protected $validationRules = [];
 
     /** @var Family */
     protected $parent;
@@ -39,6 +32,9 @@ class Family implements FamilyInterface
 
     /** @var Family[] */
     protected $children = [];
+
+    /** @var string */
+    protected $dataClass;
 
     /** @var string */
     protected $valueClass;
@@ -54,6 +50,7 @@ class Family implements FamilyInterface
     public function __construct($code, AttributeConfigurationHandler $attributeConfigurationHandler, FamilyConfigurationHandler $familyConfigurationHandler, array $config = null)
     {
         $this->code = $code;
+        $this->dataClass = $config['data_class'];
         $this->valueClass = $config['value_class'];
         if (!empty($config['parent'])) {
             $this->parent = $familyConfigurationHandler->getFamily($config['parent']);
@@ -98,22 +95,6 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @return boolean
-     */
-    public function isVersionable()
-    {
-        return $this->versionable;
-    }
-
-    /**
-     * @param boolean $versionable
-     */
-    public function setVersionable($versionable)
-    {
-        $this->versionable = $versionable;
-    }
-
-    /**
      * @return \Symfony\Component\Security\Acl\Permission\PermissionMapInterface[]
      */
     public function getPermissions()
@@ -127,22 +108,6 @@ class Family implements FamilyInterface
     public function setPermissions(array $permissions)
     {
         $this->permissions = $permissions;
-    }
-
-    /**
-     * @return \Symfony\Component\Validator\Validator\ValidatorInterface[]
-     */
-    public function getValidationRules()
-    {
-        return $this->validationRules;
-    }
-
-    /**
-     * @param \Symfony\Component\Validator\Validator\ValidatorInterface[] $validationRules
-     */
-    public function setValidationRules(array $validationRules)
-    {
-        $this->validationRules = $validationRules;
     }
 
     /**
@@ -196,7 +161,8 @@ class Family implements FamilyInterface
             $this->addAttribute($attribute);
         }
         $this->attributeAsLabel = $parent->getAttributeAsLabel();
-        // @todo for other properties
+        $this->valueClass = $parent->getValueClass();
+        $this->dataClass = $parent->getDataClass();
     }
 
     /**
@@ -243,7 +209,7 @@ class Family implements FamilyInterface
     {
         $codes = [$this->getCode()];
         foreach ($this->getChildren() as $child) {
-            $codes = array_merge($codes, $child->getMatchingCodes());
+            $codes += $child->getMatchingCodes();
         }
         return $codes;
     }
@@ -257,6 +223,14 @@ class Family implements FamilyInterface
     }
 
     /**
+     * @return string
+     */
+    public function getDataClass()
+    {
+        return $this->dataClass;
+    }
+
+    /**
      * @param Data $data
      * @param AttributeInterface $attribute
      * @return Value
@@ -267,5 +241,14 @@ class Family implements FamilyInterface
         $value = new $valueClass($data, $attribute);
         $data->addValue($value);
         return $value;
+    }
+
+    /**
+     * @return Data
+     */
+    public function createData()
+    {
+        $dataClass = $this->getDataClass();
+        return new $dataClass($this);
     }
 }

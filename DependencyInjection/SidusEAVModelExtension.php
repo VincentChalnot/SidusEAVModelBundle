@@ -18,6 +18,7 @@ class SidusEAVModelExtension extends Extension
      *
      * {@inheritdoc}
      * @throws \Exception
+     * @throws BadMethodCallException
      */
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -35,6 +36,9 @@ class SidusEAVModelExtension extends Extension
 
         // Automatically declare a service for each family configured
         foreach ($config['families'] as $code => $familyConfiguration) {
+            if (empty($familyConfiguration['data_class'])) {
+                $familyConfiguration['data_class'] = $config['data_class'];
+            }
             if (empty($familyConfiguration['value_class'])) {
                 $familyConfiguration['value_class'] = $config['value_class'];
             }
