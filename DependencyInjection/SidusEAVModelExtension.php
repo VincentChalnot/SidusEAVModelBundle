@@ -6,6 +6,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\BadMethodCallException;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
@@ -19,6 +20,7 @@ class SidusEAVModelExtension extends Extension
      * {@inheritdoc}
      * @throws \Exception
      * @throws BadMethodCallException
+     * @throws InvalidArgumentException
      */
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -56,6 +58,7 @@ class SidusEAVModelExtension extends Extension
      * @param array $familyConfiguration
      * @param ContainerBuilder $container
      * @throws BadMethodCallException
+     * @throws InvalidArgumentException
      */
     protected function addFamilyServiceDefinition($code, $familyConfiguration, ContainerBuilder $container)
     {
@@ -65,6 +68,7 @@ class SidusEAVModelExtension extends Extension
             new Reference('sidus_eav_model.family_configuration.handler'),
             $familyConfiguration,
         ]);
+        $definition->addMethodCall('setTranslator', [new Reference('translator')]);
         $definition->addTag('sidus.family');
         $container->setDefinition('sidus_eav_model.family.' . $code, $definition);
     }
@@ -74,6 +78,7 @@ class SidusEAVModelExtension extends Extension
      * @param array $attributeConfiguration
      * @param ContainerBuilder $container
      * @throws BadMethodCallException
+     * @throws InvalidArgumentException
      */
     protected function addAttributeServiceDefinition($code, $attributeConfiguration, ContainerBuilder $container)
     {
@@ -82,6 +87,7 @@ class SidusEAVModelExtension extends Extension
             new Reference('sidus_eav_model.attribute_type_configuration.handler'),
             $attributeConfiguration,
         ]);
+        $definition->addMethodCall('setTranslator', [new Reference('translator')]);
         $definition->addTag('sidus.attribute');
         $container->setDefinition('sidus_eav_model.attribute.' . $code, $definition);
     }

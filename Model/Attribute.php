@@ -3,6 +3,7 @@
 namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler;
+use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
@@ -13,8 +14,13 @@ use UnexpectedValueException;
 
 class Attribute implements AttributeInterface
 {
+    use TranslatableTrait;
+
     /** @var string */
     protected $code;
+
+    /** @var string */
+    protected $label;
 
     /** @var AttributeType */
     protected $type;
@@ -314,9 +320,30 @@ class Attribute implements AttributeInterface
     /**
      * @return string
      */
+    public function getLabel()
+    {
+        if ($this->label) {
+            return $this->label;
+        }
+        return $this->tryTranslate("eav.attribute.{$this->getCode()}.label", [], $this->getCode());
+    }
+
+    /**
+     * @param string $label
+     * @return Attribute
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
     public function __toString()
     {
-        return 'sidus.attribute.' . $this->getCode() . '.label';
+        return (string) $this->getLabel();
     }
 
     /**

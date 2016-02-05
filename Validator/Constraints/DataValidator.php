@@ -9,6 +9,7 @@ use Sidus\EAVModelBundle\Entity\Data as SidusData;
 use Sidus\EAVModelBundle\Entity\Value;
 use Sidus\EAVModelBundle\Entity\ValueRepository;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
+use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Sidus\EAVModelBundle\Validator\Mapping\Loader\BaseLoader;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraint;
@@ -21,14 +22,13 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 class DataValidator extends ConstraintValidator
 {
+    use TranslatableTrait;
+
     /** @var FamilyConfigurationHandler */
     protected $familyConfigurationHandler;
 
     /** @var string */
     protected $dataClass;
-
-    /** @var TranslatorInterface */
-    protected $translator;
 
     /** @var Registry */
     protected $doctrine;
@@ -147,28 +147,10 @@ class DataValidator extends ConstraintValidator
     protected function buildMessage(AttributeInterface $attribute, $type)
     {
         return $this->tryTranslate([
-            "sidus.attribute.{$attribute->getCode()}.validation.{$type}",
-            "sidus.attribute.validation.{$type}",
+            "eav.attribute.{$attribute->getCode()}.validation.{$type}",
+            "eav.attribute.validation.{$type}",
         ], [
             '%attribute%' => $this->translator->trans((string) $attribute),
         ]);
-    }
-
-    /**
-     * @param array $transKeys
-     * @param array $parameters
-     * @return string
-     * @throws \InvalidArgumentException
-     */
-    protected function tryTranslate(array $transKeys, array $parameters = [])
-    {
-        $transKey = 'sidus.missing.translation';
-        foreach ($transKeys as $transKey) {
-            $label = $this->translator->trans($transKey, $parameters);
-            if ($label !== $transKey) {
-                return $label;
-            }
-        }
-        return $transKey;
     }
 }

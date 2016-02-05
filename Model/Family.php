@@ -7,13 +7,19 @@ use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Entity\Value;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
+use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use UnexpectedValueException;
 
 class Family implements FamilyInterface
 {
+    use TranslatableTrait;
+
     /** @var string */
     protected $code;
+
+    /** @var string */
+    protected $label;
 
     /** @var Attribute */
     protected $attributeAsLabel;
@@ -63,6 +69,7 @@ class Family implements FamilyInterface
             $this->attributeAsLabel = $attributeConfigurationHandler->getAttribute($config['attributeAsLabel']);
         }
         $this->instantiable = $config['instantiable'];
+        $this->label = $config['label'];
     }
 
     /**
@@ -195,9 +202,23 @@ class Family implements FamilyInterface
         return $this->instantiable;
     }
 
+    /**
+     * Will check the translator for the key "eav.family.{$code}.label"
+     * and humanize the code if no translation is found
+     *
+     * @return string
+     */
+    public function getLabel()
+    {
+        if ($this->label) {
+            return $this->label;
+        }
+        return $this->tryTranslate("eav.family.{$this->getCode()}.label", [], $this->getCode());
+    }
+
     public function __toString()
     {
-        return 'sidus.family.' . $this->getCode();
+        return (string) $this->getLabel();
     }
 
     /**

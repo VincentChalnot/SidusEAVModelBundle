@@ -39,6 +39,7 @@ class Configuration implements ConfigurationInterface
                         ->children()
                             ->scalarNode('data_class')->end()
                             ->scalarNode('value_class')->end()
+                            ->scalarNode('label')->defaultNull()->end()
                             ->scalarNode('attributeAsLabel')->defaultValue('string')->end()
                             ->scalarNode('parent')->end()
                             ->booleanNode('instantiable')->defaultValue(true)->end()

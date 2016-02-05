@@ -6,6 +6,7 @@ use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
+use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -13,15 +14,13 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Translation\TranslatorInterface;
 
 class DataType extends AbstractType
 {
+    use TranslatableTrait;
+
     /** @var FamilyConfigurationHandler */
     protected $familyConfigurationHandler;
-
-    /** @var TranslatorInterface */
-    protected $translator;
 
     /** @var string */
     protected $dataClass;
@@ -76,7 +75,7 @@ class DataType extends AbstractType
     {
         $choices = [];
         foreach ($this->familyConfigurationHandler->getFamilies() as $family) {
-            $choices[$family->getCode()] = $this->translator->trans($family->getCode());
+            $choices[$family->getCode()] = $this->translator->trans((string) $family);
         }
 
         $form->add('family', 'choice', [
@@ -166,14 +165,6 @@ class DataType extends AbstractType
     }
 
     /**
-     * @param TranslatorInterface $translator
-     */
-    public function setTranslator(TranslatorInterface $translator)
-    {
-        $this->translator = $translator;
-    }
-
-    /**
      * Use label from formOptions or use translation or automatically create human readable one
      *
      * @param FamilyInterface $family
@@ -183,28 +174,7 @@ class DataType extends AbstractType
      */
     protected function getFieldLabel(FamilyInterface $family, AttributeInterface $attribute)
     {
-        $transKeys = [
-            "{$family->getCode()}.attribute.{$attribute->getCode()}.label",
-            "attributes.{$attribute->getCode()}.label",
-        ];
-        return $this->translateOrDefault($transKeys, $attribute->getCode());
-    }
-
-    /**
-     * @param array $transKeys
-     * @param string $default
-     * @return string
-     * @throws \InvalidArgumentException
-     */
-    protected function translateOrDefault(array $transKeys, $default)
-    {
-        foreach ($transKeys as $transKey) {
-            $label = $this->translator->trans($transKey);
-            if ($label !== $transKey) {
-                return $label;
-            }
-        }
-        $label = ucfirst(preg_replace('/(?!^)[A-Z]{2,}(?=[A-Z][a-z])|[A-Z][a-z]|\d{1,}/', ' $0', $default));
-        return $label;
+        $tId = "eav.{$family->getCode()}.attribute.{$attribute->getCode()}.label";
+        return $this->tryTranslate($tId, [], (string) $attribute);
     }
 }
