@@ -10,6 +10,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -45,14 +46,18 @@ class DataType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        /** @var Data $data */
-        $data = $builder->getData();
-        if ($data && $data->getFamily()) {
-            $this->buildValuesForm($builder, $options);
-            $this->buildDataForm($builder, $options);
-        } else {
-            $this->buildCreateForm($builder, $options);
-        }
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
+            $form = $event->getForm();
+            /** @var Data $data */
+            $data = $event->getData();
+
+            if ($data && $data->getFamily()) {
+                $this->buildValuesForm($data, $form, $options);
+                $this->buildDataForm($data, $form, $options);
+            } else {
+                $this->buildCreateForm($form, $options);
+            }
+        });
         $builder->addEventListener(FormEvents::POST_SUBMIT, function(FormEvent $event){
             /** @var Data $data */
             $data = $event->getData();
@@ -63,18 +68,18 @@ class DataType extends AbstractType
     }
 
     /**
-     * @param FormBuilderInterface $builder
+     * @param FormInterface $form
      * @param array $options
-     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
-    public function buildCreateForm(FormBuilderInterface $builder, array $options)
+    public function buildCreateForm(FormInterface $form, array $options)
     {
         $choices = [];
         foreach ($this->familyConfigurationHandler->getFamilies() as $family) {
             $choices[$family->getCode()] = $this->translator->trans($family->getCode());
         }
 
-        $builder->add('family', 'choice', [
+        $form->add('family', 'choice', [
             'choices' => $choices,
         ]);
     }
@@ -82,30 +87,36 @@ class DataType extends AbstractType
     /**
      * For additional fields in data form that are not linked to EAV model
      *
-     * @param FormBuilderInterface $builder
+     * @param Data $data
+     * @param FormInterface $form
      * @param array $options
      */
-    public function buildDataForm(FormBuilderInterface $builder, array $options)
+    public function buildDataForm(Data $data, FormInterface $form, array $options)
     {
 
     }
 
     /**
-     * @param FormBuilderInterface $builder
+     * @param Data $data
+     * @param FormInterface $form
      * @param array $options
      * @throws \Exception
      */
-    public function buildValuesForm(FormBuilderInterface $builder, array $options)
+    public function buildValuesForm(Data $data, FormInterface $form, array $options)
     {
-        /** @var Data $data */
-        $data = $builder->getData();
         $family = $data->getFamily();
         foreach ($family->getAttributes() as $attribute) {
-            $this->addAttribute($builder, $attribute, $family);
+            $this->addAttribute($form, $attribute, $family);
         }
     }
 
-    protected function addAttribute(FormBuilderInterface $builder, AttributeInterface $attribute, FamilyInterface $family)
+    /**
+     * @param FormInterface $form
+     * @param AttributeInterface $attribute
+     * @param FamilyInterface $family
+     * @throws \Exception
+     */
+    protected function addAttribute(FormInterface $form, AttributeInterface $attribute, FamilyInterface $family)
     {
         $attributeType = $attribute->getType();
         $label = $this->getFieldLabel($family, $attribute);
@@ -113,7 +124,7 @@ class DataType extends AbstractType
         if ($attribute->isMultiple()) {
             $formOptions = $attribute->getFormOptions();
             $formOptions['label'] = false;
-            $builder->add($attribute->getCode(), $this->collectionType, [
+            $form->add($attribute->getCode(), $this->collectionType, [
                 'label' => $label,
                 'type' => $attributeType->getFormType(),
                 'options' => $formOptions,
@@ -123,7 +134,7 @@ class DataType extends AbstractType
             ]);
         } else {
             $formOptions = array_merge(['label' => $label], $attribute->getFormOptions());
-            $builder->add($attribute->getCode(), $attributeType->getFormType(), $formOptions);
+            $form->add($attribute->getCode(), $attributeType->getFormType(), $formOptions);
         }
     }
 
