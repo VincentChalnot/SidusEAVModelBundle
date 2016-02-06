@@ -61,7 +61,7 @@ class DataValidator extends ConstraintValidator
             throw new \UnexpectedValueException("Can't validate data of class {$class}");
         }
         foreach ($data->getFamily()->getAttributes() as $attribute) {
-            if ($attribute->isRequired() && count($data->getValuesData($attribute)) === 0) {
+            if ($attribute->isRequired() && $data->isEmpty($attribute)) {
                 $this->buildAttributeViolation($attribute, 'required');
             }
             if ($attribute->isUnique()) {
@@ -146,11 +146,12 @@ class DataValidator extends ConstraintValidator
      */
     protected function buildMessage(AttributeInterface $attribute, $type)
     {
+        $tId = "eav.attribute.{$attribute->getCode()}.validation.{$type}";
         return $this->tryTranslate([
-            "eav.attribute.{$attribute->getCode()}.validation.{$type}",
+            $tId,
             "eav.attribute.validation.{$type}",
         ], [
             '%attribute%' => $this->translator->trans((string) $attribute),
-        ]);
+        ], $tId);
     }
 }

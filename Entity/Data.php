@@ -2,6 +2,7 @@
 
 namespace Sidus\EAVModelBundle\Entity;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,6 +11,7 @@ use LogicException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use UnexpectedValueException;
 
 /**
  * @\Sidus\EAVModelBundle\Validator\Constraints\Data()
@@ -55,13 +57,13 @@ abstract class Data
     protected $id;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      * @ORM\Column(name="created_at", type="datetime")
      */
     protected $createdAt;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      * @ORM\Column(name="updated_at", type="datetime")
      */
     protected $updatedAt;
@@ -84,8 +86,8 @@ abstract class Data
             throw new LogicException("Family {$family->getCode()} is not instantiable");
         }
         $this->family = $family;
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
+        $this->createdAt = new DateTime();
+        $this->updatedAt = new DateTime();
         $this->values = new ArrayCollection();
         $this->children = new ArrayCollection();
     }
@@ -109,10 +111,10 @@ abstract class Data
     }
 
     /**
-     * @param \DateTime $createdAt
+     * @param DateTime $createdAt
      * @return Data
      */
-    public function setCreatedAt(\DateTime $createdAt = null)
+    public function setCreatedAt(DateTime $createdAt = null)
     {
         $this->createdAt = $createdAt;
 
@@ -120,7 +122,7 @@ abstract class Data
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
     public function getCreatedAt()
     {
@@ -128,10 +130,10 @@ abstract class Data
     }
 
     /**
-     * @param \DateTime $updatedAt
+     * @param DateTime $updatedAt
      * @return Data
      */
-    public function setUpdatedAt(\DateTime $updatedAt = null)
+    public function setUpdatedAt(DateTime $updatedAt = null)
     {
         $this->updatedAt = $updatedAt;
 
@@ -139,7 +141,7 @@ abstract class Data
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
     public function getUpdatedAt()
     {
@@ -176,17 +178,18 @@ abstract class Data
     /**
      * Return all values matching the attribute code
      *
-     * @param string|null $attributeCode
+     * @param AttributeInterface|null $attribute
      * @return Collection|Value[]
      */
-    public function getValues($attributeCode = null)
+    public function getValues(AttributeInterface $attribute)
     {
-        if (null === $attributeCode) {
+        if (null === $attribute) {
             return $this->values;
         }
+        $this->checkAttribute($attribute);
         $values = new ArrayCollection();
         foreach ($this->values as $value) {
-            if ($value->getAttributeCode() === $attributeCode) {
+            if ($value->getAttributeCode() === $attribute->getCode()) {
                 $values->add($value);
             }
         }
@@ -196,12 +199,13 @@ abstract class Data
     /**
      * Return first value found for attribute code in value collection
      *
-     * @param string|null $attributeCode
+     * @param AttributeInterface $attribute
      * @return Value|null
      */
-    public function getValue($attributeCode)
+    public function getValue(AttributeInterface $attribute)
     {
-        return $this->getValues($attributeCode)->first();
+        $values = $this->getValues($attribute);
+        return count($values) === 0 ? null : $values->first();
     }
 
     /**
@@ -213,12 +217,8 @@ abstract class Data
      */
     public function getValueData(AttributeInterface $attribute)
     {
-        $value = $this->getValue($attribute->getCode());
-        if (!$value) {
-            return null;
-        }
-        $accessor = PropertyAccess::createPropertyAccessor();
-        return $accessor->getValue($value, $attribute->getType()->getDatabaseType());
+        $valuesData = $this->getValuesData($attribute);
+        return count($valuesData) === 0 ? null : $valuesData->first();
     }
 
     /**
@@ -228,18 +228,13 @@ abstract class Data
      * @return mixed
      * @throws \Exception
      */
-    public function getValuesData(AttributeInterface $attribute)
+    public function getValuesData(AttributeInterface $attribute = null)
     {
-        $accessor = PropertyAccess::createPropertyAccessor();
-        $values = $this->getValues($attribute->getCode());
-        if (0 === count($values)) {
-            return [];
-        }
         $valuesData = new ArrayCollection();
-        foreach ($values as $value) {
+        $accessor = PropertyAccess::createPropertyAccessor();
+        foreach ($this->getValues($attribute) as $value) {
             $valuesData->add($accessor->getValue($value, $attribute->getType()->getDatabaseType()));
         }
-
         return $valuesData;
     }
 
@@ -248,17 +243,12 @@ abstract class Data
      *
      * @param AttributeInterface $attribute
      * @param $data
-     * @return mixed
+     * @return Data
      * @throws Exception
      */
     public function setValueData(AttributeInterface $attribute, $data)
     {
-        $value = $this->getValue($attribute->getCode());
-        if (!$value) {
-            $value = $this->createValue($attribute);
-        }
-        $accessor = PropertyAccess::createPropertyAccessor();
-        $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $data);
+        return $this->setValuesData($attribute, [$data]);
     }
 
     /**
@@ -266,18 +256,16 @@ abstract class Data
      *
      * @param AttributeInterface $attribute
      * @param array|\Traversable $datas
-     * @return mixed
+     * @return Data
      * @throws Exception
      */
     public function setValuesData(AttributeInterface $attribute, $datas)
     {
-        $accessor = PropertyAccess::createPropertyAccessor();
-        $values = $this->getValues($attribute->getCode());
-        /** @var Value $value */
-        foreach ($values as $value) {
-            $this->removeValue($value);
+        if (!is_array($datas) && !$datas instanceof \Traversable) {
+            throw new UnexpectedValueException("Datas must be an array or implements Traversable");
         }
-
+        $this->emptyValues($attribute);
+        $accessor = PropertyAccess::createPropertyAccessor();
         $position = 0;
         foreach ($datas as $data) {
             /** @noinspection DisconnectedForeachInstructionInspection */
@@ -285,6 +273,20 @@ abstract class Data
             $value->setPosition($position++);
             $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $data);
         }
+        return $this;
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @return Data
+     */
+    public function emptyValues(AttributeInterface $attribute)
+    {
+        $values = $this->getValues($attribute);
+        foreach ($values as $value) {
+            $this->removeValue($value);
+        }
+        return $this;
     }
 
     /**
@@ -308,12 +310,15 @@ abstract class Data
         return $this;
     }
 
+    /**
+     * @return string
+     */
     protected function getLabelValue()
     {
         if (!$this->getFamily()) {
-            throw new \UnexpectedValueException('Missing family code');
+            throw new UnexpectedValueException('Missing family code');
         }
-        return (string)$this->getValueData($this->getFamily()->getAttributeAsLabel());
+        return (string) $this->getValueData($this->getFamily()->getAttributeAsLabel());
     }
 
     /**
@@ -377,12 +382,12 @@ abstract class Data
             if ($returnData) {
                 return $this->getValuesData($attribute);
             }
-            return $this->getValues($attributeCode);
+            return $this->getValues($attribute);
         }
         if ($returnData) {
             return $this->getValueData($attribute);
         }
-        return $this->getValue($attributeCode);
+        return $this->getValue($attribute);
     }
 
     /**
@@ -446,5 +451,30 @@ abstract class Data
     public function createValue(AttributeInterface $attribute)
     {
         return $this->getFamily()->createValue($this, $attribute);
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @return bool
+     */
+    public function isEmpty(AttributeInterface $attribute)
+    {
+        foreach ($this->getValuesData($attribute) as $valueData) {
+            if ($valueData !== null && $valueData !== '') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @throw UnexpectedValueException
+     */
+    protected function checkAttribute(AttributeInterface $attribute)
+    {
+        if (!$this->getFamily()->hasAttribute($attribute->getCode())) {
+            throw new UnexpectedValueException("Attribute {$attribute->getCode()} doesn't exists in family {$this->getFamily()->getCode()}");
+        }
     }
 }

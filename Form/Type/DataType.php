@@ -175,6 +175,6 @@ class DataType extends AbstractType
     protected function getFieldLabel(FamilyInterface $family, AttributeInterface $attribute)
     {
         $tId = "eav.{$family->getCode()}.attribute.{$attribute->getCode()}.label";
-        return $this->tryTranslate($tId, [], (string) $attribute);
+        return $this->tryTranslate($tId, [], ucfirst($attribute));
     }
 }
