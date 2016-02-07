@@ -1,5 +1,6 @@
 parameters:
     sidus_eav_model.form.type.data.class: Sidus\EAVModelBundle\Form\Type\DataType
+    sidus_eav_model.form.type.family_selector.class: Sidus\EAVModelBundle\Form\Type\FamilySelectorType
     sidus_eav_model.form.type.simple_data_selector.class: Sidus\EAVModelBundle\Form\Type\SimpleDataSelectorType
 
 services:
@@ -11,6 +12,12 @@ services:
             - [setTranslator, [@translator]]
         tags:
             - { name: form.type, alias: sidus_data }
+
+    sidus_eav_model.form.type.family_selector:
+        class: %sidus_eav_model.form.type.family_selector.class%
+        arguments: [@sidus_eav_model.family_configuration.handler]
+        tags:
+            - { name: form.type, alias: sidus_family_selector }
 
     sidus_eav_model.form.type.simple_data_selector:
         class: %sidus_eav_model.form.type.simple_data_selector.class%

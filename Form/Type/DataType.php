@@ -73,14 +73,7 @@ class DataType extends AbstractType
      */
     public function buildCreateForm(FormInterface $form, array $options)
     {
-        $choices = [];
-        foreach ($this->familyConfigurationHandler->getFamilies() as $family) {
-            $choices[$family->getCode()] = $this->translator->trans((string) $family);
-        }
-
-        $form->add('family', 'choice', [
-            'choices' => $choices,
-        ]);
+        $form->add('family', 'sidus_family_selector');
     }
 
     /**

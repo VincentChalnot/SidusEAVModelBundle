@@ -79,4 +79,18 @@ class FamilyConfigurationHandler
             }
         }
     }
+
+    public function getRootFamilies()
+    {
+        $root = [];
+        foreach ($this->getFamilies() as $family) {
+            if ($family->isInstantiable()) {
+                $p = $family->getParent();
+                if (($p && !$p->isInstantiable()) || !$p) {
+                    $root[$family->getCode()] = $family;
+                }
+            }
+        }
+        return $root;
+    }
 }
