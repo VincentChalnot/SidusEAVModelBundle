@@ -67,3 +67,11 @@ services:
         arguments: [data, dataValue, sidus_simple_data_selector]
         tags:
             - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.embbed:
+        class: %sidus_eav_model.attribute_type.default.class%
+        arguments: [embbed, dataValue, sidus_data]
+        calls:
+            - [setIsEmbedded, [true]]
+        tags:
+            - { name: sidus.attribute_type }

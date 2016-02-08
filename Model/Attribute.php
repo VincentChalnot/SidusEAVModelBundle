@@ -9,7 +9,6 @@ use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use UnexpectedValueException;
 
 class Attribute implements AttributeInterface
@@ -46,7 +45,7 @@ class Attribute implements AttributeInterface
     /** @var bool */
     protected $unique = false;
 
-    /** @var ValidatorInterface[] */
+    /** @var array */
     protected $validationRules = [];
 
     /** @var bool */
@@ -206,7 +205,7 @@ class Attribute implements AttributeInterface
     }
 
     /**
-     * @return ValidatorInterface[]
+     * @return array
      */
     public function getValidationRules()
     {
@@ -214,7 +213,15 @@ class Attribute implements AttributeInterface
     }
 
     /**
-     * @param ValidatorInterface[] $validationRules
+     * @param array $options
+     */
+    public function addValidationRules(array $options)
+    {
+        $this->validationRules[] = $options;
+    }
+
+    /**
+     * @param array $validationRules
      */
     public function setValidationRules(array $validationRules)
     {

@@ -15,6 +15,7 @@ use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\ConstraintViolationInterface;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
@@ -52,6 +53,7 @@ class DataValidator extends ConstraintValidator
      *
      * @param SidusData $data The value that should be validated
      * @param Constraint $constraint The constraint for the validation
+     * @return ConstraintViolationListInterface
      * @throws Exception
      */
     public function validate($data, Constraint $constraint)
@@ -60,25 +62,33 @@ class DataValidator extends ConstraintValidator
             $class = get_class($data);
             throw new \UnexpectedValueException("Can't validate data of class {$class}");
         }
+        $context = $this->context; // VERY IMPORTANT ! context will be lost otherwise
         foreach ($data->getFamily()->getAttributes() as $attribute) {
+            // Dynamically append data validator for embed types
+            if ($attribute->getType()->isEmbedded()) {
+                $attribute->addValidationRules([
+                    'Valid' => [],
+                ]);
+            }
             if ($attribute->isRequired() && $data->isEmpty($attribute)) {
-                $this->buildAttributeViolation($attribute, 'required');
+                $this->buildAttributeViolation($context, $attribute, 'required');
             }
             if ($attribute->isUnique()) {
-                $this->checkUnique($attribute, $data);
+                $this->checkUnique($context, $attribute, $data);
             }
             if (count($attribute->getValidationRules())) {
-                $this->validateRules($attribute, $data);
+                $this->validateRules($context, $attribute, $data);
             }
         }
     }
 
     /**
+     * @param ExecutionContextInterface $context
      * @param AttributeInterface $attribute
      * @param SidusData $data
      * @throws Exception
      */
-    protected function checkUnique(AttributeInterface $attribute, SidusData $data)
+    protected function checkUnique(ExecutionContextInterface $context, AttributeInterface $attribute, SidusData $data)
     {
         $valueData = $data->getValueData($attribute);
         /** @var ValueRepository $repo */
@@ -89,18 +99,23 @@ class DataValidator extends ConstraintValidator
         ]);
         /** @var Value $value */
         foreach ($values as $value) {
+            if (!$value->getData()) {
+                var_dump($value);exit; // @todo : DEBUG THIS SHIT OUT : Value DOES have a data associated, why doesn't it shows up here ????
+            }
             if ($value->getData()->getId() !== $data->getId()) {
-                $this->buildAttributeViolation($attribute, 'unique');
+                $this->buildAttributeViolation($context, $attribute, 'unique');
+                return;
             }
         }
     }
 
     /**
+     * @param ExecutionContextInterface $context
      * @param AttributeInterface $attribute
      * @param SidusData $data
      * @throws Exception
      */
-    protected function validateRules(AttributeInterface $attribute, SidusData $data)
+    protected function validateRules(ExecutionContextInterface $context, AttributeInterface $attribute, SidusData $data)
     {
         if ($attribute->isMultiple()) {
             $value = $data->getValuesData($attribute);
@@ -111,15 +126,20 @@ class DataValidator extends ConstraintValidator
         foreach ($attribute->getValidationRules() as $validationRule) {
             foreach ($validationRule as $item => $options) {
                 $constraint = $loader->newConstraint($item, $options);
-                $violations = $this->context->getValidator()->validate($value, $constraint);
+                $violations = $context->getValidator()->validate($value, $constraint);
                 /** @var ConstraintViolationInterface $violation */
                 foreach ($violations as $violation) {
+                    $path = $attribute->getCode();
+                    if ($attribute->getType()->isEmbedded()) {
+                        $path .= '.'.$violation->getPropertyPath();
+                    }
                     if ($violation->getMessage()) {
-                        $this->context->buildViolation($violation->getMessage())
-                            ->atPath($attribute->getCode())
+                        $context->buildViolation($violation->getMessage())
+                            ->atPath($path)
+                            ->setInvalidValue($value)
                             ->addViolation();
                     } else {
-                        $this->buildAttributeViolation($attribute, strtolower($item));
+                        $this->buildAttributeViolation($context, $attribute, strtolower($item), $path);
                     }
                 }
             }
@@ -127,14 +147,19 @@ class DataValidator extends ConstraintValidator
     }
 
     /**
+     * @param ExecutionContextInterface $context
      * @param AttributeInterface $attribute
+     * @param string $path
      * @param string $type
      * @throws \InvalidArgumentException
      */
-    protected function buildAttributeViolation(AttributeInterface $attribute, $type)
+    protected function buildAttributeViolation(ExecutionContextInterface $context, AttributeInterface $attribute, $type, $path = null)
     {
-        $this->context->buildViolation($this->buildMessage($attribute, $type))
-            ->atPath($attribute->getCode())
+        if (null === $path) {
+            $path = $attribute->getCode();
+        }
+        $context->buildViolation($this->buildMessage($attribute, $type))
+            ->atPath($path)
             ->addViolation();
     }
 
@@ -153,5 +178,23 @@ class DataValidator extends ConstraintValidator
         ], [
             '%attribute%' => $this->translator->trans((string) $attribute),
         ], $tId);
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @param SidusData $data
+     * @param Constraint $constraint
+     * @throws \Exception
+     */
+    protected function validateEmbedded(AttributeInterface $attribute, SidusData $data, Constraint $constraint)
+    {
+        if ($attribute->isMultiple()) {
+            foreach ($data->getValuesData($attribute) as $key => $item) {
+                $constraint->
+                $this->validate($item, $constraint);
+            }
+        } else {
+            $this->validate($data->getValueData($attribute), $constraint);
+        }
     }
 }

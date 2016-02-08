@@ -21,7 +21,7 @@ abstract class Value
 
     /**
      * @var Data
-     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\Data")
+     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\Data", cascade={"persist"})
      * @ORM\JoinColumn(name="data_value_id", referencedColumnName="id", onDelete="cascade", nullable=true)
      */
     protected $dataValue;

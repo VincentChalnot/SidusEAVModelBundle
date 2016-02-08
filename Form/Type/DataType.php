@@ -4,7 +4,9 @@ namespace Sidus\EAVModelBundle\Form\Type;
 
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Entity\Data;
+use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
+use Sidus\EAVModelBundle\Model\Family;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Symfony\Component\Form\AbstractType;
@@ -13,6 +15,8 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
+use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class DataType extends AbstractType
@@ -50,9 +54,15 @@ class DataType extends AbstractType
             /** @var Data $data */
             $data = $event->getData();
 
-            if ($data && $data->getFamily()) {
-                $this->buildValuesForm($data, $form, $options);
-                $this->buildDataForm($data, $form, $options);
+            if ($data) {
+                $family = $data->getFamily();
+            } else {
+                $family = $options['family_code'];
+            }
+
+            if ($family) {
+                $this->buildValuesForm($form, $family, $data, $options);
+                $this->buildDataForm($form, $family, $data, $options);
             } else {
                 $this->buildCreateForm($form, $options);
             }
@@ -79,24 +89,25 @@ class DataType extends AbstractType
     /**
      * For additional fields in data form that are not linked to EAV model
      *
-     * @param Data $data
      * @param FormInterface $form
+     * @param FamilyInterface $family
+     * @param Data $data
      * @param array $options
      */
-    public function buildDataForm(Data $data, FormInterface $form, array $options)
+    public function buildDataForm(FormInterface $form, FamilyInterface $family, Data $data = null, array $options = [])
     {
 
     }
 
     /**
-     * @param Data $data
      * @param FormInterface $form
+     * @param FamilyInterface $family
+     * @param Data $data
      * @param array $options
      * @throws \Exception
      */
-    public function buildValuesForm(Data $data, FormInterface $form, array $options)
+    public function buildValuesForm(FormInterface $form, FamilyInterface $family, Data $data = null, array $options = [])
     {
-        $family = $data->getFamily();
         foreach ($family->getAttributes() as $attribute) {
             $this->addAttribute($form, $attribute, $family);
         }
@@ -116,6 +127,8 @@ class DataType extends AbstractType
         if ($attribute->isMultiple()) {
             $formOptions = $attribute->getFormOptions();
             $formOptions['label'] = false;
+            $sortable = isset($formOptions['sortable']) ? $formOptions['sortable'] : false;
+            unset($formOptions['sortable']);
             $form->add($attribute->getCode(), $this->collectionType, [
                 'label' => $label,
                 'type' => $attributeType->getFormType(),
@@ -123,6 +136,8 @@ class DataType extends AbstractType
                 'allow_add' => true,
                 'allow_delete' => true,
                 'required' => false,
+                'sortable' => $sortable,
+                'cascade_validation' => true,
             ]);
         } else {
             $formOptions = array_merge(['label' => $label], $attribute->getFormOptions());
@@ -133,12 +148,27 @@ class DataType extends AbstractType
     /**
      * @param OptionsResolver $resolver
      * @throws AccessException
+     * @throws UndefinedOptionsException
+     * @throws MissingFamilyException
      */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
             'data_class' => $this->dataClass,
+            'family_code' => null,
         ]);
+        $resolver->setNormalizer('family_code', function (Options $options, $value) {
+            if ($value === null) {
+                return null;
+            }
+            return $this->familyConfigurationHandler->getFamily($value);
+        });
+        $resolver->setNormalizer('empty_data', function (Options $options, $value) {
+            if ($options['family_code'] instanceof FamilyInterface) {
+                return $options['family_code']->createData();
+            }
+            return $value;
+        });
     }
 
     /**

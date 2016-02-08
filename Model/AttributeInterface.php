@@ -2,8 +2,6 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-
 interface AttributeInterface
 {
     /**
@@ -47,7 +45,12 @@ interface AttributeInterface
     public function isUnique();
 
     /**
-     * @return ValidatorInterface[]
+     * @return array
      */
     public function getValidationRules();
+
+    /**
+     * @param array
+     */
+    public function addValidationRules(array $options);
 }
