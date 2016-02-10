@@ -100,6 +100,7 @@ class DataValidator extends ConstraintValidator
         /** @var Value $value */
         foreach ($values as $value) {
             if (!$value->getData()) {
+                echo 'Please debug me';
                 var_dump($value);exit; // @todo : DEBUG THIS SHIT OUT : Value DOES have a data associated, why doesn't it shows up here ????
             }
             if ($value->getData()->getId() !== $data->getId()) {
@@ -131,7 +132,10 @@ class DataValidator extends ConstraintValidator
                 foreach ($violations as $violation) {
                     $path = $attribute->getCode();
                     if ($attribute->getType()->isEmbedded()) {
-                        $path .= '.'.$violation->getPropertyPath();
+                        if (!$attribute->isMultiple()) {
+                            $path .= '.';
+                        }
+                        $path .= $violation->getPropertyPath();
                     }
                     if ($violation->getMessage()) {
                         $context->buildViolation($violation->getMessage())

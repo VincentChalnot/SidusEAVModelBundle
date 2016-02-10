@@ -2,6 +2,7 @@
 
 namespace Sidus\EAVModelBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -15,42 +16,68 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('sidus_eav_model');
-        $rootNode
+        $attributeDefinition = $rootNode
             ->children()
                 ->scalarNode('data_class')->isRequired()->end()
                 ->scalarNode('value_class')->isRequired()->end()
                 ->scalarNode('collection_type')->defaultValue('collection')->end()
                 ->arrayNode('attributes')
                     ->prototype('array')
-                        ->children()
-                            ->scalarNode('type')->defaultValue('string')->end()
-                            ->scalarNode('group')->end()
-                            ->variableNode('form_options')->end()
-                            ->variableNode('view_options')->end()
-                            ->variableNode('validation_rules')->end()
-                            ->booleanNode('required')->defaultValue(false)->end()
-                            ->booleanNode('unique')->defaultValue(false)->end()
-                            ->booleanNode('multiple')->defaultValue(false)->end()
-                        ->end()
+                        ->children();
+
+        $this->appendAttributeDefinition($attributeDefinition);
+
+        $familyDefinition = $attributeDefinition->end()
                     ->end()
                 ->end()
                 ->arrayNode('families')
                     ->prototype('array')
-                        ->children()
-                            ->scalarNode('data_class')->end()
-                            ->scalarNode('value_class')->end()
-                            ->scalarNode('label')->defaultNull()->end()
-                            ->scalarNode('attributeAsLabel')->defaultValue('string')->end()
-                            ->scalarNode('parent')->end()
-                            ->booleanNode('instantiable')->defaultValue(true)->end()
-                            ->arrayNode('attributes')
-                                ->prototype('scalar')->end()
-                            ->end()
-                        ->end()
+                        ->children();
+
+        $this->appendFamilyDefinition($familyDefinition);
+
+        $familyDefinition->end()
                     ->end()
                 ->end()
             ->end();
 
         return $treeBuilder;
+    }
+
+
+    /**
+     * @param NodeBuilder $attributeDefinition
+     */
+    protected function appendAttributeDefinition(NodeBuilder $attributeDefinition)
+    {
+        $attributeDefinition
+            ->scalarNode('type')->defaultValue('string')->end()
+            ->scalarNode('group')->end()
+            ->variableNode('options')->end()
+            ->variableNode('form_options')->end()
+            ->variableNode('view_options')->end()
+            ->variableNode('validation_rules')->end()
+            ->booleanNode('required')->defaultValue(false)->end()
+            ->booleanNode('unique')->defaultValue(false)->end()
+            ->booleanNode('multiple')->defaultValue(false)->end();
+
+    }
+
+
+    /**
+     * @param NodeBuilder $familyDefinition
+     */
+    protected function appendFamilyDefinition(NodeBuilder $familyDefinition)
+    {
+        $familyDefinition
+            ->scalarNode('data_class')->end()
+            ->scalarNode('value_class')->end()
+            ->scalarNode('label')->defaultNull()->end()
+            ->scalarNode('attributeAsLabel')->defaultValue('string')->end()
+            ->scalarNode('parent')->end()
+            ->booleanNode('instantiable')->defaultValue(true)->end()
+            ->arrayNode('attributes')
+                ->prototype('scalar')->end()
+            ->end();
     }
 }

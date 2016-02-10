@@ -5,6 +5,7 @@ namespace Sidus\EAVModelBundle;
 use Sidus\EAVModelBundle\DependencyInjection\Compiler\AttributeCompilerPass;
 use Sidus\EAVModelBundle\DependencyInjection\Compiler\AttributeTypeCompilerPass;
 use Sidus\EAVModelBundle\DependencyInjection\Compiler\FamilyCompilerPass;
+use Sidus\EAVModelBundle\DependencyInjection\Compiler\GenericCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -17,10 +18,17 @@ class SidusEAVModelBundle extends Bundle
      */
     public function build(ContainerBuilder $container)
     {
-        parent::build($container);
-
-        $container->addCompilerPass(new AttributeTypeCompilerPass());
-        $container->addCompilerPass(new AttributeCompilerPass());
-        $container->addCompilerPass(new FamilyCompilerPass());
+        $container->addCompilerPass(new GenericCompilerPass(
+            'sidus_eav_model.attribute_type_configuration.handler',
+            'sidus.attribute_type',
+            'addType'));
+        $container->addCompilerPass(new GenericCompilerPass(
+            'sidus_eav_model.attribute_configuration.handler',
+            'sidus.attribute',
+            'addAttribute'));
+        $container->addCompilerPass(new GenericCompilerPass(
+            'sidus_eav_model.family_configuration.handler',
+            'sidus.family',
+            'addFamily'));
     }
 }

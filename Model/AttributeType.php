@@ -16,11 +16,22 @@ class AttributeType implements AttributeTypeInterface
     /** @var bool */
     protected $isEmbedded = false;
 
-    public function __construct($code, $databaseType, $formType)
+    /** @var array */
+    protected $formOptions = [];
+
+    /**
+     * AttributeType constructor.
+     * @param string $code
+     * @param string $databaseType
+     * @param string $formType
+     * @param array $formOptions
+     */
+    public function __construct($code, $databaseType, $formType, array $formOptions = [])
     {
         $this->code = $code;
         $this->databaseType = $databaseType;
         $this->formType = $formType;
+        $this->formOptions = $formOptions = [];
     }
 
     /**
@@ -61,5 +72,29 @@ class AttributeType implements AttributeTypeInterface
     public function setIsEmbedded($isEmbedded)
     {
         $this->isEmbedded = $isEmbedded;
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     */
+    public function setAttributeDefaults(AttributeInterface $attribute)
+    {
+    }
+
+    /**
+     * @param $data
+     * @return array
+     */
+    public function getFormOptions($data)
+    {
+        return $this->formOptions;
+    }
+
+    /**
+     * @param array $formOptions
+     */
+    public function setFormOptions($formOptions)
+    {
+        $this->formOptions = $formOptions;
     }
 }

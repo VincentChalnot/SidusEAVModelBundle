@@ -6,8 +6,8 @@ use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Entity\Value;
-use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use UnexpectedValueException;
 
@@ -15,8 +15,13 @@ class Family implements FamilyInterface
 {
     use TranslatableTrait;
 
+    const FAMILY_DEFAULT = 'family';
+
     /** @var string */
     protected $code;
+
+    /** @var string */
+    protected $type;
 
     /** @var string */
     protected $label;
@@ -50,26 +55,28 @@ class Family implements FamilyInterface
      * @param AttributeConfigurationHandler $attributeConfigurationHandler
      * @param FamilyConfigurationHandler $familyConfigurationHandler
      * @param array $config
-     * @throws MissingFamilyException
-     * @throws UnexpectedValueException
+     * @throws \Exception
      */
     public function __construct($code, AttributeConfigurationHandler $attributeConfigurationHandler, FamilyConfigurationHandler $familyConfigurationHandler, array $config = null)
     {
         $this->code = $code;
-        $this->dataClass = $config['data_class'];
-        $this->valueClass = $config['value_class'];
         if (!empty($config['parent'])) {
             $this->parent = $familyConfigurationHandler->getFamily($config['parent']);
             $this->copyFromFamily($this->parent);
         }
-        foreach ($config['attributes'] as $code) {
-            $this->attributes[$code] = $attributeConfigurationHandler->getAttribute($code);
+        unset($config['parent']);
+        foreach ($config['attributes'] as $attribute) {
+            $this->attributes[$attribute] = $attributeConfigurationHandler->getAttribute($attribute);
         }
+        unset($config['attributes']);
         if (!empty($config['attributeAsLabel'])) {
             $this->attributeAsLabel = $attributeConfigurationHandler->getAttribute($config['attributeAsLabel']);
         }
-        $this->instantiable = $config['instantiable'];
-        $this->label = $config['label'];
+        unset($config['attributeAsLabel']);
+        $accessor = PropertyAccess::createPropertyAccessor();
+        foreach ($config as $key => $value) {
+            $accessor->setValue($this, $key, $value);
+        }
     }
 
     /**
@@ -96,6 +103,9 @@ class Family implements FamilyInterface
         return $this->attributes;
     }
 
+    /**
+     * @param AttributeInterface $attribute
+     */
     public function addAttribute(AttributeInterface $attribute)
     {
         $this->attributes[$attribute->getCode()] = $attribute;
@@ -162,6 +172,9 @@ class Family implements FamilyInterface
         return $this->code;
     }
 
+    /**
+     * @param FamilyInterface $parent
+     */
     protected function copyFromFamily(FamilyInterface $parent)
     {
         foreach ($parent->getAttributes() as $attribute) {
@@ -179,7 +192,7 @@ class Family implements FamilyInterface
      */
     public function getAttribute($code)
     {
-        if (empty($this->attributes[$code])) {
+        if (!$this->hasAttribute($code)) {
             throw new UnexpectedValueException("Unknown attribute {$code} in family {$this->code}");
         }
         return $this->attributes[$code];
@@ -203,6 +216,14 @@ class Family implements FamilyInterface
     }
 
     /**
+     * @param boolean $instantiable
+     */
+    public function setInstantiable($instantiable)
+    {
+        $this->instantiable = $instantiable;
+    }
+
+    /**
      * Will check the translator for the key "eav.family.{$code}.label"
      * and humanize the code if no translation is found
      *
@@ -216,6 +237,17 @@ class Family implements FamilyInterface
         return $this->tryTranslate("eav.family.{$this->getCode()}.label", [], $this->getCode());
     }
 
+    /**
+     * @param string $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+    }
+
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return (string) $this->getLabel();
@@ -244,11 +276,27 @@ class Family implements FamilyInterface
     }
 
     /**
+     * @param string $valueClass
+     */
+    public function setValueClass($valueClass)
+    {
+        $this->valueClass = $valueClass;
+    }
+
+    /**
      * @return string
      */
     public function getDataClass()
     {
         return $this->dataClass;
+    }
+
+    /**
+     * @param string $dataClass
+     */
+    public function setDataClass($dataClass)
+    {
+        $this->dataClass = $dataClass;
     }
 
     /**
@@ -271,5 +319,21 @@ class Family implements FamilyInterface
     {
         $dataClass = $this->getDataClass();
         return new $dataClass($this);
+    }
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param string $type
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
     }
 }

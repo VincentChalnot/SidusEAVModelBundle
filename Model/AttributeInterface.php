@@ -20,9 +20,38 @@ interface AttributeInterface
     public function getGroup();
 
     /**
+     * @param string $group
+     */
+    public function setGroup($group);
+
+    /**
      * @return array
      */
-    public function getFormOptions();
+    public function getOptions();
+
+    /**
+     * @param string $code
+     * @return mixed
+     */
+    public function getOption($code);
+
+    /**
+     * @param string $code
+     * @param mixed $value
+     */
+    public function addOption($code, $value);
+
+    /**
+     * @param $data
+     * @return array
+     */
+    public function getFormOptions($data = null);
+
+    /**
+     * @param string $code
+     * @param mixed $value
+     */
+    public function addFormOption($code, $value);
 
     /**
      * @return array
@@ -30,9 +59,30 @@ interface AttributeInterface
     public function getViewOptions();
 
     /**
+     * @param string $code
+     * @param mixed $value
+     */
+    public function addViewOption($code, $value);
+
+    /**
      * @return boolean
      */
     public function isMultiple();
+
+    /**
+     * @param boolean $value
+     */
+    public function setMultiple($value);
+
+    /**
+     * @return boolean
+     */
+    public function isCollection();
+
+    /**
+     * @param boolean $value
+     */
+    public function setCollection($value);
 
     /**
      * @return boolean
@@ -40,9 +90,19 @@ interface AttributeInterface
     public function isRequired();
 
     /**
+     * @param boolean $value
+     */
+    public function setRequired($value);
+
+    /**
      * @return boolean
      */
     public function isUnique();
+
+    /**
+     * @param boolean $value
+     */
+    public function setUnique($value);
 
     /**
      * @return array

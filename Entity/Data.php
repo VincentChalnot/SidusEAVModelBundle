@@ -252,26 +252,26 @@ abstract class Data
     }
 
     /**
-     * Set the value's datas of a given attribute for multiple fields
+     * Set the values' data of a given attribute for multiple fields
      *
      * @param AttributeInterface $attribute
-     * @param array|\Traversable $datas
+     * @param array|\Traversable $dataValues
      * @return Data
      * @throws Exception
      */
-    public function setValuesData(AttributeInterface $attribute, $datas)
+    public function setValuesData(AttributeInterface $attribute, $dataValues)
     {
-        if (!is_array($datas) && !$datas instanceof \Traversable) {
-            throw new UnexpectedValueException("Datas must be an array or implements Traversable");
+        if (!is_array($dataValues) && !$dataValues instanceof \Traversable) {
+            throw new UnexpectedValueException('Datas must be an array or implements Traversable');
         }
         $this->emptyValues($attribute);
         $accessor = PropertyAccess::createPropertyAccessor();
         $position = 0;
-        foreach ($datas as $data) {
+        foreach ($dataValues as $dataValue) {
             /** @noinspection DisconnectedForeachInstructionInspection */
             $value = $this->createValue($attribute);
             $value->setPosition($position++);
-            $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $data);
+            $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
         }
         return $this;
     }
@@ -300,8 +300,29 @@ abstract class Data
     }
 
     /**
+     * Append data to an attribute
+     *
+     * @param AttributeInterface $attribute
+     * @param $valueData
+     * @return Data
+     * @throws \Exception
+     */
+    public function addValueData(AttributeInterface $attribute, $valueData)
+    {
+        $newValue = $this->createValue($attribute);
+        $accessor = PropertyAccess::createPropertyAccessor();
+        $position = -1;
+        foreach ($this->getValues($attribute) as $value) {
+            $position = max($position, $value->getPosition());
+        }
+        $newValue->setPosition($position + 1);
+        $accessor->setValue($newValue, $attribute->getType()->getDatabaseType(), $valueData);
+        return $this;
+    }
+
+    /**
      * @param Value $value
-     * @return $this
+     * @return Data
      */
     public function removeValue(Value $value)
     {
@@ -312,12 +333,10 @@ abstract class Data
 
     /**
      * @return string
+     * @throws \Exception
      */
     protected function getLabelValue()
     {
-        if (!$this->getFamily()) {
-            throw new UnexpectedValueException('Missing family code');
-        }
         return (string) $this->getValueData($this->getFamily()->getAttributeAsLabel());
     }
 
@@ -456,6 +475,7 @@ abstract class Data
     /**
      * @param AttributeInterface $attribute
      * @return bool
+     * @throws \Exception
      */
     public function isEmpty(AttributeInterface $attribute)
     {
@@ -470,11 +490,12 @@ abstract class Data
     /**
      * @param AttributeInterface $attribute
      * @throw UnexpectedValueException
+     * @throws UnexpectedValueException
      */
     protected function checkAttribute(AttributeInterface $attribute)
     {
         if (!$this->getFamily()->hasAttribute($attribute->getCode())) {
-            throw new UnexpectedValueException("Attribute {$attribute->getCode()} doesn't exists in family {$this->getFamily()->getCode()}");
+            throw new UnexpectedValueException("Attribute {$attribute->getCode()} doesn't exists in family {$this->getFamilyCode()}");
         }
     }
 }

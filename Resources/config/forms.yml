@@ -6,9 +6,8 @@ parameters:
 services:
     sidus_eav_model.form.type.data:
         class: %sidus_eav_model.form.type.data.class%
-        arguments: [%sidus_eav_model.entity.data.class%, %sidus_eav_model.form.collection_type%]
+        arguments: [@sidus_eav_model.family_configuration.handler, %sidus_eav_model.entity.data.class%, %sidus_eav_model.form.collection_type%]
         calls:
-            - [setFamilyConfiguration, [@sidus_eav_model.family_configuration.handler]]
             - [setTranslator, [@translator]]
         tags:
             - { name: form.type, alias: sidus_data }

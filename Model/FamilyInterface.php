@@ -13,6 +13,11 @@ interface FamilyInterface
     public function getCode();
 
     /**
+     * @return string
+     */
+    public function getType();
+
+    /**
      * @return AttributeInterface
      */
     public function getAttributeAsLabel();

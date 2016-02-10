@@ -8,7 +8,6 @@ use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use UnexpectedValueException;
 
 class Attribute implements AttributeInterface
@@ -28,40 +27,28 @@ class Attribute implements AttributeInterface
     protected $group;
 
     /** @var array */
+    protected $options = [];
+
+    /** @var array */
     protected $formOptions = [];
 
     /** @var array */
     protected $viewOptions = [];
 
-    /** @var bool */
-    protected $versionable = false;
-
-    /** @var PermissionMapInterface[] */
-    protected $permissions = [];
-
-    /** @var bool */
-    protected $required = false;
-
-    /** @var bool */
-    protected $unique = false;
-
     /** @var array */
     protected $validationRules = [];
 
     /** @var bool */
-    protected $multiple = false;
+    protected $isRequired = false;
 
     /** @var bool */
-    protected $scopable = false;
+    protected $isUnique = false;
 
     /** @var bool */
-    protected $translatable = false;
+    protected $isMultiple = false;
 
     /** @var bool */
-    protected $countrySpecific = false;
-
-    /** @var bool */
-    protected $localizable = false;
+    protected $isCollection; // Important to left null
 
     /**
      * @param string $code
@@ -81,10 +68,7 @@ class Attribute implements AttributeInterface
         foreach ($configuration as $key => $value) {
             $accessor->setValue($this, $key, $value);
         }
-        if ($this->localizable) {
-            $this->countrySpecific = true;
-            $this->translatable = true;
-        }
+        $this->type->setAttributeDefaults($this); // Allow attribute type service to configure attribute
 
         $this->checkConflicts();
     }
@@ -108,13 +92,60 @@ class Attribute implements AttributeInterface
     /**
      * @return array
      */
-    public function getFormOptions()
+    public function getOptions()
     {
-        $options = array_merge([
-            'required' => $this->required,
-        ], $this->formOptions);
-        return $options;
+        return $this->options;
     }
+
+    /**
+     * @param string $code
+     * @return mixed
+     */
+    public function getOption($code)
+    {
+        if (!isset($this->options[$code])) {
+            return null;
+        }
+        return $this->options[$code];
+    }
+
+    /**
+     * @param string $code
+     * @param mixed $value
+     */
+    public function addOption($code, $value)
+    {
+        $this->options[$code] = $value;
+    }
+
+    /**
+     * @param array $options
+     */
+    public function setOptions($options)
+    {
+        $this->options = $options;
+    }
+
+    /**
+     * @param $data
+     * @return array
+     */
+    public function getFormOptions($data = null)
+    {
+        $defaultOptions = ['required' => $this->isRequired];
+        $typeOptions = $this->getType()->getFormOptions($data);
+        return array_merge($defaultOptions, $typeOptions, $this->formOptions);
+    }
+
+    /**
+     * @param string $code
+     * @param mixed $value
+     */
+    public function addFormOption($code, $value)
+    {
+        $this->formOptions[$code] = $value;
+    }
+
 
     /**
      * @param array $formOptions
@@ -122,6 +153,15 @@ class Attribute implements AttributeInterface
     public function setFormOptions(array $formOptions)
     {
         $this->formOptions = $formOptions;
+    }
+
+    /**
+     * @param string $code
+     * @param mixed $value
+     */
+    public function addViewOption($code, $value)
+    {
+        $this->viewOptions[$code] = $value;
     }
 
     /**
@@ -143,41 +183,9 @@ class Attribute implements AttributeInterface
     /**
      * @return boolean
      */
-    public function isVersionable()
-    {
-        return $this->versionable;
-    }
-
-    /**
-     * @param boolean $versionable
-     */
-    public function setVersionable($versionable)
-    {
-        $this->versionable = $versionable;
-    }
-
-    /**
-     * @return PermissionMapInterface[]
-     */
-    public function getPermissions()
-    {
-        return $this->permissions;
-    }
-
-    /**
-     * @param PermissionMapInterface[] $permissions
-     */
-    public function setPermissions(array $permissions)
-    {
-        $this->permissions = $permissions;
-    }
-
-    /**
-     * @return boolean
-     */
     public function isRequired()
     {
-        return $this->required;
+        return $this->isRequired;
     }
 
     /**
@@ -185,7 +193,7 @@ class Attribute implements AttributeInterface
      */
     public function setRequired($required)
     {
-        $this->required = $required;
+        $this->isRequired = $required;
     }
 
     /**
@@ -193,7 +201,7 @@ class Attribute implements AttributeInterface
      */
     public function isUnique()
     {
-        return $this->unique;
+        return $this->isUnique;
     }
 
     /**
@@ -201,7 +209,7 @@ class Attribute implements AttributeInterface
      */
     public function setUnique($unique)
     {
-        $this->unique = $unique;
+        $this->isUnique = $unique;
     }
 
     /**
@@ -233,79 +241,38 @@ class Attribute implements AttributeInterface
      */
     public function isMultiple()
     {
-        return $this->multiple;
+        return $this->isMultiple;
     }
 
     /**
+     * Most of the time, when an attribute is multiple, it's also a collection
+     *
      * @param boolean $multiple
      */
     public function setMultiple($multiple)
     {
-        $this->multiple = $multiple;
+        $this->isMultiple = $multiple;
     }
 
     /**
      * @return boolean
      */
-    public function isScopable()
+    public function isCollection()
     {
-        return $this->scopable;
+        if ($this->isCollection === null) {
+            return $this->isMultiple();
+        }
+        return $this->isCollection;
     }
 
     /**
-     * @param boolean $scopable
+     * Sometimes an attribute can be multiple but not a collection
+     *
+     * @param boolean $collection
      */
-    public function setScopable($scopable)
+    public function setCollection($collection)
     {
-        $this->scopable = $scopable;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isTranslatable()
-    {
-        return $this->translatable;
-    }
-
-    /**
-     * @param boolean $translatable
-     */
-    public function setTranslatable($translatable)
-    {
-        $this->translatable = $translatable;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isCountrySpecific()
-    {
-        return $this->countrySpecific;
-    }
-
-    /**
-     * @param boolean $countrySpecific
-     */
-    public function setCountrySpecific($countrySpecific)
-    {
-        $this->countrySpecific = $countrySpecific;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isLocalizable()
-    {
-        return $this->localizable;
-    }
-
-    /**
-     * @param boolean $localizable
-     */
-    public function setLocalizable($localizable)
-    {
-        $this->localizable = $localizable;
+        $this->isCollection = $collection;
     }
 
     /**

@@ -30,16 +30,16 @@ class SimpleDataSelectorType extends AbstractType
         $this->fixDoctrineQueryBuilderNormalizer($resolver);
 
         $resolver->setRequired([
-            'family_code',
+            'family',
         ]);
 
         $queryBuilder = function (EntityRepository $repository, $options) {
             $qb = $repository->createQueryBuilder('d');
-            if (!empty($options['family_code'])) {
+            if (!empty($options['family'])) {
                 $qb->addSelect('v')
                     ->leftJoin('d.values', 'v')
                     ->andWhere('d.family = :family')
-                    ->setParameter('family', $options['family_code']);
+                    ->setParameter('family', $options['family']);
             }
             $qb->setMaxResults(100);
             return $qb;

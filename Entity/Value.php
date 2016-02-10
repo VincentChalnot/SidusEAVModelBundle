@@ -13,9 +13,12 @@ abstract class Value
      */
 
     /**
+     * Every parameter here is important, do not try to simplify these annotations in your final model if you don't
+     * really know what you're doing
+     *
      * @var Data
-     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\Data", inversedBy="values")
-     * @ORM\JoinColumn(name="data_id", referencedColumnName="id", onDelete="cascade")
+     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\Data", inversedBy="values", fetch="EAGER")
+     * @ORM\JoinColumn(name="data_id", referencedColumnName="id", onDelete="cascade", nullable=false)
      */
     protected $data;
 

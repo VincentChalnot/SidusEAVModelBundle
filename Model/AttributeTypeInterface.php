@@ -23,4 +23,15 @@ interface AttributeTypeInterface
      * @return bool
      */
     public function isEmbedded();
+
+    /**
+     * @param AttributeInterface $attribute
+     */
+    public function setAttributeDefaults(AttributeInterface $attribute);
+
+    /**
+     * @param $data
+     * @return array
+     */
+    public function getFormOptions($data);
 }

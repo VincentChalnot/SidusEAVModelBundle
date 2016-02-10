@@ -27,17 +27,19 @@ class DataType extends AbstractType
     protected $familyConfigurationHandler;
 
     /** @var string */
-    protected $dataClass;
-
-    /** @var string */
     protected $collectionType;
 
+    /** @var string */
+    protected $dataClass;
+
     /**
-     * @param string $dataClass
+     * @param FamilyConfigurationHandler $familyConfigurationHandler
+     * @param $dataClass
      * @param string $collectionType
      */
-    public function __construct($dataClass, $collectionType = 'collection')
+    public function __construct(FamilyConfigurationHandler $familyConfigurationHandler, $dataClass, $collectionType = 'collection')
     {
+        $this->familyConfigurationHandler = $familyConfigurationHandler;
         $this->dataClass = $dataClass;
         $this->collectionType = $collectionType;
     }
@@ -57,7 +59,7 @@ class DataType extends AbstractType
             if ($data) {
                 $family = $data->getFamily();
             } else {
-                $family = $options['family_code'];
+                $family = $options['family'];
             }
 
             if ($family) {
@@ -68,9 +70,8 @@ class DataType extends AbstractType
             }
         });
         $builder->addEventListener(FormEvents::POST_SUBMIT, function(FormEvent $event){
-            /** @var Data $data */
             $data = $event->getData();
-            if ($data) {
+            if ($data instanceof Data) {
                 $data->setUpdatedAt(new \DateTime());
             }
         });
@@ -109,7 +110,7 @@ class DataType extends AbstractType
     public function buildValuesForm(FormInterface $form, FamilyInterface $family, Data $data = null, array $options = [])
     {
         foreach ($family->getAttributes() as $attribute) {
-            $this->addAttribute($form, $attribute, $family);
+            $this->addAttribute($form, $attribute, $family, $data);
         }
     }
 
@@ -117,15 +118,17 @@ class DataType extends AbstractType
      * @param FormInterface $form
      * @param AttributeInterface $attribute
      * @param FamilyInterface $family
+     * @param Data|null $data
+     * @param array $options
      * @throws \Exception
      */
-    protected function addAttribute(FormInterface $form, AttributeInterface $attribute, FamilyInterface $family)
+    protected function addAttribute(FormInterface $form, AttributeInterface $attribute, FamilyInterface $family, Data $data = null, array $options = [])
     {
         $attributeType = $attribute->getType();
         $label = $this->getFieldLabel($family, $attribute);
 
-        if ($attribute->isMultiple()) {
-            $formOptions = $attribute->getFormOptions();
+        $formOptions = array_merge($attribute->getFormOptions($data), $options);
+        if ($attribute->isMultiple() && $attribute->isCollection()) {
             $formOptions['label'] = false;
             $sortable = isset($formOptions['sortable']) ? $formOptions['sortable'] : false;
             unset($formOptions['sortable']);
@@ -137,10 +140,9 @@ class DataType extends AbstractType
                 'allow_delete' => true,
                 'required' => false,
                 'sortable' => $sortable,
-                'cascade_validation' => true,
             ]);
         } else {
-            $formOptions = array_merge(['label' => $label], $attribute->getFormOptions());
+            $formOptions = array_merge(['label' => $label], $formOptions);
             $form->add($attribute->getCode(), $attributeType->getFormType(), $formOptions);
         }
     }
@@ -154,18 +156,21 @@ class DataType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => $this->dataClass,
-            'family_code' => null,
+            'family' => null,
+//            'data_class' => $this->dataClass,
         ]);
-        $resolver->setNormalizer('family_code', function (Options $options, $value) {
+        $resolver->setNormalizer('family', function (Options $options, $value) {
             if ($value === null) {
                 return null;
+            }
+            if ($value instanceof FamilyInterface) {
+                return $value;
             }
             return $this->familyConfigurationHandler->getFamily($value);
         });
         $resolver->setNormalizer('empty_data', function (Options $options, $value) {
-            if ($options['family_code'] instanceof FamilyInterface) {
-                return $options['family_code']->createData();
+            if ($options['family'] instanceof FamilyInterface) {
+                return $options['family']->createData();
             }
             return $value;
         });
@@ -177,14 +182,6 @@ class DataType extends AbstractType
     public function getName()
     {
         return 'sidus_data';
-    }
-
-    /**
-     * @param FamilyConfigurationHandler $familyConfigurationHandler
-     */
-    public function setFamilyConfiguration(FamilyConfigurationHandler $familyConfigurationHandler)
-    {
-        $this->familyConfigurationHandler = $familyConfigurationHandler;
     }
 
     /**
