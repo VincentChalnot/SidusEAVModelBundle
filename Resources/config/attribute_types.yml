@@ -68,9 +68,9 @@ services:
         tags:
             - { name: sidus.attribute_type }
 
-    sidus_eav_model.attribute_type.embbed:
+    sidus_eav_model.attribute_type.embed:
         class: %sidus_eav_model.attribute_type.default.class%
-        arguments: [embbed, dataValue, sidus_data]
+        arguments: [embed, dataValue, sidus_data]
         calls:
             - [setIsEmbedded, [true]]
         tags:

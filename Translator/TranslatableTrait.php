@@ -27,9 +27,10 @@ trait TranslatableTrait
      * @param string|array $tIds
      * @param array $parameters
      * @param string $fallback
+     * @param bool $humanizeFallback
      * @return string
      */
-    protected function tryTranslate($tIds, array $parameters = [], $fallback = null)
+    protected function tryTranslate($tIds, array $parameters = [], $fallback = null, $humanizeFallback = true)
     {
         if (!is_array($tIds)) {
             $tIds = [$tIds];
@@ -49,7 +50,13 @@ trait TranslatableTrait
             } catch (\InvalidArgumentException $e) {}
         }
 
+        if ($fallback === null) {
+            return null;
+        }
+        if (!$humanizeFallback) {
+            return $fallback;
+        }
         $pattern = '/(?!^)[A-Z]{2,}(?=[A-Z][a-z])|[A-Z][a-z]|\d{1,}/';
-        return $fallback ? preg_replace($pattern, ' $0', $fallback) : null;
+        return str_replace('_', ' ' ,preg_replace($pattern, ' $0', $fallback));
     }
 }

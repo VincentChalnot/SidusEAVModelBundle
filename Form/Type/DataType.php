@@ -157,7 +157,8 @@ class DataType extends AbstractType
     {
         $resolver->setDefaults([
             'family' => null,
-//            'data_class' => $this->dataClass,
+            'data_class' => $this->dataClass,
+//            'by_reference' => false,
         ]);
         $resolver->setNormalizer('family', function (Options $options, $value) {
             if ($value === null) {
@@ -171,6 +172,12 @@ class DataType extends AbstractType
         $resolver->setNormalizer('empty_data', function (Options $options, $value) {
             if ($options['family'] instanceof FamilyInterface) {
                 return $options['family']->createData();
+            }
+            return $value;
+        });
+        $resolver->setNormalizer('data_class', function (Options $options, $value) {
+            if ($options['family'] instanceof FamilyInterface) {
+                return $options['family']->getDataClass();
             }
             return $value;
         });
