@@ -56,5 +56,6 @@ services:
 
     sidus_eav_model.serializer.data.subscriber.subscriber:
         class: %sidus_eav_model.serializer.data.subscriber.class%
+        arguments: [@serializer]
         tags:
             - { name: jms_serializer.event_subscriber }
