@@ -7,14 +7,16 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
+use JMS\Serializer\Annotation as JMS;
 use LogicException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use UnexpectedValueException;
+use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
 
 /**
- * @\Sidus\EAVModelBundle\Validator\Constraints\Data()
+ * @DataConstraint()
  */
 abstract class Data
 {
@@ -40,6 +42,7 @@ abstract class Data
      * @var Value[]|Collection
      * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\Value", mappedBy="data", cascade={"persist", "remove"}, fetch="EAGER", orphanRemoval=true)
      * @ORM\OrderBy({"position" = "ASC"})
+     * @JMS\Exclude()
      */
     protected $values;
 
@@ -71,6 +74,7 @@ abstract class Data
     /**
      * @var FamilyInterface
      * @ORM\Column(name="family_code", type="sidus_family", length=255)
+     * @JMS\Exclude()
      */
     protected $family;
 
@@ -168,6 +172,8 @@ abstract class Data
     }
 
     /**
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("family")
      * @return string
      */
     public function getFamilyCode()

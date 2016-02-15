@@ -9,6 +9,7 @@ parameters:
     sidus_eav_model.validator.sidus_data.class: Sidus\EAVModelBundle\Validator\Constraints\DataValidator
     sidus_eav_model.request.family.param_converter.class: Sidus\EAVModelBundle\Request\ParamConverter\FamilyParamConverter
     sidus_eav_model.request.attribute.param_converter.class: Sidus\EAVModelBundle\Request\ParamConverter\AttributeParamConverter
+    sidus_eav_model.serializer.data.subscriber.class: Sidus\EAVModelBundle\Event\DataSerializerHandler
 
 services:
     sidus_eav_model.attribute_type_configuration.handler:
@@ -52,3 +53,8 @@ services:
         arguments: [ @sidus_eav_model.attribute_configuration.handler ]
         tags:
             - { name: request.param_converter }
+
+    sidus_eav_model.serializer.data.subscriber.subscriber:
+        class: %sidus_eav_model.serializer.data.subscriber.class%
+        tags:
+            - { name: jms_serializer.event_subscriber }
