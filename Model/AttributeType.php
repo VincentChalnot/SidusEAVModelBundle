@@ -31,7 +31,7 @@ class AttributeType implements AttributeTypeInterface
         $this->code = $code;
         $this->databaseType = $databaseType;
         $this->formType = $formType;
-        $this->formOptions = $formOptions = [];
+        $this->formOptions = $formOptions;
     }
 
     /**
