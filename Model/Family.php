@@ -4,6 +4,7 @@ namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Entity\Context;
 use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Entity\Value;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
@@ -50,6 +51,9 @@ class Family implements FamilyInterface
     /** @var string */
     protected $valueClass;
 
+    /** @var Context */
+    protected $defaultContext;
+
     /**
      * @param string $code
      * @param AttributeConfigurationHandler $attributeConfigurationHandler
@@ -60,19 +64,26 @@ class Family implements FamilyInterface
     public function __construct($code, AttributeConfigurationHandler $attributeConfigurationHandler, FamilyConfigurationHandler $familyConfigurationHandler, array $config = null)
     {
         $this->code = $code;
+
         if (!empty($config['parent'])) {
             $this->parent = $familyConfigurationHandler->getFamily($config['parent']);
             $this->copyFromFamily($this->parent);
         }
         unset($config['parent']);
+
         foreach ($config['attributes'] as $attribute) {
             $this->attributes[$attribute] = $attributeConfigurationHandler->getAttribute($attribute);
         }
         unset($config['attributes']);
+
         if (!empty($config['attributeAsLabel'])) {
             $this->attributeAsLabel = $attributeConfigurationHandler->getAttribute($config['attributeAsLabel']);
         }
         unset($config['attributeAsLabel']);
+
+        $this->defaultContext = new Context($config['default_context']);
+        unset($config['default_context']);
+
         $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($config as $key => $value) {
             $accessor->setValue($this, $key, $value);
@@ -335,5 +346,13 @@ class Family implements FamilyInterface
     public function setType($type)
     {
         $this->type = $type;
+    }
+
+    /**
+     * @return Context
+     */
+    public function getDefaultContext()
+    {
+        return $this->defaultContext;
     }
 }

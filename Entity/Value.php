@@ -7,15 +7,15 @@ use Sidus\EAVModelBundle\Model\AttributeInterface;
 
 abstract class Value
 {
-    /*
-     * THE FOLLOWING FIELDS NEED TO BE REDECLARED IN YOUR MAIN CLASS
-     * Because they are not matching any real entities
+    /**
+     * @var integer
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
+    protected $id;
 
     /**
-     * Every parameter here is important, do not try to simplify these annotations in your final model if you don't
-     * really know what you're doing
-     *
      * @var Data
      * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\Data", inversedBy="values", fetch="EAGER")
      * @ORM\JoinColumn(name="data_id", referencedColumnName="id", onDelete="cascade", nullable=false)
@@ -28,18 +28,6 @@ abstract class Value
      * @ORM\JoinColumn(name="data_value_id", referencedColumnName="id", onDelete="cascade", nullable=true)
      */
     protected $dataValue;
-
-    /*
-     * END OF WHAT YOU HAVE TO REDECLARE IN YOUR MAIN CLASS
-     */
-
-    /**
-     * @var integer
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    protected $id;
 
     /**
      * @var string
@@ -54,8 +42,8 @@ abstract class Value
     protected $position;
 
     /**
-     * @var array
-     * @ORM\Column(name="context", type="json_array", nullable=true)
+     * @var Context
+     * @ORM\OneToOne(targetEntity="Sidus\EAVModelBundle\Entity\Context", cascade={"persist"}, mappedBy="value", fetch="EAGER")
      */
     protected $context;
 
@@ -344,7 +332,7 @@ abstract class Value
     }
 
     /**
-     * @return array
+     * @return ContextInterface
      */
     public function getContext()
     {
@@ -352,10 +340,11 @@ abstract class Value
     }
 
     /**
-     * @param array $context
+     * @param ContextInterface $context
      */
-    public function setContext($context)
+    public function setContext(ContextInterface $context)
     {
+        $context->setValue($this);
         $this->context = $context;
     }
 

@@ -21,6 +21,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('data_class')->isRequired()->end()
                 ->scalarNode('value_class')->isRequired()->end()
                 ->scalarNode('collection_type')->defaultValue('collection')->end()
+                ->variableNode('default_context')->end()
                 ->arrayNode('attributes')
                     ->prototype('array')
                         ->children();
@@ -59,8 +60,10 @@ class Configuration implements ConfigurationInterface
             ->variableNode('validation_rules')->end()
             ->booleanNode('required')->defaultValue(false)->end()
             ->booleanNode('unique')->defaultValue(false)->end()
-            ->booleanNode('multiple')->defaultValue(false)->end();
-
+            ->booleanNode('multiple')->defaultValue(false)->end()
+            ->arrayNode('context_mask')
+                ->prototype('scalar')->end()
+            ->end();
     }
 
 

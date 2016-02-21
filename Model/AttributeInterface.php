@@ -2,6 +2,9 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
+use Sidus\EAVModelBundle\Entity\ContextInterface;
+use Sidus\EAVModelBundle\Entity\Value;
+
 interface AttributeInterface
 {
     /**
@@ -113,4 +116,16 @@ interface AttributeInterface
      * @param array
      */
     public function addValidationRules(array $options);
+
+    /**
+     * @return array
+     */
+    public function getContextMask();
+
+    /**
+     * @param Value $value
+     * @param ContextInterface $context
+     * @return bool
+     */
+    public function isContextMatching(Value $value, ContextInterface $context);
 }

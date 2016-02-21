@@ -3,6 +3,8 @@
 namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler;
+use Sidus\EAVModelBundle\Entity\ContextInterface;
+use Sidus\EAVModelBundle\Entity\Value;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
@@ -49,6 +51,9 @@ class Attribute implements AttributeInterface
 
     /** @var bool */
     protected $isCollection; // Important to left null
+
+    /** @var array */
+    protected $contextMask = [];
 
     /**
      * @param string $code
@@ -330,5 +335,39 @@ class Attribute implements AttributeInterface
         if ($this->isMultiple() && $this->isUnique()) {
             throw new UnexpectedValueException("Attribute {$this->getCode()} cannot be multiple and unique at the same time");
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getContextMask()
+    {
+        return $this->contextMask;
+    }
+
+    /**
+     * @param array $contextMask
+     */
+    public function setContextMask($contextMask)
+    {
+        $this->contextMask = $contextMask;
+    }
+
+    /**
+     * @param Value $value
+     * @param ContextInterface $context
+     * @return bool
+     */
+    public function isContextMatching(Value $value, ContextInterface $context)
+    {
+        if (!$value->getContext()) {
+            return true;
+        }
+        foreach ($this->getContextMask() as $key) {
+            if ($context->getContextValue($key) !== $value->getContext()->getContextValue($key)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

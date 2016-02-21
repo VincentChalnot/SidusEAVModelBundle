@@ -30,12 +30,27 @@ class SidusEAVModelExtension extends Extension
         $container->setParameter('sidus_eav_model.entity.data.class', $config['data_class']);
         $container->setParameter('sidus_eav_model.entity.value.class', $config['value_class']);
         $container->setParameter('sidus_eav_model.form.collection_type', $config['collection_type']);
+        $container->setParameter('sidus_eav_model.context.default_context', $config['default_context']);
 
         // Automatically declare a service for each attribute configured
         foreach ($config['attributes'] as $code => $attributeConfiguration) {
             $this->addAttributeServiceDefinition($code, $attributeConfiguration, $container);
         }
 
+        $this->createFamilyServices($config, $container);
+
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('services.yml');
+        $loader->load('attribute_types.yml');
+        $loader->load('forms.yml');
+    }
+
+    /**
+     * @param array $config
+     * @param ContainerBuilder $container
+     */
+    protected function createFamilyServices(array $config, ContainerBuilder $container)
+    {
         // Automatically declare a service for each family configured
         foreach ($config['families'] as $code => $familyConfiguration) {
             if (empty($familyConfiguration['data_class'])) {
@@ -44,13 +59,9 @@ class SidusEAVModelExtension extends Extension
             if (empty($familyConfiguration['value_class'])) {
                 $familyConfiguration['value_class'] = $config['value_class'];
             }
+            $familyConfiguration['default_context'] = $config['default_context'];
             $this->addFamilyServiceDefinition($code, $familyConfiguration, $container);
         }
-
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-        $loader->load('services.yml');
-        $loader->load('attribute_types.yml');
-        $loader->load('forms.yml');
     }
 
     /**
