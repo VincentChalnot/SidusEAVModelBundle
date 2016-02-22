@@ -3,6 +3,7 @@
 namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Entity\Context;
+use Sidus\EAVModelBundle\Entity\ContextInterface;
 use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Entity\Value;
 
@@ -68,9 +69,10 @@ interface FamilyInterface
     /**
      * @param Data $data
      * @param AttributeInterface $attribute
+     * @param ContextInterface $context
      * @return Value
      */
-    public function createValue(Data $data, AttributeInterface $attribute);
+    public function createValue(Data $data, AttributeInterface $attribute, ContextInterface $context = null);
 
     /**
      * @return string
@@ -91,4 +93,10 @@ interface FamilyInterface
      * @return Context
      */
     public function getDefaultContext();
+
+    /**
+     * @param array $contextValues
+     * @return ContextInterface
+     */
+    public function createContext(array $contextValues);
 }

@@ -192,13 +192,20 @@ abstract class Data
      */
     public function getValues(AttributeInterface $attribute = null, ContextInterface $context = null)
     {
-        if (null === $attribute) {
-            return $this->values;
-        }
-        $this->checkAttribute($attribute);
         if (!$context) {
             $context = $this->getCurrentContext();
         }
+        if (null === $attribute) {
+            $values = new ArrayCollection();
+            foreach ($this->values as $value) {
+                $attribute = $this->getFamily()->getAttribute($value->getAttributeCode());
+                if ($attribute->isContextMatching($value, $context)) {
+                    $values->add($value);
+                }
+            }
+            return $values;
+        }
+        $this->checkAttribute($attribute);
         $values = new ArrayCollection();
         foreach ($this->values as $value) {
             if ($value->getAttributeCode() === $attribute->getCode() && $attribute->isContextMatching($value, $context)) {
@@ -298,7 +305,7 @@ abstract class Data
      * @param ContextInterface $context
      * @return Data
      */
-    public function emptyValues(AttributeInterface $attribute, ContextInterface $context = null)
+    public function emptyValues(AttributeInterface $attribute = null, ContextInterface $context = null)
     {
         $values = $this->getValues($attribute, $context);
         foreach ($values as $value) {
@@ -313,6 +320,10 @@ abstract class Data
      */
     public function addValue(Value $value)
     {
+        if (!$value->getContext()) {
+            $value->setContext($this->getCurrentContext());
+        }
+        $this->values->add($value);
         $value->setData($this);
         return $this;
     }
@@ -489,20 +500,19 @@ abstract class Data
      */
     public function createValue(AttributeInterface $attribute, ContextInterface $context = null)
     {
-        $value = $this->getFamily()->createValue($this, $attribute);
-
-        if (count($attribute->getContextMask())) {
-            if (!$context) {
-                $context = $this->getCurrentContext();
-            }
-            $contextValues = [];
-            foreach ($attribute->getContextMask() as $key) {
-                $contextValues[$key] = $context->getContextValue($key);
-            }
-            $value->setContext(new Context($contextValues));
+        if (!$context) {
+            $context = $this->getCurrentContext();
         }
+        return $this->getFamily()->createValue($this, $attribute, $context);
+    }
 
-        return $value;
+    /**
+     * @param array $contextValues
+     * @return ContextInterface
+     */
+    public function createContext(array $contextValues)
+    {
+        return $this->getFamily()->createContext($contextValues);
     }
 
     /**
@@ -560,10 +570,29 @@ abstract class Data
     }
 
     /**
-     * @param Context $currentContext
+     * @param ContextInterface|array $currentContext
      */
-    public function setCurrentContext(Context $currentContext)
+    public function setCurrentContext($currentContext)
     {
+        if (!$currentContext instanceof ContextInterface) {
+            $currentContext = $this->createContext($currentContext);
+        }
         $this->currentContext = $currentContext;
+    }
+
+    /**
+     * Remove id on clone and clean values
+     */
+    public function __clone() {
+        $this->id = null;
+        $newValues = new ArrayCollection();
+        foreach ($this->getValues() as $value) {
+            $newValues[] = clone $value;
+        }
+        $this->emptyValues();
+        foreach ($newValues as $newValue) {
+            $this->addValue($newValue);
+        }
+        $this->setCreatedAt(new DateTime());
     }
 }

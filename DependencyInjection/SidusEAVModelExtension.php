@@ -14,6 +14,9 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class SidusEAVModelExtension extends Extension
 {
+    /** @var array */
+    protected $globalConfig;
+
     /**
      * Generate automatically services for attributes and families from configuration
      *
@@ -26,9 +29,11 @@ class SidusEAVModelExtension extends Extension
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
+        $this->globalConfig = $config;
 
         $container->setParameter('sidus_eav_model.entity.data.class', $config['data_class']);
         $container->setParameter('sidus_eav_model.entity.value.class', $config['value_class']);
+        $container->setParameter('sidus_eav_model.entity.context.class', $config['context_class']);
         $container->setParameter('sidus_eav_model.form.collection_type', $config['collection_type']);
         $container->setParameter('sidus_eav_model.context.default_context', $config['default_context']);
 
@@ -58,6 +63,9 @@ class SidusEAVModelExtension extends Extension
             }
             if (empty($familyConfiguration['value_class'])) {
                 $familyConfiguration['value_class'] = $config['value_class'];
+            }
+            if (empty($familyConfiguration['context_class'])) {
+                $familyConfiguration['context_class'] = $config['context_class'];
             }
             $familyConfiguration['default_context'] = $config['default_context'];
             $this->addFamilyServiceDefinition($code, $familyConfiguration, $container);
@@ -93,6 +101,7 @@ class SidusEAVModelExtension extends Extension
      */
     protected function addAttributeServiceDefinition($code, $attributeConfiguration, ContainerBuilder $container)
     {
+        $attributeConfiguration['context_mask'] = array_merge($this->globalConfig['global_context_mask'], $attributeConfiguration['context_mask']);
         $definition = new Definition(new Parameter('sidus_eav_model.attribute.class'), [
             $code,
             new Reference('sidus_eav_model.attribute_type_configuration.handler'),

@@ -20,8 +20,12 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('data_class')->isRequired()->end()
                 ->scalarNode('value_class')->isRequired()->end()
+                ->scalarNode('context_class')->defaultValue('Sidus\EAVModelBundle\Entity\Context')->end()
                 ->scalarNode('collection_type')->defaultValue('collection')->end()
                 ->variableNode('default_context')->end()
+                ->arrayNode('global_context_mask')
+                    ->prototype('scalar')->end()
+                ->end()
                 ->arrayNode('attributes')
                     ->prototype('array')
                         ->children();
@@ -75,6 +79,7 @@ class Configuration implements ConfigurationInterface
         $familyDefinition
             ->scalarNode('data_class')->end()
             ->scalarNode('value_class')->end()
+            ->scalarNode('context_class')->end()
             ->scalarNode('label')->defaultNull()->end()
             ->scalarNode('attributeAsLabel')->defaultValue('string')->end()
             ->scalarNode('parent')->end()

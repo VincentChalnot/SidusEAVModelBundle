@@ -364,7 +364,7 @@ class Attribute implements AttributeInterface
             return true;
         }
         foreach ($this->getContextMask() as $key) {
-            if ($context->getContextValue($key) !== $value->getContext()->getContextValue($key)) {
+            if ($context->get($key) !== $value->getContext()->get($key)) {
                 return false;
             }
         }

@@ -3,7 +3,6 @@
 namespace Sidus\EAVModelBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * Context
@@ -11,23 +10,8 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  * @ORM\Table(name="sidus_context")
  * @ORM\Entity()
  */
-class Context implements ContextInterface
+class Context extends BaseContext
 {
-    /**
-     * @var integer
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    protected $id;
-
-    /**
-     * @var Value
-     * @ORM\OneToOne(targetEntity="Sidus\EAVModelBundle\Entity\Value", inversedBy="context", fetch="EAGER")
-     * @ORM\JoinColumn(name="value_id", referencedColumnName="id", onDelete="cascade", nullable=false)
-     */
-    protected $value;
-
     /**
      * ISO 3166-1 alpha-2 country code
      *
@@ -65,130 +49,16 @@ class Context implements ContextInterface
     protected $channel;
 
     /**
-     * Context constructor.
-     * @param array $context
+     * @return array
      */
-    public function __construct(array $context)
+    public function getAllowedKeys()
     {
-        $accessor = PropertyAccess::createPropertyAccessor();
-        foreach ($context as $key => $value) {
-            if (in_array($key, ['id', 'value'], true)) {
-                throw new \UnexpectedValueException("Cannot set '{$key}' via context configuration");
-            }
-            $accessor->setValue($this, $key, $value);
-        }
-    }
-
-    /**
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getValue()
-    {
-        return $this->value;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    public function setValue($value)
-    {
-        $this->value = $value;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCountry()
-    {
-        return $this->country;
-    }
-
-    /**
-     * @param string $country
-     */
-    public function setCountry($country)
-    {
-        $this->country = $country;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLanguage()
-    {
-        return $this->language;
-    }
-
-    /**
-     * @param string $language
-     */
-    public function setLanguage($language)
-    {
-        $this->language = $language;
-    }
-
-    /**
-     * @return int
-     */
-    public function getVersion()
-    {
-        return $this->version;
-    }
-
-    /**
-     * @param int $version
-     */
-    public function setVersion($version)
-    {
-        $this->version = $version;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isHead()
-    {
-        return $this->head;
-    }
-
-    /**
-     * @param boolean $head
-     */
-    public function setHead($head)
-    {
-        $this->head = $head;
-    }
-
-    /**
-     * @return string
-     */
-    public function getChannel()
-    {
-        return $this->channel;
-    }
-
-    /**
-     * @param string $channel
-     */
-    public function setChannel($channel)
-    {
-        $this->channel = $channel;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getContextValue($key)
-    {
-        $accessor = PropertyAccess::createPropertyAccessor();
-        return $accessor->getValue($this, $key);
+        return [
+            'country',
+            'language',
+            'version',
+            'head',
+            'channel',
+        ];
     }
 }

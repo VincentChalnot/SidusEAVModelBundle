@@ -326,9 +326,6 @@ abstract class Value
     public function setData(Data $data = null)
     {
         $this->data = $data;
-        if ($data && !$data->getValues()->contains($this)) {
-            $data->getValues()->add($this);
-        }
     }
 
     /**
@@ -362,5 +359,12 @@ abstract class Value
     public function setPosition($position)
     {
         $this->position = $position;
+    }
+
+    /**
+     * Remove id on clone
+     */
+    public function __clone() {
+        $this->id = null;
     }
 }

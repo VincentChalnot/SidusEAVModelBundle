@@ -4,7 +4,7 @@ namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
-use Sidus\EAVModelBundle\Entity\Context;
+use Sidus\EAVModelBundle\Entity\ContextInterface;
 use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Entity\Value;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
@@ -51,7 +51,10 @@ class Family implements FamilyInterface
     /** @var string */
     protected $valueClass;
 
-    /** @var Context */
+    /** @var string */
+    protected $contextClass;
+
+    /** @var ContextInterface */
     protected $defaultContext;
 
     /**
@@ -80,9 +83,6 @@ class Family implements FamilyInterface
             $this->attributeAsLabel = $attributeConfigurationHandler->getAttribute($config['attributeAsLabel']);
         }
         unset($config['attributeAsLabel']);
-
-        $this->defaultContext = new Context($config['default_context']);
-        unset($config['default_context']);
 
         $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($config as $key => $value) {
@@ -311,15 +311,45 @@ class Family implements FamilyInterface
     }
 
     /**
+     * @return string
+     */
+    public function getContextClass()
+    {
+        return $this->contextClass;
+    }
+
+    /**
+     * @param string $contextClass
+     */
+    public function setContextClass($contextClass)
+    {
+        $this->contextClass = $contextClass;
+    }
+
+    /**
      * @param Data $data
      * @param AttributeInterface $attribute
+     * @param ContextInterface $context
      * @return Value
      */
-    public function createValue(Data $data, AttributeInterface $attribute)
+    public function createValue(Data $data, AttributeInterface $attribute, ContextInterface $context = null)
     {
         $valueClass = $this->getValueClass();
+        /** @var Value $value */
         $value = new $valueClass($data, $attribute);
         $data->addValue($value);
+
+        if (count($attribute->getContextMask())) {
+            if (!$context) {
+                $context = $this->getDefaultContext();
+            }
+            $contextValues = [];
+            foreach ($attribute->getContextMask() as $key) {
+                $contextValues[$key] = $context->get($key);
+            }
+            $value->setContext($this->createContext($contextValues));
+        }
+
         return $value;
     }
 
@@ -349,10 +379,32 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @return Context
+     * @return ContextInterface
      */
     public function getDefaultContext()
     {
         return $this->defaultContext;
+    }
+
+    /**
+     * @param ContextInterface $defaultContext
+     */
+    public function setDefaultContext($defaultContext)
+    {
+        if (!$defaultContext instanceof ContextInterface) {
+            /** @var array $defaultContext */
+            $defaultContext = $this->createContext($defaultContext);
+        }
+        $this->defaultContext = $defaultContext;
+    }
+
+    /**
+     * @param array $contextValues
+     * @return ContextInterface
+     */
+    public function createContext(array $contextValues)
+    {
+        $class = $this->getContextClass();
+        return new $class($contextValues);
     }
 }
