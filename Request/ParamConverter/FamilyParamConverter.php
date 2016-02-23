@@ -27,6 +27,30 @@ class FamilyParamConverter extends BaseParamConverter
     }
 
     /**
+     * Stores the object in the request.
+     *
+     * @param Request $request The request
+     * @param ParamConverter $configuration Contains the name, class and options of the object
+     *
+     * @return bool True if the object has been successfully set, else false
+     * @throws \InvalidArgumentException
+     */
+    public function apply(Request $request, ParamConverter $configuration)
+    {
+        $originalName = $configuration->getName();
+        if ($request->attributes->has('familyCode')) {
+            $configuration->setName('familyCode');
+        }
+        if (!parent::apply($request, $configuration)) {
+            return false;
+        }
+        if ($originalName !== $configuration->getName()) {
+            $request->attributes->set($originalName, $request->attributes->get($configuration->getName()));
+        }
+        return true;
+    }
+
+    /**
      * @return mixed
      */
     protected function getClass()
