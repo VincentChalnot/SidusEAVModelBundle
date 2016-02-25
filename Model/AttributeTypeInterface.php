@@ -25,6 +25,11 @@ interface AttributeTypeInterface
     public function isEmbedded();
 
     /**
+     * @return bool
+     */
+    public function isRelation();
+
+    /**
      * @param AttributeInterface $attribute
      */
     public function setAttributeDefaults(AttributeInterface $attribute);

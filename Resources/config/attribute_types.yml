@@ -72,6 +72,6 @@ services:
         class: %sidus_eav_model.attribute_type.default.class%
         arguments: [embed, dataValue, sidus_data]
         calls:
-            - [setIsEmbedded, [true]]
+            - [setEmbedded, [true]]
         tags:
             - { name: sidus.attribute_type }

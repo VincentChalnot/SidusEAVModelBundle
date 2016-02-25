@@ -4,6 +4,21 @@ namespace Sidus\EAVModelBundle\Model;
 
 class AttributeType implements AttributeTypeInterface
 {
+    /**
+     * Not exactly scalar types as it includes also Date/Time types but exclude all relationships
+     *
+     * @var array
+     */
+    protected static $scalarDatabaseTypes = [
+        'boolValue',
+        'integerValue',
+        'decimalValue',
+        'dateValue',
+        'datetimeValue',
+        'stringValue',
+        'textValue',
+    ];
+
     /** @var string */
     protected $code;
 
@@ -15,6 +30,9 @@ class AttributeType implements AttributeTypeInterface
 
     /** @var bool */
     protected $isEmbedded = false;
+
+    /** @var bool */
+    protected $isRelation = false;
 
     /** @var array */
     protected $formOptions = [];
@@ -32,6 +50,9 @@ class AttributeType implements AttributeTypeInterface
         $this->databaseType = $databaseType;
         $this->formType = $formType;
         $this->formOptions = $formOptions;
+        if (!in_array($this->databaseType, $this::$scalarDatabaseTypes, true)) {
+            $this->isRelation = true;
+        }
     }
 
     /**
@@ -69,7 +90,7 @@ class AttributeType implements AttributeTypeInterface
     /**
      * @param boolean $isEmbedded
      */
-    public function setIsEmbedded($isEmbedded)
+    public function setEmbedded($isEmbedded)
     {
         $this->isEmbedded = $isEmbedded;
     }
@@ -96,5 +117,21 @@ class AttributeType implements AttributeTypeInterface
     public function setFormOptions($formOptions)
     {
         $this->formOptions = $formOptions;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRelation()
+    {
+        return $this->isRelation;
+    }
+
+    /**
+     * @param boolean $isRelation
+     */
+    public function setRelation($isRelation)
+    {
+        $this->isRelation = $isRelation;
     }
 }
