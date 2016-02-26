@@ -11,6 +11,7 @@ use JMS\Serializer\Annotation as JMS;
 use LogicException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
+use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use UnexpectedValueException;
 use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
@@ -119,10 +120,11 @@ abstract class Data
     /**
      * @param DateTime $createdAt
      * @return Data
+     * @throws UnexpectedValueException
      */
-    public function setCreatedAt(DateTime $createdAt = null)
+    public function setCreatedAt($createdAt)
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = DateTimeUtility::parse($createdAt, false);
 
         return $this;
     }
@@ -138,10 +140,11 @@ abstract class Data
     /**
      * @param DateTime $updatedAt
      * @return Data
+     * @throws UnexpectedValueException
      */
-    public function setUpdatedAt(DateTime $updatedAt = null)
+    public function setUpdatedAt($updatedAt)
     {
-        $this->updatedAt = $updatedAt;
+        $this->updatedAt = DateTimeUtility::parse($updatedAt, false);
 
         return $this;
     }

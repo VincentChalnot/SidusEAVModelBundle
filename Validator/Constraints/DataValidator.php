@@ -65,13 +65,14 @@ class DataValidator extends ConstraintValidator
         $context = $this->context; // VERY IMPORTANT ! context will be lost otherwise
         foreach ($data->getFamily()->getAttributes() as $attribute) {
             // Dynamically append data validator for embed types
-            if ($attribute->getType()->isEmbedded()) {
+            $type = $attribute->getType();
+            if ($type->isEmbedded() || $type->isRelation()) {
                 $attribute->addValidationRules([
                     'Valid' => [],
                 ]);
             }
             if ($attribute->isRequired() && $data->isEmpty($attribute)) {
-                $this->buildAttributeViolation($context, $attribute, 'required');
+                $this->buildAttributeViolation($context, $attribute, 'required', $data->getValueData($attribute));
             }
             if ($attribute->isUnique()) {
                 $this->checkUnique($context, $attribute, $data);
@@ -104,7 +105,7 @@ class DataValidator extends ConstraintValidator
                 var_dump($value);exit; // @todo : DEBUG THIS SHIT OUT : Value DOES have a data associated, why doesn't it shows up here ????
             }
             if ($value->getData()->getId() !== $data->getId()) {
-                $this->buildAttributeViolation($context, $attribute, 'unique');
+                $this->buildAttributeViolation($context, $attribute, 'unique', $valueData);
                 return;
             }
         }
@@ -119,15 +120,15 @@ class DataValidator extends ConstraintValidator
     protected function validateRules(ExecutionContextInterface $context, AttributeInterface $attribute, SidusData $data)
     {
         if ($attribute->isMultiple()) {
-            $value = $data->getValuesData($attribute);
+            $valueData = $data->getValuesData($attribute);
         } else {
-            $value = $data->getValueData($attribute);
+            $valueData = $data->getValueData($attribute);
         }
         $loader = new BaseLoader();
         foreach ($attribute->getValidationRules() as $validationRule) {
             foreach ($validationRule as $item => $options) {
                 $constraint = $loader->newConstraint($item, $options);
-                $violations = $context->getValidator()->validate($value, $constraint);
+                $violations = $context->getValidator()->validate($valueData, $constraint);
                 /** @var ConstraintViolationInterface $violation */
                 foreach ($violations as $violation) {
                     $path = $attribute->getCode();
@@ -140,10 +141,10 @@ class DataValidator extends ConstraintValidator
                     if ($violation->getMessage()) {
                         $context->buildViolation($violation->getMessage())
                             ->atPath($path)
-                            ->setInvalidValue($value)
+                            ->setInvalidValue($valueData)
                             ->addViolation();
                     } else {
-                        $this->buildAttributeViolation($context, $attribute, strtolower($item), $path);
+                        $this->buildAttributeViolation($context, $attribute, strtolower($item), $valueData, $path);
                     }
                 }
             }
@@ -153,17 +154,19 @@ class DataValidator extends ConstraintValidator
     /**
      * @param ExecutionContextInterface $context
      * @param AttributeInterface $attribute
-     * @param string $path
      * @param string $type
+     * @param mixed $invalidValue
+     * @param string $path
      * @throws \InvalidArgumentException
      */
-    protected function buildAttributeViolation(ExecutionContextInterface $context, AttributeInterface $attribute, $type, $path = null)
+    protected function buildAttributeViolation(ExecutionContextInterface $context, AttributeInterface $attribute, $type, $invalidValue = null, $path = null)
     {
         if (null === $path) {
             $path = $attribute->getCode();
         }
         $context->buildViolation($this->buildMessage($attribute, $type))
             ->atPath($path)
+            ->setInvalidValue($invalidValue)
             ->addViolation();
     }
 

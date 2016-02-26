@@ -2,8 +2,10 @@
 
 namespace Sidus\EAVModelBundle\Entity;
 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
+use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
 
 abstract class Value
 {
@@ -66,13 +68,13 @@ abstract class Value
     protected $decimalValue;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      * @ORM\Column(name="date_value", type="date", nullable=true)
      */
     protected $dateValue;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      * @ORM\Column(name="datetime_value", type="datetime", nullable=true)
      */
     protected $datetimeValue;
@@ -202,19 +204,20 @@ abstract class Value
     /**
      * Set dateValue
      *
-     * @param \DateTime $dateValue
+     * @param DateTime|int|string $dateValue
      * @return Value
+     * @throws \UnexpectedValueException
      */
-    public function setDateValue(\DateTime $dateValue = null)
+    public function setDateValue($dateValue)
     {
-        $this->dateValue = $dateValue;
+        $this->dateValue = DateTimeUtility::parse($dateValue);
         return $this;
     }
 
     /**
      * Get dateValue
      *
-     * @return \DateTime
+     * @return DateTime
      */
     public function getDateValue()
     {
@@ -224,19 +227,20 @@ abstract class Value
     /**
      * Set datetimeValue
      *
-     * @param \DateTime $datetimeValue
+     * @param DateTime|int|string $datetimeValue
      * @return Value
+     * @throws \UnexpectedValueException
      */
-    public function setDatetimeValue(\DateTime $datetimeValue = null)
+    public function setDatetimeValue($datetimeValue)
     {
-        $this->datetimeValue = $datetimeValue;
+        $this->datetimeValue = DateTimeUtility::parse($datetimeValue);
         return $this;
     }
 
     /**
      * Get datetimeValue
      *
-     * @return \DateTime
+     * @return DateTime
      */
     public function getDatetimeValue()
     {
