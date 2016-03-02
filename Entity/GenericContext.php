@@ -4,13 +4,7 @@ namespace Sidus\EAVModelBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * Context
- *
- * @ORM\Table(name="sidus_context")
- * @ORM\Entity()
- */
-class Context extends BaseContext
+trait GenericContext
 {
     /**
      * ISO 3166-1 alpha-2 country code

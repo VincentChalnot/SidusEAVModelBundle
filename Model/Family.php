@@ -4,7 +4,6 @@ namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
-use Sidus\EAVModelBundle\Entity\ContextInterface;
 use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Entity\Value;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
@@ -54,7 +53,7 @@ class Family implements FamilyInterface
     /** @var string */
     protected $contextClass;
 
-    /** @var ContextInterface */
+    /** @var array */
     protected $defaultContext;
 
     /**
@@ -329,10 +328,11 @@ class Family implements FamilyInterface
     /**
      * @param Data $data
      * @param AttributeInterface $attribute
-     * @param ContextInterface $context
+     * @param array $context
      * @return Value
+     * @throws UnexpectedValueException
      */
-    public function createValue(Data $data, AttributeInterface $attribute, ContextInterface $context = null)
+    public function createValue(Data $data, AttributeInterface $attribute, array $context = null)
     {
         $valueClass = $this->getValueClass();
         /** @var Value $value */
@@ -343,11 +343,9 @@ class Family implements FamilyInterface
             if (!$context) {
                 $context = $this->getDefaultContext();
             }
-            $contextValues = [];
             foreach ($attribute->getContextMask() as $key) {
-                $contextValues[$key] = $context->get($key);
+                $value->setContextValue($key, $context[$key]);
             }
-            $value->setContext($this->createContext($contextValues));
         }
 
         return $value;
@@ -379,7 +377,7 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @return ContextInterface
+     * @return array
      */
     public function getDefaultContext()
     {
@@ -387,24 +385,10 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @param ContextInterface $defaultContext
+     * @param array $defaultContext
      */
-    public function setDefaultContext($defaultContext)
+    public function setDefaultContext(array $defaultContext)
     {
-        if (!$defaultContext instanceof ContextInterface) {
-            /** @var array $defaultContext */
-            $defaultContext = $this->createContext($defaultContext);
-        }
         $this->defaultContext = $defaultContext;
-    }
-
-    /**
-     * @param array $contextValues
-     * @return ContextInterface
-     */
-    public function createContext(array $contextValues)
-    {
-        $class = $this->getContextClass();
-        return new $class($contextValues);
     }
 }

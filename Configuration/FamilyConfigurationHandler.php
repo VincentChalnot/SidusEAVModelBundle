@@ -86,7 +86,7 @@ class FamilyConfigurationHandler
         foreach ($this->getFamilies() as $family) {
             if ($family->isInstantiable()) {
                 $p = $family->getParent();
-                if (($p && !$p->isInstantiable()) || !$p) {
+                if (!$p || ($p && !$p->isInstantiable())) {
                     $root[$family->getCode()] = $family;
                 }
             }

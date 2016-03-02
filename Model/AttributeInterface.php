@@ -2,7 +2,6 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
-use Sidus\EAVModelBundle\Entity\ContextInterface;
 use Sidus\EAVModelBundle\Entity\Value;
 
 interface AttributeInterface
@@ -124,8 +123,8 @@ interface AttributeInterface
 
     /**
      * @param Value $value
-     * @param ContextInterface $context
+     * @param array $context
      * @return bool
      */
-    public function isContextMatching(Value $value, ContextInterface $context);
+    public function isContextMatching(Value $value, array $context);
 }

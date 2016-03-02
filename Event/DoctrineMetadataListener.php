@@ -10,7 +10,6 @@ class DoctrineMetadataListener
 {
     const BASE_DATA_CLASS = 'Sidus\EAVModelBundle\Entity\Data';
     const BASE_VALUE_CLASS = 'Sidus\EAVModelBundle\Entity\Value';
-    const BASE_CONTEXT_CLASS = 'Sidus\EAVModelBundle\Entity\Context';
 
     /** @var array */
     protected $mapping;
@@ -19,14 +18,12 @@ class DoctrineMetadataListener
      * DoctrineMetadataListener constructor.
      * @param string $dataClass
      * @param string $valueClass
-     * @param string $contextClass
      */
-    public function __construct($dataClass, $valueClass, $contextClass)
+    public function __construct($dataClass, $valueClass)
     {
         $this->mapping = [
             self::BASE_DATA_CLASS => $dataClass,
             self::BASE_VALUE_CLASS => $valueClass,
-            self::BASE_CONTEXT_CLASS => $contextClass,
         ];
     }
 

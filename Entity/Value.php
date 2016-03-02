@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
 
-abstract class Value
+abstract class Value implements ContextualValueInterface
 {
     /**
      * @var integer
@@ -42,12 +42,6 @@ abstract class Value
      * @ORM\Column(name="position", type="integer", nullable=true)
      */
     protected $position;
-
-    /**
-     * @var Context
-     * @ORM\OneToOne(targetEntity="Sidus\EAVModelBundle\Entity\Context", cascade={"persist"}, mappedBy="value", fetch="EAGER")
-     */
-    protected $context;
 
     /**
      * @var boolean
@@ -333,23 +327,6 @@ abstract class Value
     }
 
     /**
-     * @return ContextInterface
-     */
-    public function getContext()
-    {
-        return $this->context;
-    }
-
-    /**
-     * @param ContextInterface $context
-     */
-    public function setContext(ContextInterface $context)
-    {
-        $context->setValue($this);
-        $this->context = $context;
-    }
-
-    /**
      * @return int
      */
     public function getPosition()
@@ -363,6 +340,82 @@ abstract class Value
     public function setPosition($position)
     {
         $this->position = $position;
+    }
+
+    /**
+     * @return array
+     */
+    public function getContext()
+    {
+        $context = [];
+        foreach ($this->getContextKeys() as $key) {
+            $context[$key] = $this->$key;
+        }
+        return $context;
+    }
+
+    /**
+     * @param string $key
+     * @throws \UnexpectedValueException
+     */
+    protected function checkContextKey($key)
+    {
+        if (!in_array($key, $this->getContextKeys(), true)) {
+            throw new \UnexpectedValueException("Trying to get an non-allowed context key {$key}");
+        }
+    }
+
+    /**
+     * @param string $key
+     * @return mixed
+     * @throws \UnexpectedValueException
+     */
+    public function getContextValue($key)
+    {
+        $this->checkContextKey($key);
+        return $this->$key;
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @throws \UnexpectedValueException
+     */
+    public function setContextValue($key, $value)
+    {
+        $this->checkContextKey($key);
+        $this->$key = $value;
+    }
+
+    /**
+     * Context constructor.
+     * @param array $context
+     * @throws \UnexpectedValueException
+     */
+    public function setContext(array $context)
+    {
+        $this->clearContext();
+        foreach ($context as $key => $value) {
+            $this->setContextValue($key, $value);
+        }
+    }
+
+    /**
+     * Clean all contextual keys
+     */
+    public function clearContext()
+    {
+        foreach ($this->getContextKeys() as $key) {
+            $this->$key = null;
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getContextKeys()
+    {
+        return [];
     }
 
     /**

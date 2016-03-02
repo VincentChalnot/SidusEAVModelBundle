@@ -3,7 +3,6 @@
 namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler;
-use Sidus\EAVModelBundle\Entity\ContextInterface;
 use Sidus\EAVModelBundle\Entity\Value;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
@@ -355,16 +354,18 @@ class Attribute implements AttributeInterface
 
     /**
      * @param Value $value
-     * @param ContextInterface $context
+     * @param array $context
      * @return bool
+     * @throws UnexpectedValueException
      */
-    public function isContextMatching(Value $value, ContextInterface $context)
+    public function isContextMatching(Value $value, array $context)
     {
         if (!$value->getContext()) {
             return true;
         }
         foreach ($this->getContextMask() as $key) {
-            if ($context->get($key) !== $value->getContext()->get($key)) {
+            $contextKey = array_key_exists($key, $context) ? $context[$key] : null;
+            if ($contextKey !== $value->getContextValue($key)) {
                 return false;
             }
         }

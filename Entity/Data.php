@@ -19,7 +19,7 @@ use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
 /**
  * @DataConstraint()
  */
-abstract class Data
+abstract class Data implements DataInterface
 {
     /**
      * @var int
@@ -45,7 +45,7 @@ abstract class Data
 
     /**
      * @var Value[]|Collection
-     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\Value", mappedBy="data", cascade={"persist", "remove"}, fetch="EAGER", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\Value", mappedBy="data", cascade={"persist", "remove"}, orphanRemoval=true)
      * @ORM\OrderBy({"position" = "ASC"})
      * @JMS\Exclude()
      */
@@ -77,7 +77,7 @@ abstract class Data
     protected $currentVersion = 0;
 
     /**
-     * @var Context
+     * @var array
      */
     protected $currentContext;
 
@@ -190,10 +190,11 @@ abstract class Data
      * Return all values matching the attribute code
      *
      * @param AttributeInterface|null $attribute
-     * @param ContextInterface $context
+     * @param array $context
      * @return Collection|Value[]
+     * @throws UnexpectedValueException
      */
-    public function getValues(AttributeInterface $attribute = null, ContextInterface $context = null)
+    public function getValues(AttributeInterface $attribute = null, array $context = null)
     {
         if (!$context) {
             $context = $this->getCurrentContext();
@@ -211,6 +212,7 @@ abstract class Data
         $this->checkAttribute($attribute);
         $values = new ArrayCollection();
         foreach ($this->values as $value) {
+            /** @noinspection NotOptimalIfConditionsInspection */
             if ($value->getAttributeCode() === $attribute->getCode() && $attribute->isContextMatching($value, $context)) {
                 $values->add($value);
             }
@@ -222,10 +224,11 @@ abstract class Data
      * Return first value found for attribute code in value collection
      *
      * @param AttributeInterface $attribute
-     * @param ContextInterface $context
+     * @param array $context
      * @return null|Value
+     * @throws UnexpectedValueException
      */
-    public function getValue(AttributeInterface $attribute, ContextInterface $context = null)
+    public function getValue(AttributeInterface $attribute, array $context = null)
     {
         $values = $this->getValues($attribute, $context);
         return count($values) === 0 ? null : $values->first();
@@ -235,11 +238,11 @@ abstract class Data
      * Get the value data of the value matching the attribute
      *
      * @param AttributeInterface $attribute
-     * @param ContextInterface $context
+     * @param array $context
      * @return mixed
      * @throws \Exception
      */
-    public function getValueData(AttributeInterface $attribute, ContextInterface $context = null)
+    public function getValueData(AttributeInterface $attribute, array $context = null)
     {
         $valuesData = $this->getValuesData($attribute, $context);
         return count($valuesData) === 0 ? null : $valuesData->first();
@@ -249,11 +252,11 @@ abstract class Data
      * Get the values data of multiple values for a given attribute
      *
      * @param AttributeInterface $attribute
-     * @param ContextInterface $context
+     * @param array $context
      * @return mixed
      * @throws \Exception
      */
-    public function getValuesData(AttributeInterface $attribute = null, ContextInterface $context = null)
+    public function getValuesData(AttributeInterface $attribute = null, array $context = null)
     {
         $valuesData = new ArrayCollection();
         $accessor = PropertyAccess::createPropertyAccessor();
@@ -268,11 +271,11 @@ abstract class Data
      *
      * @param AttributeInterface $attribute
      * @param mixed $dataValue
-     * @param ContextInterface $context
+     * @param array $context
      * @return Data
      * @throws Exception
      */
-    public function setValueData(AttributeInterface $attribute, $dataValue, ContextInterface $context = null)
+    public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null)
     {
         return $this->setValuesData($attribute, [$dataValue], $context);
     }
@@ -282,11 +285,11 @@ abstract class Data
      *
      * @param AttributeInterface $attribute
      * @param array|\Traversable $dataValues
-     * @param ContextInterface $context
+     * @param array $context
      * @return Data
      * @throws Exception
      */
-    public function setValuesData(AttributeInterface $attribute, $dataValues, ContextInterface $context = null)
+    public function setValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
     {
         if (!is_array($dataValues) && !$dataValues instanceof \Traversable) {
             throw new UnexpectedValueException('Datas must be an array or implements Traversable');
@@ -305,10 +308,11 @@ abstract class Data
 
     /**
      * @param AttributeInterface $attribute
-     * @param ContextInterface $context
+     * @param array $context
      * @return Data
+     * @throws UnexpectedValueException
      */
-    public function emptyValues(AttributeInterface $attribute = null, ContextInterface $context = null)
+    public function emptyValues(AttributeInterface $attribute = null, array $context = null)
     {
         $values = $this->getValues($attribute, $context);
         foreach ($values as $value) {
@@ -319,7 +323,8 @@ abstract class Data
 
     /**
      * @param Value $value
-     * @return $this
+     * @return Data
+     * @throws UnexpectedValueException
      */
     public function addValue(Value $value)
     {
@@ -336,11 +341,11 @@ abstract class Data
      *
      * @param AttributeInterface $attribute
      * @param $valueData
-     * @param ContextInterface $context
+     * @param array $context
      * @return Data
      * @throws \Exception
      */
-    public function addValueData(AttributeInterface $attribute, $valueData, ContextInterface $context = null)
+    public function addValueData(AttributeInterface $attribute, $valueData, array $context = null)
     {
         $newValue = $this->createValue($attribute, $context);
         $accessor = PropertyAccess::createPropertyAccessor();
@@ -399,7 +404,7 @@ abstract class Data
 
     public function __call($methodName, $arguments)
     {
-        if (substr($methodName, 0, 3) === 'get') {
+        if (0 === strpos($methodName, 'get')) {
             return $this->__get(lcfirst(substr($methodName, 3)));
         }
         $attribute = $this->getAttribute($methodName);
@@ -498,10 +503,10 @@ abstract class Data
 
     /**
      * @param AttributeInterface $attribute
-     * @param ContextInterface $context
+     * @param array $context
      * @return Value
      */
-    public function createValue(AttributeInterface $attribute, ContextInterface $context = null)
+    public function createValue(AttributeInterface $attribute, array $context = null)
     {
         if (!$context) {
             $context = $this->getCurrentContext();
@@ -510,20 +515,12 @@ abstract class Data
     }
 
     /**
-     * @param array $contextValues
-     * @return ContextInterface
-     */
-    public function createContext(array $contextValues)
-    {
-        return $this->getFamily()->createContext($contextValues);
-    }
-
-    /**
      * @param AttributeInterface $attribute
-     * @param ContextInterface $context
+     * @param array $context
      * @return bool
+     * @throws \Exception
      */
-    public function isEmpty(AttributeInterface $attribute, ContextInterface $context = null)
+    public function isEmpty(AttributeInterface $attribute, array $context = null)
     {
         foreach ($this->getValuesData($attribute, $context) as $valueData) {
             if ($valueData !== null && $valueData !== '') {
@@ -562,7 +559,7 @@ abstract class Data
     }
 
     /**
-     * @return Context
+     * @return array
      */
     public function getCurrentContext()
     {
@@ -573,18 +570,16 @@ abstract class Data
     }
 
     /**
-     * @param ContextInterface|array $currentContext
+     * @param array $currentContext
      */
-    public function setCurrentContext($currentContext)
+    public function setCurrentContext(array $currentContext = [])
     {
-        if (!$currentContext instanceof ContextInterface) {
-            $currentContext = $this->createContext($currentContext);
-        }
         $this->currentContext = $currentContext;
     }
 
     /**
      * Remove id on clone and clean values
+     * @throws UnexpectedValueException
      */
     public function __clone() {
         $this->id = null;

@@ -33,7 +33,6 @@ class SidusEAVModelExtension extends Extension
 
         $container->setParameter('sidus_eav_model.entity.data.class', $config['data_class']);
         $container->setParameter('sidus_eav_model.entity.value.class', $config['value_class']);
-        $container->setParameter('sidus_eav_model.entity.context.class', $config['context_class']);
         $container->setParameter('sidus_eav_model.form.collection_type', $config['collection_type']);
         $container->setParameter('sidus_eav_model.context.default_context', $config['default_context']);
 
@@ -53,6 +52,7 @@ class SidusEAVModelExtension extends Extension
     /**
      * @param array $config
      * @param ContainerBuilder $container
+     * @throws \Exception
      */
     protected function createFamilyServices(array $config, ContainerBuilder $container)
     {
@@ -63,9 +63,6 @@ class SidusEAVModelExtension extends Extension
             }
             if (empty($familyConfiguration['value_class'])) {
                 $familyConfiguration['value_class'] = $config['value_class'];
-            }
-            if (empty($familyConfiguration['context_class'])) {
-                $familyConfiguration['context_class'] = $config['context_class'];
             }
             $familyConfiguration['default_context'] = $config['default_context'];
             $this->addFamilyServiceDefinition($code, $familyConfiguration, $container);

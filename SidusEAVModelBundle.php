@@ -2,9 +2,6 @@
 
 namespace Sidus\EAVModelBundle;
 
-use Sidus\EAVModelBundle\DependencyInjection\Compiler\AttributeCompilerPass;
-use Sidus\EAVModelBundle\DependencyInjection\Compiler\AttributeTypeCompilerPass;
-use Sidus\EAVModelBundle\DependencyInjection\Compiler\FamilyCompilerPass;
 use Sidus\EAVModelBundle\DependencyInjection\Compiler\GenericCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;

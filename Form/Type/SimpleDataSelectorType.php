@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
+use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -24,6 +25,7 @@ class SimpleDataSelectorType extends AbstractType
 
     /**
      * @param OptionsResolver $resolver
+     * @throws \Exception
      */
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -55,6 +57,7 @@ class SimpleDataSelectorType extends AbstractType
      * Taken directly from \Symfony\Bridge\Doctrine\Form\Type\EntityType
      *
      * @param OptionsResolver $resolver
+     * @throws \Exception
      */
     protected function fixDoctrineQueryBuilderNormalizer(OptionsResolver $resolver)
     {
