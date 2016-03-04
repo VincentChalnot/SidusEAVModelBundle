@@ -18,7 +18,7 @@ class DateTimeUtility
      */
     public static function parse($data, $allowNull = true)
     {
-        if (null === $allowNull) {
+        if (null === $data) {
             if ($allowNull) {
                 return null;
             } else {
