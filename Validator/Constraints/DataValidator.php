@@ -66,7 +66,7 @@ class DataValidator extends ConstraintValidator
         foreach ($data->getFamily()->getAttributes() as $attribute) {
             // Dynamically append data validator for embed types
             $type = $attribute->getType();
-            if ($type->isEmbedded() || $type->isRelation()) {
+            if ($type->isEmbedded()) {
                 $attribute->addValidationRules([
                     'Valid' => [],
                 ]);
