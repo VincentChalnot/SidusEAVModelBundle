@@ -127,4 +127,9 @@ interface AttributeInterface
      * @return bool
      */
     public function isContextMatching(Value $value, array $context);
+
+    /**
+     * @return mixed
+     */
+    public function getDefault();
 }

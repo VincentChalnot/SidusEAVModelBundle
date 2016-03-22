@@ -2,6 +2,7 @@
 
 namespace Sidus\EAVModelBundle\Entity;
 
+use BadMethodCallException;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -12,6 +13,9 @@ use LogicException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
+use Symfony\Component\PropertyAccess\Exception\AccessException;
+use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
+use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use UnexpectedValueException;
 use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
@@ -85,6 +89,7 @@ abstract class Data implements DataInterface
      * Initialize the data with an optional (but recommended family code)
      *
      * @param FamilyInterface $family
+     *
      * @throws LogicException
      */
     public function __construct(FamilyInterface $family)
@@ -120,6 +125,7 @@ abstract class Data implements DataInterface
     /**
      * @param DateTime $createdAt
      * @return Data
+     *
      * @throws UnexpectedValueException
      */
     public function setCreatedAt($createdAt)
@@ -140,6 +146,7 @@ abstract class Data implements DataInterface
     /**
      * @param DateTime $updatedAt
      * @return Data
+     *
      * @throws UnexpectedValueException
      */
     public function setUpdatedAt($updatedAt)
@@ -192,7 +199,11 @@ abstract class Data implements DataInterface
      * @param AttributeInterface|null $attribute
      * @param array $context
      * @return Collection|Value[]
+     *
      * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function getValues(AttributeInterface $attribute = null, array $context = null)
     {
@@ -217,6 +228,58 @@ abstract class Data implements DataInterface
                 $values->add($value);
             }
         }
+        if (0 === count($values) && null !== $attribute->getDefault()) {
+            return $this->createDefaultValues($attribute, $context);
+        }
+        return $values;
+    }
+
+    /**
+     * @param AttributeInterface|null $attribute
+     * @param array|null $context
+     * @return Collection|Value[]
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    protected function createDefaultValues(AttributeInterface $attribute = null, array $context = null)
+    {
+        $default = $attribute->getDefault();
+        if (!$attribute->isMultiple()) {
+            $default = [$default];
+        }
+        return $this->_setValuesData($attribute, $default, $context);
+    }
+
+    /**
+     * @param AttributeInterface|null $attribute
+     * @param array|\Traversable $dataValues
+     * @param array|null $context
+     * @return Collection|Value[]
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    protected function _setValuesData(AttributeInterface $attribute = null, $dataValues, array $context = null)
+    {
+        if (!(is_array($dataValues) || $dataValues instanceof \Traversable)) {
+            $type = is_object($dataValues) ? get_class($dataValues) : gettype($dataValues);
+            throw new UnexpectedValueException("Value for multiple attribute {$attribute->getCode()} must be an array, '{$type}' given");
+        }
+        $values = new ArrayCollection();
+        $accessor = PropertyAccess::createPropertyAccessor();
+        $position = 0;
+        foreach ($dataValues as $dataValue) {
+            /** @noinspection DisconnectedForeachInstructionInspection */
+            $value = $this->createValue($attribute, $context);
+            $value->setPosition($position++);
+            $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
+            $values->add($value);
+        }
         return $values;
     }
 
@@ -226,7 +289,11 @@ abstract class Data implements DataInterface
      * @param AttributeInterface $attribute
      * @param array $context
      * @return null|Value
+     *
      * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function getValue(AttributeInterface $attribute, array $context = null)
     {
@@ -240,7 +307,11 @@ abstract class Data implements DataInterface
      * @param AttributeInterface $attribute
      * @param array $context
      * @return mixed
-     * @throws \Exception
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function getValueData(AttributeInterface $attribute, array $context = null)
     {
@@ -254,7 +325,11 @@ abstract class Data implements DataInterface
      * @param AttributeInterface $attribute
      * @param array $context
      * @return mixed
-     * @throws \Exception
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function getValuesData(AttributeInterface $attribute = null, array $context = null)
     {
@@ -273,7 +348,11 @@ abstract class Data implements DataInterface
      * @param mixed $dataValue
      * @param array $context
      * @return Data
-     * @throws Exception
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null)
     {
@@ -287,22 +366,16 @@ abstract class Data implements DataInterface
      * @param array|\Traversable $dataValues
      * @param array $context
      * @return Data
-     * @throws Exception
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function setValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
     {
-        if (!is_array($dataValues) && !$dataValues instanceof \Traversable) {
-            throw new UnexpectedValueException('Datas must be an array or implements Traversable');
-        }
         $this->emptyValues($attribute, $context);
-        $accessor = PropertyAccess::createPropertyAccessor();
-        $position = 0;
-        foreach ($dataValues as $dataValue) {
-            /** @noinspection DisconnectedForeachInstructionInspection */
-            $value = $this->createValue($attribute, $context);
-            $value->setPosition($position++);
-            $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
-        }
+        $this->_setValuesData($attribute, $dataValues, $context);
         return $this;
     }
 
@@ -310,7 +383,11 @@ abstract class Data implements DataInterface
      * @param AttributeInterface $attribute
      * @param array $context
      * @return Data
+     *
      * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function emptyValues(AttributeInterface $attribute = null, array $context = null)
     {
@@ -324,6 +401,7 @@ abstract class Data implements DataInterface
     /**
      * @param Value $value
      * @return Data
+     *
      * @throws UnexpectedValueException
      */
     public function addValue(Value $value)
@@ -343,7 +421,11 @@ abstract class Data implements DataInterface
      * @param $valueData
      * @param array $context
      * @return Data
-     * @throws \Exception
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function addValueData(AttributeInterface $attribute, $valueData, array $context = null)
     {
@@ -371,7 +453,11 @@ abstract class Data implements DataInterface
 
     /**
      * @return string
-     * @throws \Exception
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     protected function getLabelValue()
     {
@@ -402,6 +488,19 @@ abstract class Data implements DataInterface
         }
     }
 
+    /**
+     * Magic method to allow direct access to EAV model
+     *
+     * @param $methodName
+     * @param $arguments
+     * @return mixed|null|Value
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     * @throws BadMethodCallException
+     */
     public function __call($methodName, $arguments)
     {
         if (0 === strpos($methodName, 'get')) {
@@ -412,7 +511,7 @@ abstract class Data implements DataInterface
             return $this->__get(lcfirst($methodName));
         }
         $class = get_class($this);
-        throw new \BadMethodCallException("Method '{$methodName}' for object '{$class}' with family '{$this->getFamilyCode()}' does not exist");
+        throw new BadMethodCallException("Method '{$methodName}' for object '{$class}' with family '{$this->getFamilyCode()}' does not exist");
     }
 
     /**
@@ -420,7 +519,12 @@ abstract class Data implements DataInterface
      *
      * @param string $name
      * @return mixed|null|Value
-     * @throws \Exception
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     * @throws BadMethodCallException
      */
     public function __get($name)
     {
@@ -432,7 +536,7 @@ abstract class Data implements DataInterface
         }
         $attribute = $this->getAttribute($attributeCode);
         if (!$attribute) {
-            throw new \BadMethodCallException("No attribute or method named {$name}");
+            throw new BadMethodCallException("No attribute or method named {$name}");
         }
 
         if ($attribute->isMultiple()) {
@@ -452,7 +556,12 @@ abstract class Data implements DataInterface
      *
      * @param string $name
      * @param mixed|null|Value $value
-     * @throws \Exception
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     * @throws BadMethodCallException
      */
     public function __set($name, $value)
     {
@@ -464,7 +573,7 @@ abstract class Data implements DataInterface
         }
         $attribute = $this->getAttribute($attributeCode);
         if (!$attribute) {
-            throw new \BadMethodCallException("No attribute or method named {$name}");
+            throw new BadMethodCallException("No attribute or method named {$name}");
         }
 
         if ($attribute->isMultiple()) {
@@ -518,7 +627,11 @@ abstract class Data implements DataInterface
      * @param AttributeInterface $attribute
      * @param array $context
      * @return bool
-     * @throws \Exception
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function isEmpty(AttributeInterface $attribute, array $context = null)
     {
@@ -532,7 +645,7 @@ abstract class Data implements DataInterface
 
     /**
      * @param AttributeInterface $attribute
-     * @throw UnexpectedValueException
+     *
      * @throws UnexpectedValueException
      */
     protected function checkAttribute(AttributeInterface $attribute)
@@ -579,7 +692,11 @@ abstract class Data implements DataInterface
 
     /**
      * Remove id on clone and clean values
+     *
      * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function __clone() {
         $this->id = null;

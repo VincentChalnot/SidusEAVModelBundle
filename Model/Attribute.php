@@ -54,6 +54,9 @@ class Attribute implements AttributeInterface
     /** @var array */
     protected $contextMask = [];
 
+    /** @var mixed */
+    protected $default;
+
     /**
      * @param string $code
      * @param AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler
@@ -331,8 +334,17 @@ class Attribute implements AttributeInterface
      */
     protected function checkConflicts()
     {
-        if ($this->isMultiple() && $this->isUnique()) {
-            throw new UnexpectedValueException("Attribute {$this->getCode()} cannot be multiple and unique at the same time");
+        $default = $this->getDefault();
+        if ($this->isMultiple()) {
+            if ($this->isUnique()) {
+                throw new UnexpectedValueException("Attribute {$this->getCode()} cannot be multiple and unique at the same time");
+            }
+            if (null !== $default && !(is_array($default) || $default instanceof \Traversable)) {
+                throw new UnexpectedValueException("Attribute {$this->getCode()} is multiple and therefore should have an array of values as default option");
+            }
+        }
+        if ($default !== null && ($this->getType()->isRelation() || $this->getType()->isEmbedded())) {
+            throw new UnexpectedValueException("Attribute {$this->getCode()} is a relation to an other entity, it doesn't support default values in configuration");
         }
     }
 
@@ -370,5 +382,23 @@ class Attribute implements AttributeInterface
             }
         }
         return true;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefault()
+    {
+        return $this->default;
+    }
+
+    /**
+     * @param mixed $default
+     * @return Attribute
+     */
+    public function setDefault($default)
+    {
+        $this->default = $default;
+        return $this;
     }
 }
