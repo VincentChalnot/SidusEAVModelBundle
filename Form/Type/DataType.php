@@ -110,7 +110,7 @@ class DataType extends AbstractType
     public function buildValuesForm(FormInterface $form, FamilyInterface $family, Data $data = null, array $options = [])
     {
         foreach ($family->getAttributes() as $attribute) {
-            $this->addAttribute($form, $attribute, $family, $data);
+            $this->addAttribute($form, $attribute, $family, $data, $options);
         }
     }
 
@@ -127,7 +127,7 @@ class DataType extends AbstractType
         $attributeType = $attribute->getType();
         $label = $this->getFieldLabel($family, $attribute);
 
-        $formOptions = array_merge($attribute->getFormOptions($data), $options);
+        $formOptions = $attribute->getFormOptions($data);
         if ($attribute->isMultiple() && $attribute->isCollection()) {
             $formOptions['label'] = false;
             $sortable = isset($formOptions['sortable']) ? $formOptions['sortable'] : false;
@@ -158,7 +158,6 @@ class DataType extends AbstractType
         $resolver->setDefaults([
             'family' => null,
             'data_class' => $this->dataClass,
-//            'by_reference' => false,
         ]);
         $resolver->setNormalizer('family', function (Options $options, $value) {
             if ($value === null) {
