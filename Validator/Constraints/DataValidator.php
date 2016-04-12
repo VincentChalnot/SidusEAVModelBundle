@@ -100,10 +100,6 @@ class DataValidator extends ConstraintValidator
         ]);
         /** @var Value $value */
         foreach ($values as $value) {
-            if (!$value->getData()) {
-                echo 'Please debug me';
-                var_dump($value);exit; // @todo : DEBUG THIS SHIT OUT : Value DOES have a data associated, why doesn't it shows up here ????
-            }
             if ($value->getData()->getId() !== $data->getId()) {
                 $this->buildAttributeViolation($context, $attribute, 'unique', $valueData);
                 return;
