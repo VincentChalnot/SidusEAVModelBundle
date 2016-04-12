@@ -2,8 +2,6 @@
 
 namespace Sidus\EAVModelBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-
 /**
  * Generic context you can use in your applications
  *
@@ -15,7 +13,7 @@ trait GenericContextTrait
      * ISO 3166-1 alpha-2 country code
      *
      * @var string
-     * @ORM\Column(type="string", length=2, nullable=true)
+     * @\Doctrine\ORM\Mapping\Column(type="string", length=2, nullable=true)
      */
     protected $country;
 
@@ -23,7 +21,7 @@ trait GenericContextTrait
      * ISO ISO 639-2 language code
      *
      * @var string
-     * @ORM\Column(type="string", length=3, nullable=true)
+     * @\Doctrine\ORM\Mapping\Column(type="string", length=3, nullable=true)
      */
     protected $language;
 
@@ -31,19 +29,19 @@ trait GenericContextTrait
      * Version number
      *
      * @var int
-     * @ORM\Column(type="integer", nullable=true)
+     * @\Doctrine\ORM\Mapping\Column(type="integer", nullable=true)
      */
     protected $version;
 
     /**
      * @var bool
-     * @ORM\Column(type="boolean", nullable=true)
+     * @\Doctrine\ORM\Mapping\Column(type="boolean", nullable=true)
      */
     protected $head;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=64, nullable=true)
+     * @\Doctrine\ORM\Mapping\Column(type="string", length=64, nullable=true)
      */
     protected $channel;
 

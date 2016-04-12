@@ -3,9 +3,6 @@
 namespace Sidus\EAVModelBundle\Entity;
 
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
-use Exception;
-use JMS\Serializer\Annotation as JMS;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 

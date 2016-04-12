@@ -2,7 +2,6 @@
 
 namespace Sidus\EAVModelBundle\Translator;
 
-use JMS\Serializer\Annotation as JMS;
 use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -10,7 +9,7 @@ trait TranslatableTrait
 {
     /**
      * @var TranslatorInterface
-     * @JMS\Exclude()
+     * @\JMS\Serializer\Annotation\Exclude()
      */
     protected $translator;
 
