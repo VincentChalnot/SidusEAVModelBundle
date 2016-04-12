@@ -13,12 +13,12 @@ use LogicException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
+use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use UnexpectedValueException;
-use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
 
 /**
  * @DataConstraint()
@@ -105,21 +105,11 @@ abstract class Data implements DataInterface
     }
 
     /**
-     * @return int
+     * @return DateTime
      */
-    public function getId()
+    public function getCreatedAt()
     {
-        return $this->id;
-    }
-
-    /**
-     * @param $id
-     * @return $this
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-        return $this;
+        return $this->createdAt;
     }
 
     /**
@@ -138,9 +128,9 @@ abstract class Data implements DataInterface
     /**
      * @return DateTime
      */
-    public function getCreatedAt()
+    public function getUpdatedAt()
     {
-        return $this->createdAt;
+        return $this->updatedAt;
     }
 
     /**
@@ -157,11 +147,11 @@ abstract class Data implements DataInterface
     }
 
     /**
-     * @return DateTime
+     * @return Data
      */
-    public function getUpdatedAt()
+    public function getParent()
     {
-        return $this->updatedAt;
+        return $this->parent;
     }
 
     /**
@@ -176,250 +166,11 @@ abstract class Data implements DataInterface
     }
 
     /**
-     * @return Data
-     */
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    /**
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("family")
-     * @return string
-     */
-    public function getFamilyCode()
-    {
-        return $this->getFamily()->getCode();
-    }
-
-    /**
-     * Return all values matching the attribute code
-     *
-     * @param AttributeInterface|null $attribute
-     * @param array $context
-     * @return Collection|Value[]
-     *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     */
-    public function getValues(AttributeInterface $attribute = null, array $context = null)
-    {
-        if (!$context) {
-            $context = $this->getCurrentContext();
-        }
-        if (null === $attribute) {
-            $values = new ArrayCollection();
-            foreach ($this->values as $value) {
-                $attribute = $this->getFamily()->getAttribute($value->getAttributeCode());
-                if ($attribute->isContextMatching($value, $context)) {
-                    $values->add($value);
-                }
-            }
-            return $values;
-        }
-        $this->checkAttribute($attribute);
-        $values = new ArrayCollection();
-        foreach ($this->values as $value) {
-            /** @noinspection NotOptimalIfConditionsInspection */
-            if ($value->getAttributeCode() === $attribute->getCode() && $attribute->isContextMatching($value, $context)) {
-                $values->add($value);
-            }
-        }
-        if (0 === count($values) && null !== $attribute->getDefault()) {
-            return $this->createDefaultValues($attribute, $context);
-        }
-        return $values;
-    }
-
-    /**
-     * @param AttributeInterface|null $attribute
-     * @param array|null $context
-     * @return Collection|Value[]
-     *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     */
-    protected function createDefaultValues(AttributeInterface $attribute = null, array $context = null)
-    {
-        $default = $attribute->getDefault();
-        if (!$attribute->isMultiple()) {
-            $default = [$default];
-        }
-        return $this->_setValuesData($attribute, $default, $context);
-    }
-
-    /**
-     * @param AttributeInterface|null $attribute
-     * @param array|\Traversable $dataValues
-     * @param array|null $context
-     * @return Collection|Value[]
-     *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     */
-    protected function _setValuesData(AttributeInterface $attribute = null, $dataValues, array $context = null)
-    {
-        if (!(is_array($dataValues) || $dataValues instanceof \Traversable)) {
-            $type = is_object($dataValues) ? get_class($dataValues) : gettype($dataValues);
-            throw new UnexpectedValueException("Value for multiple attribute {$attribute->getCode()} must be an array, '{$type}' given");
-        }
-        $values = new ArrayCollection();
-        $accessor = PropertyAccess::createPropertyAccessor();
-        $position = 0;
-        foreach ($dataValues as $dataValue) {
-            /** @noinspection DisconnectedForeachInstructionInspection */
-            $value = $this->createValue($attribute, $context);
-            $value->setPosition($position++);
-            $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
-            $values->add($value);
-        }
-        return $values;
-    }
-
-    /**
-     * Return first value found for attribute code in value collection
-     *
-     * @param AttributeInterface $attribute
-     * @param array $context
-     * @return null|Value
-     *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     */
-    public function getValue(AttributeInterface $attribute, array $context = null)
-    {
-        $values = $this->getValues($attribute, $context);
-        return count($values) === 0 ? null : $values->first();
-    }
-
-    /**
-     * Get the value data of the value matching the attribute
-     *
-     * @param AttributeInterface $attribute
-     * @param array $context
-     * @return mixed
-     *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     */
-    public function getValueData(AttributeInterface $attribute, array $context = null)
-    {
-        $valuesData = $this->getValuesData($attribute, $context);
-        return count($valuesData) === 0 ? null : $valuesData->first();
-    }
-
-    /**
-     * Get the values data of multiple values for a given attribute
-     *
-     * @param AttributeInterface $attribute
-     * @param array $context
-     * @return mixed
-     *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     */
-    public function getValuesData(AttributeInterface $attribute = null, array $context = null)
-    {
-        $valuesData = new ArrayCollection();
-        $accessor = PropertyAccess::createPropertyAccessor();
-        foreach ($this->getValues($attribute, $context) as $value) {
-            $valuesData->add($accessor->getValue($value, $attribute->getType()->getDatabaseType()));
-        }
-        return $valuesData;
-    }
-
-    /**
-     * Set the value's data of a given attribute
-     *
-     * @param AttributeInterface $attribute
-     * @param mixed $dataValue
-     * @param array $context
-     * @return Data
-     *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     */
-    public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null)
-    {
-        return $this->setValuesData($attribute, [$dataValue], $context);
-    }
-
-    /**
-     * Set the values' data of a given attribute for multiple fields
-     *
-     * @param AttributeInterface $attribute
-     * @param array|\Traversable $dataValues
-     * @param array $context
-     * @return Data
-     *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     */
-    public function setValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
-    {
-        $this->emptyValues($attribute, $context);
-        $this->_setValuesData($attribute, $dataValues, $context);
-        return $this;
-    }
-
-    /**
-     * @param AttributeInterface $attribute
-     * @param array $context
-     * @return Data
-     *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     */
-    public function emptyValues(AttributeInterface $attribute = null, array $context = null)
-    {
-        $values = $this->getValues($attribute, $context);
-        foreach ($values as $value) {
-            $this->removeValue($value);
-        }
-        return $this;
-    }
-
-    /**
-     * @param Value $value
-     * @return Data
-     *
-     * @throws UnexpectedValueException
-     */
-    public function addValue(Value $value)
-    {
-        if (!$value->getContext()) {
-            $value->setContext($this->getCurrentContext());
-        }
-        $this->values->add($value);
-        $value->setData($this);
-        return $this;
-    }
-
-    /**
      * Append data to an attribute
      *
      * @param AttributeInterface $attribute
-     * @param $valueData
-     * @param array $context
+     * @param mixed              $valueData
+     * @param array              $context
      * @return Data
      *
      * @throws UnexpectedValueException
@@ -437,31 +188,8 @@ abstract class Data implements DataInterface
         }
         $newValue->setPosition($position + 1);
         $accessor->setValue($newValue, $attribute->getType()->getDatabaseType(), $valueData);
-        return $this;
-    }
 
-    /**
-     * @param Value $value
-     * @return Data
-     */
-    public function removeValue(Value $value)
-    {
-        $this->values->removeElement($value);
-        $value->setData(null);
         return $this;
-    }
-
-    /**
-     * @return string
-     *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     */
-    protected function getLabelValue()
-    {
-        return (string) $this->getValueData($this->getFamily()->getAttributeAsLabel());
     }
 
     /**
@@ -474,6 +202,67 @@ abstract class Data implements DataInterface
         } catch (Exception $e) {
             return "[{$this->getId()}]";
         }
+    }
+
+    /**
+     * Get the value data of the value matching the attribute
+     *
+     * @param AttributeInterface $attribute
+     * @param array              $context
+     * @return mixed
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    public function getValueData(AttributeInterface $attribute, array $context = null)
+    {
+        $valuesData = $this->getValuesData($attribute, $context);
+
+        return count($valuesData) === 0 ? null : $valuesData->first();
+    }
+
+    /**
+     * Get the values data of multiple values for a given attribute
+     *
+     * @param AttributeInterface $attribute
+     * @param array              $context
+     * @return mixed
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    public function getValuesData(AttributeInterface $attribute = null, array $context = null)
+    {
+        $valuesData = new ArrayCollection();
+        $accessor = PropertyAccess::createPropertyAccessor();
+        foreach ($this->getValues($attribute, $context) as $value) {
+            $valuesData->add($accessor->getValue($value, $attribute->getType()->getDatabaseType()));
+        }
+
+        return $valuesData;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     * @return $this
+     */
+    public function setId($id)
+    {
+        $this->id = (int) $id;
+
+        return $this;
     }
 
     /**
@@ -491,8 +280,8 @@ abstract class Data implements DataInterface
     /**
      * Magic method to allow direct access to EAV model
      *
-     * @param $methodName
-     * @param $arguments
+     * @param string $methodName
+     * @param array  $arguments
      * @return mixed|null|Value
      *
      * @throws UnexpectedValueException
@@ -543,18 +332,20 @@ abstract class Data implements DataInterface
             if ($returnData) {
                 return $this->getValuesData($attribute);
             }
+
             return $this->getValues($attribute);
         }
         if ($returnData) {
             return $this->getValueData($attribute);
         }
+
         return $this->getValue($attribute);
     }
 
     /**
      * Used to seemingly set values as if they were normal properties of this class
      *
-     * @param string $name
+     * @param string           $name
      * @param mixed|null|Value $value
      *
      * @throws UnexpectedValueException
@@ -579,27 +370,105 @@ abstract class Data implements DataInterface
         if ($attribute->isMultiple()) {
             if ($setData) {
                 $this->setValuesData($attribute, $value);
+
                 return;
             }
             foreach ($value as $v) {
                 $this->addValue($v);
             }
+
             return;
         }
         if ($setData) {
             $this->setValueData($attribute, $value);
+
             return;
         }
         $this->addValue($value);
     }
 
     /**
-     * @param $attributeCode
-     * @return AttributeInterface
+     * Return first value found for attribute code in value collection
+     *
+     * @param AttributeInterface $attribute
+     * @param array              $context
+     * @return null|Value
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
-    protected function getAttribute($attributeCode)
+    public function getValue(AttributeInterface $attribute, array $context = null)
     {
-        return $this->getFamily()->getAttribute($attributeCode);
+        $values = $this->getValues($attribute, $context);
+
+        return count($values) === 0 ? null : $values->first();
+    }
+
+    /**
+     * Return all values matching the attribute code
+     *
+     * @param AttributeInterface|null $attribute
+     * @param array                   $context
+     * @return Collection|Value[]
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    public function getValues(AttributeInterface $attribute = null, array $context = null)
+    {
+        if (!$context) {
+            $context = $this->getCurrentContext();
+        }
+        if (null === $attribute) {
+            $values = new ArrayCollection();
+            foreach ($this->values as $value) {
+                $attribute = $this->getFamily()->getAttribute($value->getAttributeCode());
+                if ($attribute->isContextMatching($value, $context)) {
+                    $values->add($value);
+                }
+            }
+
+            return $values;
+        }
+        $this->checkAttribute($attribute);
+        $values = new ArrayCollection();
+        foreach ($this->values as $value) {
+            /** @noinspection NotOptimalIfConditionsInspection */
+            if ($value->getAttributeCode() === $attribute->getCode()
+                && $attribute->isContextMatching($value, $context)
+            ) {
+                $values->add($value);
+            }
+        }
+        if (0 === count($values) && null !== $attribute->getDefault()) {
+            return $this->createDefaultValues($attribute, $context);
+        }
+
+        return $values;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCurrentContext()
+    {
+        if (!$this->currentContext) {
+            return $this->getFamily()->getDefaultContext();
+        }
+
+        return $this->currentContext;
+    }
+
+    /**
+     * @param array $currentContext
+     */
+    public function setCurrentContext(array $currentContext = [])
+    {
+        $this->currentContext = $currentContext;
     }
 
     /**
@@ -611,8 +480,18 @@ abstract class Data implements DataInterface
     }
 
     /**
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("family")
+     * @return string
+     */
+    public function getFamilyCode()
+    {
+        return $this->getFamily()->getCode();
+    }
+
+    /**
      * @param AttributeInterface $attribute
-     * @param array $context
+     * @param array              $context
      * @return Value
      */
     public function createValue(AttributeInterface $attribute, array $context = null)
@@ -620,12 +499,101 @@ abstract class Data implements DataInterface
         if (!$context) {
             $context = $this->getCurrentContext();
         }
+
         return $this->getFamily()->createValue($this, $attribute, $context);
     }
 
     /**
+     * Set the values' data of a given attribute for multiple fields
+     *
      * @param AttributeInterface $attribute
-     * @param array $context
+     * @param array|\Traversable $dataValues
+     * @param array              $context
+     * @return Data
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    public function setValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
+    {
+        $this->emptyValues($attribute, $context);
+        $this->setInternalValuesData($attribute, $dataValues, $context);
+
+        return $this;
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @param array              $context
+     * @return Data
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    public function emptyValues(AttributeInterface $attribute = null, array $context = null)
+    {
+        $values = $this->getValues($attribute, $context);
+        foreach ($values as $value) {
+            $this->removeValue($value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Value $value
+     * @return Data
+     */
+    public function removeValue(Value $value)
+    {
+        $this->values->removeElement($value);
+        $value->setData(null);
+
+        return $this;
+    }
+
+    /**
+     * @param Value $value
+     * @return Data
+     *
+     * @throws UnexpectedValueException
+     */
+    public function addValue(Value $value)
+    {
+        if (!$value->getContext()) {
+            $value->setContext($this->getCurrentContext());
+        }
+        $this->values->add($value);
+        $value->setData($this);
+
+        return $this;
+    }
+
+    /**
+     * Set the value's data of a given attribute
+     *
+     * @param AttributeInterface $attribute
+     * @param mixed              $dataValue
+     * @param array              $context
+     * @return Data
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null)
+    {
+        return $this->setValuesData($attribute, [$dataValue], $context);
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @param array              $context
      * @return bool
      *
      * @throws UnexpectedValueException
@@ -640,19 +608,8 @@ abstract class Data implements DataInterface
                 return false;
             }
         }
-        return true;
-    }
 
-    /**
-     * @param AttributeInterface $attribute
-     *
-     * @throws UnexpectedValueException
-     */
-    protected function checkAttribute(AttributeInterface $attribute)
-    {
-        if (!$this->getFamily()->hasAttribute($attribute->getCode())) {
-            throw new UnexpectedValueException("Attribute {$attribute->getCode()} doesn't exists in family {$this->getFamilyCode()}");
-        }
+        return true;
     }
 
     /**
@@ -672,25 +629,6 @@ abstract class Data implements DataInterface
     }
 
     /**
-     * @return array
-     */
-    public function getCurrentContext()
-    {
-        if (!$this->currentContext) {
-            return $this->getFamily()->getDefaultContext();
-        }
-        return $this->currentContext;
-    }
-
-    /**
-     * @param array $currentContext
-     */
-    public function setCurrentContext(array $currentContext = [])
-    {
-        $this->currentContext = $currentContext;
-    }
-
-    /**
      * Remove id on clone and clean values
      *
      * @throws UnexpectedValueException
@@ -698,7 +636,8 @@ abstract class Data implements DataInterface
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
      */
-    public function __clone() {
+    public function __clone()
+    {
         $this->id = null;
         $newValues = new ArrayCollection();
         foreach ($this->getValues() as $value) {
@@ -709,5 +648,90 @@ abstract class Data implements DataInterface
             $this->addValue($newValue);
         }
         $this->setCreatedAt(new DateTime());
+    }
+
+    /**
+     * @param $attributeCode
+     * @return AttributeInterface
+     */
+    protected function getAttribute($attributeCode)
+    {
+        return $this->getFamily()->getAttribute($attributeCode);
+    }
+
+    /**
+     * @param AttributeInterface|null $attribute
+     * @param array|null              $context
+     * @return Collection|Value[]
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    protected function createDefaultValues(AttributeInterface $attribute = null, array $context = null)
+    {
+        $default = $attribute->getDefault();
+        if (!$attribute->isMultiple()) {
+            $default = [$default];
+        }
+
+        return $this->setInternalValuesData($attribute, $default, $context);
+    }
+
+    /**
+     * @param AttributeInterface      $attribute
+     * @param array|\Traversable      $dataValues
+     * @param array|null              $context
+     * @return Collection|Value[]
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    protected function setInternalValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
+    {
+        if (!(is_array($dataValues) || $dataValues instanceof \Traversable)) {
+            $type = is_object($dataValues) ? get_class($dataValues) : gettype($dataValues);
+            throw new UnexpectedValueException("Value for multiple attribute {$attribute->getCode()} must be an array, '{$type}' given");
+        }
+        $values = new ArrayCollection();
+        $accessor = PropertyAccess::createPropertyAccessor();
+        $position = 0;
+        foreach ($dataValues as $dataValue) {
+            /** @noinspection DisconnectedForeachInstructionInspection */
+            $value = $this->createValue($attribute, $context);
+            $value->setPosition($position++);
+            $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
+            $values->add($value);
+        }
+
+        return $values;
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     *
+     * @throws UnexpectedValueException
+     */
+    protected function checkAttribute(AttributeInterface $attribute)
+    {
+        if (!$this->getFamily()->hasAttribute($attribute->getCode())) {
+            throw new UnexpectedValueException("Attribute {$attribute->getCode()} doesn't exists in family {$this->getFamilyCode()}");
+        }
+    }
+
+    /**
+     * @return string
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    protected function getLabelValue()
+    {
+        return (string) $this->getValueData($this->getFamily()->getAttributeAsLabel());
     }
 }

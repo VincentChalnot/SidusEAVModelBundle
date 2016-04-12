@@ -1,29 +1,35 @@
 {
-  "name": "sidus/eav-model-bundle",
-  "description": "Symfony2 & Doctrine implementation of a Entity-Attribute-Value model, easily extendable",
-  "keywords": [ "eav", "doctrine", "model" ],
-  "homepage": "https://github.com/VincentChalnot/SidusEAVModelBundle",
-  "type": "library",
-  "license": "GPL-2.0",
-  "authors": [
-    {
-      "name": "Vincent Chalnot",
-      "email": "vincent@sidus.fr",
-      "homepage": "http://chalnot.fr",
-      "role": "Developer"
+    "name": "sidus/eav-model-bundle",
+    "description": "Symfony2 & Doctrine implementation of a Entity-Attribute-Value model, easily extendable",
+    "keywords": [
+        "eav",
+        "doctrine",
+        "model"
+    ],
+    "homepage": "https://github.com/VincentChalnot/SidusEAVModelBundle",
+    "type": "library",
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "Vincent Chalnot",
+            "email": "vincent@sidus.fr",
+            "homepage": "http://chalnot.fr",
+            "role": "Developer"
+        }
+    ],
+    "target-dir": "Sidus/EAVModelBundle",
+    "autoload": {
+        "psr-0": {
+            "Sidus\\EAVModelBundle": ""
+        }
+    },
+    "require": {
+        "php": ">=5.4",
+        "symfony/symfony": "~2.7.4|~2.8.1",
+        "doctrine/doctrine-bundle": "~1.4"
+    },
+    "suggest": {
+        "sidus/eav-bootstrap-bundle": "Easy Bootstrap integration",
+        "sidus/eav-filter-bundle": "Data filtering with Elastic Search and Doctrine fallback"
     }
-  ],
-  "target-dir": "Sidus/EAVModelBundle",
-  "autoload": {
-    "psr-0": { "Sidus\\EAVModelBundle": "" }
-  },
-  "require": {
-    "php": ">=5.4",
-    "symfony/symfony": "~2.7.4|~2.8.1",
-    "doctrine/doctrine-bundle": "~1.4"
-  },
-  "suggest": {
-    "sidus/eav-bootstrap-bundle" : "Easy Bootstrap integration",
-    "sidus/eav-filter-bundle" : "Data filtering with Elastic Search and Doctrine fallback"
-  }
 }

@@ -6,6 +6,11 @@ use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
+/**
+ * Build extendable configuration tree
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class Configuration implements ConfigurationInterface
 {
     /**
@@ -18,31 +23,31 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->root('sidus_eav_model');
         $attributeDefinition = $rootNode
             ->children()
-                ->scalarNode('data_class')->isRequired()->end()
-                ->scalarNode('value_class')->isRequired()->end()
-                ->scalarNode('collection_type')->defaultValue('collection')->end()
-                ->variableNode('default_context')->end()
-                ->arrayNode('global_context_mask')
-                    ->prototype('scalar')->end()
-                ->end()
-                ->arrayNode('attributes')
-                    ->prototype('array')
-                        ->children();
+            ->scalarNode('data_class')->isRequired()->end()
+            ->scalarNode('value_class')->isRequired()->end()
+            ->scalarNode('collection_type')->defaultValue('collection')->end()
+            ->variableNode('default_context')->end()
+            ->arrayNode('global_context_mask')
+            ->prototype('scalar')->end()
+            ->end()
+            ->arrayNode('attributes')
+            ->prototype('array')
+            ->children();
 
         $this->appendAttributeDefinition($attributeDefinition);
 
         $familyDefinition = $attributeDefinition->end()
-                    ->end()
-                ->end()
-                ->arrayNode('families')
-                    ->prototype('array')
-                        ->children();
+            ->end()
+            ->end()
+            ->arrayNode('families')
+            ->prototype('array')
+            ->children();
 
         $this->appendFamilyDefinition($familyDefinition);
 
         $familyDefinition->end()
-                    ->end()
-                ->end()
+            ->end()
+            ->end()
             ->end();
 
         return $treeBuilder;
@@ -66,7 +71,7 @@ class Configuration implements ConfigurationInterface
             ->booleanNode('unique')->defaultValue(false)->end()
             ->booleanNode('multiple')->defaultValue(false)->end()
             ->arrayNode('context_mask')
-                ->prototype('scalar')->end()
+            ->prototype('scalar')->end()
             ->end();
     }
 
@@ -84,7 +89,7 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('parent')->end()
             ->booleanNode('instantiable')->defaultValue(true)->end()
             ->arrayNode('attributes')
-                ->prototype('scalar')->end()
+            ->prototype('scalar')->end()
             ->end();
     }
 }

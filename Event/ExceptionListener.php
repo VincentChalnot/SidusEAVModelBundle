@@ -15,6 +15,12 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+/**
+ * Handles missing family exceptions and clear the database from the corrupted values
+ * Deactivated for the moment as it can be dangerous
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class ExceptionListener implements EventSubscriberInterface
 {
     /** @var FamilyConfigurationHandler */
@@ -27,9 +33,11 @@ class ExceptionListener implements EventSubscriberInterface
     protected $session;
 
     /**
+     * ExceptionListener constructor.
+     *
      * @param FamilyConfigurationHandler $familyConfigurationHandler
-     * @param DataRepository $dataRepository
-     * @param SessionInterface $session
+     * @param DataRepository             $dataRepository
+     * @param SessionInterface           $session
      */
     public function __construct(
         FamilyConfigurationHandler $familyConfigurationHandler,
@@ -41,7 +49,9 @@ class ExceptionListener implements EventSubscriberInterface
         $this->session = $session;
     }
 
-
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents()
     {
         return [
@@ -49,6 +59,10 @@ class ExceptionListener implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * @param GetResponseForExceptionEvent $event
+     * @throws \Exception
+     */
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
         $exception = $event->getException();
@@ -67,7 +81,7 @@ class ExceptionListener implements EventSubscriberInterface
      */
     protected function handleMissingFamilyException(GetResponseForExceptionEvent $event)
     {
-        $familyCodes = $this->familyConfigurationHandler->getFamilyCodes(); // @todo do it directly with families ?
+        $familyCodes = $this->familyConfigurationHandler->getFamilyCodes();
 
         $qb = $this->dataRepository->createQueryBuilder('d');
         $qb->delete()

@@ -7,6 +7,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
 
+/**
+ * Base class for storing values in the EAV model
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 abstract class Value implements ContextualValueInterface
 {
     /**
@@ -86,7 +91,7 @@ abstract class Value implements ContextualValueInterface
     protected $textValue;
 
     /**
-     * @param Data $data
+     * @param Data               $data
      * @param AttributeInterface $attribute
      */
     public function __construct(Data $data = null, AttributeInterface $attribute = null)
@@ -108,18 +113,6 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set attributeCode
-     *
-     * @param string $attributeCode
-     * @return Value
-     */
-    public function setAttributeCode($attributeCode)
-    {
-        $this->attributeCode = $attributeCode;
-        return $this;
-    }
-
-    /**
      * Get attributeCode
      *
      * @return string
@@ -130,14 +123,15 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set boolValue
+     * Set attributeCode
      *
-     * @param boolean $boolValue
+     * @param string $attributeCode
      * @return Value
      */
-    public function setBoolValue($boolValue)
+    public function setAttributeCode($attributeCode)
     {
-        $this->boolValue = $boolValue;
+        $this->attributeCode = $attributeCode;
+
         return $this;
     }
 
@@ -152,14 +146,15 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set integerValue
+     * Set boolValue
      *
-     * @param integer $integerValue
+     * @param boolean $boolValue
      * @return Value
      */
-    public function setIntegerValue($integerValue)
+    public function setBoolValue($boolValue)
     {
-        $this->integerValue = $integerValue;
+        $this->boolValue = $boolValue;
+
         return $this;
     }
 
@@ -174,14 +169,15 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set decimalValue
+     * Set integerValue
      *
-     * @param float $decimalValue
+     * @param integer $integerValue
      * @return Value
      */
-    public function setDecimalValue($decimalValue)
+    public function setIntegerValue($integerValue)
     {
-        $this->decimalValue = $decimalValue;
+        $this->integerValue = $integerValue;
+
         return $this;
     }
 
@@ -196,15 +192,15 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set dateValue
+     * Set decimalValue
      *
-     * @param DateTime|int|string $dateValue
+     * @param float $decimalValue
      * @return Value
-     * @throws \UnexpectedValueException
      */
-    public function setDateValue($dateValue)
+    public function setDecimalValue($decimalValue)
     {
-        $this->dateValue = DateTimeUtility::parse($dateValue);
+        $this->decimalValue = $decimalValue;
+
         return $this;
     }
 
@@ -219,15 +215,16 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set datetimeValue
+     * Set dateValue
      *
-     * @param DateTime|int|string $datetimeValue
+     * @param DateTime|int|string $dateValue
      * @return Value
      * @throws \UnexpectedValueException
      */
-    public function setDatetimeValue($datetimeValue)
+    public function setDateValue($dateValue)
     {
-        $this->datetimeValue = DateTimeUtility::parse($datetimeValue);
+        $this->dateValue = DateTimeUtility::parse($dateValue);
+
         return $this;
     }
 
@@ -239,6 +236,30 @@ abstract class Value implements ContextualValueInterface
     public function getDatetimeValue()
     {
         return $this->datetimeValue;
+    }
+
+    /**
+     * Set datetimeValue
+     *
+     * @param DateTime|int|string $datetimeValue
+     * @return Value
+     * @throws \UnexpectedValueException
+     */
+    public function setDatetimeValue($datetimeValue)
+    {
+        $this->datetimeValue = DateTimeUtility::parse($datetimeValue);
+
+        return $this;
+    }
+
+    /**
+     * Get stringValue
+     *
+     * @return string
+     */
+    public function getStringValue()
+    {
+        return $this->stringValue;
     }
 
     /**
@@ -255,13 +276,13 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Get stringValue
+     * Get textValue
      *
      * @return string
      */
-    public function getStringValue()
+    public function getTextValue()
     {
-        return $this->stringValue;
+        return $this->textValue;
     }
 
     /**
@@ -278,13 +299,13 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Get textValue
+     * Get dataValue
      *
-     * @return string
+     * @return integer
      */
-    public function getTextValue()
+    public function getDataValue()
     {
-        return $this->textValue;
+        return $this->dataValue;
     }
 
     /**
@@ -298,16 +319,6 @@ abstract class Value implements ContextualValueInterface
         $this->dataValue = $dataValue;
 
         return $this;
-    }
-
-    /**
-     * Get dataValue
-     *
-     * @return integer
-     */
-    public function getDataValue()
-    {
-        return $this->dataValue;
     }
 
     /**
@@ -351,18 +362,16 @@ abstract class Value implements ContextualValueInterface
         foreach ($this->getContextKeys() as $key) {
             $context[$key] = $this->$key;
         }
+
         return $context;
     }
 
     /**
-     * @param string $key
-     * @throws \UnexpectedValueException
+     * @return array
      */
-    protected function checkContextKey($key)
+    public function getContextKeys()
     {
-        if (!in_array($key, $this->getContextKeys(), true)) {
-            throw new \UnexpectedValueException("Trying to get an non-allowed context key {$key}");
-        }
+        return [];
     }
 
     /**
@@ -373,22 +382,13 @@ abstract class Value implements ContextualValueInterface
     public function getContextValue($key)
     {
         $this->checkContextKey($key);
+
         return $this->$key;
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
-     * @throws \UnexpectedValueException
-     */
-    public function setContextValue($key, $value)
-    {
-        $this->checkContextKey($key);
-        $this->$key = $value;
-    }
-
-    /**
      * Context constructor.
+     *
      * @param array $context
      * @throws \UnexpectedValueException
      */
@@ -411,17 +411,32 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * @return array
+     * @param string $key
+     * @param mixed  $value
+     * @throws \UnexpectedValueException
      */
-    public function getContextKeys()
+    public function setContextValue($key, $value)
     {
-        return [];
+        $this->checkContextKey($key);
+        $this->$key = $value;
     }
 
     /**
      * Remove id on clone
      */
-    public function __clone() {
+    public function __clone()
+    {
         $this->id = null;
+    }
+
+    /**
+     * @param string $key
+     * @throws \UnexpectedValueException
+     */
+    protected function checkContextKey($key)
+    {
+        if (!in_array($key, $this->getContextKeys(), true)) {
+            throw new \UnexpectedValueException("Trying to get an non-allowed context key {$key}");
+        }
     }
 }

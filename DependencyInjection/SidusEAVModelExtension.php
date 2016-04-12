@@ -12,6 +12,11 @@ use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
+/**
+ * Parse configuration and creates attributes and familie's services
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class SidusEAVModelExtension extends Extension
 {
     /** @var array */
@@ -43,14 +48,14 @@ class SidusEAVModelExtension extends Extension
 
         $this->createFamilyServices($config, $container);
 
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
         $loader->load('attribute_types.yml');
         $loader->load('forms.yml');
     }
 
     /**
-     * @param array $config
+     * @param array            $config
      * @param ContainerBuilder $container
      * @throws \Exception
      */
@@ -70,8 +75,8 @@ class SidusEAVModelExtension extends Extension
     }
 
     /**
-     * @param string $code
-     * @param array $familyConfiguration
+     * @param string           $code
+     * @param array            $familyConfiguration
      * @param ContainerBuilder $container
      * @throws BadMethodCallException
      * @throws InvalidArgumentException
@@ -86,26 +91,31 @@ class SidusEAVModelExtension extends Extension
         ]);
         $definition->addMethodCall('setTranslator', [new Reference('translator')]);
         $definition->addTag('sidus.family');
-        $container->setDefinition('sidus_eav_model.family.' . $code, $definition);
+        $container->setDefinition('sidus_eav_model.family.'.$code, $definition);
     }
 
     /**
-     * @param string $code
-     * @param array $attributeConfiguration
+     * @param string           $code
+     * @param array            $attributeConfiguration
      * @param ContainerBuilder $container
      * @throws BadMethodCallException
      * @throws InvalidArgumentException
      */
     protected function addAttributeServiceDefinition($code, $attributeConfiguration, ContainerBuilder $container)
     {
-        $attributeConfiguration['context_mask'] = array_merge($this->globalConfig['global_context_mask'], $attributeConfiguration['context_mask']);
-        $definition = new Definition(new Parameter('sidus_eav_model.attribute.class'), [
+        $attributeConfiguration['context_mask'] = array_merge(
+            $this->globalConfig['global_context_mask'],
+            $attributeConfiguration['context_mask']
+        );
+
+        $definitionOptions = [
             $code,
             new Reference('sidus_eav_model.attribute_type_configuration.handler'),
             $attributeConfiguration,
-        ]);
+        ];
+        $definition = new Definition(new Parameter('sidus_eav_model.attribute.class'), $definitionOptions);
         $definition->addMethodCall('setTranslator', [new Reference('translator')]);
         $definition->addTag('sidus.attribute');
-        $container->setDefinition('sidus_eav_model.attribute.' . $code, $definition);
+        $container->setDefinition('sidus_eav_model.attribute.'.$code, $definition);
     }
 }

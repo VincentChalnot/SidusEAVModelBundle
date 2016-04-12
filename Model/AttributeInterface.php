@@ -4,6 +4,11 @@ namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Entity\Value;
 
+/**
+ * Interface for attribute services
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 interface AttributeInterface
 {
     /**
@@ -39,19 +44,19 @@ interface AttributeInterface
 
     /**
      * @param string $code
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function addOption($code, $value);
 
     /**
-     * @param $data
+     * @param mixed $data
      * @return array
      */
     public function getFormOptions($data = null);
 
     /**
      * @param string $code
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function addFormOption($code, $value);
 
@@ -62,7 +67,7 @@ interface AttributeInterface
 
     /**
      * @param string $code
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function addViewOption($code, $value);
 
@@ -112,7 +117,7 @@ interface AttributeInterface
     public function getValidationRules();
 
     /**
-     * @param array
+     * @param array $options
      */
     public function addValidationRules(array $options);
 

@@ -5,6 +5,11 @@ namespace Sidus\EAVModelBundle\Model;
 use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Entity\Value;
 
+/**
+ * Interface for family services
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 interface FamilyInterface
 {
     /**
@@ -65,9 +70,9 @@ interface FamilyInterface
     public function createData();
 
     /**
-     * @param Data $data
+     * @param Data               $data
      * @param AttributeInterface $attribute
-     * @param array $context
+     * @param array              $context
      * @return Value
      */
     public function createValue(Data $data, AttributeInterface $attribute, array $context = null);

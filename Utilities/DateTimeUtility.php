@@ -5,6 +5,11 @@ namespace Sidus\EAVModelBundle\Utilities;
 use DateTime;
 use UnexpectedValueException;
 
+/**
+ * Parse datetime values
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class DateTimeUtility
 {
     /**
@@ -12,7 +17,7 @@ class DateTimeUtility
      * ISO8601 string
      *
      * @param DateTime|int|string $data
-     * @param bool $allowNull
+     * @param bool                $allowNull
      * @return DateTime
      * @throws UnexpectedValueException
      */
@@ -34,6 +39,7 @@ class DateTimeUtility
             }
             $date = new DateTime();
             $date->setTimestamp($data);
+
             return $date;
         }
         $date = DateTime::createFromFormat(DateTime::W3C, $data);
@@ -43,6 +49,7 @@ class DateTimeUtility
         if (!$date) {
             throw new \UnexpectedValueException("Unable to parse DateTime value: '{$data}' expecting DateTime or timestamp");
         }
+
         return $date;
     }
 }

@@ -2,6 +2,11 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
+/**
+ * Interface for attribute types services
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 interface AttributeTypeInterface
 {
     /**
@@ -35,7 +40,7 @@ interface AttributeTypeInterface
     public function setAttributeDefaults(AttributeInterface $attribute);
 
     /**
-     * @param $data
+     * @param mixed $data
      * @return array
      */
     public function getFormOptions($data);

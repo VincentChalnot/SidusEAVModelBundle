@@ -5,6 +5,11 @@ namespace Sidus\EAVModelBundle\Configuration;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 
+/**
+ * Container for families
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class FamilyConfigurationHandler
 {
     /** @var FamilyInterface[] */
@@ -28,6 +33,7 @@ class FamilyConfigurationHandler
     public function getFamilies()
     {
         $this->initialize();
+
         return $this->families;
     }
 
@@ -50,6 +56,7 @@ class FamilyConfigurationHandler
             throw new MissingFamilyException($code);
         }
         $this->initialize();
+
         return $this->families[$code];
     }
 
@@ -60,6 +67,26 @@ class FamilyConfigurationHandler
     public function hasFamily($code)
     {
         return !empty($this->families[$code]);
+    }
+
+    /**
+     * Get all instantiable families with no parent
+     *
+     * @return array
+     */
+    public function getRootFamilies()
+    {
+        $root = [];
+        foreach ($this->getFamilies() as $family) {
+            if ($family->isInstantiable()) {
+                $p = $family->getParent();
+                if (!$p || ($p && !$p->isInstantiable())) {
+                    $root[$family->getCode()] = $family;
+                }
+            }
+        }
+
+        return $root;
     }
 
     /**
@@ -78,19 +105,5 @@ class FamilyConfigurationHandler
                 }
             }
         }
-    }
-
-    public function getRootFamilies()
-    {
-        $root = [];
-        foreach ($this->getFamilies() as $family) {
-            if ($family->isInstantiable()) {
-                $p = $family->getParent();
-                if (!$p || ($p && !$p->isInstantiable())) {
-                    $root[$family->getCode()] = $family;
-                }
-            }
-        }
-        return $root;
     }
 }

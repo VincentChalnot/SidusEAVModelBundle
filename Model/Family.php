@@ -11,6 +11,11 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use UnexpectedValueException;
 
+/**
+ * Defines the model of a data, think of it as the data type
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class Family implements FamilyInterface
 {
     use TranslatableTrait;
@@ -57,14 +62,18 @@ class Family implements FamilyInterface
     protected $defaultContext;
 
     /**
-     * @param string $code
+     * @param string                        $code
      * @param AttributeConfigurationHandler $attributeConfigurationHandler
-     * @param FamilyConfigurationHandler $familyConfigurationHandler
-     * @param array $config
+     * @param FamilyConfigurationHandler    $familyConfigurationHandler
+     * @param array                         $config
      * @throws \Exception
      */
-    public function __construct($code, AttributeConfigurationHandler $attributeConfigurationHandler, FamilyConfigurationHandler $familyConfigurationHandler, array $config = null)
-    {
+    public function __construct(
+        $code,
+        AttributeConfigurationHandler $attributeConfigurationHandler,
+        FamilyConfigurationHandler $familyConfigurationHandler,
+        array $config = null
+    ) {
         $this->code = $code;
 
         if (!empty($config['parent'])) {
@@ -183,20 +192,7 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @param FamilyInterface $parent
-     */
-    protected function copyFromFamily(FamilyInterface $parent)
-    {
-        foreach ($parent->getAttributes() as $attribute) {
-            $this->addAttribute($attribute);
-        }
-        $this->attributeAsLabel = $parent->getAttributeAsLabel();
-        $this->valueClass = $parent->getValueClass();
-        $this->dataClass = $parent->getDataClass();
-    }
-
-    /**
-     * @param $code
+     * @param string $code
      * @return AttributeInterface
      * @throws UnexpectedValueException
      */
@@ -205,11 +201,12 @@ class Family implements FamilyInterface
         if (!$this->hasAttribute($code)) {
             throw new UnexpectedValueException("Unknown attribute {$code} in family {$this->code}");
         }
+
         return $this->attributes[$code];
     }
 
     /**
-     * @param $code
+     * @param string $code
      * @return bool
      */
     public function hasAttribute($code)
@@ -244,6 +241,7 @@ class Family implements FamilyInterface
         if ($this->label) {
             return $this->label;
         }
+
         return $this->tryTranslate("eav.family.{$this->getCode()}.label", [], $this->getCode());
     }
 
@@ -274,6 +272,7 @@ class Family implements FamilyInterface
         foreach ($this->getChildren() as $child) {
             $codes += $child->getMatchingCodes();
         }
+
         return $codes;
     }
 
@@ -326,9 +325,9 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @param Data $data
+     * @param Data               $data
      * @param AttributeInterface $attribute
-     * @param array $context
+     * @param array              $context
      * @return Value
      * @throws UnexpectedValueException
      */
@@ -357,6 +356,7 @@ class Family implements FamilyInterface
     public function createData()
     {
         $dataClass = $this->getDataClass();
+
         return new $dataClass($this);
     }
 
@@ -390,5 +390,18 @@ class Family implements FamilyInterface
     public function setDefaultContext(array $defaultContext)
     {
         $this->defaultContext = $defaultContext;
+    }
+
+    /**
+     * @param FamilyInterface $parent
+     */
+    protected function copyFromFamily(FamilyInterface $parent)
+    {
+        foreach ($parent->getAttributes() as $attribute) {
+            $this->addAttribute($attribute);
+        }
+        $this->attributeAsLabel = $parent->getAttributeAsLabel();
+        $this->valueClass = $parent->getValueClass();
+        $this->dataClass = $parent->getDataClass();
     }
 }

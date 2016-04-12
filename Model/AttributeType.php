@@ -2,6 +2,11 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
+/**
+ * Type of attribute like string, integer, etc.
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class AttributeType implements AttributeTypeInterface
 {
     /**
@@ -39,10 +44,11 @@ class AttributeType implements AttributeTypeInterface
 
     /**
      * AttributeType constructor.
+     *
      * @param string $code
      * @param string $databaseType
      * @param string $formType
-     * @param array $formOptions
+     * @param array  $formOptions
      */
     public function __construct($code, $databaseType, $formType, array $formOptions = [])
     {
@@ -103,7 +109,7 @@ class AttributeType implements AttributeTypeInterface
     }
 
     /**
-     * @param $data
+     * @param mixed $data
      * @return array
      */
     public function getFormOptions($data)

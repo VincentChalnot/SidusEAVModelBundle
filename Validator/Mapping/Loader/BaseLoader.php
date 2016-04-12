@@ -7,6 +7,11 @@ use Symfony\Component\Validator\Exception\MappingException;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Mapping\Loader\AbstractLoader;
 
+/**
+ * Custom loader to manually call constraints on values based on their attributes
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class BaseLoader extends AbstractLoader
 {
 
@@ -23,19 +28,10 @@ class BaseLoader extends AbstractLoader
     }
 
     /**
-     * Creates a new constraint instance for the given constraint name.
-     *
-     * @param string $name    The constraint name. Either a constraint relative
-     *                        to the default constraint namespace, or a fully
-     *                        qualified class name. Alternatively, the constraint
-     *                        may be preceded by a namespace alias and a colon.
-     *                        The namespace alias must have been defined using
-     *                        {@link addNamespaceAlias()}.
-     * @param mixed  $options The constraint options
-     *
+     * @param string $name
+     * @param null   $options
      * @return Constraint
-     *
-     * @throws MappingException If the namespace prefix is undefined
+     * @throws MappingException
      */
     public function newConstraint($name, $options = null)
     {

@@ -2,6 +2,11 @@
 
 namespace Sidus\EAVModelBundle\Entity;
 
+/**
+ * All values must implements this class that defines how context information is handled
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 interface ContextualValueInterface
 {
     /**
@@ -18,13 +23,14 @@ interface ContextualValueInterface
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
      * @throws \UnexpectedValueException
      */
     public function setContextValue($key, $value);
 
     /**
      * Context constructor.
+     *
      * @param array $context
      * @throws \UnexpectedValueException
      */

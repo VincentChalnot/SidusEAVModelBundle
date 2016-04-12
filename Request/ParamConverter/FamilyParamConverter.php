@@ -3,12 +3,16 @@
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterInterface;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Symfony\Component\HttpFoundation\Request;
 
-class FamilyParamConverter extends BaseParamConverter
+/**
+ * Automatically convert request parameters in families
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
+class FamilyParamConverter extends AbstractBaseParamConverter
 {
     /** @var FamilyConfigurationHandler */
     protected $familyConfigurationHandler;
@@ -21,15 +25,10 @@ class FamilyParamConverter extends BaseParamConverter
         $this->familyConfigurationHandler = $familyConfigurationHandler;
     }
 
-    protected function convertValue($value)
-    {
-        return $this->familyConfigurationHandler->getFamily($value);
-    }
-
     /**
      * Stores the object in the request.
      *
-     * @param Request $request The request
+     * @param Request        $request       The request
      * @param ParamConverter $configuration Contains the name, class and options of the object
      *
      * @return bool True if the object has been successfully set, else false
@@ -47,7 +46,18 @@ class FamilyParamConverter extends BaseParamConverter
         if ($originalName !== $configuration->getName()) {
             $request->attributes->set($originalName, $request->attributes->get($configuration->getName()));
         }
+
         return true;
+    }
+
+    /**
+     * @param string $value
+     * @return \Sidus\EAVModelBundle\Model\FamilyInterface
+     * @throws MissingFamilyException
+     */
+    protected function convertValue($value)
+    {
+        return $this->familyConfigurationHandler->getFamily($value);
     }
 
     /**

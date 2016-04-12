@@ -8,10 +8,15 @@ use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\Metadata\VirtualPropertyMetadata;
 use Sidus\EAVModelBundle\Entity\Data;
 
+/**
+ * Handle serialization of the EAV model
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class DataSerializerHandler implements EventSubscriberInterface
 {
     /**
-     * @inheritdoc
+     * @return array
      */
     public static function getSubscribedEvents()
     {
@@ -41,6 +46,7 @@ class DataSerializerHandler implements EventSubscriberInterface
             $propertyMetadata = new VirtualPropertyMetadata(get_class($data), $attribute->getCode());
             $context->pushPropertyMetadata($propertyMetadata);
             $visitor->visitProperty($propertyMetadata, $data, $context);
+            /** @noinspection DisconnectedForeachInstructionInspection */
             $context->popPropertyMetadata();
         }
     }

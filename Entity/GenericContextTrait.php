@@ -4,7 +4,12 @@ namespace Sidus\EAVModelBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-trait GenericContext
+/**
+ * Generic context you can use in your applications
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
+trait GenericContextTrait
 {
     /**
      * ISO 3166-1 alpha-2 country code

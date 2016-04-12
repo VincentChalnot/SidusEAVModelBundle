@@ -6,7 +6,6 @@ use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Entity\Data;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
-use Sidus\EAVModelBundle\Model\Family;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Symfony\Component\Form\AbstractType;
@@ -19,6 +18,11 @@ use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * Base form used for data edition
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class DataType extends AbstractType
 {
     use TranslatableTrait;
@@ -34,11 +38,14 @@ class DataType extends AbstractType
 
     /**
      * @param FamilyConfigurationHandler $familyConfigurationHandler
-     * @param $dataClass
-     * @param string $collectionType
+     * @param string                     $dataClass
+     * @param string                     $collectionType
      */
-    public function __construct(FamilyConfigurationHandler $familyConfigurationHandler, $dataClass, $collectionType = 'collection')
-    {
+    public function __construct(
+        FamilyConfigurationHandler $familyConfigurationHandler,
+        $dataClass,
+        $collectionType = 'collection'
+    ) {
         $this->familyConfigurationHandler = $familyConfigurationHandler;
         $this->dataClass = $dataClass;
         $this->collectionType = $collectionType;
@@ -46,7 +53,7 @@ class DataType extends AbstractType
 
     /**
      * @param FormBuilderInterface $builder
-     * @param array $options
+     * @param array                $options
      * @throws \Exception
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -69,7 +76,7 @@ class DataType extends AbstractType
                 $this->buildCreateForm($form, $options);
             }
         });
-        $builder->addEventListener(FormEvents::POST_SUBMIT, function(FormEvent $event){
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
             $data = $event->getData();
             if ($data instanceof Data) {
                 $data->setUpdatedAt(new \DateTime());
@@ -79,7 +86,7 @@ class DataType extends AbstractType
 
     /**
      * @param FormInterface $form
-     * @param array $options
+     * @param array         $options
      * @throws \Exception
      */
     public function buildCreateForm(FormInterface $form, array $options)
@@ -90,10 +97,10 @@ class DataType extends AbstractType
     /**
      * For additional fields in data form that are not linked to EAV model
      *
-     * @param FormInterface $form
+     * @param FormInterface   $form
      * @param FamilyInterface $family
-     * @param Data $data
-     * @param array $options
+     * @param Data            $data
+     * @param array           $options
      */
     public function buildDataForm(FormInterface $form, FamilyInterface $family, Data $data = null, array $options = [])
     {
@@ -101,29 +108,84 @@ class DataType extends AbstractType
     }
 
     /**
-     * @param FormInterface $form
+     * @param FormInterface   $form
      * @param FamilyInterface $family
-     * @param Data $data
-     * @param array $options
+     * @param Data            $data
+     * @param array           $options
      * @throws \Exception
      */
-    public function buildValuesForm(FormInterface $form, FamilyInterface $family, Data $data = null, array $options = [])
-    {
+    public function buildValuesForm(
+        FormInterface $form,
+        FamilyInterface $family,
+        Data $data = null,
+        array $options = []
+    ) {
         foreach ($family->getAttributes() as $attribute) {
             $this->addAttribute($form, $attribute, $family, $data, $options);
         }
     }
 
     /**
-     * @param FormInterface $form
+     * @param OptionsResolver $resolver
+     * @throws AccessException
+     * @throws UndefinedOptionsException
+     * @throws MissingFamilyException
+     */
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+            'family' => null,
+            'data_class' => $this->dataClass,
+        ]);
+        $resolver->setNormalizer('family', function (Options $options, $value) {
+            if ($value === null) {
+                return null;
+            }
+            if ($value instanceof FamilyInterface) {
+                return $value;
+            }
+
+            return $this->familyConfigurationHandler->getFamily($value);
+        });
+        $resolver->setNormalizer('empty_data', function (Options $options, $value) {
+            if ($options['family'] instanceof FamilyInterface) {
+                return $options['family']->createData();
+            }
+
+            return $value;
+        });
+        $resolver->setNormalizer('data_class', function (Options $options, $value) {
+            if ($options['family'] instanceof FamilyInterface) {
+                return $options['family']->getDataClass();
+            }
+
+            return $value;
+        });
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return 'sidus_data';
+    }
+
+    /**
+     * @param FormInterface      $form
      * @param AttributeInterface $attribute
-     * @param FamilyInterface $family
-     * @param Data|null $data
-     * @param array $options
+     * @param FamilyInterface    $family
+     * @param Data|null          $data
+     * @param array              $options
      * @throws \Exception
      */
-    protected function addAttribute(FormInterface $form, AttributeInterface $attribute, FamilyInterface $family, Data $data = null, array $options = [])
-    {
+    protected function addAttribute(
+        FormInterface $form,
+        AttributeInterface $attribute,
+        FamilyInterface $family,
+        Data $data = null,
+        array $options = []
+    ) {
         $attributeType = $attribute->getType();
         $label = $this->getFieldLabel($family, $attribute);
 
@@ -148,52 +210,9 @@ class DataType extends AbstractType
     }
 
     /**
-     * @param OptionsResolver $resolver
-     * @throws AccessException
-     * @throws UndefinedOptionsException
-     * @throws MissingFamilyException
-     */
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        $resolver->setDefaults([
-            'family' => null,
-            'data_class' => $this->dataClass,
-        ]);
-        $resolver->setNormalizer('family', function (Options $options, $value) {
-            if ($value === null) {
-                return null;
-            }
-            if ($value instanceof FamilyInterface) {
-                return $value;
-            }
-            return $this->familyConfigurationHandler->getFamily($value);
-        });
-        $resolver->setNormalizer('empty_data', function (Options $options, $value) {
-            if ($options['family'] instanceof FamilyInterface) {
-                return $options['family']->createData();
-            }
-            return $value;
-        });
-        $resolver->setNormalizer('data_class', function (Options $options, $value) {
-            if ($options['family'] instanceof FamilyInterface) {
-                return $options['family']->getDataClass();
-            }
-            return $value;
-        });
-    }
-
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return 'sidus_data';
-    }
-
-    /**
      * Use label from formOptions or use translation or automatically create human readable one
      *
-     * @param FamilyInterface $family
+     * @param FamilyInterface    $family
      * @param AttributeInterface $attribute
      * @return string
      * @throws \InvalidArgumentException
@@ -201,6 +220,7 @@ class DataType extends AbstractType
     protected function getFieldLabel(FamilyInterface $family, AttributeInterface $attribute)
     {
         $tId = "eav.{$family->getCode()}.attribute.{$attribute->getCode()}.label";
+
         return $this->tryTranslate($tId, [], ucfirst($attribute));
     }
 }

@@ -11,6 +11,11 @@ use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use UnexpectedValueException;
 
+/**
+ * Define an attribute in the EAV model
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class Attribute implements AttributeInterface
 {
     use TranslatableTrait;
@@ -58,16 +63,19 @@ class Attribute implements AttributeInterface
     protected $default;
 
     /**
-     * @param string $code
+     * @param string                            $code
      * @param AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler
-     * @param array $configuration
+     * @param array                             $configuration
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
      */
-    public function __construct($code, AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler, array $configuration = null)
-    {
+    public function __construct(
+        $code,
+        AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler,
+        array $configuration = null
+    ) {
         $this->code = $code;
         $this->type = $attributeTypeConfigurationHandler->getType($configuration['type']);
         unset($configuration['type']);
@@ -115,12 +123,13 @@ class Attribute implements AttributeInterface
         if (!isset($this->options[$code])) {
             return null;
         }
+
         return $this->options[$code];
     }
 
     /**
      * @param string $code
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function addOption($code, $value)
     {
@@ -136,19 +145,20 @@ class Attribute implements AttributeInterface
     }
 
     /**
-     * @param $data
+     * @param mixed $data
      * @return array
      */
     public function getFormOptions($data = null)
     {
         $defaultOptions = ['required' => $this->isRequired];
         $typeOptions = $this->getType()->getFormOptions($data);
+
         return array_merge($defaultOptions, $typeOptions, $this->formOptions);
     }
 
     /**
      * @param string $code
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function addFormOption($code, $value)
     {
@@ -166,7 +176,7 @@ class Attribute implements AttributeInterface
 
     /**
      * @param string $code
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function addViewOption($code, $value)
     {
@@ -271,6 +281,7 @@ class Attribute implements AttributeInterface
         if ($this->isCollection === null) {
             return $this->isMultiple();
         }
+
         return $this->isCollection;
     }
 
@@ -308,6 +319,7 @@ class Attribute implements AttributeInterface
         if ($this->label) {
             return $this->label;
         }
+
         return $this->tryTranslate("eav.attribute.{$this->getCode()}.label", [], $this->getCode());
     }
 
@@ -318,6 +330,7 @@ class Attribute implements AttributeInterface
     public function setLabel($label)
     {
         $this->label = $label;
+
         return $this;
     }
 
@@ -327,25 +340,6 @@ class Attribute implements AttributeInterface
     public function __toString()
     {
         return (string) $this->getLabel();
-    }
-
-    /**
-     * @throws UnexpectedValueException
-     */
-    protected function checkConflicts()
-    {
-        $default = $this->getDefault();
-        if ($this->isMultiple()) {
-            if ($this->isUnique()) {
-                throw new UnexpectedValueException("Attribute {$this->getCode()} cannot be multiple and unique at the same time");
-            }
-            if (null !== $default && !(is_array($default) || $default instanceof \Traversable)) {
-                throw new UnexpectedValueException("Attribute {$this->getCode()} is multiple and therefore should have an array of values as default option");
-            }
-        }
-        if ($default !== null && ($this->getType()->isRelation() || $this->getType()->isEmbedded())) {
-            throw new UnexpectedValueException("Attribute {$this->getCode()} is a relation to an other entity, it doesn't support default values in configuration");
-        }
     }
 
     /**
@@ -381,6 +375,7 @@ class Attribute implements AttributeInterface
                 return false;
             }
         }
+
         return true;
     }
 
@@ -399,6 +394,26 @@ class Attribute implements AttributeInterface
     public function setDefault($default)
     {
         $this->default = $default;
+
         return $this;
+    }
+
+    /**
+     * @throws UnexpectedValueException
+     */
+    protected function checkConflicts()
+    {
+        $default = $this->getDefault();
+        if ($this->isMultiple()) {
+            if ($this->isUnique()) {
+                throw new UnexpectedValueException("Attribute {$this->getCode()} cannot be multiple and unique at the same time");
+            }
+            if (null !== $default && !(is_array($default) || $default instanceof \Traversable)) {
+                throw new UnexpectedValueException("Attribute {$this->getCode()} is multiple and therefore should have an array of values as default option");
+            }
+        }
+        if ($default !== null && ($this->getType()->isRelation() || $this->getType()->isEmbedded())) {
+            throw new UnexpectedValueException("Attribute {$this->getCode()} is a relation to an other entity, it doesn't support default values in configuration");
+        }
     }
 }

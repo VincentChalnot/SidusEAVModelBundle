@@ -2,10 +2,14 @@
 
 namespace Sidus\EAVModelBundle\Event;
 
-
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
+/**
+ * Change Doctrine's metadata on the fly to inject user-defined data and value classes
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class DoctrineMetadataListener
 {
     const BASE_DATA_CLASS = 'Sidus\EAVModelBundle\Entity\Data';
@@ -16,6 +20,7 @@ class DoctrineMetadataListener
 
     /**
      * DoctrineMetadataListener constructor.
+     *
      * @param string $dataClass
      * @param string $valueClass
      */

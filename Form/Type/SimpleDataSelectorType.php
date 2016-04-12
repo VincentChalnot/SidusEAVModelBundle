@@ -6,17 +6,21 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * Simple data form selector, limits the options to 100
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class SimpleDataSelectorType extends AbstractType
 {
     /** @var string */
     protected $dataClass;
 
     /**
-     * @param $dataClass
+     * @param string $dataClass
      */
     public function __construct($dataClass)
     {
@@ -44,12 +48,29 @@ class SimpleDataSelectorType extends AbstractType
                     ->setParameter('family', $options['family']);
             }
             $qb->setMaxResults(100);
+
             return $qb;
         };
         $resolver->setDefaults([
             'class' => $this->dataClass,
             'query_builder' => $queryBuilder,
         ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getParent()
+    {
+        return 'entity';
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return 'sidus_simple_data_selector';
     }
 
     /**
@@ -63,7 +84,11 @@ class SimpleDataSelectorType extends AbstractType
     {
         $queryBuilderNormalizer = function (Options $options, $queryBuilder) {
             if (is_callable($queryBuilder)) {
-                $queryBuilder = call_user_func($queryBuilder, $options['em']->getRepository($options['class']), $options);
+                $queryBuilder = call_user_func(
+                    $queryBuilder,
+                    $options['em']->getRepository($options['class']),
+                    $options
+                );
 
                 if (!$queryBuilder instanceof QueryBuilder) {
                     throw new UnexpectedTypeException($queryBuilder, 'Doctrine\ORM\QueryBuilder');
@@ -74,18 +99,5 @@ class SimpleDataSelectorType extends AbstractType
         };
 
         $resolver->setNormalizer('query_builder', $queryBuilderNormalizer);
-    }
-
-    public function getParent()
-    {
-        return 'entity';
-    }
-
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return 'sidus_simple_data_selector';
     }
 }

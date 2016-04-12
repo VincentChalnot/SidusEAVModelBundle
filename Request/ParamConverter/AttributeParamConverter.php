@@ -4,7 +4,12 @@ namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
 use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
 
-class AttributeParamConverter extends BaseParamConverter
+/**
+ * Convert request parameters in attributes
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
+class AttributeParamConverter extends AbstractBaseParamConverter
 {
     /** @var AttributeConfigurationHandler */
     protected $attributeConfigurationHandler;

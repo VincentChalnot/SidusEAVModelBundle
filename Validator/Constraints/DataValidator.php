@@ -35,13 +35,17 @@ class DataValidator extends ConstraintValidator
     protected $doctrine;
 
     /**
-     * @param string $dataClass
+     * @param string                     $dataClass
      * @param FamilyConfigurationHandler $familyConfigurationHandler
-     * @param TranslatorInterface $translator
-     * @param $doctrine
+     * @param TranslatorInterface        $translator
+     * @param Registry                   $doctrine
      */
-    public function __construct($dataClass, FamilyConfigurationHandler $familyConfigurationHandler, TranslatorInterface $translator, Registry $doctrine)
-    {
+    public function __construct(
+        $dataClass,
+        FamilyConfigurationHandler $familyConfigurationHandler,
+        TranslatorInterface $translator,
+        Registry $doctrine
+    ) {
         $this->dataClass = $dataClass;
         $this->familyConfigurationHandler = $familyConfigurationHandler;
         $this->translator = $translator;
@@ -51,7 +55,7 @@ class DataValidator extends ConstraintValidator
     /**
      * Checks if the passed value is valid.
      *
-     * @param SidusData $data The value that should be validated
+     * @param SidusData  $data       The value that should be validated
      * @param Constraint $constraint The constraint for the validation
      * @return ConstraintViolationListInterface
      * @throws Exception
@@ -85,8 +89,8 @@ class DataValidator extends ConstraintValidator
 
     /**
      * @param ExecutionContextInterface $context
-     * @param AttributeInterface $attribute
-     * @param SidusData $data
+     * @param AttributeInterface        $attribute
+     * @param SidusData                 $data
      * @throws Exception
      */
     protected function checkUnique(ExecutionContextInterface $context, AttributeInterface $attribute, SidusData $data)
@@ -102,6 +106,7 @@ class DataValidator extends ConstraintValidator
         foreach ($values as $value) {
             if ($value->getData()->getId() !== $data->getId()) {
                 $this->buildAttributeViolation($context, $attribute, 'unique', $valueData);
+
                 return;
             }
         }
@@ -109,8 +114,8 @@ class DataValidator extends ConstraintValidator
 
     /**
      * @param ExecutionContextInterface $context
-     * @param AttributeInterface $attribute
-     * @param SidusData $data
+     * @param AttributeInterface        $attribute
+     * @param SidusData                 $data
      * @throws Exception
      */
     protected function validateRules(ExecutionContextInterface $context, AttributeInterface $attribute, SidusData $data)
@@ -127,6 +132,7 @@ class DataValidator extends ConstraintValidator
                 $violations = $context->getValidator()->validate($valueData, $constraint);
                 /** @var ConstraintViolationInterface $violation */
                 foreach ($violations as $violation) {
+                    /** @noinspection DisconnectedForeachInstructionInspection */
                     $path = $attribute->getCode();
                     if ($attribute->getType()->isEmbedded()) {
                         if (!$attribute->isMultiple()) {
@@ -149,14 +155,19 @@ class DataValidator extends ConstraintValidator
 
     /**
      * @param ExecutionContextInterface $context
-     * @param AttributeInterface $attribute
-     * @param string $type
-     * @param mixed $invalidValue
-     * @param string $path
+     * @param AttributeInterface        $attribute
+     * @param string                    $type
+     * @param mixed                     $invalidValue
+     * @param string                    $path
      * @throws \InvalidArgumentException
      */
-    protected function buildAttributeViolation(ExecutionContextInterface $context, AttributeInterface $attribute, $type, $invalidValue = null, $path = null)
-    {
+    protected function buildAttributeViolation(
+        ExecutionContextInterface $context,
+        AttributeInterface $attribute,
+        $type,
+        $invalidValue = null,
+        $path = null
+    ) {
         if (null === $path) {
             $path = $attribute->getCode();
         }
@@ -168,25 +179,27 @@ class DataValidator extends ConstraintValidator
 
     /**
      * @param AttributeInterface $attribute
-     * @param string $type
+     * @param string             $type
      * @return string
      * @throws \InvalidArgumentException
      */
     protected function buildMessage(AttributeInterface $attribute, $type)
     {
         $tId = "eav.attribute.{$attribute->getCode()}.validation.{$type}";
-        return $this->tryTranslate([
+        $tIds = [
             $tId,
             "eav.attribute.validation.{$type}",
-        ], [
+        ];
+
+        return $this->tryTranslate($tIds, [
             '%attribute%' => $this->translator->trans((string) $attribute),
         ], $tId);
     }
 
     /**
      * @param AttributeInterface $attribute
-     * @param SidusData $data
-     * @param Constraint $constraint
+     * @param SidusData          $data
+     * @param Constraint         $constraint
      * @throws \Exception
      */
     protected function validateEmbedded(AttributeInterface $attribute, SidusData $data, Constraint $constraint)

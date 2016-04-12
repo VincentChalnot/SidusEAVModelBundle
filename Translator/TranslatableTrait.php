@@ -2,10 +2,9 @@
 
 namespace Sidus\EAVModelBundle\Translator;
 
+use JMS\Serializer\Annotation as JMS;
 use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Component\Translation\TranslatorInterface;
-
-use JMS\Serializer\Annotation as JMS;
 
 trait TranslatableTrait
 {
@@ -28,9 +27,9 @@ trait TranslatableTrait
      * and humanize the code if no translation is found
      *
      * @param string|array $tIds
-     * @param array $parameters
-     * @param string $fallback
-     * @param bool $humanizeFallback
+     * @param array        $parameters
+     * @param string       $fallback
+     * @param bool         $humanizeFallback
      * @return string
      */
     protected function tryTranslate($tIds, array $parameters = [], $fallback = null, $humanizeFallback = true)
@@ -42,6 +41,8 @@ trait TranslatableTrait
             try {
                 if ($this->translator instanceof TranslatorBagInterface) {
                     if ($this->translator->getCatalogue()->has($tId)) {
+                        /** @noinspection PhpUndefinedMethodInspection */
+
                         return $this->translator->trans($tId, $parameters);
                     }
                 } elseif ($this->translator instanceof TranslatorInterface) {
@@ -50,7 +51,9 @@ trait TranslatableTrait
                         return $label;
                     }
                 }
-            } catch (\InvalidArgumentException $e) {}
+            } catch (\InvalidArgumentException $e) {
+                // Do nothing
+            }
         }
 
         if ($fallback === null) {
@@ -60,6 +63,7 @@ trait TranslatableTrait
             return $fallback;
         }
         $pattern = '/(?!^)[A-Z]{2,}(?=[A-Z][a-z])|[A-Z][a-z]|\d{1,}/';
-        return str_replace('_', ' ' ,preg_replace($pattern, ' $0', $fallback));
+
+        return str_replace('_', ' ', preg_replace($pattern, ' $0', $fallback));
     }
 }

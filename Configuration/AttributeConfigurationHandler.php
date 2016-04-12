@@ -5,6 +5,11 @@ namespace Sidus\EAVModelBundle\Configuration;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use UnexpectedValueException;
 
+/**
+ * Container for all attributes
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class AttributeConfigurationHandler
 {
     /** @var AttributeInterface[] */
@@ -27,7 +32,7 @@ class AttributeConfigurationHandler
     }
 
     /**
-     * @param $code
+     * @param string $code
      * @return AttributeInterface
      * @throws UnexpectedValueException
      */
@@ -36,6 +41,7 @@ class AttributeConfigurationHandler
         if (empty($this->attributes[$code])) {
             throw new UnexpectedValueException("No attribute with code : {$code}");
         }
+
         return $this->attributes[$code];
     }
 }

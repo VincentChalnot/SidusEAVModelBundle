@@ -2,20 +2,18 @@
 
 namespace Sidus\EAVModelBundle\Entity;
 
-use DateTime;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use JMS\Serializer\Annotation as JMS;
-use LogicException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
-use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use UnexpectedValueException;
-use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
 
+/**
+ * Interface for data storage
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 interface DataInterface
 {
     /**
@@ -27,7 +25,7 @@ interface DataInterface
      * Return all values matching the attribute code
      *
      * @param AttributeInterface|null $attribute
-     * @param array $context
+     * @param array                   $context
      * @return Collection|Value[]
      */
     public function getValues(AttributeInterface $attribute = null, array $context = null);
@@ -36,7 +34,7 @@ interface DataInterface
      * Return first value found for attribute code in value collection
      *
      * @param AttributeInterface $attribute
-     * @param array $context
+     * @param array              $context
      * @return null|Value
      */
     public function getValue(AttributeInterface $attribute, array $context = null);
@@ -45,7 +43,7 @@ interface DataInterface
      * Get the value data of the value matching the attribute
      *
      * @param AttributeInterface $attribute
-     * @param array $context
+     * @param array              $context
      * @return mixed
      */
     public function getValueData(AttributeInterface $attribute, array $context = null);
@@ -54,7 +52,7 @@ interface DataInterface
      * Get the values data of multiple values for a given attribute
      *
      * @param AttributeInterface $attribute
-     * @param array $context
+     * @param array              $context
      * @return mixed
      */
     public function getValuesData(AttributeInterface $attribute = null, array $context = null);
@@ -63,8 +61,8 @@ interface DataInterface
      * Set the value's data of a given attribute
      *
      * @param AttributeInterface $attribute
-     * @param mixed $dataValue
-     * @param array $context
+     * @param mixed              $dataValue
+     * @param array              $context
      * @return Data
      */
     public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null);
@@ -74,14 +72,14 @@ interface DataInterface
      *
      * @param AttributeInterface $attribute
      * @param array|\Traversable $dataValues
-     * @param array $context
+     * @param array              $context
      * @return Data
      */
     public function setValuesData(AttributeInterface $attribute, $dataValues, array $context = null);
 
     /**
      * @param AttributeInterface $attribute
-     * @param array $context
+     * @param array              $context
      * @return Data
      */
     public function emptyValues(AttributeInterface $attribute = null, array $context = null);
@@ -96,8 +94,8 @@ interface DataInterface
      * Append data to an attribute
      *
      * @param AttributeInterface $attribute
-     * @param $valueData
-     * @param array $context
+     * @param mixed              $valueData
+     * @param array              $context
      * @return Data
      */
     public function addValueData(AttributeInterface $attribute, $valueData, array $context = null);
@@ -125,14 +123,14 @@ interface DataInterface
 
     /**
      * @param AttributeInterface $attribute
-     * @param array $context
+     * @param array              $context
      * @return Value
      */
     public function createValue(AttributeInterface $attribute, array $context = null);
 
     /**
      * @param AttributeInterface $attribute
-     * @param array $context
+     * @param array              $context
      * @return bool
      * @throws \Exception
      */

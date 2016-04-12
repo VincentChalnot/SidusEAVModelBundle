@@ -6,6 +6,9 @@ use Sidus\EAVModelBundle\DependencyInjection\Compiler\GenericCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+/**
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class SidusEAVModelBundle extends Bundle
 {
     /**
@@ -18,14 +21,17 @@ class SidusEAVModelBundle extends Bundle
         $container->addCompilerPass(new GenericCompilerPass(
             'sidus_eav_model.attribute_type_configuration.handler',
             'sidus.attribute_type',
-            'addType'));
+            'addType'
+        ));
         $container->addCompilerPass(new GenericCompilerPass(
             'sidus_eav_model.attribute_configuration.handler',
             'sidus.attribute',
-            'addAttribute'));
+            'addAttribute'
+        ));
         $container->addCompilerPass(new GenericCompilerPass(
             'sidus_eav_model.family_configuration.handler',
             'sidus.family',
-            'addFamily'));
+            'addFamily'
+        ));
     }
 }

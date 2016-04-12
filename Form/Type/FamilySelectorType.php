@@ -2,18 +2,20 @@
 
 namespace Sidus\EAVModelBundle\Form\Type;
 
-
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Translation\TranslatorInterface;
 
+/**
+ * Simple family selector
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ */
 class FamilySelectorType extends AbstractType
 {
     /** @var FamilyConfigurationHandler */
@@ -28,16 +30,18 @@ class FamilySelectorType extends AbstractType
     }
 
     /**
-     * @inheritDoc
+     * @param FormBuilderInterface $builder
+     * @param array                $options
      * @throws \InvalidArgumentException
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->addModelTransformer(new CallbackTransformer(
-            function ($originalData) use ($options) {
+            function ($originalData) {
                 if ($originalData instanceof FamilyInterface) {
                     $originalData = $originalData->getCode();
                 }
+
                 return $originalData;
             },
             function ($submittedData) {
@@ -55,7 +59,7 @@ class FamilySelectorType extends AbstractType
     }
 
     /**
-     * @inheritdoc
+     * @param OptionsResolver $resolver
      * @throws \Exception
      */
     public function configureOptions(OptionsResolver $resolver)
@@ -79,12 +83,14 @@ class FamilySelectorType extends AbstractType
                     $families[$value->getCode()] = $value;
                 }
             }
+
             return $families;
         });
         $resolver->setNormalizer('choices_as_values', function (Options $options, $value) {
             if ($value !== true) {
                 throw new \UnexpectedValueException("'choices_as_values' must be true (and is by default)");
             }
+
             return true;
         });
         $resolver->setNormalizer('choices', function (Options $options, $value) {
@@ -98,15 +104,22 @@ class FamilySelectorType extends AbstractType
                     $choices[ucfirst($family)] = $family->getCode();
                 }
             }
+
             return $choices;
         });
     }
 
+    /**
+     * @return string
+     */
     public function getParent()
     {
         return 'choice';
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return 'sidus_family_selector';
