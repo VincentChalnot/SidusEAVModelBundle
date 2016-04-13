@@ -1,38 +1,36 @@
 Sidus/EAVModelBundle Documentation
 ==================================
 
-# Introduction
+## Introduction
 
 This documentation is a work in progress
 
-## Demo
-If you want to get a quick idea of what this bundle can do, checkout this repository:
-https://github.com/VincentChalnot/SidusEAVDemo
+### Demo
+If you want to get a quick idea of what this bundle can do, checkout the [Demo Symfony Project](https://github.com/VincentChalnot/SidusEAVDemo)
 
-## What’s an EAV model
-Entity-Attribute-Value
+### What’s an EAV model
+EAV stands for Entity-Attribute-Value
 
-It's basically storing values in a different table than the entities.
-
-Check the confusing and not-so-accurate Wikipedia article:
-https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model
+The main feature consists in storing values in a different table than the entities. Check the confusing and not-so-accurate [Wikipedia article](https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model)
 
 This implementation is actually more an E(A)V model than en traditional EAV model because attributes are not stored in the database but in YAML files.
 
-## Why using it
+If you're not familiar with the key concepts of the EAV model, please read the following.
+
+### Why using it
 - Grouping in the same place the model and the metadata.
-- Allowing ultra-fast modelisation because it's super easy to bootstrap.
+- Allowing ultra-fast model design because it's super easy to bootstrap.
 - Storing contextual values per: locale, channel (web/print/mobile), versions.
-- Managing single-value attributes and multiple-values attributes the same way and beeing able to change your mind after without having to do data recovery
+- Managing single-value attributes and multiple-values attributes the same way and being able to change your mind after without having to do data recovery
 - Grouping and ordering attributes
 - Easy CRUD: your forms are already configured !
 
-## Why not using it ?
-Performances: not a real issue because MySQL is not usable for searching in a vast amount of data be it an EAV model or a more standard relationnal model. Solution: Elastic Search; it’s currently optionnaly supported but you have to do a lots of manual configuration over your model, this will be an key feature in a near future.
+### Why not using it ?
+Performances: not a real issue because MySQL is not usable for searching in a vast amount of data anyway, be it an EAV model or a more standard relational model. Solution: Elastic Search: it’s currently optionally supported but you have to do a lots of manual configuration over your model, this will be an key feature in a near future.
 
-If you a complex relationnal model and you plan to use a lots of joins to retrieve data, it might be best to keep your relational model outside of the EAV model but both can coexists without any problem.
+If you a have a complex relational model and you plan to use a lots of joins to retrieve data, it might be best to keep your relational model outside of the EAV model but both can coexists without any problem.
 
-## The implementation
+### The implementation
 We are using Doctrine as it’s the most widely supported ORM by the Symfony community and we’re aiming at a MySQL/MariaDB implementation only for data storage.
 
 In any EAV model there are two sides
@@ -42,17 +40,17 @@ In any EAV model there are two sides
 In some implementation the model is stored in the database but here we chose to maintain the model in Symfony service configuration for several reasons:
 - For performance reasons, you always needs to access a lots of components from your model and lazy loading will generate many unnecessary SQL requests. Symfony services are lazy loaded from PHP cache system which is very very fast compared to any other storage system.
 - For complexity reason: with services, you can always define new services, use injections, extend existing services and have complex behaviors for your entities.
-- A Symfony configuration is easy to write and to maintain and can be versionned, when your model is stored in your database along with your data you will have a very hard time to maintain the same model on your different environments.
+- A Symfony configuration is easy to write and to maintain and can be versioned, when your model is stored in your database along with your data you will have a very hard time to maintain the same model on your different environments.
 - Because the final users *NEVER* edits the model directly in production, it’s always some expert or some developer that does it on a testing environment first and we prefer simple yaml configuration files over a complex administration system that can fail.
 - It allows you to add layers of configuration for your special needs, for example you can configure directly some form options in the attribute declaration.
 - Finally, you can split your configuration and organise it in different files if needed be and you can comment it, which is a powerful feature when your model starts to grow bigger and bigger with hundreds of different attributes.
 
 Families and attributes are services automatically generated from your configuration, attribute types are standard Symfony services.
 
-## Example
+### Example
 For a basic blog the configuration will look like this:
 
-```yaml
+````yaml
     families:
         post:
             attributeAsLabel: title
@@ -109,18 +107,244 @@ For a basic blog the configuration will look like this:
         email:
             validation_rules:
                 - Email: ~
-```
+````
 
-# Installation
-## Specific configuration
+## Installation
+This bundle can be installed with a few easy steps. Note that it's highly encouraged to install the full [EAV-Toolkit](https://github.com/VincentChalnot/SidusEAVToolkit) for a better experience. (but you can install it in a second time if you want)
 
-# Configuration
-## Family configuration reference
-## Attributes configuration reference
+### Bundle installation
+The bundle installation covers three steps: requiring the library, enabling the bundle in your kernel, overriding some classes and defining the default minimum configuration.
 
-# Extending the model
-## Custom attribute types
-## Custom relations
-## Form customization
+#### Require the bundle with composer:
 
-# Going further: the EAV Toolkit
+````bash
+$ composer require sidus/eav-model-bundle "~1.0"
+````
+
+#### Add the bundle to AppKernel.php
+
+````php
+<?php
+// app/AppKernel.php
+
+public function registerBundles()
+{
+    $bundles = array(
+        // ...
+        new Sidus\EAVModelBundle\SidusEAVModelBundle(),
+        // ...
+    );
+}
+````
+
+#### Create your Data and Value classes
+
+In a dedicated bundle or in one of your bundle (it's generally considered as a good practise to separate your model in a dedicated bundle), create two new Doctrine entities:
+
+````php
+<?php
+
+namespace MyNamespace\EAVModelBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Sidus\EAVModelBundle\Entity\Data as BaseData;
+
+/**
+ * @ORM\Table(name="mynamespace_data")
+ * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\DataRepository")
+ */
+class Data extends BaseData
+{
+}
+````
+
+````php
+<?php
+
+namespace MyNamespace\EAVModelBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Sidus\EAVModelBundle\Entity\Value as BaseValue;
+
+/**
+ * @ORM\Table(name="mynamespace_value")
+ * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\ValueRepository")
+ */
+class Value extends BaseValue
+{
+}
+````
+
+#### Base configuration
+
+You will need at least the following configuration:
+
+````yaml
+sidus_eav_model:
+    data_class: MyNamespace\EAVModelBundle\Entity\Data
+    value_class: MyNamespace\EAVModelBundle\Entity\Value
+
+doctrine:
+    dbal:
+        types:
+            sidus_family:
+                class: Sidus\EAVModelBundle\Doctrine\Types\FamilyType
+                commented: true
+````
+
+The custom Doctrine type for the families is the only "hack" needed for this bundle, everything else is standard Symfony.
+
+## Configuration
+At this point your application should run although you won't be able to do anything without defining first your model configuration.
+
+### Model configuration
+Please read the example in the first chapter to familiar yourself with the key features of the configuration.
+
+If you want to test your configuration against an existing app, you can do it in the [Demo Symfony Project](https://github.com/VincentChalnot/SidusEAVDemo)
+
+#### Family configuration reference
+The families of your model are what would be your classes in a relational model, we call them families instead of classes because they do not correspond to any PHP class in a strict sens. They are "data types" but such a denomination could lead to many mistakes so we prefer to call them "families".
+
+Each family must define at least an attribute and an attribute as label:
+- The list of attribute is a simple array of attribute codes and the order in which you declare them will define the order in which they appear in their edition form.
+- The attribute as label defines which attribute should be used to display the object when calling __toString on it.
+
+Just like a standard relational model you can define an inheritance between your families and add attributes to a child family.
+
+Here is a full configuration reference, the <> syntax defines a placeholder:
+
+````yaml
+sidus_eav_model:
+    families:
+        <familyCode>:
+            label: <human-readable name of the family> # Use the translator instead of this
+            attributeAsLabel: <attributeCode> # Required, except if the family is inherited
+            instantiable: <boolean> # Default true, can be used to define an "abstract" family
+            parent: <familyCode> # When specified, the family will inherits its configuration
+            attributes: # Required
+                - <attributeCode>
+                - <attributeCode>
+                - <attributeCode>
+````
+
+#### Attributes configuration reference
+The attributes (or properties) are defined independently from their families because they will often be reused in many families.
+
+An attribute will define the way a value is edited and stored in the database, each attribute has a unique code and a type (see next chapter).
+
+If you change the code of an attribute, all its previous values stored in the database will be discarded on next save.
+
+Attributes can have a group, mainly to facilitate their edition but also to group them by business logic in order to define permissions (not covered by the current bundle). You can safely change the group of an attribute without having any effect on the way data is stored.
+
+The full configuration reference will help you see what can be done with attributes:
+
+````yaml
+sidus_eav_model:
+    attributes:
+        <attributeCode>:
+            type: <attributeType> # Default "string", see following chapter
+            group: <groupCode> # Default null
+            options: <object> # Some attribute types require specific options here
+            form_options: <object> # Standard symfony form options
+            view_options: <object> # Passed to the view (not used in this bundle)
+            validation_rules: <array> # Standard Symfony validation rules
+            default: <mixed> # Default value
+            required: <boolean> # Default false, empty() PHP function is used for validation
+            unique: <boolean> # Default false
+            multiple: <boolean> # Default false, see following chapter
+            context_mask: <array> # See dedicated chapter
+````
+
+Some codes are reserved like: id, parent, children, values, valueData, createdAt, updatedAt, currentVersion, family and currentContext. If you use any of these words as attribute codes your application behavior will depends of how you try to access the entitie's data. Don't do that.
+
+##### Attribute types
+Attribute types define a common way of editing and storing data, this bundle provides the following types:
+- string: Stored as varchar(255), edited as text input
+- text: Stored as text, edited as textarea
+- integer: Stored as integer, edited as text input with validation
+- decimal: Stored as float, edited as text input with validation
+- boolean: Stored as boolean, edited as checkbox
+- date: Stored as date, edited as Symfony date widget
+- datetime: Stored as datetime, edited as Symfony datetime widget
+- choice: Stored as varchar(255), edited as choice widget (required "choices" form_options)
+- data: Stored in a real Doctrine Many-To-One relationship with a related Data object, edited as a choice widget, requires the "family" form_option.
+- embed: Stored like data but embed the edition of the foreign entity directly into the form, requires the "family" form_option.
+
+Additionnal attribute types can be found in the sidus/eav-bootstrap-bundle:
+- html: Stored as text, edited as TinyMCE WYSIWYG editor, featuring full control over configuration
+- switch: Stored as boolean, edited as a nice checkbox
+- autocomplete_data: Stored like data, edited as an auto-complete input, requires the "family" form_option.
+Date and datetime are also improved with bootstrap date/time picker.
+
+The only current limitation of the embed type is that you cannot embed a family inside the same family, this creates an infinite loop during form building.
+
+If you change the type of an attribute, its values will probably be discarded during the next save but it can also leads to unexpected behaviors: don't change the type of an attribute, create a new one (and remove the previous one if need be).
+The only safe thing you can do is switch between different attributes that stores their data the same way: For example: data, embed and autocomplete_data are safely interchangeable.
+
+
+#### Multiple option
+The "multiple" option allows you to add multiple values for the same attribute and because of the way the EAV model works, all attribute types are compatible with this option.
+
+This option will probably not behave well in forms without the bootstrap-collection extension of the sidus/eav-bootstrap-bundle:
+https://github.com/VincentChalnot/SidusEAVBootstrapBundle
+
+You can safely switch a single-value attribute to multiple, the current values will be kept as the first value of the collection. If you switch from an multiple attribute back to a single-valued one, only the first value of the collection will be kept during the next save of the entity.
+
+When using the "required" option, the collection will pass validation if containing at least one element (event if the element itself is empty).
+
+## Basic CRUD
+From there you are already ready to use your model in your application, you can do basically three things with your entities:
+- Create an entity from a family
+- Editing an entity and accessing its values
+- Using a form
+- Persisting or deleting an entity
+
+### Creating entities
+To create a new entity you must first fetch the family you want from configuration.
+
+````php
+<?php
+/** @var \Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler $familyConfigurationHandler */
+$familyConfigurationHandler = $container->get('sidus_eav_model.family_configuration.handler');
+$postFamily = $familyConfigurationHandler->getFamily('post');
+
+$newPost = $postFamily->createData();
+````
+
+#### Editing an entity and accessing its values
+You can simply set or get values of an entity manually in PHP like this:
+
+````php
+<?php
+$newPost->setTitle('I LOVE SYMFONY');
+echo $newPost->getTitle();
+// or
+$newPost->title = 'I LOVE SYMFONY';
+echo $newPost->title;
+````
+
+Yes, this relies on magic methods to work but magic methods are not evil (while code generation definitely is). You can read sometimes that they are bad in terms of performances but this is less and less true with recent versions of PHP. The only drawback of using them is the lack of annotations that makes them appearing as errors in your IDE which is not cool. There is no simple solution for this but we might explore the benefits of automatically generating annotations in Symfony's cache to allow you to identify them with @var.
+
+Meanwhile if you really like your code as clean as we do you can use this syntax:
+
+````php
+<?php
+$attribute = $newPost->getFamily()->getAttribute('title');
+$newPost->setValueData($attribute, 'I LIKE SYMFONY');
+echo $newPost->getValueData($attribute);
+````
+
+Which is exactly what the magic method will do in the background. Use setValuesData/getValuesData for multiple attributes.
+
+#### Using a form
+The default form to edit entities is referenced as 'sidus_data' and the only thing to keep in mind is that it can't work without an entity or the "family" option.
+
+#### Persisting or deleting an entity
+There is no specific logic to persist or delete an entity, the only thing you need to keep in mind is that you can't flush just the entity but you need to do a global flush because values are stored separately from the entity.
+
+## Extending the model
+### Custom attribute types
+### Custom relations
+### Form customization
+
+## Going further: the EAV Toolkit
