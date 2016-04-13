@@ -10,10 +10,14 @@ If you want to get a quick idea of what this bundle can do, checkout this reposi
 https://github.com/VincentChalnot/SidusEAVDemo
 
 ## What’s an EAV model
+Entity-Attribute-Value
+
 It's basically storing values in a different table than the entities.
 
 Check the confusing and not-so-accurate Wikipedia article:
 https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model
+
+This implementation is actually more an E(A)V model than en traditional EAV model because attributes are not stored in the database but in YAML files.
 
 ## Why using it
 - Grouping in the same place the model and the metadata.
@@ -24,7 +28,7 @@ https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model
 - Easy CRUD: your forms are already configured !
 
 ## Why not using it ?
-Performances: not a real issue because MySQL is usable for searching in a vast amount of data be it an EAV model or a more standard relationnal model. Solution: Elastic Search; it’s currently optionnaly supported but you have to do a lots of manual configuration over your model, this will be an key feature in a near future.
+Performances: not a real issue because MySQL is not usable for searching in a vast amount of data be it an EAV model or a more standard relationnal model. Solution: Elastic Search; it’s currently optionnaly supported but you have to do a lots of manual configuration over your model, this will be an key feature in a near future.
 
 If you a complex relationnal model and you plan to use a lots of joins to retrieve data, it might be best to keep your relational model outside of the EAV model but both can coexists without any problem.
 
