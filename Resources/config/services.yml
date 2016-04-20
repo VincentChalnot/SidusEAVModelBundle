@@ -13,6 +13,11 @@ parameters:
     sidus_eav_model.doctrine.metadata.mapper.class: Sidus\EAVModelBundle\Event\DoctrineMetadataListener
 
 services:
+    # Enabling enableMagicCall globally
+    property_accessor:
+        class: %property_accessor.class%
+        arguments: [true]
+
     sidus_eav_model.attribute_type_configuration.handler:
         class: %sidus_eav_model.attribute_type_configuration.handler.class%
 

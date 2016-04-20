@@ -292,22 +292,30 @@ abstract class Data implements DataInterface
      */
     public function __call($methodName, $arguments)
     {
-        if (0 === strpos($methodName, 'get')) {
-            return $this->__get(lcfirst(substr($methodName, 3)));
-        }
-        $attribute = $this->getAttribute($methodName);
-        if ($attribute) {
-            return $this->__get(lcfirst($methodName));
-        }
         $class = get_class($this);
+
+        if (0 === strpos($methodName, 'get')) {
+            return $this->get(lcfirst(substr($methodName, 3)));
+        }
+
+        if (0 === strpos($methodName, 'set')) {
+            if (!array_key_exists(0, $arguments)) {
+                throw new BadMethodCallException("Method '{$methodName}' for object '{$class}' with family '{$this->getFamilyCode()}' requires at least one argument");
+            }
+            $context = array_key_exists(1, $arguments) ? $arguments[1] : null;
+
+            return $this->set(lcfirst(substr($methodName, 3)), $arguments[0], $context);
+        }
+
         throw new BadMethodCallException("Method '{$methodName}' for object '{$class}' with family '{$this->getFamilyCode()}' does not exist");
     }
 
     /**
-     * Used to seemingly get values as if they were normal properties of this class
+     * Used to get values in a simple way
      *
-     * @param string $name
-     * @return mixed|null|Value
+     * @param string $attributeCode
+     * @param array  $context
+     * @return mixed
      *
      * @throws UnexpectedValueException
      * @throws AccessException
@@ -315,76 +323,37 @@ abstract class Data implements DataInterface
      * @throws UnexpectedTypeException
      * @throws BadMethodCallException
      */
-    public function __get($name)
+    public function get($attributeCode, array $context = null)
     {
-        $attributeCode = $name;
-        $returnData = true;
-        if (substr($name, -5) === 'Value') {
-            $returnData = false;
-            $attributeCode = substr($name, 0, -5);
-        }
         $attribute = $this->getAttribute($attributeCode);
-        if (!$attribute) {
-            throw new BadMethodCallException("No attribute or method named {$name}");
-        }
 
         if ($attribute->isMultiple()) {
-            if ($returnData) {
-                return $this->getValuesData($attribute);
-            }
-
-            return $this->getValues($attribute);
+            return $this->getValuesData($attribute, $context);
         }
-        if ($returnData) {
-            return $this->getValueData($attribute);
-        }
-
-        return $this->getValue($attribute);
+        return $this->getValueData($attribute, $context);
     }
 
     /**
-     * Used to seemingly set values as if they were normal properties of this class
+     * Used to set values as in a simple way
      *
-     * @param string           $name
-     * @param mixed|null|Value $value
+     * @param string $attributeCode
+     * @param mixed  $value
+     * @param array  $context
+     * @return Data
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
-     * @throws BadMethodCallException
      */
-    public function __set($name, $value)
+    public function set($attributeCode, $value, array $context = null)
     {
-        $attributeCode = $name;
-        $setData = true;
-        if (substr($name, -5) === 'Value') {
-            $setData = false;
-            $attributeCode = substr($name, 0, -5);
-        }
         $attribute = $this->getAttribute($attributeCode);
-        if (!$attribute) {
-            throw new BadMethodCallException("No attribute or method named {$name}");
-        }
 
         if ($attribute->isMultiple()) {
-            if ($setData) {
-                $this->setValuesData($attribute, $value);
-
-                return;
-            }
-            foreach ($value as $v) {
-                $this->addValue($v);
-            }
-
-            return;
+            return $this->setValuesData($attribute, $value, $context);
         }
-        if ($setData) {
-            $this->setValueData($attribute, $value);
-
-            return;
-        }
-        $this->addValue($value);
+        return $this->setValueData($attribute, $value, $context);
     }
 
     /**

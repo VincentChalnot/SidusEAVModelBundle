@@ -19,6 +19,25 @@ interface DataInterface
     public function getFamilyCode();
 
     /**
+     * Used to get values in a simple way
+     *
+     * @param string $attributeCode
+     * @param array  $context
+     * @return mixed
+     */
+    public function get($attributeCode, array $context = null);
+
+    /**
+     * Used to set values as in a simple way
+     *
+     * @param string $attributeCode
+     * @param mixed  $value
+     * @param array  $context
+     * @return Data
+     */
+    public function set($attributeCode, $value, array $context = null);
+
+    /**
      * Return all values matching the attribute code
      *
      * @param AttributeInterface|null $attribute

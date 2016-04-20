@@ -54,7 +54,7 @@ For a basic blog the configuration will look like this:
 
 ````yaml
     families:
-        post:
+        Post:
             attributeAsLabel: title
             attributes:
                 - title
@@ -65,7 +65,7 @@ For a basic blog the configuration will look like this:
                 - tags
                 - isFeatured
 
-        author:
+        Author:
             attributeAsLabel: name
             attributes:
                 - name
@@ -93,7 +93,7 @@ For a basic blog the configuration will look like this:
         author:
             type: data_selector
             form_options:
-                family: author
+                family: Author
 
         tags:
             multiple: true
@@ -110,6 +110,8 @@ For a basic blog the configuration will look like this:
             validation_rules:
                 - Email: ~
 ````
+
+Note that by convention we declare the families in UpperCamelCase and the attributes as lowerCamelCase and we encourage you to do so.
 
 ## Installation
 This bundle can be installed with a few easy steps. Note that it's highly encouraged to install the full [EAV-Toolkit](https://github.com/VincentChalnot/SidusEAVToolkit) for a better experience. (but you can install it in a second time if you want)
@@ -223,6 +225,7 @@ sidus_eav_model:
             attributeAsLabel: <attributeCode> # Required, except if the family is inherited
             instantiable: <boolean> # Default true, can be used to define an "abstract" family
             parent: <familyCode> # When specified, the family will inherits its configuration
+            data_class: <PhpClass> # Can be used with single table inheritance to declare specific business logic in a dedicated class
             attributes: # Required
                 - <attributeCode>
                 - <attributeCode>
@@ -276,6 +279,7 @@ Additionnal attribute types can be found in the sidus/eav-bootstrap-bundle:
 - html: Stored as text, edited as TinyMCE WYSIWYG editor, featuring full control over configuration
 - switch: Stored as boolean, edited as a nice checkbox
 - autocomplete_data: Stored like data, edited as an auto-complete input, requires the "family" form_option.
+- combo_selector: Allow selection of the family first, then autocomplete of the data, using "autocomplete_data".
 Date and datetime are also improved with bootstrap date/time picker.
 
 The only current limitation of the embed type is that you cannot embed a family inside the same family, this creates an infinite loop during form building.
@@ -308,7 +312,7 @@ To create a new entity you must first fetch the family you want from configurati
 <?php
 /** @var \Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler $familyConfigurationHandler */
 $familyConfigurationHandler = $container->get('sidus_eav_model.family_configuration.handler');
-$postFamily = $familyConfigurationHandler->getFamily('post');
+$postFamily = $familyConfigurationHandler->getFamily('Post');
 
 $newPost = $postFamily->createData();
 ````
@@ -320,9 +324,6 @@ You can simply set or get values of an entity manually in PHP like this:
 <?php
 $newPost->setTitle('I LOVE SYMFONY');
 echo $newPost->getTitle();
-// or
-$newPost->title = 'I LOVE SYMFONY';
-echo $newPost->title;
 ````
 
 Yes, this relies on magic methods to work but magic methods are not evil (while code generation definitely is). You can read sometimes that they are bad in terms of performances but this is less and less true with recent versions of PHP. The only drawback of using them is the lack of annotations that makes them appearing as errors in your IDE which is not cool. There is no simple solution for this but we might explore the benefits of automatically generating annotations in Symfony's cache to allow you to identify them with @var.
@@ -331,12 +332,15 @@ Meanwhile if you really like your code as clean as we do you can use this syntax
 
 ````php
 <?php
-$attribute = $newPost->getFamily()->getAttribute('title');
-$newPost->setValueData($attribute, 'I LIKE SYMFONY');
-echo $newPost->getValueData($attribute);
+$newPost->set('title', 'I LOVE SYMFONY');
+echo $newPost->get('title');
 ````
 
-Which is exactly what the magic method will do in the background. Use setValuesData/getValuesData for multiple attributes.
+Which is exactly what the magic method will do in the background.
+
+We do not implements the magic getters and setters for properties (\__get, \__set) because they do not allow you to easily override the business logic in a child class.
+
+Note: In order for the forms to be able to PropertyAccessor (used in forms) to read from magic calls, we enable the "enableMagicCall" option globally.
 
 #### Using a form
 The default form to edit entities is referenced as 'sidus_data' and the only thing to keep in mind is that it can't work without an entity or the "family" option.
