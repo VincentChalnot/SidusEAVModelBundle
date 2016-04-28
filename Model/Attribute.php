@@ -3,7 +3,7 @@
 namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler;
-use Sidus\EAVModelBundle\Entity\Value;
+use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
@@ -359,12 +359,12 @@ class Attribute implements AttributeInterface
     }
 
     /**
-     * @param Value $value
+     * @param ContextualValueInterface $value
      * @param array $context
      * @return bool
      * @throws UnexpectedValueException
      */
-    public function isContextMatching(Value $value, array $context)
+    public function isContextMatching(ContextualValueInterface $value, array $context)
     {
         if (!$value->getContext()) {
             return true;

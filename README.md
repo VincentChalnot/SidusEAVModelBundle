@@ -260,7 +260,7 @@ sidus_eav_model:
             context_mask: <array> # See dedicated chapter
 ````
 
-Some codes are reserved like: id, parent, children, values, valueData, createdAt, updatedAt, currentVersion, family and currentContext. If you use any of these words as attribute codes your application behavior will depends of how you try to access the entitie's data. Don't do that.
+Some codes are reserved like: id, parent, children, values, valueData, createdAt, updatedAt, currentVersion, family and currentContext. If you use any of these words as attribute codes your application behavior will depends of how you try to access the entities' data. Don't do that.
 
 ##### Attribute types
 Attribute types define a common way of editing and storing data, this bundle provides the following types:
@@ -275,7 +275,7 @@ Attribute types define a common way of editing and storing data, this bundle pro
 - data: Stored in a real Doctrine Many-To-One relationship with a related Data object, edited as a choice widget, requires the "family" form_option.
 - embed: Stored like data but embed the edition of the foreign entity directly into the form, requires the "family" form_option.
 
-Additionnal attribute types can be found in the sidus/eav-bootstrap-bundle:
+Additional attribute types can be found in the sidus/eav-bootstrap-bundle:
 - html: Stored as text, edited as TinyMCE WYSIWYG editor, featuring full control over configuration
 - switch: Stored as boolean, edited as a nice checkbox
 - autocomplete_data: Stored like data, edited as an auto-complete input, requires the "family" form_option.
@@ -387,7 +387,7 @@ Don't forget to tag your service properly.
 
 #### Overriding existing attribute types
 If you need to override an existing attribute type, you can use the following method.
-Attribute types are standard tagged symfony services, you shouldn't need to override the default class and you will see that all existing attribute types are based on the same class.
+Attribute types are standard tagged symfony services, you should'nt need to override the default class and you will see that all existing attribute types are based on the same class.
 For example if you need to override the form_type of the "html" type:
 
 ````yaml

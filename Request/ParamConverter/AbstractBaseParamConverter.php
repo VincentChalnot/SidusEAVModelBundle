@@ -50,8 +50,7 @@ abstract class AbstractBaseParamConverter implements ParamConverterInterface
      */
     public function supports(ParamConverter $configuration)
     {
-        return $configuration->getClass() &&
-        is_a($configuration->getClass(), $this->getClass(), true);
+        return $configuration->getClass() && is_a($configuration->getClass(), $this->getClass(), true);
     }
 
     /**

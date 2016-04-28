@@ -3,27 +3,28 @@
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
-use Sidus\EAVModelBundle\Exception\MissingFamilyException;
-use Sidus\EAVModelBundle\Model\FamilyInterface;
+use Sidus\EAVModelBundle\Entity\DataInterface;
+use Sidus\EAVModelBundle\Entity\DataRepository;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Automatically convert request parameters in families
+ * Convert request parameters in data
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class FamilyParamConverter extends AbstractBaseParamConverter
+class DataParamConverter extends AbstractBaseParamConverter
 {
-    /** @var FamilyConfigurationHandler */
-    protected $familyConfigurationHandler;
+    /** @var DataRepository */
+    protected $dataRepository;
 
     /**
-     * @param FamilyConfigurationHandler $familyConfigurationHandler
+     * DataParamConverter constructor.
+     *
+     * @param DataRepository $dataRepository
      */
-    public function __construct(FamilyConfigurationHandler $familyConfigurationHandler)
+    public function __construct(DataRepository $dataRepository)
     {
-        $this->familyConfigurationHandler = $familyConfigurationHandler;
+        $this->dataRepository = $dataRepository;
     }
 
     /**
@@ -38,8 +39,11 @@ class FamilyParamConverter extends AbstractBaseParamConverter
     public function apply(Request $request, ParamConverter $configuration)
     {
         $originalName = $configuration->getName();
-        if ($request->attributes->has('familyCode')) {
-            $configuration->setName('familyCode');
+        if ($request->attributes->has('id')) {
+            $configuration->setName('id');
+        }
+        if ($request->attributes->has('dataId')) {
+            $configuration->setName('dataId');
         }
         if (!parent::apply($request, $configuration)) {
             return false;
@@ -51,14 +55,9 @@ class FamilyParamConverter extends AbstractBaseParamConverter
         return true;
     }
 
-    /**
-     * @param string $value
-     * @return FamilyInterface
-     * @throws MissingFamilyException
-     */
     protected function convertValue($value)
     {
-        return $this->familyConfigurationHandler->getFamily($value);
+        return $this->dataRepository->find($value);
     }
 
     /**
@@ -66,6 +65,6 @@ class FamilyParamConverter extends AbstractBaseParamConverter
      */
     protected function getClass()
     {
-        return FamilyInterface::class;
+        return DataInterface::class;
     }
 }

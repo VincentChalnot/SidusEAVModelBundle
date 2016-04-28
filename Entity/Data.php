@@ -23,7 +23,7 @@ use UnexpectedValueException;
 /**
  * @DataConstraint()
  */
-abstract class Data implements DataInterface
+abstract class Data implements ContextualDataInterface
 {
     /**
      * @var int
@@ -35,21 +35,21 @@ abstract class Data implements DataInterface
     protected $id;
 
     /**
-     * @var Data
-     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\Data", inversedBy="children")
+     * @var DataInterface
+     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", inversedBy="children")
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="cascade")
      */
     protected $parent;
 
     /**
-     * @var Data[]
-     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\Data", mappedBy="parent", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var DataInterface[]
+     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", mappedBy="parent", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     protected $children;
 
     /**
-     * @var Value[]|Collection
-     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\Value", mappedBy="data", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var ValueInterface[]|Collection
+     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\ValueInterface", mappedBy="data", cascade={"persist", "remove"}, orphanRemoval=true)
      * @ORM\OrderBy({"position" = "ASC"})
      * @JMS\Exclude()
      */
@@ -105,6 +105,16 @@ abstract class Data implements DataInterface
     }
 
     /**
+     * @return mixed
+     * @throws BadMethodCallException
+     */
+    public function getIdentifier()
+    {
+        // @todo check the existence of an identifier attribute in the family
+        return $this->getId();
+    }
+
+    /**
      * @return DateTime
      */
     public function getCreatedAt()
@@ -114,7 +124,7 @@ abstract class Data implements DataInterface
 
     /**
      * @param DateTime $createdAt
-     * @return Data
+     * @return DataInterface
      *
      * @throws UnexpectedValueException
      */
@@ -135,7 +145,7 @@ abstract class Data implements DataInterface
 
     /**
      * @param DateTime $updatedAt
-     * @return Data
+     * @return DataInterface
      *
      * @throws UnexpectedValueException
      */
@@ -147,7 +157,7 @@ abstract class Data implements DataInterface
     }
 
     /**
-     * @return Data
+     * @return DataInterface
      */
     public function getParent()
     {
@@ -155,10 +165,10 @@ abstract class Data implements DataInterface
     }
 
     /**
-     * @param Data $parent
-     * @return Data
+     * @param DataInterface $parent
+     * @return DataInterface
      */
-    public function setParent(Data $parent = null)
+    public function setParent(DataInterface $parent = null)
     {
         $this->parent = $parent;
 
@@ -171,7 +181,7 @@ abstract class Data implements DataInterface
      * @param AttributeInterface $attribute
      * @param mixed              $valueData
      * @param array              $context
-     * @return Data
+     * @return DataInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
@@ -260,7 +270,7 @@ abstract class Data implements DataInterface
      */
     public function setId($id)
     {
-        $this->id = (int) $id;
+        $this->id = (int)$id;
 
         return $this;
     }
@@ -282,7 +292,7 @@ abstract class Data implements DataInterface
      *
      * @param string $methodName
      * @param array  $arguments
-     * @return mixed|null|Value
+     * @return mixed|null|ValueInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
@@ -330,6 +340,7 @@ abstract class Data implements DataInterface
         if ($attribute->isMultiple()) {
             return $this->getValuesData($attribute, $context);
         }
+
         return $this->getValueData($attribute, $context);
     }
 
@@ -339,7 +350,7 @@ abstract class Data implements DataInterface
      * @param string $attributeCode
      * @param mixed  $value
      * @param array  $context
-     * @return Data
+     * @return DataInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
@@ -353,6 +364,7 @@ abstract class Data implements DataInterface
         if ($attribute->isMultiple()) {
             return $this->setValuesData($attribute, $value, $context);
         }
+
         return $this->setValueData($attribute, $value, $context);
     }
 
@@ -361,7 +373,7 @@ abstract class Data implements DataInterface
      *
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return null|Value
+     * @return null|ValueInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
@@ -380,7 +392,7 @@ abstract class Data implements DataInterface
      *
      * @param AttributeInterface|null $attribute
      * @param array                   $context
-     * @return Collection|Value[]
+     * @return Collection|ValueInterface[]
      *
      * @throws UnexpectedValueException
      * @throws AccessException
@@ -461,7 +473,7 @@ abstract class Data implements DataInterface
     /**
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return Value
+     * @return ValueInterface
      */
     public function createValue(AttributeInterface $attribute, array $context = null)
     {
@@ -478,7 +490,7 @@ abstract class Data implements DataInterface
      * @param AttributeInterface $attribute
      * @param array|\Traversable $dataValues
      * @param array              $context
-     * @return Data
+     * @return DataInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
@@ -496,7 +508,7 @@ abstract class Data implements DataInterface
     /**
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return Data
+     * @return DataInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
@@ -514,10 +526,10 @@ abstract class Data implements DataInterface
     }
 
     /**
-     * @param Value $value
-     * @return Data
+     * @param ValueInterface $value
+     * @return DataInterface
      */
-    public function removeValue(Value $value)
+    public function removeValue(ValueInterface $value)
     {
         $this->values->removeElement($value);
         $value->setData(null);
@@ -526,15 +538,15 @@ abstract class Data implements DataInterface
     }
 
     /**
-     * @param Value $value
-     * @return Data
+     * @param ValueInterface $value
+     * @return DataInterface
      *
      * @throws UnexpectedValueException
      */
-    public function addValue(Value $value)
+    public function addValue(ValueInterface $value)
     {
-        if (!$value->getContext()) {
-            $value->setContext($this->getCurrentContext());
+        if ($value instanceof ContextualValueInterface && !$value->getContext()) {
+                $value->setContext($this->getCurrentContext());
         }
         $this->values->add($value);
         $value->setData($this);
@@ -548,7 +560,7 @@ abstract class Data implements DataInterface
      * @param AttributeInterface $attribute
      * @param mixed              $dataValue
      * @param array              $context
-     * @return Data
+     * @return DataInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
@@ -631,7 +643,7 @@ abstract class Data implements DataInterface
     /**
      * @param AttributeInterface|null $attribute
      * @param array|null              $context
-     * @return Collection|Value[]
+     * @return Collection|ValueInterface[]
      *
      * @throws UnexpectedValueException
      * @throws AccessException
@@ -649,10 +661,10 @@ abstract class Data implements DataInterface
     }
 
     /**
-     * @param AttributeInterface      $attribute
-     * @param array|\Traversable      $dataValues
-     * @param array|null              $context
-     * @return Collection|Value[]
+     * @param AttributeInterface $attribute
+     * @param array|\Traversable $dataValues
+     * @param array|null         $context
+     * @return Collection|ValueInterface[]
      *
      * @throws UnexpectedValueException
      * @throws AccessException
@@ -701,6 +713,6 @@ abstract class Data implements DataInterface
      */
     protected function getLabelValue()
     {
-        return (string) $this->getValueData($this->getFamily()->getAttributeAsLabel());
+        return (string)$this->getValueData($this->getFamily()->getAttributeAsLabel());
     }
 }

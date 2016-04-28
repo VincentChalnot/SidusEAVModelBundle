@@ -6,7 +6,7 @@ use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\Metadata\VirtualPropertyMetadata;
-use Sidus\EAVModelBundle\Entity\Data;
+use Sidus\EAVModelBundle\Entity\DataInterface;
 
 /**
  * Handle serialization of the EAV model
@@ -33,9 +33,9 @@ class DataSerializerHandler implements EventSubscriberInterface
      */
     public function postSerialize(ObjectEvent $event)
     {
-        /** @var Data $data */
+        /** @var DataInterface $data */
         $data = $event->getObject();
-        if (!$data instanceof Data) {
+        if (!$data instanceof DataInterface) {
             return;
         }
         $context = $event->getContext();

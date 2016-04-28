@@ -23,15 +23,15 @@ abstract class Value implements ContextualValueInterface
     protected $id;
 
     /**
-     * @var Data
-     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\Data", inversedBy="values", fetch="EAGER")
+     * @var DataInterface
+     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", inversedBy="values", fetch="EAGER")
      * @ORM\JoinColumn(name="data_id", referencedColumnName="id", onDelete="cascade", nullable=false)
      */
     protected $data;
 
     /**
-     * @var Data
-     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\Data", cascade={"persist"})
+     * @var DataInterface
+     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", cascade={"persist"})
      * @ORM\JoinColumn(name="data_value_id", referencedColumnName="id", onDelete="cascade", nullable=true)
      */
     protected $dataValue;
@@ -91,10 +91,10 @@ abstract class Value implements ContextualValueInterface
     protected $textValue;
 
     /**
-     * @param Data               $data
+     * @param DataInterface      $data
      * @param AttributeInterface $attribute
      */
-    public function __construct(Data $data = null, AttributeInterface $attribute = null)
+    public function __construct(DataInterface $data = null, AttributeInterface $attribute = null)
     {
         $this->data = $data;
         if ($attribute) {
@@ -322,7 +322,7 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * @return Data
+     * @return DataInterface
      */
     public function getData()
     {
@@ -330,9 +330,9 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * @param Data $data
+     * @param DataInterface $data
      */
-    public function setData(Data $data = null)
+    public function setData(DataInterface $data = null)
     {
         $this->data = $data;
     }

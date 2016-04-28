@@ -7,6 +7,7 @@ parameters:
     sidus_eav_model.doctrine.repository.data.class: Sidus\EAVModelBundle\Entity\DataRepository
     sidus_eav_model.exception.handler.class: Sidus\EAVModelBundle\Event\ExceptionListener
     sidus_eav_model.validator.sidus_data.class: Sidus\EAVModelBundle\Validator\Constraints\DataValidator
+    sidus_eav_model.request.data.param_converter.class: Sidus\EAVModelBundle\Request\ParamConverter\DataParamConverter
     sidus_eav_model.request.family.param_converter.class: Sidus\EAVModelBundle\Request\ParamConverter\FamilyParamConverter
     sidus_eav_model.request.attribute.param_converter.class: Sidus\EAVModelBundle\Request\ParamConverter\AttributeParamConverter
     sidus_eav_model.serializer.data.subscriber.class: Sidus\EAVModelBundle\Event\DataSerializerHandler
@@ -35,18 +36,17 @@ services:
         factory_method: getRepository
         arguments: [%sidus_eav_model.entity.data.class%]
 
-#    Disabling exception listener for now
-#    sidus_eav_model.exception.handler:
-#        class: %sidus_eav_model.exception.handler.class%
-#        arguments: [ @sidus_eav_model.family_configuration.handler, @sidus_eav_model.doctrine.repository.data, @session ]
-#        tags:
-#            - { name: kernel.event_subscriber }
-
     sidus_eav_model.validator.sidus_data:
         class: %sidus_eav_model.validator.sidus_data.class%
         arguments: [%sidus_eav_model.entity.data.class%, @sidus_eav_model.family_configuration.handler, @translator, @doctrine]
         tags:
             - { name: validator.constraint_validator, alias: sidus_data }
+
+    sidus_eav_model.request.data.param_converter:
+        class: %sidus_eav_model.request.data.param_converter.class%
+        arguments: [ @sidus_eav_model.doctrine.repository.data ]
+        tags:
+            - { name: request.param_converter }
 
     sidus_eav_model.request.family.param_converter:
         class: %sidus_eav_model.request.family.param_converter.class%

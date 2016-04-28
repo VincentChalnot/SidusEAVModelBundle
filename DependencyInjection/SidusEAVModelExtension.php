@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 /**
- * Parse configuration and creates attributes and familie's services
+ * Parse configuration and creates attributes and families' services
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */

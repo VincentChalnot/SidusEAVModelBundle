@@ -4,8 +4,8 @@ namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
-use Sidus\EAVModelBundle\Entity\Data;
-use Sidus\EAVModelBundle\Entity\Value;
+use Sidus\EAVModelBundle\Entity\DataInterface;
+use Sidus\EAVModelBundle\Entity\ValueInterface;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
@@ -325,16 +325,16 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @param Data               $data
+     * @param DataInterface      $data
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return Value
+     * @return ValueInterface
      * @throws UnexpectedValueException
      */
-    public function createValue(Data $data, AttributeInterface $attribute, array $context = null)
+    public function createValue(DataInterface $data, AttributeInterface $attribute, array $context = null)
     {
         $valueClass = $this->getValueClass();
-        /** @var Value $value */
+        /** @var ValueInterface $value */
         $value = new $valueClass($data, $attribute);
         $data->addValue($value);
 
@@ -351,7 +351,7 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @return Data
+     * @return DataInterface
      */
     public function createData()
     {

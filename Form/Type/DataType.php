@@ -3,7 +3,7 @@
 namespace Sidus\EAVModelBundle\Form\Type;
 
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
-use Sidus\EAVModelBundle\Entity\Data;
+use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -60,7 +60,7 @@ class DataType extends AbstractType
     {
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
             $form = $event->getForm();
-            /** @var Data $data */
+            /** @var DataInterface $data */
             $data = $event->getData();
 
             if ($data) {
@@ -78,7 +78,7 @@ class DataType extends AbstractType
         });
         $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
             $data = $event->getData();
-            if ($data instanceof Data) {
+            if ($data instanceof DataInterface) {
                 $data->setUpdatedAt(new \DateTime());
             }
         });
@@ -99,10 +99,10 @@ class DataType extends AbstractType
      *
      * @param FormInterface   $form
      * @param FamilyInterface $family
-     * @param Data            $data
+     * @param DataInterface   $data
      * @param array           $options
      */
-    public function buildDataForm(FormInterface $form, FamilyInterface $family, Data $data = null, array $options = [])
+    public function buildDataForm(FormInterface $form, FamilyInterface $family, DataInterface $data = null, array $options = [])
     {
 
     }
@@ -110,14 +110,14 @@ class DataType extends AbstractType
     /**
      * @param FormInterface   $form
      * @param FamilyInterface $family
-     * @param Data            $data
+     * @param DataInterface   $data
      * @param array           $options
      * @throws \Exception
      */
     public function buildValuesForm(
         FormInterface $form,
         FamilyInterface $family,
-        Data $data = null,
+        DataInterface $data = null,
         array $options = []
     ) {
         foreach ($family->getAttributes() as $attribute) {
@@ -175,7 +175,7 @@ class DataType extends AbstractType
      * @param FormInterface      $form
      * @param AttributeInterface $attribute
      * @param FamilyInterface    $family
-     * @param Data|null          $data
+     * @param DataInterface|null $data
      * @param array              $options
      * @throws \Exception
      */
@@ -183,7 +183,7 @@ class DataType extends AbstractType
         FormInterface $form,
         AttributeInterface $attribute,
         FamilyInterface $family,
-        Data $data = null,
+        DataInterface $data = null,
         array $options = []
     ) {
         $attributeType = $attribute->getType();

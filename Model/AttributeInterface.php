@@ -2,7 +2,7 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
-use Sidus\EAVModelBundle\Entity\Value;
+use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
 
 /**
  * Interface for attribute services
@@ -127,11 +127,11 @@ interface AttributeInterface
     public function getContextMask();
 
     /**
-     * @param Value $value
+     * @param ContextualValueInterface $value
      * @param array $context
      * @return bool
      */
-    public function isContextMatching(Value $value, array $context);
+    public function isContextMatching(ContextualValueInterface $value, array $context);
 
     /**
      * @return mixed

@@ -5,8 +5,8 @@ namespace Sidus\EAVModelBundle\Validator\Constraints;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Exception;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
-use Sidus\EAVModelBundle\Entity\Data as SidusData;
-use Sidus\EAVModelBundle\Entity\Value;
+use Sidus\EAVModelBundle\Entity\DataInterface;
+use Sidus\EAVModelBundle\Entity\ValueInterface;
 use Sidus\EAVModelBundle\Entity\ValueRepository;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
@@ -55,8 +55,8 @@ class DataValidator extends ConstraintValidator
     /**
      * Checks if the passed value is valid.
      *
-     * @param SidusData  $data       The value that should be validated
-     * @param Constraint $constraint The constraint for the validation
+     * @param DataInterface $data       The value that should be validated
+     * @param Constraint    $constraint The constraint for the validation
      * @return ConstraintViolationListInterface
      * @throws Exception
      */
@@ -90,11 +90,14 @@ class DataValidator extends ConstraintValidator
     /**
      * @param ExecutionContextInterface $context
      * @param AttributeInterface        $attribute
-     * @param SidusData                 $data
+     * @param DataInterface             $data
      * @throws Exception
      */
-    protected function checkUnique(ExecutionContextInterface $context, AttributeInterface $attribute, SidusData $data)
-    {
+    protected function checkUnique(
+        ExecutionContextInterface $context,
+        AttributeInterface $attribute,
+        DataInterface $data
+    ) {
         $valueData = $data->getValueData($attribute);
         /** @var ValueRepository $repo */
         $repo = $this->doctrine->getRepository($data->getFamily()->getValueClass());
@@ -102,7 +105,7 @@ class DataValidator extends ConstraintValidator
             'attributeCode' => $attribute->getCode(),
             $attribute->getType()->getDatabaseType() => $valueData,
         ]);
-        /** @var Value $value */
+        /** @var ValueInterface $value */
         foreach ($values as $value) {
             if ($value->getData()->getId() !== $data->getId()) {
                 $this->buildAttributeViolation($context, $attribute, 'unique', $valueData);
@@ -115,11 +118,14 @@ class DataValidator extends ConstraintValidator
     /**
      * @param ExecutionContextInterface $context
      * @param AttributeInterface        $attribute
-     * @param SidusData                 $data
+     * @param DataInterface             $data
      * @throws Exception
      */
-    protected function validateRules(ExecutionContextInterface $context, AttributeInterface $attribute, SidusData $data)
-    {
+    protected function validateRules(
+        ExecutionContextInterface $context,
+        AttributeInterface $attribute,
+        DataInterface $data
+    ) {
         if ($attribute->isMultiple()) {
             $valueData = $data->getValuesData($attribute);
         } else {
@@ -192,17 +198,17 @@ class DataValidator extends ConstraintValidator
         ];
 
         return $this->tryTranslate($tIds, [
-            '%attribute%' => $this->translator->trans((string) $attribute),
+            '%attribute%' => $this->translator->trans((string)$attribute),
         ], $tId);
     }
 
     /**
      * @param AttributeInterface $attribute
-     * @param SidusData          $data
+     * @param DataInterface      $data
      * @param Constraint         $constraint
      * @throws \Exception
      */
-    protected function validateEmbedded(AttributeInterface $attribute, SidusData $data, Constraint $constraint)
+    protected function validateEmbedded(AttributeInterface $attribute, DataInterface $data, Constraint $constraint)
     {
         if ($attribute->isMultiple()) {
             foreach ($data->getValuesData($attribute) as $key => $item) {

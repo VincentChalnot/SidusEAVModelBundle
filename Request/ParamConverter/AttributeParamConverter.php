@@ -3,6 +3,7 @@
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
 use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
+use Sidus\EAVModelBundle\Model\AttributeInterface;
 
 /**
  * Convert request parameters in attributes
@@ -32,6 +33,6 @@ class AttributeParamConverter extends AbstractBaseParamConverter
      */
     protected function getClass()
     {
-        return 'Sidus\EAVModelBundle\Model\AttributeInterface';
+        return AttributeInterface::class;
     }
 }

@@ -14,6 +14,16 @@ use Sidus\EAVModelBundle\Model\FamilyInterface;
 interface DataInterface
 {
     /**
+     * @return mixed
+     */
+    public function getId();
+
+    /**
+     * @return mixed
+     */
+    public function getIdentifier();
+
+    /**
      * @return string
      */
     public function getFamilyCode();
@@ -33,7 +43,7 @@ interface DataInterface
      * @param string $attributeCode
      * @param mixed  $value
      * @param array  $context
-     * @return Data
+     * @return DataInterface
      */
     public function set($attributeCode, $value, array $context = null);
 
@@ -42,7 +52,7 @@ interface DataInterface
      *
      * @param AttributeInterface|null $attribute
      * @param array                   $context
-     * @return Collection|Value[]
+     * @return Collection|ValueInterface[]
      */
     public function getValues(AttributeInterface $attribute = null, array $context = null);
 
@@ -51,7 +61,7 @@ interface DataInterface
      *
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return null|Value
+     * @return null|ValueInterface
      */
     public function getValue(AttributeInterface $attribute, array $context = null);
 
@@ -79,7 +89,7 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param mixed              $dataValue
      * @param array              $context
-     * @return Data
+     * @return DataInterface
      */
     public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null);
 
@@ -89,22 +99,22 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param array|\Traversable $dataValues
      * @param array              $context
-     * @return Data
+     * @return DataInterface
      */
     public function setValuesData(AttributeInterface $attribute, $dataValues, array $context = null);
 
     /**
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return Data
+     * @return DataInterface
      */
     public function emptyValues(AttributeInterface $attribute = null, array $context = null);
 
     /**
-     * @param Value $value
-     * @return Data
+     * @param ValueInterface $value
+     * @return DataInterface
      */
-    public function addValue(Value $value);
+    public function addValue(ValueInterface $value);
 
     /**
      * Append data to an attribute
@@ -112,15 +122,15 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param mixed              $valueData
      * @param array              $context
-     * @return Data
+     * @return DataInterface
      */
     public function addValueData(AttributeInterface $attribute, $valueData, array $context = null);
 
     /**
-     * @param Value $value
-     * @return Data
+     * @param ValueInterface $value
+     * @return DataInterface
      */
-    public function removeValue(Value $value);
+    public function removeValue(ValueInterface $value);
 
     /**
      * @return string
@@ -140,7 +150,7 @@ interface DataInterface
     /**
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return Value
+     * @return ValueInterface
      */
     public function createValue(AttributeInterface $attribute, array $context = null);
 

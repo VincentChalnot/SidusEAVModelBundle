@@ -7,7 +7,7 @@ namespace Sidus\EAVModelBundle\Entity;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-interface ContextualValueInterface
+interface ContextualValueInterface extends ValueInterface
 {
     /**
      * @return array
