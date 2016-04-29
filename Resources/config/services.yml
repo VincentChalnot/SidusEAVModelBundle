@@ -5,7 +5,6 @@ parameters:
     sidus_eav_model.attribute_configuration.handler.class: Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler
     sidus_eav_model.family_configuration.handler.class: Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler
     sidus_eav_model.doctrine.repository.data.class: Sidus\EAVModelBundle\Entity\DataRepository
-    sidus_eav_model.exception.handler.class: Sidus\EAVModelBundle\Event\ExceptionListener
     sidus_eav_model.validator.sidus_data.class: Sidus\EAVModelBundle\Validator\Constraints\DataValidator
     sidus_eav_model.request.data.param_converter.class: Sidus\EAVModelBundle\Request\ParamConverter\DataParamConverter
     sidus_eav_model.request.family.param_converter.class: Sidus\EAVModelBundle\Request\ParamConverter\FamilyParamConverter
