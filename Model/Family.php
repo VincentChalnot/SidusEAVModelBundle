@@ -50,6 +50,9 @@ class Family implements FamilyInterface
     /** @var bool */
     protected $instantiable;
 
+    /** @var bool */
+    protected $singleton;
+
     /** @var Family[] */
     protected $children = [];
 
@@ -270,6 +273,22 @@ class Family implements FamilyInterface
     public function setInstantiable($instantiable)
     {
         $this->instantiable = $instantiable;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isSingleton()
+    {
+        return $this->singleton;
+    }
+
+    /**
+     * @param boolean $singleton
+     */
+    public function setSingleton($singleton)
+    {
+        $this->singleton = $singleton;
     }
 
     /**

@@ -158,7 +158,6 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      * @return bool
-     * @throws \Exception
      */
     public function isEmpty(AttributeInterface $attribute, array $context = null);
 }

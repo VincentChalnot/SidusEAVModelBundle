@@ -94,6 +94,7 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('attributeAsLabel')->defaultNull()->end()
             ->scalarNode('attributeAsIdentifier')->defaultNull()->end()
             ->scalarNode('parent')->end()
+            ->booleanNode('singleton')->defaultValue(false)->end()
             ->booleanNode('instantiable')->defaultValue(true)->end()
             ->arrayNode('attributes')
                 ->prototype('scalar')->end()
