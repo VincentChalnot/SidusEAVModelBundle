@@ -98,6 +98,11 @@ interface FamilyInterface
     public function isInstantiable();
 
     /**
+     * @return bool
+     */
+    public function isSingleton();
+
+    /**
      * @return array
      */
     public function getDefaultContext();

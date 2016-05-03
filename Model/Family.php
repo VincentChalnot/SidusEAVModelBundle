@@ -417,6 +417,12 @@ class Family implements FamilyInterface
      */
     public function createData()
     {
+        if (!$this->isInstantiable()) {
+            throw new \LogicException("Family {$this->getCode()} is not instantiable");
+        }
+        if ($this->isSingleton()) {
+            throw new \LogicException("Family {$this->getCode()} is a singleton, use the repository to retrieve the instance");
+        }
         $dataClass = $this->getDataClass();
 
         return new $dataClass($this);

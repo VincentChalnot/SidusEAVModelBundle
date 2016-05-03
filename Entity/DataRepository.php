@@ -41,4 +41,31 @@ class DataRepository extends EntityRepository
 
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+    /**
+     * @param FamilyInterface $family
+     * @return DataInterface
+     */
+    public function getInstance(FamilyInterface $family)
+    {
+        if (!$family->isSingleton()) {
+            throw new \LogicException("Family {$family->getCode()} is not a singleton");
+        }
+        $qb = $this->createQueryBuilder('d')
+            ->andWhere('d.family = :familyCode')
+            ->addSelect('values')
+            ->join('d.values', 'values')
+            ->setParameters([
+                'familyCode' => $family->getCode(),
+            ])
+        ;
+
+        $instance = $qb->getQuery()->getOneOrNullResult();
+        if (!$instance) {
+            $dataClass = $family->getDataClass();
+            $instance = new $dataClass($family);
+        }
+
+        return $instance;
+    }
 }
