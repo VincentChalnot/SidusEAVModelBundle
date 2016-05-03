@@ -106,11 +106,18 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @return mixed
-     * @throws BadMethodCallException
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function getIdentifier()
     {
-        // 70D0 check the existence of an identifier attribute in the family
+        $identifierAttribute = $this->getFamily()->getAttributeAsIdentifier();
+        if ($identifierAttribute) {
+            return $this->getValuesData($identifierAttribute);
+        }
+
         return $this->getId();
     }
 

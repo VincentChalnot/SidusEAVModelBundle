@@ -360,7 +360,7 @@ class Attribute implements AttributeInterface
 
     /**
      * @param ContextualValueInterface $value
-     * @param array $context
+     * @param array                    $context
      * @return bool
      * @throws UnexpectedValueException
      */

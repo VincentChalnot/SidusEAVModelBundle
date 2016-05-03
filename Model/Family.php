@@ -4,6 +4,7 @@ namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\ValueInterface;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
@@ -33,6 +34,9 @@ class Family implements FamilyInterface
 
     /** @var Attribute */
     protected $attributeAsLabel;
+
+    /** @var Attribute */
+    protected $attributeAsIdentifier;
 
     /** @var Attribute[] */
     protected $attributes = [];
@@ -88,9 +92,31 @@ class Family implements FamilyInterface
         unset($config['attributes']);
 
         if (!empty($config['attributeAsLabel'])) {
-            $this->attributeAsLabel = $attributeConfigurationHandler->getAttribute($config['attributeAsLabel']);
+            $labelCode = $config['attributeAsLabel'];
+            if (!$this->hasAttribute($labelCode)) {
+                $message = "Bad configuration for family {$code}: attribute as label '{$labelCode}'";
+                $message .= " doesn't exists for this family";
+                throw new UnexpectedValueException($message);
+            }
+            $this->attributeAsLabel = $this->getAttribute($labelCode);
         }
         unset($config['attributeAsLabel']);
+
+        if (!empty($config['attributeAsIdentifier'])) {
+            $labelCode = $config['attributeAsIdentifier'];
+            $commonMessage = "Bad configuration for family {$code}: attribute as identifier '{$labelCode}'";
+            if (!$this->hasAttribute($labelCode)) {
+                throw new UnexpectedValueException("{$commonMessage} doesn't exists for this family");
+            }
+            $this->attributeAsIdentifier = $this->getAttribute($labelCode);
+            if (!$this->attributeAsIdentifier->isUnique()) {
+                throw new UnexpectedValueException("{$commonMessage} should be unique");
+            }
+            if (!$this->attributeAsIdentifier->isRequired()) {
+                throw new UnexpectedValueException("{$commonMessage} should be required");
+            }
+        }
+        unset($config['attributeAsIdentifier']);
 
         $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($config as $key => $value) {
@@ -112,6 +138,22 @@ class Family implements FamilyInterface
     public function setAttributeAsLabel(Attribute $attributeAsLabel)
     {
         $this->attributeAsLabel = $attributeAsLabel;
+    }
+
+    /**
+     * @return Attribute|null
+     */
+    public function getAttributeAsIdentifier()
+    {
+        return $this->attributeAsIdentifier;
+    }
+
+    /**
+     * @param Attribute $attributeAsIdentifier
+     */
+    public function setAttributeAsIdentifier(Attribute $attributeAsIdentifier)
+    {
+        $this->attributeAsIdentifier = $attributeAsIdentifier;
     }
 
     /**
@@ -338,7 +380,8 @@ class Family implements FamilyInterface
         $value = new $valueClass($data, $attribute);
         $data->addValue($value);
 
-        if (count($attribute->getContextMask())) {
+        if ($value instanceof ContextualValueInterface && count($attribute->getContextMask())) {
+            /** @var ContextualValueInterface $value */
             if (!$context) {
                 $context = $this->getDefaultContext();
             }
@@ -401,6 +444,7 @@ class Family implements FamilyInterface
             $this->addAttribute($attribute);
         }
         $this->attributeAsLabel = $parent->getAttributeAsLabel();
+        $this->attributeAsIdentifier = $parent->getAttributeAsIdentifier();
         $this->valueClass = $parent->getValueClass();
         $this->dataClass = $parent->getDataClass();
     }

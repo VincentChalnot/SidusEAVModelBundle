@@ -28,6 +28,11 @@ interface FamilyInterface
     public function getAttributeAsLabel();
 
     /**
+     * @return AttributeInterface|null
+     */
+    public function getAttributeAsIdentifier();
+
+    /**
      * @return AttributeInterface[]
      */
     public function getAttributes();

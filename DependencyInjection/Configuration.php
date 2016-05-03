@@ -34,6 +34,7 @@ class Configuration implements ConfigurationInterface
                     ->useAttributeAsKey('code')
                     ->prototype('array')
                         ->performNoDeepMerging()
+                        ->cannotBeOverwritten()
                         ->children();
 
         $this->appendAttributeDefinition($attributeDefinition);
@@ -45,6 +46,7 @@ class Configuration implements ConfigurationInterface
                     ->useAttributeAsKey('code')
                     ->prototype('array')
                         ->performNoDeepMerging()
+                        ->cannotBeOverwritten()
                         ->children();
 
         $this->appendFamilyDefinition($familyDefinition);
@@ -90,6 +92,7 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('value_class')->end()
             ->scalarNode('label')->defaultNull()->end()
             ->scalarNode('attributeAsLabel')->defaultNull()->end()
+            ->scalarNode('attributeAsIdentifier')->defaultNull()->end()
             ->scalarNode('parent')->end()
             ->booleanNode('instantiable')->defaultValue(true)->end()
             ->arrayNode('attributes')

@@ -128,7 +128,7 @@ interface AttributeInterface
 
     /**
      * @param ContextualValueInterface $value
-     * @param array $context
+     * @param array                    $context
      * @return bool
      */
     public function isContextMatching(ContextualValueInterface $value, array $context);
