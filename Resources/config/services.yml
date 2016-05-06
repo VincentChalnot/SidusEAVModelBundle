@@ -15,60 +15,60 @@ parameters:
 services:
     # Enabling enableMagicCall globally
     property_accessor:
-        class: %property_accessor.class%
+        class: '%property_accessor.class%'
         arguments: [true]
 
     sidus_eav_model.attribute_type_configuration.handler:
-        class: %sidus_eav_model.attribute_type_configuration.handler.class%
+        class: '%sidus_eav_model.attribute_type_configuration.handler.class%'
 
     sidus_eav_model.attribute_configuration.handler:
-        class: %sidus_eav_model.attribute_configuration.handler.class%
+        class: '%sidus_eav_model.attribute_configuration.handler.class%'
 
     sidus_eav_model.family_configuration.handler:
-        class: %sidus_eav_model.family_configuration.handler.class%
+        class: '%sidus_eav_model.family_configuration.handler.class%'
         tags:
             - { name: doctrine.event_listener, event: sidus_family_configuration }
 
     sidus_eav_model.doctrine.repository.data:
-        class: %sidus_eav_model.doctrine.repository.data.class%
+        class: '%sidus_eav_model.doctrine.repository.data.class%'
         factory_service: doctrine.orm.default_entity_manager
         factory_method: getRepository
-        arguments: [%sidus_eav_model.entity.data.class%]
+        arguments: ['%sidus_eav_model.entity.data.class%']
 
     sidus_eav_model.validator.sidus_data:
-        class: %sidus_eav_model.validator.sidus_data.class%
-        arguments: [%sidus_eav_model.entity.data.class%, @sidus_eav_model.family_configuration.handler, @translator, @doctrine]
+        class: '%sidus_eav_model.validator.sidus_data.class%'
+        arguments: ['%sidus_eav_model.entity.data.class%', '@sidus_eav_model.family_configuration.handler', '@translator', '@doctrine']
         tags:
             - { name: validator.constraint_validator, alias: sidus_data }
 
     sidus_eav_model.request.data.param_converter:
-        class: %sidus_eav_model.request.data.param_converter.class%
-        arguments: [ @sidus_eav_model.doctrine.repository.data ]
+        class: '%sidus_eav_model.request.data.param_converter.class%'
+        arguments: ['@sidus_eav_model.doctrine.repository.data']
         tags:
             - { name: request.param_converter }
 
     sidus_eav_model.request.family.param_converter:
-        class: %sidus_eav_model.request.family.param_converter.class%
-        arguments: [ @sidus_eav_model.family_configuration.handler ]
+        class: '%sidus_eav_model.request.family.param_converter.class%'
+        arguments: ['@sidus_eav_model.family_configuration.handler']
         tags:
             - { name: request.param_converter }
 
     sidus_eav_model.request.attribute.param_converter:
-        class: %sidus_eav_model.request.attribute.param_converter.class%
-        arguments: [ @sidus_eav_model.attribute_configuration.handler ]
+        class: '%sidus_eav_model.request.attribute.param_converter.class%'
+        arguments: ['@sidus_eav_model.attribute_configuration.handler']
         tags:
             - { name: request.param_converter }
 
     sidus_eav_model.serializer.data.subscriber.subscriber:
-        class: %sidus_eav_model.serializer.data.subscriber.class%
-        arguments: [@serializer]
+        class: '%sidus_eav_model.serializer.data.subscriber.class%'
+        arguments: ['@serializer']
         tags:
             - { name: jms_serializer.event_subscriber }
 
     sidus_eav_model.doctrine.metadata.mapper:
-        class: %sidus_eav_model.doctrine.metadata.mapper.class%
+        class: '%sidus_eav_model.doctrine.metadata.mapper.class%'
         arguments:
-            - %sidus_eav_model.entity.data.class%
-            - %sidus_eav_model.entity.value.class%
+            - '%sidus_eav_model.entity.data.class%'
+            - '%sidus_eav_model.entity.value.class%'
         tags:
             - { name: doctrine.event_listener, event: loadClassMetadata }
