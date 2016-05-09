@@ -416,6 +416,15 @@ abstract class Data implements ContextualDataInterface
     }
 
     /**
+     * @param string $attributeCode
+     * @return bool
+     */
+    public function __isset($attributeCode)
+    {
+        return $this->getFamily()->hasAttribute($attributeCode);
+    }
+
+    /**
      * Return first value found for attribute code in value collection
      *
      * @param AttributeInterface $attribute
