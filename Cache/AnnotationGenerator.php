@@ -62,9 +62,7 @@ class AnnotationGenerator implements CacheWarmerInterface
     public function warmUp($cacheDir)
     {
         $baseDir = $this->annotationDir.DIRECTORY_SEPARATOR.'Sidus'.DIRECTORY_SEPARATOR.'EAV'.DIRECTORY_SEPARATOR;
-        if (!is_dir($baseDir)) {
-            @mkdir($baseDir, 0777, true);
-        }
+        !@mkdir($baseDir, 0777, true) && !is_dir($baseDir);
 
         foreach ($this->familyConfigurationHandler->getFamilies() as $family) {
             $content = '<?php namespace Sidus\EAV; abstract class '.$family->getCode().' extends ';
@@ -145,6 +143,7 @@ EOT;
             } elseif ('decimal' === $type) {
                 return 'double';
             }
+
             return $type;
         }
         if (in_array($type, ['date', 'datetime'], true)) {
@@ -152,6 +151,7 @@ EOT;
             if ($attribute->isMultiple()) {
                 $type .= '[]';
             }
+
             return $type;
         }
         if ('data' === $type) {
@@ -162,6 +162,7 @@ EOT;
                 if ($attribute->isMultiple()) {
                     $type .= '[]';
                 }
+
                 return $type;
             }
 
@@ -176,6 +177,7 @@ EOT;
                         $type .= '[]';
                     }
                 }
+
                 return implode('|', $types);
             }
 
@@ -183,6 +185,7 @@ EOT;
             if ($attribute->isMultiple()) {
                 return 'array';
             }
+
             return 'mixed';
         }
 
@@ -196,6 +199,7 @@ EOT;
         if ($attribute->isMultiple()) {
             return 'array';
         }
+
         return 'mixed';
     }
 
@@ -221,6 +225,7 @@ EOT;
         if ($attribute->isMultiple()) {
             $type .= '[]';
         }
+
         return '\\'.$type;
     }
 }
