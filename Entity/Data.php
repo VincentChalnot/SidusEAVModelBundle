@@ -344,11 +344,31 @@ abstract class Data implements ContextualDataInterface
     {
         $attribute = $this->getAttribute($attributeCode);
 
+        $getter = 'get'.ucfirst($attributeCode);
+        if (method_exists($this, $getter)) {
+            return $this->$getter($attributeCode, $context);
+        }
+
         if ($attribute->isMultiple()) {
             return $this->getValuesData($attribute, $context);
         }
 
         return $this->getValueData($attribute, $context);
+    }
+
+    /**
+     * @param string $attributeCode
+     * @return mixed
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     * @throws BadMethodCallException
+     */
+    public function __get($attributeCode)
+    {
+        return $this->get($attributeCode);
     }
 
     /**
@@ -368,11 +388,31 @@ abstract class Data implements ContextualDataInterface
     {
         $attribute = $this->getAttribute($attributeCode);
 
+        $setter = 'set'.ucfirst($attributeCode);
+        if (method_exists($this, $setter)) {
+            return $this->$setter($attributeCode, $value, $context);
+        }
+
         if ($attribute->isMultiple()) {
             return $this->setValuesData($attribute, $value, $context);
         }
 
         return $this->setValueData($attribute, $value, $context);
+    }
+
+    /**
+     * @param string $attributeCode
+     * @param mixed  $value
+     * @return DataInterface
+     *
+     * @throws UnexpectedValueException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
+     */
+    public function __set($attributeCode, $value)
+    {
+        return $this->set($attributeCode, $value);
     }
 
     /**
