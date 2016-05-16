@@ -105,5 +105,5 @@ interface FamilyInterface
     /**
      * @return array
      */
-    public function getDefaultContext();
+    public function getContext();
 }

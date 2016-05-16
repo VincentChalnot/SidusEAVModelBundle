@@ -39,6 +39,7 @@ class SidusEAVModelExtension extends Extension
         $container->setParameter('sidus_eav_model.entity.data.class', $config['data_class']);
         $container->setParameter('sidus_eav_model.entity.value.class', $config['value_class']);
         $container->setParameter('sidus_eav_model.form.collection_type', $config['collection_type']);
+        $container->setParameter('sidus_eav_model.context.form_type', $config['context_form_type']);
         $container->setParameter('sidus_eav_model.context.default_context', $config['default_context']);
 
         // Automatically declare a service for each attribute configured
@@ -69,7 +70,6 @@ class SidusEAVModelExtension extends Extension
             if (empty($familyConfiguration['value_class'])) {
                 $familyConfiguration['value_class'] = $config['value_class'];
             }
-            $familyConfiguration['default_context'] = $config['default_context'];
             $this->addFamilyServiceDefinition($code, $familyConfiguration, $container);
         }
     }
@@ -87,6 +87,7 @@ class SidusEAVModelExtension extends Extension
             $code,
             new Reference('sidus_eav_model.attribute_configuration.handler'),
             new Reference('sidus_eav_model.family_configuration.handler'),
+            new Reference('sidus_eav_model.context.manager'),
             $familyConfiguration,
         ]);
         $definition->addMethodCall('setTranslator', [new Reference('translator')]);

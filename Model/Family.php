@@ -4,10 +4,15 @@ namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Context\ContextManager;
 use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\ValueInterface;
+use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
+use Symfony\Component\PropertyAccess\Exception\AccessException;
+use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
+use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use UnexpectedValueException;
@@ -62,26 +67,30 @@ class Family implements FamilyInterface
     /** @var string */
     protected $valueClass;
 
-    /** @var string */
-    protected $contextClass;
-
-    /** @var array */
-    protected $defaultContext;
+    /** @var ContextManager */
+    protected $contextManager;
 
     /**
      * @param string                        $code
      * @param AttributeConfigurationHandler $attributeConfigurationHandler
      * @param FamilyConfigurationHandler    $familyConfigurationHandler
+     * @param ContextManager                $contextManager
      * @param array                         $config
-     * @throws \Exception
+     * @throws UnexpectedValueException
+     * @throws MissingFamilyException
+     * @throws AccessException
+     * @throws InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     public function __construct(
         $code,
         AttributeConfigurationHandler $attributeConfigurationHandler,
         FamilyConfigurationHandler $familyConfigurationHandler,
+        ContextManager $contextManager,
         array $config = null
     ) {
         $this->code = $code;
+        $this->contextManager = $contextManager;
 
         if (!empty($config['parent'])) {
             $this->parent = $familyConfigurationHandler->getFamily($config['parent']);
@@ -370,22 +379,6 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @return string
-     */
-    public function getContextClass()
-    {
-        return $this->contextClass;
-    }
-
-    /**
-     * @param string $contextClass
-     */
-    public function setContextClass($contextClass)
-    {
-        $this->contextClass = $contextClass;
-    }
-
-    /**
      * @param DataInterface      $data
      * @param AttributeInterface $attribute
      * @param array              $context
@@ -402,7 +395,7 @@ class Family implements FamilyInterface
         if ($value instanceof ContextualValueInterface && count($attribute->getContextMask())) {
             /** @var ContextualValueInterface $value */
             if (!$context) {
-                $context = $this->getDefaultContext();
+                $context = $this->getContext();
             }
             foreach ($attribute->getContextMask() as $key) {
                 $value->setContextValue($key, $context[$key]);
@@ -414,6 +407,7 @@ class Family implements FamilyInterface
 
     /**
      * @return DataInterface
+     * @throws \LogicException
      */
     public function createData()
     {
@@ -447,17 +441,9 @@ class Family implements FamilyInterface
     /**
      * @return array
      */
-    public function getDefaultContext()
+    public function getContext()
     {
-        return $this->defaultContext;
-    }
-
-    /**
-     * @param array $defaultContext
-     */
-    public function setDefaultContext(array $defaultContext)
-    {
-        $this->defaultContext = $defaultContext;
+        return $this->contextManager->getContext();
     }
 
     /**

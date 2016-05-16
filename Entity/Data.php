@@ -277,7 +277,7 @@ abstract class Data implements ContextualDataInterface
      */
     public function setId($id)
     {
-        $this->id = (int)$id;
+        $this->id = (int) $id;
 
         return $this;
     }
@@ -494,7 +494,7 @@ abstract class Data implements ContextualDataInterface
     public function getCurrentContext()
     {
         if (!$this->currentContext) {
-            return $this->getFamily()->getDefaultContext();
+            return $this->getFamily()->getContext();
         }
 
         return $this->currentContext;
@@ -769,6 +769,6 @@ abstract class Data implements ContextualDataInterface
      */
     protected function getLabelValue()
     {
-        return (string)$this->getValueData($this->getFamily()->getAttributeAsLabel());
+        return (string) $this->getValueData($this->getFamily()->getAttributeAsLabel());
     }
 }

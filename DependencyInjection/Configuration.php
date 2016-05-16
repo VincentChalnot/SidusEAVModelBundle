@@ -26,6 +26,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('data_class')->isRequired()->end()
                 ->scalarNode('value_class')->isRequired()->end()
                 ->scalarNode('collection_type')->defaultValue('collection')->end()
+                ->scalarNode('context_form_type')->defaultNull()->end()
                 ->variableNode('default_context')->end()
                 ->arrayNode('global_context_mask')
                     ->prototype('scalar')->end()
