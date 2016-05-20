@@ -17,14 +17,22 @@ class DataRepository extends EntityRepository
     /**
      * @param FamilyInterface $family
      * @param int|string      $reference
-     * @return DataInterface|null
+     * @param bool            $idFallback
+     * @return null|DataInterface
      * @throws NonUniqueResultException
      */
-    public function findByIdentifier(FamilyInterface $family, $reference)
+    public function findByIdentifier(FamilyInterface $family, $reference, $idFallback = false)
     {
         $identifierAttribute = $family->getAttributeAsIdentifier();
         if (!$identifierAttribute) {
-            return $this->find($reference);
+            if (!$idFallback) {
+                return null;
+            }
+
+            return $this->findOneBy([
+                'id' => $reference,
+                'family' => $family->getCode(),
+            ]);
         }
         $qb = $this->createQueryBuilder('d');
         $dataBaseType = $identifierAttribute->getType()->getDatabaseType();
@@ -33,9 +41,11 @@ class DataRepository extends EntityRepository
             ->addSelect('values')
             ->join('d.values', 'id', Join::WITH, $joinCondition)
             ->join('d.values', 'values')
+            ->where('d.family = :familyCode')
             ->setParameters([
                 'attributeCode' => $identifierAttribute->getCode(),
                 'reference' => $reference,
+                'familyCode' => $family->getCode(),
             ])
         ;
 
