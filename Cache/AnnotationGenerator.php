@@ -51,18 +51,21 @@ class AnnotationGenerator implements CacheWarmerInterface
      */
     public function isOptional()
     {
-        return true;
+        return false;
     }
 
     /**
      * Warms up the cache.
      *
      * @param string $cacheDir The cache directory
+     * @throws \RuntimeException
      */
     public function warmUp($cacheDir)
     {
         $baseDir = $this->annotationDir.DIRECTORY_SEPARATOR.'Sidus'.DIRECTORY_SEPARATOR.'EAV'.DIRECTORY_SEPARATOR;
-        !@mkdir($baseDir, 0777, true) && !is_dir($baseDir);
+        if (!@mkdir($baseDir, 0777, true) && !is_dir($baseDir)) {
+            throw new \RuntimeException("Unable to create annotations directory: {$baseDir}");
+        }
 
         foreach ($this->familyConfigurationHandler->getFamilies() as $family) {
             $content = '<?php namespace Sidus\EAV; abstract class '.$family->getCode().' extends ';
@@ -73,6 +76,9 @@ class AnnotationGenerator implements CacheWarmerInterface
             }
             $content .= " {\n";
             foreach ($family->getAttributes() as $attribute) {
+                if ($this->isAttributeInherited($family, $attribute)) {
+                    continue;
+                }
                 $content .= $this->generateGetAnnotation($family, $attribute);
                 $content .= 'abstract public function get'.ucfirst($attribute->getCode()).'();'."\n";
                 $content .= $this->generateSetAnnotation($family, $attribute);
@@ -88,10 +94,13 @@ class AnnotationGenerator implements CacheWarmerInterface
     /**
      * @param $filename
      * @param $content
+     * @throws \RuntimeException
      */
     protected function writeFile($filename, $content)
     {
-        @file_put_contents($filename, $content);
+        if (!@file_put_contents($filename, $content)) {
+            throw new \RuntimeException("Unable to write annotation file: {$filename}");
+        }
     }
 
     protected function generateGetAnnotation(FamilyInterface $family, AttributeInterface $attribute)
@@ -227,5 +236,22 @@ EOT;
         }
 
         return '\\'.$type;
+    }
+
+    /**
+     * @param FamilyInterface    $family
+     * @param AttributeInterface $attribute
+     * @return bool
+     */
+    protected function isAttributeInherited(FamilyInterface $family, AttributeInterface $attribute)
+    {
+        if (!$family->getParent()) {
+            return false;
+        }
+        if ($family->getParent()->hasAttribute($attribute->getCode())) {
+            return true;
+        }
+
+        return $this->isAttributeInherited($family->getParent(), $attribute);
     }
 }

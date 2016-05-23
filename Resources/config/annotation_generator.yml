@@ -9,4 +9,4 @@ services:
             - '@doctrine.orm.entity_manager'
             - '%kernel.root_dir%'
         tags:
-            - { name: kernel.cache_warmer, priority: -1 }
+            - { name: kernel.cache_warmer, priority: 0 }
