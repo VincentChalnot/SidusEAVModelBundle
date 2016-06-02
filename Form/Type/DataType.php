@@ -200,7 +200,7 @@ class DataType extends AbstractType
                 'options' => $formOptions,
                 'allow_add' => true,
                 'allow_delete' => true,
-                'required' => false,
+                'required' => $attribute->isRequired(),
                 'sortable' => $sortable,
             ]);
         } else {
