@@ -77,6 +77,7 @@ class Configuration implements ConfigurationInterface
             ->booleanNode('required')->defaultValue(false)->end()
             ->booleanNode('unique')->defaultValue(false)->end()
             ->booleanNode('multiple')->defaultValue(false)->end()
+            ->booleanNode('sortable')->defaultValue(false)->end()
             ->arrayNode('context_mask')
                 ->prototype('scalar')->end()
             ->end();
