@@ -197,9 +197,11 @@ class DataValidator extends ConstraintValidator
             "eav.attribute.validation.{$type}",
         ];
 
-        return $this->tryTranslate($tIds, [
-            '%attribute%' => $this->translator->trans((string)$attribute),
-        ], $tId);
+        return $this->tryTranslate(
+            $tIds,
+            ['%attribute%' => $this->translator->trans((string) $attribute)],
+            $tId
+        );
     }
 
     /**
