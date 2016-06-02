@@ -46,6 +46,9 @@ class Attribute implements AttributeInterface
 
     /** @var bool */
     protected $isRequired = false;
+    
+    /** @var bool */
+    protected $isSortable = false;
 
     /** @var bool */
     protected $isUnique = false;
@@ -213,6 +216,22 @@ class Attribute implements AttributeInterface
     public function setRequired($required)
     {
         $this->isRequired = $required;
+    }
+    
+    /**
+     * @return boolean
+     */
+    public function isSortable()
+    {
+        return $this->isSortable;
+    }
+
+    /**
+     * @param boolean $sortable
+     */
+    public function setSortable($sortable)
+    {
+        $this->isSortable = $sortable;
     }
 
     /**
