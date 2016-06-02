@@ -192,8 +192,7 @@ class DataType extends AbstractType
         $formOptions = $attribute->getFormOptions($data);
         if ($attribute->isMultiple() && $attribute->isCollection()) {
             $formOptions['label'] = false;
-            $sortable = isset($formOptions['sortable']) ? $formOptions['sortable'] : false;
-            unset($formOptions['sortable']);
+            $help_label_tooltip = isset($formOptions['help_label_tooltip']) ? $formOptions['help_label_tooltip'] : array('title', 'text');
             $form->add($attribute->getCode(), $this->collectionType, [
                 'label' => $label,
                 'type' => $attributeType->getFormType(),
@@ -202,6 +201,7 @@ class DataType extends AbstractType
                 'allow_delete' => true,
                 'required' => $attribute->isRequired(),
                 'sortable' => $sortable,
+                'help_label_tooltip' => $help_label_tooltip
             ]);
         } else {
             $formOptions = array_merge(['label' => $label], $formOptions);
