@@ -25,8 +25,8 @@
     },
     "require": {
         "php": ">=5.4",
-        "symfony/symfony": "~2.7.4|~2.8.6",
-        "doctrine/doctrine-bundle": "~1.4"
+        "symfony/symfony": "~3.1.0|~2.8.6",
+        "doctrine/doctrine-bundle": "~1.6"
     },
     "suggest": {
         "sidus/eav-bootstrap-bundle": "Easy Bootstrap integration",
