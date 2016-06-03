@@ -43,7 +43,7 @@ class DataSerializerHandler implements EventSubscriberInterface
 
         $family = $data->getFamily();
         foreach ($family->getAttributes() as $attribute) {
-            $propertyMetadata = new VirtualPropertyMetadata(get_class($data), $attribute->getCode());
+            $propertyMetadata = new VirtualPropertyMetadata(get_class($data), 'get'.ucfirst($attribute->getCode()));
             $context->pushPropertyMetadata($propertyMetadata);
             $visitor->visitProperty($propertyMetadata, $data, $context);
             /** @noinspection DisconnectedForeachInstructionInspection */
