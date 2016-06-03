@@ -340,7 +340,7 @@ class Family implements FamilyInterface
     {
         $codes = [$this->getCode()];
         foreach ($this->getChildren() as $child) {
-            $codes += $child->getMatchingCodes();
+            $codes = array_merge($codes, $child->getMatchingCodes());
         }
 
         return $codes;
