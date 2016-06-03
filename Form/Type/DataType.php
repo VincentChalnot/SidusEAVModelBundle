@@ -191,20 +191,24 @@ class DataType extends AbstractType
 
         $formOptions = $attribute->getFormOptions($data);
         if ($attribute->isMultiple() && $attribute->isCollection()) {
-            $formOptions['label'] = false;
-            $sortable = isset($formOptions['sortable']) ? $formOptions['sortable'] : false;
-            unset($formOptions['sortable']);
-            $form->add($attribute->getCode(), $this->collectionType, [
+            $formOptions['label'] = false; // Removing label
+            $collectionOptions = [
                 'label' => $label,
                 'type' => $attributeType->getFormType(),
-                'options' => $formOptions,
+                'entry_options' => $formOptions,
                 'allow_add' => true,
                 'allow_delete' => true,
                 'required' => $attribute->isRequired(),
-                'sortable' => $sortable,
-            ]);
+                'sortable' => false,
+            ];
+            if (!empty($formOptions['collection_options'])) {
+                $collectionOptions = array_merge($collectionOptions, $formOptions['collection_options']);
+            }
+            unset($collectionOptions['entry_options']['collection_options']);
+            $form->add($attribute->getCode(), $this->collectionType, $collectionOptions);
         } else {
             $formOptions = array_merge(['label' => $label], $formOptions);
+            unset($formOptions['collection_options']); // Ignoring collection_options if set
             $form->add($attribute->getCode(), $attributeType->getFormType(), $formOptions);
         }
     }
