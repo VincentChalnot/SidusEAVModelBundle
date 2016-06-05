@@ -150,7 +150,10 @@ class Attribute implements AttributeInterface
      */
     public function getFormOptions($data = null)
     {
-        $defaultOptions = ['required' => $this->isRequired];
+        $defaultOptions = [];
+        if (!$this->isCollection()) {
+            $defaultOptions = ['required' => $this->isRequired()];
+        }
         $typeOptions = $this->getType()->getFormOptions($data);
 
         return array_merge($defaultOptions, $typeOptions, $this->formOptions);

@@ -24,7 +24,7 @@ abstract class AbstractBaseParamConverter implements ParamConverterInterface
      */
     public function apply(Request $request, ParamConverter $configuration)
     {
-        $param = $configuration->getName();
+        $param = $this->getRequestAttributeName($request, $configuration);
 
         if (!$request->attributes->has($param)) {
             return false;
@@ -36,7 +36,11 @@ abstract class AbstractBaseParamConverter implements ParamConverterInterface
             return false;
         }
 
-        $request->attributes->set($param, $this->convertValue($value));
+        $convertedValue = $this->convertValue($value);
+        $request->attributes->set($configuration->getName(), $convertedValue);
+        if ($param !== $configuration->getName()) {
+            $request->attributes->set($param, $convertedValue);
+        }
 
         return true;
     }
@@ -51,6 +55,21 @@ abstract class AbstractBaseParamConverter implements ParamConverterInterface
     public function supports(ParamConverter $configuration)
     {
         return $configuration->getClass() && is_a($configuration->getClass(), $this->getClass(), true);
+    }
+
+    /**
+     * @param Request        $request
+     * @param ParamConverter $configuration
+     * @return string
+     */
+    protected function getRequestAttributeName(Request $request, ParamConverter $configuration)
+    {
+        $param = $configuration->getName();
+        if (array_key_exists('id', $configuration->getOptions())) {
+            $param = $configuration->getOptions()['id'];
+        }
+
+        return $param;
     }
 
     /**

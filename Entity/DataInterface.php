@@ -29,6 +29,17 @@ interface DataInterface
     public function getFamilyCode();
 
     /**
+     * @return DataInterface|null
+     */
+    public function getParent();
+
+    /**
+     * @param DataInterface $parent
+     * @return DataInterface|null
+     */
+    public function setParent(DataInterface $parent = null);
+
+    /**
      * Used to get values in a simple way
      *
      * @param string $attributeCode

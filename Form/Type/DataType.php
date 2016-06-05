@@ -186,31 +186,69 @@ class DataType extends AbstractType
         DataInterface $data = null,
         array $options = []
     ) {
-        $attributeType = $attribute->getType();
-        $label = $this->getFieldLabel($family, $attribute);
-
-        $formOptions = $attribute->getFormOptions($data);
         if ($attribute->isMultiple() && $attribute->isCollection()) {
-            $formOptions['label'] = false; // Removing label
-            $collectionOptions = [
-                'label' => $label,
-                'type' => $attributeType->getFormType(),
-                'entry_options' => $formOptions,
-                'allow_add' => true,
-                'allow_delete' => true,
-                'required' => $attribute->isRequired(),
-                'sortable' => false,
-            ];
-            if (!empty($formOptions['collection_options'])) {
-                $collectionOptions = array_merge($collectionOptions, $formOptions['collection_options']);
-            }
-            unset($collectionOptions['entry_options']['collection_options']);
-            $form->add($attribute->getCode(), $this->collectionType, $collectionOptions);
+            $this->addMultipleAttribute($form, $attribute, $family, $data, $options);
         } else {
-            $formOptions = array_merge(['label' => $label], $formOptions);
-            unset($formOptions['collection_options']); // Ignoring collection_options if set
-            $form->add($attribute->getCode(), $attributeType->getFormType(), $formOptions);
+            $this->addSingleAttribute($form, $attribute, $family, $data, $options);
         }
+    }
+
+    /**
+     * @param FormInterface      $form
+     * @param AttributeInterface $attribute
+     * @param FamilyInterface    $family
+     * @param DataInterface      $data
+     * @param array              $options
+     * @throws \Exception
+     */
+    protected function addSingleAttribute(
+        FormInterface $form,
+        AttributeInterface $attribute,
+        FamilyInterface $family,
+        DataInterface $data = null,
+        array $options = []
+    ) {
+        $label = $this->getFieldLabel($family, $attribute);
+        $formOptions = $attribute->getFormOptions($data);
+
+        $formOptions = array_merge(['label' => $label], $formOptions);
+        unset($formOptions['collection_options']); // Ignoring collection_options if set
+        $form->add($attribute->getCode(), $attribute->getType()->getFormType(), $formOptions);
+    }
+
+    /**
+     * @param FormInterface      $form
+     * @param AttributeInterface $attribute
+     * @param FamilyInterface    $family
+     * @param DataInterface      $data
+     * @param array              $options
+     * @throws \Exception
+     */
+    protected function addMultipleAttribute(
+        FormInterface $form,
+        AttributeInterface $attribute,
+        FamilyInterface $family,
+        DataInterface $data = null,
+        array $options = []
+    ) {
+        $label = $this->getFieldLabel($family, $attribute);
+        $formOptions = $attribute->getFormOptions($data);
+
+        $formOptions['label'] = false; // Removing label
+        $collectionOptions = [
+            'label' => $label,
+            'type' => $attribute->getType()->getFormType(),
+            'entry_options' => $formOptions,
+            'allow_add' => true,
+            'allow_delete' => true,
+            'required' => $attribute->isRequired(),
+            'sortable' => false,
+        ];
+        if (!empty($formOptions['collection_options'])) {
+            $collectionOptions = array_merge($collectionOptions, $formOptions['collection_options']);
+        }
+        unset($collectionOptions['entry_options']['collection_options']);
+        $form->add($attribute->getCode(), $this->collectionType, $collectionOptions);
     }
 
     /**

@@ -38,18 +38,13 @@ class DataParamConverter extends AbstractBaseParamConverter
      */
     public function apply(Request $request, ParamConverter $configuration)
     {
-        $originalName = $configuration->getName();
-        if ($request->attributes->has('id')) {
-            $configuration->setName('id');
-        }
-        if ($request->attributes->has('dataId')) {
-            $configuration->setName('dataId');
-        }
+        $originalName = parent::getRequestAttributeName($request, $configuration);
+        $fallbackName = $this->getRequestAttributeName($request, $configuration);
         if (!parent::apply($request, $configuration)) {
             return false;
         }
-        if ($originalName !== $configuration->getName()) {
-            $request->attributes->set($originalName, $request->attributes->get($configuration->getName()));
+        if ($originalName !== $fallbackName) {
+            $request->attributes->set($originalName, $request->attributes->get($fallbackName));
         }
 
         return true;
@@ -66,5 +61,26 @@ class DataParamConverter extends AbstractBaseParamConverter
     protected function getClass()
     {
         return DataInterface::class;
+    }
+
+    /**
+     * Allow fallback to "dataId" or "id" in case no attribute is found
+     *
+     * @param Request        $request
+     * @param ParamConverter $configuration
+     * @return string
+     */
+    protected function getRequestAttributeName(Request $request, ParamConverter $configuration)
+    {
+        $param = parent::getRequestAttributeName($request, $configuration);
+        if (!$request->attributes->has($param)) {
+            if ($request->attributes->has('dataId')) {
+                $param = 'dataId';
+            } elseif ($request->attributes->has('id')) {
+                $param = 'id';
+            }
+        }
+
+        return $param;
     }
 }
