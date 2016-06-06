@@ -85,12 +85,7 @@ class AttributeType implements AttributeTypeInterface
      */
     public function getFormType()
     {
-        $formTypes = [
-            'text' => TextType::class,
-            'number' => NumberType::class,
-            'choice' => ChoiceType::class,
-        ];
-        return $formTypes[$this->formType];
+        return $this->formType;
     }
 
     /**
