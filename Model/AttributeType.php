@@ -1,6 +1,9 @@
 <?php
 
 namespace Sidus\EAVModelBundle\Model;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 /**
  * Type of attribute like string, integer, etc.
@@ -82,7 +85,12 @@ class AttributeType implements AttributeTypeInterface
      */
     public function getFormType()
     {
-        return $this->formType;
+        $formTypes = [
+            'text' => TextType::class,
+            'number' => NumberType::class,
+            'choice' => ChoiceType::class,
+        ];
+        return $formTypes[$this->formType];
     }
 
     /**

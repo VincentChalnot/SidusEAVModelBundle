@@ -3,73 +3,73 @@ parameters:
 
 services:
     sidus_eav_model.attribute_type.string:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [string, stringValue, text]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.text:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [text, textValue, textarea]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.integer:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [integer, integerValue, number]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.decimal:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [decimal, decimalValue, number]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.boolean:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [boolean, boolValue, checkbox]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.html:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [html, textValue, textarea]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.unique:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [unique, stringValue, text]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.date:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [date, dateValue, date]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.datetime:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [datetime, datetimeValue, datetime]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.choice:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [choice, stringValue, choice]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.data:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [data, dataValue, sidus_simple_data_selector]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.embed:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [embed, dataValue, sidus_data]
         calls:
             - [setEmbedded, [true]]
