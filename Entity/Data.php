@@ -625,7 +625,14 @@ abstract class Data implements ContextualDataInterface
      */
     public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null)
     {
-        return $this->setValuesData($attribute, [$dataValue], $context);
+        $value = $this->getValue($attribute, $context);
+        if (!$value) {
+            $value = $this->createValue($attribute, $context);
+        }
+        $accessor = PropertyAccess::createPropertyAccessor();
+        $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
+
+        return $this;
     }
 
     /**
