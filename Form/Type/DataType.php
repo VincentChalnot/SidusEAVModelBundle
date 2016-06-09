@@ -243,6 +243,7 @@ class DataType extends AbstractType
             'allow_delete' => true,
             'required' => $attribute->isRequired(),
             'sortable' => false,
+            'prototype_name' => '__'.$attribute->getCode().'__',
         ];
         if (!empty($formOptions['collection_options'])) {
             $collectionOptions = array_merge($collectionOptions, $formOptions['collection_options']);
