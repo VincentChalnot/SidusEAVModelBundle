@@ -429,7 +429,7 @@ abstract class Value implements ContextualValueInterface
         $this->id = null;
         $family = $this->getData()->getFamily();
         $attribute = $family->getAttribute($this->getAttributeCode());
-        if ($this->dataValue && $attribute->getType()->isEmbedded()) {
+        if ($this->dataValue && !$attribute->getType()->isRelation()) {
             $this->dataValue = clone $this->dataValue;
         }
     }

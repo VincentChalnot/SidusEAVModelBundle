@@ -684,12 +684,13 @@ abstract class Data implements ContextualDataInterface
     {
         $this->id = null;
         $newValues = new ArrayCollection();
-        foreach ($this->getValues() as $value) {
+        foreach ($this->values as $value) {
             $newValues[] = clone $value;
         }
-        $this->emptyValues();
+        $this->values = new ArrayCollection();
         foreach ($newValues as $newValue) {
-            $this->addValue($newValue);
+            $this->values->add($newValue);
+            $newValue->setData($this);
         }
         $this->setCreatedAt(new DateTime());
     }
