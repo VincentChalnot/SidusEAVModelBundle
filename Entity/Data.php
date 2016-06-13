@@ -695,7 +695,7 @@ abstract class Data implements ContextualDataInterface
     }
 
     /**
-     * @param $attributeCode
+     * @param string $attributeCode
      * @return AttributeInterface
      */
     protected function getAttribute($attributeCode)
