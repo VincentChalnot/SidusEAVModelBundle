@@ -191,16 +191,13 @@ class DataValidator extends ConstraintValidator
      */
     protected function buildMessage(AttributeInterface $attribute, $type)
     {
-        $tId = "eav.attribute.{$attribute->getCode()}.validation.{$type}";
-        $tIds = [
-            $tId,
-            "eav.attribute.validation.{$type}",
-        ];
-
         return $this->tryTranslate(
-            $tIds,
+            [
+                "eav.attribute.{$attribute->getCode()}.validation.{$type}",
+                "eav.attribute.validation.{$type}",
+            ],
             ['%attribute%' => $this->translator->trans((string) $attribute)],
-            $tId
+            $type
         );
     }
 
