@@ -346,7 +346,7 @@ abstract class Data implements ContextualDataInterface
 
         $getter = 'get'.ucfirst($attributeCode);
         if (method_exists($this, $getter)) {
-            return $this->$getter($attributeCode, $context);
+            return $this->$getter($context);
         }
 
         if ($attribute->isMultiple()) {
@@ -390,7 +390,7 @@ abstract class Data implements ContextualDataInterface
 
         $setter = 'set'.ucfirst($attributeCode);
         if (method_exists($this, $setter)) {
-            return $this->$setter($attributeCode, $value, $context);
+            return $this->$setter($value, $context);
         }
 
         if ($attribute->isMultiple()) {
