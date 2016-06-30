@@ -73,5 +73,6 @@ services:
         arguments: [embed, dataValue, sidus_data]
         calls:
             - [setEmbedded, [true]]
+            - [setRelation, [false]]
         tags:
             - { name: sidus.attribute_type }
