@@ -5,6 +5,7 @@ namespace Sidus\EAVModelBundle\Entity;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
+use Sidus\EAVModelBundle\Doctrine\EAVQueryBuilder;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 
 /**
@@ -53,6 +54,8 @@ class DataRepository extends EntityRepository
     }
 
     /**
+     * Return singleton for a given family
+     *
      * @param FamilyInterface $family
      * @return DataInterface
      */
@@ -77,5 +80,15 @@ class DataRepository extends EntityRepository
         }
 
         return $instance;
+    }
+
+    /**
+     * @param FamilyInterface $family
+     * @param string          $alias
+     * @return EAVQueryBuilder
+     */
+    public function createEAVQueryBuilder(FamilyInterface $family, $alias = 'e')
+    {
+        return new EAVQueryBuilder($family, $this->createQueryBuilder($alias), $alias);
     }
 }

@@ -20,6 +20,7 @@ class FamilyType extends StringType
     /**
      * @param mixed            $value
      * @param AbstractPlatform $platform
+     *
      * @return null|FamilyInterface
      * @throws MissingFamilyException
      */
@@ -39,6 +40,7 @@ class FamilyType extends StringType
     /**
      * @param mixed            $value
      * @param AbstractPlatform $platform
+     *
      * @return string
      * @throws \UnexpectedValueException
      */
