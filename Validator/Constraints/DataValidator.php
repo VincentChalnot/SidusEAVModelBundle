@@ -107,6 +107,9 @@ class DataValidator extends ConstraintValidator
         ]);
         /** @var ValueInterface $value */
         foreach ($values as $value) {
+            if (!$value->getData()) {
+                continue; // @todo log error ?
+            }
             if ($value->getData()->getId() !== $data->getId()) {
                 $this->buildAttributeViolation($context, $attribute, 'unique', $valueData);
 
