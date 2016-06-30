@@ -91,7 +91,7 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
      * @throws \LogicException
      * @throws \UnexpectedValueException
      *
-     * @return DQLHandler
+     * @return DQLHandlerInterface
      */
     public function getAnd(array $dqlHandlers)
     {
@@ -104,7 +104,7 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
      * @throws \LogicException
      * @throws \UnexpectedValueException
      *
-     * @return DQLHandler
+     * @return DQLHandlerInterface
      */
     public function getOr(array $dqlHandlers)
     {
@@ -112,11 +112,11 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
     }
 
     /**
-     * @param DQLHandler $DQLHandler
+     * @param DQLHandlerInterface $DQLHandler
      *
      * @return QueryBuilder
      */
-    public function apply(DQLHandler $DQLHandler)
+    public function apply(DQLHandlerInterface $DQLHandler)
     {
         $this->isApplied = true;
 
@@ -132,7 +132,7 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
      * @throws \LogicException
      * @throws \UnexpectedValueException
      *
-     * @return DQLHandler
+     * @return DQLHandlerInterface
      */
     protected function getStatement($glue, array $dqlHandlers)
     {

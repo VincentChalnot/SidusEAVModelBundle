@@ -57,9 +57,9 @@ interface EAVQueryBuilderInterface
     public function getAlias();
 
     /**
-     * @param DQLHandler $DQLHandler
+     * @param DQLHandlerInterface $DQLHandler
      *
-     * @return DQLHandler
+     * @return QueryBuilder
      */
-    public function apply(DQLHandler $DQLHandler);
+    public function apply(DQLHandlerInterface $DQLHandler);
 }
