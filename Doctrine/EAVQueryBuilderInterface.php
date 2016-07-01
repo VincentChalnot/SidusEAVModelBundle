@@ -31,6 +31,13 @@ interface EAVQueryBuilderInterface
     public function attributeByCode($attributeCode);
 
     /**
+     * @param string $attributeCode
+     *
+     * @return AttributeQueryBuilderInterface
+     */
+    public function a($attributeCode);
+
+    /**
      * @param AttributeInterface $attribute
      *
      * @return AttributeQueryBuilderInterface

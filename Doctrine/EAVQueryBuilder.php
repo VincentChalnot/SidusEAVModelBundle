@@ -29,8 +29,6 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
      * @param FamilyInterface $family
      * @param QueryBuilder    $queryBuilder
      * @param string          $alias
-     *
-     * @return EAVQueryBuilder
      */
     public function __construct(FamilyInterface $family, QueryBuilder $queryBuilder, $alias = 'e')
     {
@@ -76,6 +74,16 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
     }
 
     /**
+     * @param string $attributeCode
+     *
+     * @return AttributeQueryBuilderInterface
+     */
+    public function a($attributeCode)
+    {
+        return $this->attributeByCode($attributeCode);
+    }
+
+    /**
      * @param AttributeInterface $attribute
      *
      * @return AttributeQueryBuilderInterface
@@ -109,6 +117,19 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
     public function getOr(array $dqlHandlers)
     {
         return $this->getStatement(' OR ', $dqlHandlers);
+    }
+
+    /**
+     * @param AttributeQueryBuilderInterface $attributeQueryBuilder
+     * @param string                         $direction
+     *
+     * @return EAVQueryBuilder
+     */
+    public function addOrderBy(AttributeQueryBuilderInterface $attributeQueryBuilder, $direction = null)
+    {
+        $this->queryBuilder->addOrderBy($attributeQueryBuilder->getColumn(), $direction);
+
+        return $this;
     }
 
     /**

@@ -107,4 +107,9 @@ interface AttributeQueryBuilderInterface extends DQLHandlerInterface
      * @return AttributeQueryBuilderInterface
      */
     public function rawDQL($dql);
+
+    /**
+     * @return string
+     */
+    public function getColumn();
 }

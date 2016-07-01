@@ -57,6 +57,10 @@ class DataRepository extends EntityRepository
      * Return singleton for a given family
      *
      * @param FamilyInterface $family
+     *
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     *
      * @return DataInterface
      */
     public function getInstance(FamilyInterface $family)

@@ -219,6 +219,14 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     }
 
     /**
+     * @return string
+     */
+    public function getColumn()
+    {
+        return $this->joinAlias.'.'.$this->attribute->getType()->getDatabaseType();
+    }
+
+    /**
      * @param string $operator
      * @param        $parameter
      *
@@ -247,13 +255,5 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
             Join::WITH,
             "({$this->joinAlias}.attributeCode = '{$this->attribute->getCode()}')"
         );
-    }
-
-    /**
-     * @return string
-     */
-    protected function getColumn()
-    {
-        return $this->joinAlias.'.'.$this->attribute->getType()->getDatabaseType();
     }
 }
