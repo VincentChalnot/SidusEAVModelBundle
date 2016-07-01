@@ -35,6 +35,10 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
         $this->family = $family;
         $this->queryBuilder = $queryBuilder;
         $this->alias = $alias;
+
+        $queryBuilder
+            ->andWhere($alias.'.family = :familyCode')
+            ->setParameter('familyCode', $family->getCode());
     }
 
     /**
@@ -141,9 +145,17 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
     {
         $this->isApplied = true;
 
-        return $this->getQueryBuilder()
-            ->andWhere($DQLHandler->getDQL())
-            ->setParameters($DQLHandler->getParameters());
+        $qb = $this->getQueryBuilder();
+
+        if ($DQLHandler->getDQL()) {
+            $qb->andWhere($DQLHandler->getDQL());
+        }
+
+        foreach ($DQLHandler->getParameters() as $key => $value) {
+            $qb->setParameter($key, $value);
+        }
+
+        return $qb;
     }
 
     /**
