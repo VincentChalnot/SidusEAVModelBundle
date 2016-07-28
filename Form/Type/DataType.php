@@ -54,6 +54,7 @@ class DataType extends AbstractType
     /**
      * @param FormBuilderInterface $builder
      * @param array                $options
+     *
      * @throws \Exception
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -87,6 +88,7 @@ class DataType extends AbstractType
     /**
      * @param FormInterface $form
      * @param array         $options
+     *
      * @throws \Exception
      */
     public function buildCreateForm(FormInterface $form, array $options)
@@ -102,8 +104,12 @@ class DataType extends AbstractType
      * @param DataInterface   $data
      * @param array           $options
      */
-    public function buildDataForm(FormInterface $form, FamilyInterface $family, DataInterface $data = null, array $options = [])
-    {
+    public function buildDataForm(
+        FormInterface $form,
+        FamilyInterface $family,
+        DataInterface $data = null,
+        array $options = []
+    ) {
 
     }
 
@@ -112,6 +118,7 @@ class DataType extends AbstractType
      * @param FamilyInterface $family
      * @param DataInterface   $data
      * @param array           $options
+     *
      * @throws \Exception
      */
     public function buildValuesForm(
@@ -127,6 +134,7 @@ class DataType extends AbstractType
 
     /**
      * @param OptionsResolver $resolver
+     *
      * @throws AccessException
      * @throws UndefinedOptionsException
      * @throws MissingFamilyException
@@ -177,6 +185,7 @@ class DataType extends AbstractType
      * @param FamilyInterface    $family
      * @param DataInterface|null $data
      * @param array              $options
+     *
      * @throws \Exception
      */
     protected function addAttribute(
@@ -199,6 +208,7 @@ class DataType extends AbstractType
      * @param FamilyInterface    $family
      * @param DataInterface      $data
      * @param array              $options
+     *
      * @throws \Exception
      */
     protected function addSingleAttribute(
@@ -222,6 +232,7 @@ class DataType extends AbstractType
      * @param FamilyInterface    $family
      * @param DataInterface      $data
      * @param array              $options
+     *
      * @throws \Exception
      */
     protected function addMultipleAttribute(
@@ -257,6 +268,7 @@ class DataType extends AbstractType
      *
      * @param FamilyInterface    $family
      * @param AttributeInterface $attribute
+     *
      * @return string
      * @throws \InvalidArgumentException
      */

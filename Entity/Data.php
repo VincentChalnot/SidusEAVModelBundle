@@ -36,6 +36,7 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @var DataInterface
+     *
      * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", inversedBy="children")
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="cascade")
      */
@@ -43,13 +44,17 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @var DataInterface[]
-     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", mappedBy="parent", cascade={"persist", "remove"}, orphanRemoval=true)
+     *
+     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", mappedBy="parent", cascade={"persist",
+     *                                                                          "remove"}, orphanRemoval=true)
      */
     protected $children;
 
     /**
      * @var ValueInterface[]|Collection
-     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\ValueInterface", mappedBy="data", cascade={"persist", "remove"}, orphanRemoval=true)
+     *
+     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\ValueInterface", mappedBy="data", cascade={"persist",
+     *                                                                           "remove"}, orphanRemoval=true)
      * @ORM\OrderBy({"position" = "ASC"})
      * @JMS\Exclude()
      */
@@ -57,18 +62,21 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @var DateTime
+     *
      * @ORM\Column(name="created_at", type="datetime")
      */
     protected $createdAt;
 
     /**
      * @var DateTime
+     *
      * @ORM\Column(name="updated_at", type="datetime")
      */
     protected $updatedAt;
 
     /**
      * @var FamilyInterface
+     *
      * @ORM\Column(name="family_code", type="sidus_family", length=255)
      * @JMS\Exclude()
      */
@@ -76,6 +84,7 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @var int
+     *
      * @ORM\Column(name="current_version", type="integer")
      */
     protected $currentVersion = 0;
@@ -105,11 +114,12 @@ abstract class Data implements ContextualDataInterface
     }
 
     /**
-     * @return mixed
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return mixed
      */
     public function getIdentifier()
     {
@@ -131,9 +141,10 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @param DateTime $createdAt
-     * @return DataInterface
      *
      * @throws UnexpectedValueException
+     *
+     * @return DataInterface
      */
     public function setCreatedAt($createdAt)
     {
@@ -152,9 +163,10 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @param DateTime $updatedAt
-     * @return DataInterface
      *
      * @throws UnexpectedValueException
+     *
+     * @return DataInterface
      */
     public function setUpdatedAt($updatedAt)
     {
@@ -173,6 +185,7 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @param DataInterface $parent
+     *
      * @return DataInterface
      */
     public function setParent(DataInterface $parent = null)
@@ -188,12 +201,13 @@ abstract class Data implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param mixed              $valueData
      * @param array              $context
-     * @return DataInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return DataInterface
      */
     public function addValueData(AttributeInterface $attribute, $valueData, array $context = null)
     {
@@ -226,12 +240,13 @@ abstract class Data implements ContextualDataInterface
      *
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return mixed
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return mixed
      */
     public function getValueData(AttributeInterface $attribute, array $context = null)
     {
@@ -245,12 +260,13 @@ abstract class Data implements ContextualDataInterface
      *
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return mixed
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return ArrayCollection
      */
     public function getValuesData(AttributeInterface $attribute = null, array $context = null)
     {
@@ -273,6 +289,7 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @param int $id
+     *
      * @return $this
      */
     public function setId($id)
@@ -299,13 +316,14 @@ abstract class Data implements ContextualDataInterface
      *
      * @param string $methodName
      * @param array  $arguments
-     * @return mixed|null|ValueInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
      * @throws BadMethodCallException
+     *
+     * @return mixed|null|ValueInterface
      */
     public function __call($methodName, $arguments)
     {
@@ -332,13 +350,14 @@ abstract class Data implements ContextualDataInterface
      *
      * @param string $attributeCode
      * @param array  $context
-     * @return mixed
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
      * @throws BadMethodCallException
+     *
+     * @return mixed
      */
     public function get($attributeCode, array $context = null)
     {
@@ -358,13 +377,14 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @param string $attributeCode
-     * @return mixed
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
      * @throws BadMethodCallException
+     *
+     * @return mixed
      */
     public function __get($attributeCode)
     {
@@ -377,12 +397,13 @@ abstract class Data implements ContextualDataInterface
      * @param string $attributeCode
      * @param mixed  $value
      * @param array  $context
-     * @return DataInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return DataInterface
      */
     public function set($attributeCode, $value, array $context = null)
     {
@@ -403,12 +424,13 @@ abstract class Data implements ContextualDataInterface
     /**
      * @param string $attributeCode
      * @param mixed  $value
-     * @return DataInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return DataInterface
      */
     public function __set($attributeCode, $value)
     {
@@ -417,6 +439,7 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @param string $attributeCode
+     *
      * @return bool
      */
     public function __isset($attributeCode)
@@ -429,12 +452,13 @@ abstract class Data implements ContextualDataInterface
      *
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return null|ValueInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return null|ValueInterface
      */
     public function getValue(AttributeInterface $attribute, array $context = null)
     {
@@ -448,12 +472,13 @@ abstract class Data implements ContextualDataInterface
      *
      * @param AttributeInterface|null $attribute
      * @param array                   $context
-     * @return Collection|ValueInterface[]
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return Collection|ValueInterface[]
      */
     public function getValues(AttributeInterface $attribute = null, array $context = null)
     {
@@ -519,6 +544,7 @@ abstract class Data implements ContextualDataInterface
     /**
      * @JMS\VirtualProperty
      * @JMS\SerializedName("family")
+     *
      * @return string
      */
     public function getFamilyCode()
@@ -529,6 +555,7 @@ abstract class Data implements ContextualDataInterface
     /**
      * @param AttributeInterface $attribute
      * @param array              $context
+     *
      * @return ValueInterface
      */
     public function createValue(AttributeInterface $attribute, array $context = null)
@@ -546,12 +573,13 @@ abstract class Data implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array|\Traversable $dataValues
      * @param array              $context
-     * @return DataInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return DataInterface
      */
     public function setValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
     {
@@ -564,12 +592,13 @@ abstract class Data implements ContextualDataInterface
     /**
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return DataInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return DataInterface
      */
     public function emptyValues(AttributeInterface $attribute = null, array $context = null)
     {
@@ -583,6 +612,7 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @param ValueInterface $value
+     *
      * @return DataInterface
      */
     public function removeValue(ValueInterface $value)
@@ -595,14 +625,15 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @param ValueInterface $value
-     * @return DataInterface
      *
      * @throws UnexpectedValueException
+     *
+     * @return DataInterface
      */
     public function addValue(ValueInterface $value)
     {
         if ($value instanceof ContextualValueInterface && !$value->getContext()) {
-                $value->setContext($this->getCurrentContext());
+            $value->setContext($this->getCurrentContext());
         }
         $this->values->add($value);
         $value->setData($this);
@@ -616,12 +647,13 @@ abstract class Data implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param mixed              $dataValue
      * @param array              $context
-     * @return DataInterface
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return DataInterface
      */
     public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null)
     {
@@ -638,12 +670,13 @@ abstract class Data implements ContextualDataInterface
     /**
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return bool
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return bool
      */
     public function isEmpty(AttributeInterface $attribute, array $context = null)
     {
@@ -697,6 +730,7 @@ abstract class Data implements ContextualDataInterface
 
     /**
      * @param string $attributeCode
+     *
      * @return AttributeInterface
      */
     protected function getAttribute($attributeCode)
@@ -707,12 +741,13 @@ abstract class Data implements ContextualDataInterface
     /**
      * @param AttributeInterface|null $attribute
      * @param array|null              $context
-     * @return Collection|ValueInterface[]
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return Collection|ValueInterface[]
      */
     protected function createDefaultValues(AttributeInterface $attribute = null, array $context = null)
     {
@@ -728,12 +763,13 @@ abstract class Data implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array|\Traversable $dataValues
      * @param array|null         $context
-     * @return Collection|ValueInterface[]
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return Collection|ValueInterface[]
      */
     protected function setInternalValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
     {
@@ -768,15 +804,16 @@ abstract class Data implements ContextualDataInterface
     }
 
     /**
-     * @return string
-     *
+     * @throws \BadMethodCallException
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     *
+     * @return string
      */
     protected function getLabelValue()
     {
-        return (string) $this->getValueData($this->getFamily()->getAttributeAsLabel());
+        return (string) $this->get($this->getFamily()->getAttributeAsLabel()->getCode());
     }
 }

@@ -76,3 +76,9 @@ services:
             - [setRelation, [false]]
         tags:
             - { name: sidus.attribute_type }
+
+    sidus_eav_model.attribute_type.hidden:
+        class: '%sidus_eav_model.attribute_type.default.class%'
+        arguments: [hidden, stringValue, hidden]
+        tags:
+            - { name: sidus.attribute_type }
