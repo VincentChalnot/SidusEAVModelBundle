@@ -68,27 +68,69 @@ class AnnotationGenerator implements CacheWarmerInterface
         }
 
         foreach ($this->familyConfigurationHandler->getFamilies() as $family) {
-            $content = '<?php namespace Sidus\EAV; abstract class '.$family->getCode().' extends ';
-            if ($family->getParent()) {
-                $content .= $family->getParent()->getCode();
-            } else {
-                $content .= '\\'.$family->getDataClass();
-            }
-            $content .= " {\n";
+            $content = $this->getFileHeader($family);
+
             foreach ($family->getAttributes() as $attribute) {
-                if ($this->isAttributeInherited($family, $attribute)) {
-                    continue;
-                }
-                $content .= $this->generateGetAnnotation($family, $attribute);
-                $content .= 'abstract public function get'.ucfirst($attribute->getCode()).'();'."\n";
-                $content .= $this->generateSetAnnotation($family, $attribute);
-                $content .= 'abstract public function set'.ucfirst($attribute->getCode()).'($value);'."\n";
+                $content .= $this->getAttributeMethods($family, $attribute);
             }
 
             $content .= "}\n";
 
             $this->writeFile($baseDir.$family->getCode().'.php', $content);
         }
+    }
+
+    /**
+     * @param FamilyInterface $family
+     *
+     * @return string
+     */
+    protected function getFileHeader(FamilyInterface $family)
+    {
+        $content = <<<EOT
+<?php
+
+namespace Sidus\EAV;
+
+abstract class {$family->getCode()} extends 
+EOT;
+        if ($family->getParent()) {
+            $content .= $family->getParent()->getCode();
+        } else {
+            $content .= '\\'.$family->getDataClass();
+        }
+        $content .= "\n{\n";
+
+        return $content;
+    }
+
+    /**
+     * @param FamilyInterface    $family
+     * @param AttributeInterface $attribute
+     *
+     * @return string
+     */
+    protected function getAttributeMethods(FamilyInterface $family, AttributeInterface $attribute)
+    {
+        if ($this->isAttributeInherited($family, $attribute)) {
+            return '';
+        }
+        $content = '';
+        $dataClass = new \ReflectionClass($family->getDataClass());
+
+        $getter = 'get'.ucfirst($attribute->getCode());
+        if (!$dataClass->hasMethod($getter)) {
+            $content .= $this->generateGetAnnotation($family, $attribute);
+            $content .= "abstract public function {$getter}(array \$context = []);\n\n";
+        }
+
+        $setter = 'set'.ucfirst($attribute->getCode());
+        if (!$dataClass->hasMethod($setter)) {
+            $content .= $this->generateSetAnnotation($family, $attribute);
+            $content .= 'abstract public function set'.ucfirst($attribute->getCode()).'($value, array $context = []);'."\n\n";
+        }
+
+        return $content;
     }
 
     /**
@@ -103,10 +145,18 @@ class AnnotationGenerator implements CacheWarmerInterface
         }
     }
 
+    /**
+     * @param FamilyInterface    $family
+     * @param AttributeInterface $attribute
+     *
+     * @return string
+     */
     protected function generateGetAnnotation(FamilyInterface $family, AttributeInterface $attribute)
     {
         $content = <<<EOT
 /**
+ * @param array \$context
+ *
  * @return {$this->getPHPType($family, $attribute)}
  */
 
@@ -125,6 +175,8 @@ EOT;
         $content = <<<EOT
 /**
  * @param {$this->getPHPType($family, $attribute)} \$value
+ * @param array \$context
+ *
  * @return {$family->getCode()}
  */
 
