@@ -138,6 +138,7 @@ class DataType extends AbstractType
      * @throws AccessException
      * @throws UndefinedOptionsException
      * @throws MissingFamilyException
+     * @throws \UnexpectedValueException
      */
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -165,6 +166,22 @@ class DataType extends AbstractType
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
             if ($options['family'] instanceof FamilyInterface) {
                 return $options['family']->getDataClass();
+            }
+
+            return $value;
+        });
+        $resolver->setNormalizer('data', function (Options $options, $value) {
+            if (null === $value) {
+                return null;
+            }
+            if (!$value instanceof DataInterface) {
+                throw new \UnexpectedValueException("The 'data' option should be a DataInterface");
+            }
+            if ($options['family'] instanceof FamilyInterface) {
+                $dataClass = $options['family']->getDataClass();
+                if (!is_a($value, $dataClass, true)) {
+                    throw new \UnexpectedValueException("The 'data' option should be a {$dataClass}");
+                }
             }
 
             return $value;
