@@ -7,6 +7,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Sidus\EAVModelBundle\Doctrine\EAVQueryBuilder;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
+use Sidus\EAVModelBundle\Model\IdentifierAttributeType;
 
 /**
  * Base repository for Data, not currently used
@@ -32,11 +33,17 @@ class DataRepository extends EntityRepository
 
             return $this->findOneBy([
                 'id' => $reference,
-                'family' => $family->getCode(),
+                'family' => $family,
+            ]);
+        }
+        $dataBaseType = $identifierAttribute->getType()->getDatabaseType();
+        if ($identifierAttribute->getType() instanceof IdentifierAttributeType) {
+            return $this->findOneBy([
+                $dataBaseType => $reference,
+                'family' => $family,
             ]);
         }
         $qb = $this->createQueryBuilder('d');
-        $dataBaseType = $identifierAttribute->getType()->getDatabaseType();
         $joinCondition = "(id.attributeCode = :attributeCode AND id.{$dataBaseType} = :reference)";
         $qb
             ->addSelect('values')

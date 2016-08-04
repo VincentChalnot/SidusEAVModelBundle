@@ -6,9 +6,11 @@ use Doctrine\Bundle\DoctrineBundle\Registry;
 use Exception;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Entity\DataInterface;
+use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Entity\ValueInterface;
 use Sidus\EAVModelBundle\Entity\ValueRepository;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
+use Sidus\EAVModelBundle\Model\IdentifierAttributeType;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Sidus\EAVModelBundle\Validator\Mapping\Loader\BaseLoader;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -98,7 +100,19 @@ class DataValidator extends ConstraintValidator
         AttributeInterface $attribute,
         DataInterface $data
     ) {
-        $valueData = $data->getValueData($attribute);
+        $valueData = $data->get($attribute->getCode());
+
+        if ($attribute->getType() instanceof IdentifierAttributeType) {
+            /** @var DataRepository $repo */
+            $repo = $this->doctrine->getRepository($data->getFamily()->getDataClass());
+            $result = $repo->findByIdentifier($data->getFamily(), $valueData);
+            if ($result) {
+                $this->buildAttributeViolation($context, $attribute, 'unique', $valueData);
+            }
+
+            return;
+        }
+
         /** @var ValueRepository $repo */
         $repo = $this->doctrine->getRepository($data->getFamily()->getValueClass());
         $values = $repo->findBy([

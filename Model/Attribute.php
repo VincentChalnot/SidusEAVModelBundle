@@ -80,12 +80,12 @@ class Attribute implements AttributeInterface
         $this->type = $attributeTypeConfigurationHandler->getType($configuration['type']);
         unset($configuration['type']);
 
-        $this->type->setAttributeDefaults($this); // Allow attribute type service to configure attribute
-
         $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($configuration as $key => $value) {
             $accessor->setValue($this, $key, $value);
         }
+
+        $this->type->setAttributeDefaults($this); // Allow attribute type service to configure attribute
 
         $this->checkConflicts();
     }

@@ -122,10 +122,17 @@ class Family implements FamilyInterface
             }
             $this->attributeAsIdentifier = $this->getAttribute($labelCode);
             if (!$this->attributeAsIdentifier->isUnique()) {
+                var_dump($this->attributeAsIdentifier);exit;
                 throw new UnexpectedValueException("{$commonMessage} should be unique");
             }
             if (!$this->attributeAsIdentifier->isRequired()) {
                 throw new UnexpectedValueException("{$commonMessage} should be required");
+            }
+            if ($this->attributeAsIdentifier->isMultiple()) {
+                throw new UnexpectedValueException("{$commonMessage} should NOT be multiple");
+            }
+            if (0 !== count($this->attributeAsIdentifier->getContextMask())) {
+                throw new UnexpectedValueException("{$commonMessage} should NOT be contextualized");
             }
         }
         unset($config['attributeAsIdentifier']);

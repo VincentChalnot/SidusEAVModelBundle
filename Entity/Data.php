@@ -12,6 +12,7 @@ use JMS\Serializer\Annotation as JMS;
 use LogicException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
+use Sidus\EAVModelBundle\Model\IdentifierAttributeType;
 use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
 use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
@@ -83,16 +84,25 @@ abstract class Data implements ContextualDataInterface
     protected $family;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(name="current_version", type="integer")
-     */
-    protected $currentVersion = 0;
-
-    /**
      * @var array
      */
     protected $currentContext;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="string_identifier", type="string", length=255, nullable=true)
+     * @JMS\Exclude()
+     */
+    protected $stringIdentifier;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="integer_identifier", type="integer", nullable=true)
+     * @JMS\Exclude()
+     */
+    protected $integerIdentifier;
 
     /**
      * Initialize the data with an optional (but recommended family code)
@@ -118,6 +128,7 @@ abstract class Data implements ContextualDataInterface
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     * @throws \BadMethodCallException
      *
      * @return mixed
      */
@@ -125,7 +136,7 @@ abstract class Data implements ContextualDataInterface
     {
         $identifierAttribute = $this->getFamily()->getAttributeAsIdentifier();
         if ($identifierAttribute) {
-            return $this->getValuesData($identifierAttribute);
+            return $this->get($identifierAttribute->getCode());
         }
 
         return $this->getId();
@@ -211,6 +222,11 @@ abstract class Data implements ContextualDataInterface
      */
     public function addValueData(AttributeInterface $attribute, $valueData, array $context = null)
     {
+        $this->checkAttribute($attribute);
+        if (!$attribute->isMultiple()) {
+            $m = "Cannot append data to non-multiple attribute '{$attribute->getCode()}'";
+            throw new UnexpectedValueException($m);
+        }
         $newValue = $this->createValue($attribute, $context);
         $accessor = PropertyAccess::createPropertyAccessor();
         $position = -1;
@@ -270,10 +286,16 @@ abstract class Data implements ContextualDataInterface
      */
     public function getValuesData(AttributeInterface $attribute = null, array $context = null)
     {
+        $this->checkAttribute($attribute);
         $valuesData = new ArrayCollection();
         $accessor = PropertyAccess::createPropertyAccessor();
-        foreach ($this->getValues($attribute, $context) as $value) {
-            $valuesData->add($accessor->getValue($value, $attribute->getType()->getDatabaseType()));
+        $attributeType = $attribute->getType();
+        if ($attributeType instanceof IdentifierAttributeType) {
+            $valuesData->add($accessor->getValue($this, $attributeType->getDatabaseType()));
+        } else {
+            foreach ($this->getValues($attribute, $context) as $value) {
+                $valuesData->add($accessor->getValue($value, $attributeType->getDatabaseType()));
+            }
         }
 
         return $valuesData;
@@ -332,17 +354,18 @@ abstract class Data implements ContextualDataInterface
         if (0 === strpos($methodName, 'get')) {
             return $this->get(lcfirst(substr($methodName, 3)));
         }
+        $baseErrorMsg = "Method '{$methodName}' for object '{$class}' with family '{$this->getFamilyCode()}'";
 
         if (0 === strpos($methodName, 'set')) {
             if (!array_key_exists(0, $arguments)) {
-                throw new BadMethodCallException("Method '{$methodName}' for object '{$class}' with family '{$this->getFamilyCode()}' requires at least one argument");
+                throw new BadMethodCallException($baseErrorMsg.' requires at least one argument');
             }
             $context = array_key_exists(1, $arguments) ? $arguments[1] : null;
 
             return $this->set(lcfirst(substr($methodName, 3)), $arguments[0], $context);
         }
 
-        throw new BadMethodCallException("Method '{$methodName}' for object '{$class}' with family '{$this->getFamilyCode()}' does not exist");
+        throw new BadMethodCallException($baseErrorMsg.' does not exist');
     }
 
     /**
@@ -485,6 +508,7 @@ abstract class Data implements ContextualDataInterface
         if (!$context) {
             $context = $this->getCurrentContext();
         }
+
         if (null === $attribute) {
             $values = new ArrayCollection();
             foreach ($this->values as $value) {
@@ -497,6 +521,7 @@ abstract class Data implements ContextualDataInterface
             return $values;
         }
         $this->checkAttribute($attribute);
+
         $values = new ArrayCollection();
         foreach ($this->values as $value) {
             /** @noinspection NotOptimalIfConditionsInspection */
@@ -534,6 +559,46 @@ abstract class Data implements ContextualDataInterface
     }
 
     /**
+     * @return string
+     */
+    public function getStringIdentifier()
+    {
+        return $this->stringIdentifier;
+    }
+
+    /**
+     * @param string $stringIdentifier
+     *
+     * @return Data
+     */
+    public function setStringIdentifier($stringIdentifier)
+    {
+        $this->stringIdentifier = $stringIdentifier;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIntegerIdentifier()
+    {
+        return $this->integerIdentifier;
+    }
+
+    /**
+     * @param string $integerIdentifier
+     *
+     * @return Data
+     */
+    public function setIntegerIdentifier($integerIdentifier)
+    {
+        $this->integerIdentifier = $integerIdentifier;
+
+        return $this;
+    }
+
+    /**
      * @return FamilyInterface
      */
     public function getFamily()
@@ -556,10 +621,13 @@ abstract class Data implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
+     * @throws \UnexpectedValueException
+     *
      * @return ValueInterface
      */
     public function createValue(AttributeInterface $attribute, array $context = null)
     {
+        $this->checkAttribute($attribute);
         if (!$context) {
             $context = $this->getCurrentContext();
         }
@@ -657,10 +725,15 @@ abstract class Data implements ContextualDataInterface
      */
     public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null)
     {
-        $value = $this->getValue($attribute, $context);
-        if (!$value) {
-            $value = $this->createValue($attribute, $context);
+        if ($attribute->getType() instanceof IdentifierAttributeType) {
+            $value = $this;
+        } else {
+            $value = $this->getValue($attribute, $context);
+            if (!$value) {
+                $value = $this->createValue($attribute, $context);
+            }
         }
+
         $accessor = PropertyAccess::createPropertyAccessor();
         $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
 
@@ -690,22 +763,6 @@ abstract class Data implements ContextualDataInterface
     }
 
     /**
-     * @return int
-     */
-    public function getCurrentVersion()
-    {
-        return $this->currentVersion;
-    }
-
-    /**
-     * @param int $currentVersion
-     */
-    public function setCurrentVersion($currentVersion)
-    {
-        $this->currentVersion = $currentVersion;
-    }
-
-    /**
      * Remove id on clone and clean values
      *
      * @throws UnexpectedValueException
@@ -716,6 +773,9 @@ abstract class Data implements ContextualDataInterface
     public function __clone()
     {
         $this->id = null;
+        $this->stringIdentifier = null;
+        $this->integerIdentifier = null;
+
         $newValues = new ArrayCollection();
         foreach ($this->values as $value) {
             $newValues[] = clone $value;
@@ -773,6 +833,7 @@ abstract class Data implements ContextualDataInterface
      */
     protected function setInternalValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
     {
+        $this->checkAttribute($attribute);
         if (!(is_array($dataValues) || $dataValues instanceof \Traversable)) {
             $type = is_object($dataValues) ? get_class($dataValues) : gettype($dataValues);
             throw new UnexpectedValueException("Value for multiple attribute {$attribute->getCode()} must be an array, '{$type}' given");

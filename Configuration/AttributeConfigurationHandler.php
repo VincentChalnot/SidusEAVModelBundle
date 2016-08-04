@@ -15,11 +15,31 @@ class AttributeConfigurationHandler
     /** @var AttributeInterface[] */
     protected $attributes;
 
+    protected static $reservedCodes = [
+        'id',
+        'parent',
+        'children',
+        'values',
+        'valueData',
+        'createdAt',
+        'updatedAt',
+        'family',
+        'currentContext',
+        'identifier',
+        'stringIdentifier',
+        'integerIdentifier',
+    ];
+
     /**
      * @param AttributeInterface $attribute
+     *
+     * @throws \UnexpectedValueException
      */
     public function addAttribute(AttributeInterface $attribute)
     {
+        if (in_array($attribute->getCode(), static::$reservedCodes, true)) {
+            throw new UnexpectedValueException("Attribute code '{$attribute->getCode()}' is a reserved code");
+        }
         $this->attributes[$attribute->getCode()] = $attribute;
     }
 
@@ -33,8 +53,10 @@ class AttributeConfigurationHandler
 
     /**
      * @param string $code
-     * @return AttributeInterface
+     *
      * @throws UnexpectedValueException
+     *
+     * @return AttributeInterface
      */
     public function getAttribute($code)
     {
