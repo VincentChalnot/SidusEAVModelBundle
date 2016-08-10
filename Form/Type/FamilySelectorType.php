@@ -45,7 +45,9 @@ class FamilySelectorType extends AbstractType
                 return $originalData;
             },
             function ($submittedData) {
-                if ($submittedData instanceof FamilyInterface) {
+                if ($submittedData === null) {
+                    return $submittedData;
+                } elseif ($submittedData instanceof FamilyInterface) {
                     // Should actually never happen ?
                     return $submittedData;
                 }
