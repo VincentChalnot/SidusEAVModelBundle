@@ -103,8 +103,6 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Get id
-     *
      * @return integer
      */
     public function getId()
@@ -113,8 +111,6 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Get attributeCode
-     *
      * @return string
      */
     public function getAttributeCode()
@@ -123,8 +119,6 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set attributeCode
-     *
      * @param string $attributeCode
      * @return Value
      */
@@ -136,8 +130,6 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Get boolValue
-     *
      * @return boolean
      */
     public function getBoolValue()
@@ -146,21 +138,17 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set boolValue
-     *
      * @param boolean $boolValue
      * @return Value
      */
     public function setBoolValue($boolValue)
     {
-        $this->boolValue = $boolValue;
+        $this->boolValue = null === $boolValue ? null : (bool) $boolValue;
 
         return $this;
     }
 
     /**
-     * Get integerValue
-     *
      * @return integer
      */
     public function getIntegerValue()
@@ -169,21 +157,17 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set integerValue
-     *
      * @param integer $integerValue
      * @return Value
      */
     public function setIntegerValue($integerValue)
     {
-        $this->integerValue = $integerValue;
+        $this->integerValue = null === $integerValue ? null : (int) $integerValue;
 
         return $this;
     }
 
     /**
-     * Get decimalValue
-     *
      * @return float
      */
     public function getDecimalValue()
@@ -192,21 +176,17 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set decimalValue
-     *
      * @param float $decimalValue
      * @return Value
      */
     public function setDecimalValue($decimalValue)
     {
-        $this->decimalValue = $decimalValue;
+        $this->decimalValue = null === $decimalValue ? null : (float) $decimalValue;
 
         return $this;
     }
 
     /**
-     * Get dateValue
-     *
      * @return DateTime
      */
     public function getDateValue()
@@ -215,8 +195,6 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set dateValue
-     *
      * @param DateTime|int|string $dateValue
      * @return Value
      * @throws \UnexpectedValueException
@@ -229,8 +207,6 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Get datetimeValue
-     *
      * @return DateTime
      */
     public function getDatetimeValue()
@@ -239,8 +215,6 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set datetimeValue
-     *
      * @param DateTime|int|string $datetimeValue
      * @return Value
      * @throws \UnexpectedValueException
@@ -253,8 +227,6 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Get stringValue
-     *
      * @return string
      */
     public function getStringValue()
@@ -263,21 +235,17 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set stringValue
-     *
      * @param string $stringValue
      * @return Value
      */
     public function setStringValue($stringValue)
     {
-        $this->stringValue = $stringValue;
+        $this->stringValue = null === $stringValue ? null : (string) $stringValue;
 
         return $this;
     }
 
     /**
-     * Get textValue
-     *
      * @return string
      */
     public function getTextValue()
@@ -286,22 +254,18 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set textValue
-     *
      * @param string $textValue
      * @return Value
      */
     public function setTextValue($textValue)
     {
-        $this->textValue = $textValue;
+        $this->textValue = null === $textValue ? null : (string) $textValue;
 
         return $this;
     }
 
     /**
-     * Get dataValue
-     *
-     * @return integer
+     * @return DataInterface
      */
     public function getDataValue()
     {
@@ -309,12 +273,10 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * Set dataValue
-     *
-     * @param integer $dataValue
+     * @param DataInterface $dataValue
      * @return Value
      */
-    public function setDataValue($dataValue)
+    public function setDataValue(DataInterface $dataValue = null)
     {
         $this->dataValue = $dataValue;
 
