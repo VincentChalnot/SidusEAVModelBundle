@@ -875,6 +875,11 @@ abstract class Data implements ContextualDataInterface
      */
     protected function getLabelValue()
     {
-        return (string) $this->getValueData($this->getFamily()->getAttributeAsLabel());
+        $attributeAsLabel = $this->getFamily()->getAttributeAsLabel();
+        if ($attributeAsLabel) {
+            return (string) $this->getValueData($attributeAsLabel);
+        }
+
+        return (string) $this->getIdentifier();
     }
 }
