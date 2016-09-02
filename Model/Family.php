@@ -26,8 +26,6 @@ class Family implements FamilyInterface
 {
     use TranslatableTrait;
 
-    const FAMILY_DEFAULT = 'family';
-
     /** @var string */
     protected $code;
 
