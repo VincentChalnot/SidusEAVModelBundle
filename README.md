@@ -223,7 +223,9 @@ sidus_eav_model:
         <familyCode>:
             label: <human-readable name of the family> # Use the translator instead of this
             attributeAsLabel: <attributeCode> # Required, except if the family is inherited
+            attributeAsIdentifier: <attributeCode> # Can be used to set a virtual primary key on your family
             instantiable: <boolean> # Default true, can be used to define an "abstract" family
+            singleton: <boolean> # If true, the family will have only one instance accessible through DataRepository::getInstance
             parent: <familyCode> # When specified, the family will inherits its configuration
             data_class: <PhpClass> # Can be used with single table inheritance to declare specific business logic in a dedicated class
             attributes: # Required
@@ -274,6 +276,9 @@ Attribute types define a common way of editing and storing data, this bundle pro
 - choice: Stored as varchar(255), edited as choice widget (required "choices" form_options)
 - data: Stored in a real Doctrine Many-To-One relationship with a related Data object, edited as a choice widget, requires the "family" form_option.
 - embed: Stored like data but embed the edition of the foreign entity directly into the form, requires the "family" form_option.
+- hidden: Stored as varchar(255), will be present in the form as a hidden input.
+- string_identifier: **Experimental**, can be used to store the unique identifier of the family directly in the Data table for better performances.
+- integer_identifier: **Experimental**, see string_identifier
 
 Additional attribute types can be found in the sidus/eav-bootstrap-bundle:
 - html: Stored as text, edited as TinyMCE WYSIWYG editor, featuring full control over configuration

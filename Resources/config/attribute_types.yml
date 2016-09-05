@@ -39,12 +39,6 @@ services:
         tags:
             - { name: sidus.attribute_type }
 
-    sidus_eav_model.attribute_type.unique:
-        class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [unique, stringValue, text]
-        tags:
-            - { name: sidus.attribute_type }
-
     sidus_eav_model.attribute_type.date:
         class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [date, dateValue, date]
