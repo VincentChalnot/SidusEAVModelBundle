@@ -120,7 +120,6 @@ class Family implements FamilyInterface
             }
             $this->attributeAsIdentifier = $this->getAttribute($labelCode);
             if (!$this->attributeAsIdentifier->isUnique()) {
-                var_dump($this->attributeAsIdentifier);exit;
                 throw new UnexpectedValueException("{$commonMessage} should be unique");
             }
             if (!$this->attributeAsIdentifier->isRequired()) {
