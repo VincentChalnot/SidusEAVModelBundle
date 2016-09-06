@@ -121,13 +121,13 @@ EOT;
         $getter = 'get'.ucfirst($attribute->getCode());
         if (!$dataClass->hasMethod($getter)) {
             $content .= $this->generateGetAnnotation($family, $attribute);
-            $content .= "abstract public function {$getter}(array \$context = []);\n\n";
+            $content .= "abstract public function {$getter}(array \$context = null);\n\n";
         }
 
         $setter = 'set'.ucfirst($attribute->getCode());
         if (!$dataClass->hasMethod($setter)) {
             $content .= $this->generateSetAnnotation($family, $attribute);
-            $content .= 'abstract public function set'.ucfirst($attribute->getCode()).'($value, array $context = []);'."\n\n";
+            $content .= 'abstract public function set'.ucfirst($attribute->getCode()).'($value, array $context = null);'."\n\n";
         }
 
         return $content;
@@ -155,7 +155,7 @@ EOT;
     {
         $content = <<<EOT
 /**
- * @param array \$context
+ * @param array|null \$context
  *
  * @return {$this->getPHPType($family, $attribute)}
  */
@@ -175,7 +175,7 @@ EOT;
         $content = <<<EOT
 /**
  * @param {$this->getPHPType($family, $attribute)} \$value
- * @param array \$context
+ * @param array|null \$context
  *
  * @return {$family->getCode()}
  */
