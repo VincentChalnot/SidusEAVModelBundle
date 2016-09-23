@@ -106,7 +106,7 @@ class DataValidator extends ConstraintValidator
             /** @var DataRepository $repo */
             $repo = $this->doctrine->getRepository($data->getFamily()->getDataClass());
             $result = $repo->findByIdentifier($data->getFamily(), $valueData);
-            if ($result) {
+            if ($result && $result->getId() !== $data->getId()) {
                 $this->buildAttributeViolation($context, $attribute, 'unique', $valueData);
             }
 

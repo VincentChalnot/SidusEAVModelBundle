@@ -179,7 +179,7 @@ class DataType extends AbstractType
             }
             if ($options['family'] instanceof FamilyInterface) {
                 $dataClass = $options['family']->getDataClass();
-                if (!is_a($value, $dataClass, true)) {
+                if (!is_a($value, $dataClass)) {
                     throw new \UnexpectedValueException("The 'data' option should be a {$dataClass}");
                 }
             }
