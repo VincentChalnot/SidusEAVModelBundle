@@ -22,7 +22,6 @@ class GroupedDataType extends DataType
         DataInterface $data = null,
         array $options = []
     ) {
-        $family = $data->getFamily();
         foreach ($family->getAttributes() as $attribute) {
             if ($attribute->getGroup()) {
                 $groupName = $attribute->getGroup();
