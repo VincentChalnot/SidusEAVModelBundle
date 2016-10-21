@@ -245,7 +245,7 @@ class Attribute implements AttributeInterface
     /**
      * @param array $options
      */
-    public function addValidationRules(array $options)
+    public function addValidationRule(array $options)
     {
         $this->validationRules[] = $options;
     }

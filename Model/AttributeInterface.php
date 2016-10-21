@@ -119,7 +119,12 @@ interface AttributeInterface
     /**
      * @param array $options
      */
-    public function addValidationRules(array $options);
+    public function addValidationRule(array $options);
+
+    /**
+     * @param array $validationRules
+     */
+    public function setValidationRules(array $validationRules);
 
     /**
      * @return array

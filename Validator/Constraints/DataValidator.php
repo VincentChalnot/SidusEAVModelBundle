@@ -59,6 +59,7 @@ class DataValidator extends ConstraintValidator
      *
      * @param DataInterface $data       The value that should be validated
      * @param Constraint    $constraint The constraint for the validation
+     *
      * @return ConstraintViolationListInterface
      * @throws Exception
      */
@@ -70,13 +71,6 @@ class DataValidator extends ConstraintValidator
         }
         $context = $this->context; // VERY IMPORTANT ! context will be lost otherwise
         foreach ($data->getFamily()->getAttributes() as $attribute) {
-            // Dynamically append data validator for embed types
-            $type = $attribute->getType();
-            if ($type->isEmbedded()) {
-                $attribute->addValidationRules([
-                    'Valid' => [],
-                ]);
-            }
             if ($attribute->isRequired() && $data->isEmpty($attribute)) {
                 $this->buildAttributeViolation($context, $attribute, 'required', $data->getValueData($attribute));
             }
@@ -93,6 +87,7 @@ class DataValidator extends ConstraintValidator
      * @param ExecutionContextInterface $context
      * @param AttributeInterface        $attribute
      * @param DataInterface             $data
+     *
      * @throws Exception
      */
     protected function checkUnique(
@@ -115,10 +110,12 @@ class DataValidator extends ConstraintValidator
 
         /** @var ValueRepository $repo */
         $repo = $this->doctrine->getRepository($data->getFamily()->getValueClass());
-        $values = $repo->findBy([
-            'attributeCode' => $attribute->getCode(),
-            $attribute->getType()->getDatabaseType() => $valueData,
-        ]);
+        $values = $repo->findBy(
+            [
+                'attributeCode' => $attribute->getCode(),
+                $attribute->getType()->getDatabaseType() => $valueData,
+            ]
+        );
         /** @var ValueInterface $value */
         foreach ($values as $value) {
             if (!$value->getData()) {
@@ -136,6 +133,7 @@ class DataValidator extends ConstraintValidator
      * @param ExecutionContextInterface $context
      * @param AttributeInterface        $attribute
      * @param DataInterface             $data
+     *
      * @throws Exception
      */
     protected function validateRules(
@@ -152,7 +150,7 @@ class DataValidator extends ConstraintValidator
         foreach ($attribute->getValidationRules() as $validationRule) {
             foreach ($validationRule as $item => $options) {
                 $constraint = $loader->newConstraint($item, $options);
-                $violations = $context->getValidator()->validate($valueData, $constraint);
+                $violations = $context->getValidator()->validate($valueData, $constraint, $context->getGroup());
                 /** @var ConstraintViolationInterface $violation */
                 foreach ($violations as $violation) {
                     /** @noinspection DisconnectedForeachInstructionInspection */
@@ -182,6 +180,7 @@ class DataValidator extends ConstraintValidator
      * @param string                    $type
      * @param mixed                     $invalidValue
      * @param string                    $path
+     *
      * @throws \InvalidArgumentException
      */
     protected function buildAttributeViolation(
@@ -203,6 +202,7 @@ class DataValidator extends ConstraintValidator
     /**
      * @param AttributeInterface $attribute
      * @param string             $type
+     *
      * @return string
      * @throws \InvalidArgumentException
      */
@@ -213,26 +213,10 @@ class DataValidator extends ConstraintValidator
                 "eav.attribute.{$attribute->getCode()}.validation.{$type}",
                 "eav.attribute.validation.{$type}",
             ],
-            ['%attribute%' => $this->translator->trans((string) $attribute)],
+            [
+                '%attribute%' => $this->translator->trans((string) $attribute),
+            ],
             $type
         );
-    }
-
-    /**
-     * @param AttributeInterface $attribute
-     * @param DataInterface      $data
-     * @param Constraint         $constraint
-     * @throws \Exception
-     */
-    protected function validateEmbedded(AttributeInterface $attribute, DataInterface $data, Constraint $constraint)
-    {
-        if ($attribute->isMultiple()) {
-            foreach ($data->getValuesData($attribute) as $key => $item) {
-                $constraint->
-                $this->validate($item, $constraint);
-            }
-        } else {
-            $this->validate($data->getValueData($attribute), $constraint);
-        }
     }
 }

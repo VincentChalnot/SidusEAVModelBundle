@@ -90,7 +90,7 @@ interface DataInterface
      *
      * @param AttributeInterface $attribute
      * @param array              $context
-     * @return mixed
+     * @return Collection|array
      */
     public function getValuesData(AttributeInterface $attribute = null, array $context = null);
 
