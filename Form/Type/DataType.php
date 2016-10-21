@@ -212,6 +212,9 @@ class DataType extends AbstractType
         DataInterface $data = null,
         array $options = []
     ) {
+        if ($attribute->getOption('hidden')) {
+            return;
+        }
         if ($attribute->isMultiple() && $attribute->isCollection()) {
             $this->addMultipleAttribute($form, $attribute, $family, $data, $options);
         } else {
