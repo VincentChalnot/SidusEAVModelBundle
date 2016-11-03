@@ -352,7 +352,9 @@ abstract class Data implements ContextualDataInterface
         $class = get_class($this);
 
         if (0 === strpos($methodName, 'get')) {
-            return $this->get(lcfirst(substr($methodName, 3)));
+            $context = array_key_exists(0, $arguments) ? $arguments[0] : null;
+
+            return $this->get(lcfirst(substr($methodName, 3)), $context);
         }
         $baseErrorMsg = "Method '{$methodName}' for object '{$class}' with family '{$this->getFamilyCode()}'";
 
