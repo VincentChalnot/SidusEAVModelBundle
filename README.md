@@ -187,13 +187,6 @@ You will need at least the following configuration:
 sidus_eav_model:
     data_class: MyNamespace\EAVModelBundle\Entity\Data
     value_class: MyNamespace\EAVModelBundle\Entity\Value
-
-doctrine:
-    dbal:
-        types:
-            sidus_family:
-                class: Sidus\EAVModelBundle\Doctrine\Types\FamilyType
-                commented: true
 ````
 
 The custom Doctrine type for the families is the only "hack" needed for this bundle, everything else is standard Symfony.
@@ -333,7 +326,23 @@ echo $newPost->getTitle();
 
 Yes, this relies on magic methods to work but magic methods are not evil (while code generation definitely is). You can read sometimes that they are bad in terms of performances but this is less and less true with recent versions of PHP. The only drawback of using them is the lack of annotations that makes them appearing as errors in your IDE which is not cool. There is no simple solution for this but we might explore the benefits of automatically generating annotations in Symfony's cache to allow you to identify them with @var.
 
-Meanwhile if you really like your code as clean as we do you can use this syntax:
+UPDATE : You can now generate automatically fake classes from your EAV Model by adding this configuration in config_dev.yml:
+````yml
+imports:
+    - { resource: '@SidusEAVModelBundle/Resources/config/annotation_generator.yml' }
+````
+It is VERY important to never actually use the generated classes appart from annotations because they wont work.
+All classes will be in the namespace \Sidus\EAV and will be named after your families.
+Now you can do this and get autocomplete working in your IDE:
+
+````php
+<?php
+/** @var \Sidus\EAV\Post $newPost */
+$newPost->setTitle('I LOVE SYMFONY');
+echo $newPost->getTitle();
+````
+
+Or you can also use the alternative syntax:
 
 ````php
 <?php

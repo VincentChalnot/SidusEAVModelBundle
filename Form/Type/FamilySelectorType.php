@@ -100,8 +100,9 @@ class FamilySelectorType extends AbstractType
                 throw new \UnexpectedValueException("'choices' options is not supported for family selector, please use 'families' option");
             }
             $choices = [];
-            /** @var FamilyInterface $family */
-            foreach ($options['families'] as $family) {
+            /** @var FamilyInterface[] $families */
+            $families = $options['families'];
+            foreach ($families as $family) {
                 if ($family->isInstantiable()) {
                     $choices[ucfirst($family)] = $family->getCode();
                 }

@@ -14,7 +14,7 @@ use Symfony\Component\Form\FormInterface;
 class GroupedDataType extends DataType
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function buildValuesForm(
         FormInterface $form,
@@ -30,9 +30,9 @@ class GroupedDataType extends DataType
                         'inherit_data' => true,
                     ]);
                 }
-                $this->addAttribute($form->get($groupName), $attribute, $family);
+                $this->addAttribute($form->get($groupName), $attribute, $family, $data, $options);
             } else {
-                $this->addAttribute($form, $attribute, $family);
+                $this->addAttribute($form, $attribute, $family, $data, $options);
             }
         }
     }

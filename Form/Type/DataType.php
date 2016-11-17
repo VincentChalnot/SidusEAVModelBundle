@@ -238,11 +238,15 @@ class DataType extends AbstractType
         DataInterface $data = null,
         array $options = []
     ) {
-        $label = $this->getFieldLabel($family, $attribute);
-        $formOptions = $attribute->getFormOptions($data);
+        $formOptions = [];
+        if (array_key_exists('form_options', $options)) {
+            $formOptions = $options['form_options'];
+        }
 
-        $formOptions = array_merge(['label' => $label], $formOptions);
+        $label = $this->getFieldLabel($family, $attribute);
+        $formOptions = array_merge(['label' => $label], $formOptions, $attribute->getFormOptions($data));
         unset($formOptions['collection_options']); // Ignoring collection_options if set
+
         $form->add($attribute->getCode(), $attribute->getType()->getFormType(), $formOptions);
     }
 
@@ -262,8 +266,13 @@ class DataType extends AbstractType
         DataInterface $data = null,
         array $options = []
     ) {
+        $formOptions = [];
+        if (array_key_exists('form_options', $options)) {
+            $formOptions = $options['form_options'];
+        }
+
+        $formOptions = array_merge($formOptions, $attribute->getFormOptions($data));
         $label = $this->getFieldLabel($family, $attribute);
-        $formOptions = $attribute->getFormOptions($data);
 
         $formOptions['label'] = false; // Removing label
         $collectionOptions = [

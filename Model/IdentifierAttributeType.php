@@ -10,7 +10,7 @@ namespace Sidus\EAVModelBundle\Model;
 class IdentifierAttributeType extends AttributeType
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      *
      * @throws \UnexpectedValueException
      */

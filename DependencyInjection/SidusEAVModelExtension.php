@@ -2,6 +2,7 @@
 
 namespace Sidus\EAVModelBundle\DependencyInjection;
 
+use Sidus\EAVModelBundle\Doctrine\Types\FamilyType;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -41,6 +42,11 @@ class SidusEAVModelExtension extends Extension
         $container->setParameter('sidus_eav_model.form.collection_type', $config['collection_type']);
         $container->setParameter('sidus_eav_model.context.form_type', $config['context_form_type']);
         $container->setParameter('sidus_eav_model.context.default_context', $config['default_context']);
+
+        // Injecting custom doctrine type
+        $doctrineTypes = $container->getParameter('doctrine.dbal.connection_factory.types');
+        $doctrineTypes['sidus_family'] = ['class' => FamilyType::class, 'commented' => true];
+        $container->setParameter('doctrine.dbal.connection_factory.types', $doctrineTypes);
 
         // Automatically declare a service for each attribute configured
         foreach ($config['attributes'] as $code => $attributeConfiguration) {
