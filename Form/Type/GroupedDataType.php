@@ -4,6 +4,7 @@ namespace Sidus\EAVModelBundle\Form\Type;
 
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormInterface;
 
 /**
@@ -26,7 +27,7 @@ class GroupedDataType extends DataType
             if ($attribute->getGroup()) {
                 $groupName = $attribute->getGroup();
                 if (!$form->has($groupName)) {
-                    $form->add($groupName, 'form', [
+                    $form->add($groupName, FormType::class, [
                         'inherit_data' => true,
                     ]);
                 }
@@ -40,7 +41,7 @@ class GroupedDataType extends DataType
     /**
      * @return string
      */
-    public function getName()
+    public function getBlockPrefix()
     {
         return 'sidus_grouped_data';
     }

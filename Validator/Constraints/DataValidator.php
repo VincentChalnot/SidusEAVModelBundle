@@ -60,8 +60,9 @@ class DataValidator extends ConstraintValidator
      * @param DataInterface $data       The value that should be validated
      * @param Constraint    $constraint The constraint for the validation
      *
-     * @return ConstraintViolationListInterface
      * @throws Exception
+     *
+     * @return ConstraintViolationListInterface
      */
     public function validate($data, Constraint $constraint)
     {

@@ -93,7 +93,7 @@ class DataType extends AbstractType
      */
     public function buildCreateForm(FormInterface $form, array $options)
     {
-        $form->add('family', 'sidus_family_selector');
+        $form->add('family', FamilySelectorType::class);
     }
 
     /**
@@ -191,7 +191,7 @@ class DataType extends AbstractType
     /**
      * @return string
      */
-    public function getName()
+    public function getBlockPrefix()
     {
         return 'sidus_data';
     }

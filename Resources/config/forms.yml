@@ -12,25 +12,25 @@ services:
         calls:
             - [setTranslator, ['@translator']]
         tags:
-            - { name: form.type, alias: sidus_data }
+            - { name: form.type }
 
     sidus_eav_model.form.type.grouped_data:
         class: '%sidus_eav_model.form.type.grouped_data.class%'
         parent: 'sidus_eav_model.form.type.data'
         tags:
-            - { name: form.type, alias: sidus_grouped_data }
+            - { name: form.type }
 
     sidus_eav_model.form.type.family_selector:
         class: '%sidus_eav_model.form.type.family_selector.class%'
         arguments: ['@sidus_eav_model.family_configuration.handler']
         tags:
-            - { name: form.type, alias: sidus_family_selector }
+            - { name: form.type }
 
     sidus_eav_model.form.type.simple_data_selector:
         class: '%sidus_eav_model.form.type.simple_data_selector.class%'
         arguments: ['%sidus_eav_model.entity.data.class%']
         tags:
-            - { name: form.type, alias: sidus_simple_data_selector }
+            - { name: form.type }
 
     # Choice extension to handle Doctrine collections
     sidus_eav_model.form.extension.choice:

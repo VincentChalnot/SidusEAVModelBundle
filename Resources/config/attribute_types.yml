@@ -7,67 +7,67 @@ parameters:
 services:
     sidus_eav_model.attribute_type.string:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [string, stringValue, text]
+        arguments: [string, stringValue, 'Symfony\Component\Form\Extension\Core\Type\TextType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.text:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [text, textValue, textarea]
+        arguments: [text, textValue, 'Symfony\Component\Form\Extension\Core\Type\TextareaType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.integer:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [integer, integerValue, number]
+        arguments: [integer, integerValue, 'Symfony\Component\Form\Extension\Core\Type\NumberType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.decimal:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [decimal, decimalValue, number]
+        arguments: [decimal, decimalValue, 'Symfony\Component\Form\Extension\Core\Type\NumberType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.boolean:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [boolean, boolValue, checkbox]
+        arguments: [boolean, boolValue, 'Symfony\Component\Form\Extension\Core\Type\CheckboxType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.html:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [html, textValue, textarea]
+        arguments: [html, textValue, 'Symfony\Component\Form\Extension\Core\Type\TextareaType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.date:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [date, dateValue, date]
+        arguments: [date, dateValue, 'Symfony\Component\Form\Extension\Core\Type\DateType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.datetime:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [datetime, datetimeValue, datetime]
+        arguments: [datetime, datetimeValue, 'Symfony\Component\Form\Extension\Core\Type\DateTimeType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.choice:
         class: '%sidus_eav_model.attribute_type.choice.class%' # Choice has a special class to handle multiple choices
-        arguments: [choice, stringValue, choice]
+        arguments: [choice, stringValue, 'Symfony\Component\Form\Extension\Core\Type\ChoiceType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.data:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [data, dataValue, sidus_simple_data_selector]
+        arguments: [data, dataValue, 'Sidus\EAVModelBundle\Form\Type\SimpleDataSelectorType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.hidden:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [hidden, stringValue, hidden]
+        arguments: [hidden, stringValue, 'Symfony\Component\Form\Extension\Core\Type\HiddenType']
         tags:
             - { name: sidus.attribute_type }
 
@@ -75,18 +75,18 @@ services:
 
     sidus_eav_model.attribute_type.embed:
         class: '%sidus_eav_model.attribute_type.embed.class%'
-        arguments: [embed, dataValue, sidus_data]
+        arguments: [embed, dataValue, 'Sidus\EAVModelBundle\Form\Type\DataType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.string_identifier:
         class: '%sidus_eav_model.attribute_type.identifier.class%'
-        arguments: [string_identifier, stringIdentifier, text]
+        arguments: [string_identifier, stringIdentifier, 'Symfony\Component\Form\Extension\Core\Type\TextType']
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.integer_identifier:
         class: '%sidus_eav_model.attribute_type.identifier.class%'
-        arguments: [integer_identifier, integerIdentifier, text]
+        arguments: [integer_identifier, integerIdentifier, 'Symfony\Component\Form\Extension\Core\Type\TextType']
         tags:
             - { name: sidus.attribute_type }
