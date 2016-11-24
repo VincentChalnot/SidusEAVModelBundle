@@ -4,6 +4,7 @@ namespace Sidus\EAVModelBundle\Form\Type;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\OptionsResolver\Options;
@@ -51,6 +52,7 @@ class SimpleDataSelectorType extends AbstractType
 
             return $qb;
         };
+
         $resolver->setDefaults([
             'class' => $this->dataClass,
             'query_builder' => $queryBuilder,
@@ -62,13 +64,13 @@ class SimpleDataSelectorType extends AbstractType
      */
     public function getParent()
     {
-        return 'entity';
+        return EntityType::class;
     }
 
     /**
      * @return string
      */
-    public function getName()
+    public function getBlockPrefix()
     {
         return 'sidus_simple_data_selector';
     }
