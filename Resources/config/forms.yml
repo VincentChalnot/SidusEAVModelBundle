@@ -3,6 +3,7 @@ parameters:
     sidus_eav_model.form.type.grouped_data.class: Sidus\EAVModelBundle\Form\Type\GroupedDataType
     sidus_eav_model.form.type.family_selector.class: Sidus\EAVModelBundle\Form\Type\FamilySelectorType
     sidus_eav_model.form.type.simple_data_selector.class: Sidus\EAVModelBundle\Form\Type\SimpleDataSelectorType
+    sidus_eav_model.form.extension.choice.class: Sidus\EAVModelBundle\Form\Extension\ChoiceTypeExtension
 
 services:
     sidus_eav_model.form.type.data:
@@ -30,3 +31,9 @@ services:
         arguments: ['%sidus_eav_model.entity.data.class%']
         tags:
             - { name: form.type, alias: sidus_simple_data_selector }
+
+    # Choice extension to handle Doctrine collections
+    sidus_eav_model.form.extension.choice:
+        class: '%sidus_eav_model.form.extension.choice.class%'
+        tags:
+            - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\ChoiceType }

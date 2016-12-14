@@ -407,7 +407,7 @@ class Attribute implements AttributeInterface
     protected function checkConflicts()
     {
         $default = $this->getDefault();
-        if ($this->isMultiple()) {
+        if ($this->isCollection()) {
             if ($this->isUnique()) {
                 throw new UnexpectedValueException("Attribute {$this->getCode()} cannot be multiple and unique at the same time");
             }

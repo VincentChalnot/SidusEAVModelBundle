@@ -125,8 +125,8 @@ class Family implements FamilyInterface
             if (!$this->attributeAsIdentifier->isRequired()) {
                 throw new UnexpectedValueException("{$commonMessage} should be required");
             }
-            if ($this->attributeAsIdentifier->isMultiple()) {
-                throw new UnexpectedValueException("{$commonMessage} should NOT be multiple");
+            if ($this->attributeAsIdentifier->isCollection()) {
+                throw new UnexpectedValueException("{$commonMessage} should NOT be a collection");
             }
             if (0 !== count($this->attributeAsIdentifier->getContextMask())) {
                 throw new UnexpectedValueException("{$commonMessage} should NOT be contextualized");

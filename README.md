@@ -391,7 +391,7 @@ The first parameter is the attribute type code, the second one is the name of th
 ````yaml
 services:
     my_namespace.attribute_type.my_attribute:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [<my_attribute_code>, <storage_property>, <my_namespace_form_type>]
         tags:
             - { name: sidus.attribute_type }
@@ -407,7 +407,7 @@ For example if you need to override the form_type of the "html" type:
 ````yaml
 services:
     sidus_eav_model.attribute_type.html:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [html, textValue, <mynamespace_form_type>]
         tags:
             - { name: sidus.attribute_type }
@@ -465,7 +465,7 @@ Then declare at least an attribute type using a custom form type:
 ````yaml
 services:
     my_namespace.attribute_type.document:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [document, documentValue, <my_namespace_form_type>]
         tags:
             - { name: sidus.attribute_type }

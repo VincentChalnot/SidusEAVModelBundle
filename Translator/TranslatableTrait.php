@@ -5,6 +5,9 @@ namespace Sidus\EAVModelBundle\Translator;
 use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
+/**
+ * Used to try multiple translations with fallback
+ */
 trait TranslatableTrait
 {
     /**

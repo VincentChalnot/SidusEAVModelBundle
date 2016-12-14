@@ -23,6 +23,13 @@ class AttributeParamConverter extends AbstractBaseParamConverter
         $this->attributeConfigurationHandler = $attributeConfigurationHandler;
     }
 
+    /**
+     * @param string $value
+     *
+     * @throws \UnexpectedValueException
+     *
+     * @return AttributeInterface
+     */
     protected function convertValue($value)
     {
         return $this->attributeConfigurationHandler->getAttribute($value);

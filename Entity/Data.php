@@ -223,7 +223,7 @@ abstract class Data implements ContextualDataInterface
     public function addValueData(AttributeInterface $attribute, $valueData, array $context = null)
     {
         $this->checkAttribute($attribute);
-        if (!$attribute->isMultiple()) {
+        if (!$attribute->isCollection()) {
             $m = "Cannot append data to non-multiple attribute '{$attribute->getCode()}'";
             throw new UnexpectedValueException($m);
         }
@@ -393,7 +393,7 @@ abstract class Data implements ContextualDataInterface
             return $this->$getter($context);
         }
 
-        if ($attribute->isMultiple()) {
+        if ($attribute->isCollection()) {
             return $this->getValuesData($attribute, $context);
         }
 
@@ -439,7 +439,7 @@ abstract class Data implements ContextualDataInterface
             return $this->$setter($value, $context);
         }
 
-        if ($attribute->isMultiple()) {
+        if ($attribute->isCollection()) {
             return $this->setValuesData($attribute, $value, $context);
         }
 
@@ -814,8 +814,8 @@ abstract class Data implements ContextualDataInterface
     protected function createDefaultValues(AttributeInterface $attribute = null, array $context = null)
     {
         $default = $attribute->getDefault();
-        if (!$attribute->isMultiple()) {
-            $default = [$default];
+        if (!$attribute->isCollection()) {
+            $default = (array) $default;
         }
 
         return $this->setInternalValuesData($attribute, $default, $context);
