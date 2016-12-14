@@ -141,7 +141,7 @@ class DataValidator extends ConstraintValidator
         AttributeInterface $attribute,
         DataInterface $data
     ) {
-        if ($attribute->isMultiple()) {
+        if ($attribute->isCollection()) {
             $valueData = $data->getValuesData($attribute);
         } else {
             $valueData = $data->getValueData($attribute);
@@ -156,7 +156,7 @@ class DataValidator extends ConstraintValidator
                     /** @noinspection DisconnectedForeachInstructionInspection */
                     $path = $attribute->getCode();
                     if ($attribute->getType()->isEmbedded()) {
-                        if (!$attribute->isMultiple()) {
+                        if (!$attribute->isMultiple()) { // Or isCollection ?
                             $path .= '.';
                         }
                         $path .= $violation->getPropertyPath();

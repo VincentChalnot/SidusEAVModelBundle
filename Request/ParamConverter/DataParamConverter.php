@@ -50,6 +50,11 @@ class DataParamConverter extends AbstractBaseParamConverter
         return true;
     }
 
+    /**
+     * @param int|string $value
+     *
+     * @return null|DataInterface
+     */
     protected function convertValue($value)
     {
         return $this->dataRepository->find($value);

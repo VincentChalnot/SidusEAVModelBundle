@@ -69,7 +69,7 @@ Date and datetime are also improved with bootstrap date/time picker.
 ````yaml
 services:
     my_namespace.attribute_type.my_attribute:
-        class: %sidus_eav_model.attribute_type.default.class%
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [<my_attribute_code>, <storage_property>, <my_namespace_form_type>]
         tags:
             - { name: sidus.attribute_type }

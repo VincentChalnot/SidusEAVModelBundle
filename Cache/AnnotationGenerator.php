@@ -196,7 +196,7 @@ EOT;
 
         // Scalar types
         if (in_array($type, ['bool', 'integer', 'decimal', 'string', 'text'], true)) {
-            if ($attribute->isMultiple()) {
+            if ($attribute->isCollection()) {
                 return 'array';
             }
             if ('text' === $type) {
@@ -209,7 +209,7 @@ EOT;
         }
         if (in_array($type, ['date', 'datetime'], true)) {
             $type = '\DateTime';
-            if ($attribute->isMultiple()) {
+            if ($attribute->isCollection()) {
                 $type .= '[]';
             }
 
@@ -220,7 +220,7 @@ EOT;
             // Simple case
             if (array_key_exists('family', $formOptions)) {
                 $type = $formOptions['family'];
-                if ($attribute->isMultiple()) {
+                if ($attribute->isCollection()) {
                     $type .= '[]';
                 }
 
@@ -233,7 +233,7 @@ EOT;
                 if (!is_array($types)) {
                     return 'mixed'; // Shouldn't happen
                 }
-                if ($attribute->isMultiple()) {
+                if ($attribute->isCollection()) {
                     foreach ($types as &$type) {
                         $type .= '[]';
                     }
@@ -243,7 +243,7 @@ EOT;
             }
 
             // Couldn't find any family (rare case)
-            if ($attribute->isMultiple()) {
+            if ($attribute->isCollection()) {
                 return 'array';
             }
 
@@ -257,7 +257,7 @@ EOT;
         }
 
         // Fallback in any other case
-        if ($attribute->isMultiple()) {
+        if ($attribute->isCollection()) {
             return 'array';
         }
 
@@ -283,7 +283,7 @@ EOT;
         }
 
         $type = $mapping['targetEntity'];
-        if ($attribute->isMultiple()) {
+        if ($attribute->isCollection()) {
             $type .= '[]';
         }
 
