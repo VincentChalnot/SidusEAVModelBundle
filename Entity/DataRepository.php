@@ -20,8 +20,10 @@ class DataRepository extends EntityRepository
      * @param FamilyInterface $family
      * @param int|string      $reference
      * @param bool            $idFallback
-     * @return null|DataInterface
+     *
      * @throws NonUniqueResultException
+     *
+     * @return null|DataInterface
      */
     public function findByIdentifier(FamilyInterface $family, $reference, $idFallback = false)
     {
@@ -31,17 +33,21 @@ class DataRepository extends EntityRepository
                 return null;
             }
 
-            return $this->findOneBy([
-                'id' => $reference,
-                'family' => $family,
-            ]);
+            return $this->findOneBy(
+                [
+                    'id' => $reference,
+                    'family' => $family,
+                ]
+            );
         }
         $dataBaseType = $identifierAttribute->getType()->getDatabaseType();
         if ($identifierAttribute->getType() instanceof IdentifierAttributeType) {
-            return $this->findOneBy([
-                $dataBaseType => $reference,
-                'family' => $family,
-            ]);
+            return $this->findOneBy(
+                [
+                    $dataBaseType => $reference,
+                    'family' => $family,
+                ]
+            );
         }
         $qb = $this->createQueryBuilder('d');
         $joinCondition = "(id.attributeCode = :attributeCode AND id.{$dataBaseType} = :reference)";
@@ -50,12 +56,13 @@ class DataRepository extends EntityRepository
             ->join('d.values', 'id', Join::WITH, $joinCondition)
             ->join('d.values', 'values')
             ->where('d.family = :familyCode')
-            ->setParameters([
-                'attributeCode' => $identifierAttribute->getCode(),
-                'reference' => $reference,
-                'familyCode' => $family->getCode(),
-            ])
-        ;
+            ->setParameters(
+                [
+                    'attributeCode' => $identifierAttribute->getCode(),
+                    'reference' => $reference,
+                    'familyCode' => $family->getCode(),
+                ]
+            );
 
         return $qb->getQuery()->getOneOrNullResult();
     }
@@ -66,7 +73,7 @@ class DataRepository extends EntityRepository
      * @param FamilyInterface $family
      *
      * @throws \LogicException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      *
      * @return DataInterface
      */
@@ -79,10 +86,11 @@ class DataRepository extends EntityRepository
             ->andWhere('d.family = :familyCode')
             ->addSelect('values')
             ->join('d.values', 'values')
-            ->setParameters([
-                'familyCode' => $family->getCode(),
-            ])
-        ;
+            ->setParameters(
+                [
+                    'familyCode' => $family->getCode(),
+                ]
+            );
 
         $instance = $qb->getQuery()->getOneOrNullResult();
         if (!$instance) {
@@ -96,6 +104,7 @@ class DataRepository extends EntityRepository
     /**
      * @param FamilyInterface $family
      * @param string          $alias
+     *
      * @return EAVQueryBuilder
      */
     public function createEAVQueryBuilder(FamilyInterface $family, $alias = 'e')

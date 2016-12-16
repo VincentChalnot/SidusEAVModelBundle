@@ -31,7 +31,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @var DataInterface
-     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", cascade={"persist"}, fetch="EAGER")
      * @ORM\JoinColumn(name="data_value_id", referencedColumnName="id", onDelete="cascade", nullable=true)
      */
     protected $dataValue;
