@@ -65,11 +65,6 @@ interface FamilyInterface
     public function getMatchingCodes();
 
     /**
-     * @param FamilyInterface $child
-     */
-    public function addChild(FamilyInterface $child);
-
-    /**
      * @return DataInterface
      */
     public function createData();

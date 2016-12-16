@@ -36,10 +36,7 @@ trait TranslatableTrait
      */
     protected function tryTranslate($tIds, array $parameters = [], $fallback = null, $humanizeFallback = true)
     {
-        if (!is_array($tIds)) {
-            $tIds = [$tIds];
-        }
-        foreach ($tIds as $tId) {
+        foreach ((array) $tIds as $tId) {
             try {
                 if ($this->translator instanceof TranslatorBagInterface) {
                     if ($this->translator->getCatalogue()->has($tId)) {

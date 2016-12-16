@@ -120,7 +120,7 @@ class Attribute implements AttributeInterface
      */
     public function getOption($code)
     {
-        if (!isset($this->options[$code])) {
+        if (!array_key_exists($code, $this->options)) {
             return null;
         }
 
