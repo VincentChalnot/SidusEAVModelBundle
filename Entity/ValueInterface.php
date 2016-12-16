@@ -10,14 +10,21 @@ namespace Sidus\EAVModelBundle\Entity;
 interface ValueInterface
 {
     /**
-     * Get attributeCode
+     * A unique way of identifying a value accross the all system
+     *
+     * @return int|string
+     */
+    public function getIdentifier();
+
+    /**
+     * The attribute's code of the value
      *
      * @return string
      */
     public function getAttributeCode();
 
     /**
-     * Set attributeCode
+     * Set attributeCode : Warning ! No check here to whether or not the attribute actually exists
      *
      * @param string $attributeCode
      * @return Value
@@ -25,16 +32,22 @@ interface ValueInterface
     public function setAttributeCode($attributeCode);
 
     /**
+     * The data carrying the current value
+     *
      * @return DataInterface
      */
     public function getData();
 
     /**
+     * The data carrying the current value
+     *
      * @param DataInterface $data
      */
     public function setData(DataInterface $data = null);
 
     /**
+     * Position of the value when used in a collection
+     *
      * @return int
      */
     public function getPosition();

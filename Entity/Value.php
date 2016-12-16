@@ -103,11 +103,19 @@ abstract class Value implements ContextualValueInterface
     }
 
     /**
-     * @return integer
+     * @return int
      */
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return int
+     */
+    public function getIdentifier()
+    {
+        return $this->getId();
     }
 
     /**
@@ -120,6 +128,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @param string $attributeCode
+     *
      * @return Value
      */
     public function setAttributeCode($attributeCode)
@@ -139,6 +148,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @param boolean $boolValue
+     *
      * @return Value
      */
     public function setBoolValue($boolValue)
@@ -158,6 +168,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @param integer $integerValue
+     *
      * @return Value
      */
     public function setIntegerValue($integerValue)
@@ -177,6 +188,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @param float $decimalValue
+     *
      * @return Value
      */
     public function setDecimalValue($decimalValue)
@@ -196,6 +208,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @param DateTime|int|string $dateValue
+     *
      * @return Value
      * @throws \UnexpectedValueException
      */
@@ -216,6 +229,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @param DateTime|int|string $datetimeValue
+     *
      * @return Value
      * @throws \UnexpectedValueException
      */
@@ -236,6 +250,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @param string $stringValue
+     *
      * @return Value
      */
     public function setStringValue($stringValue)
@@ -255,6 +270,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @param string $textValue
+     *
      * @return Value
      */
     public function setTextValue($textValue)
@@ -274,6 +290,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @param DataInterface $dataValue
+     *
      * @return Value
      */
     public function setDataValue(DataInterface $dataValue = null)
@@ -338,6 +355,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @param string $key
+     *
      * @return mixed
      * @throws \UnexpectedValueException
      */
@@ -352,6 +370,7 @@ abstract class Value implements ContextualValueInterface
      * Context constructor.
      *
      * @param array $context
+     *
      * @throws \UnexpectedValueException
      */
     public function setContext(array $context)
@@ -375,6 +394,7 @@ abstract class Value implements ContextualValueInterface
     /**
      * @param string $key
      * @param mixed  $value
+     *
      * @throws \UnexpectedValueException
      */
     public function setContextValue($key, $value)
@@ -398,6 +418,7 @@ abstract class Value implements ContextualValueInterface
 
     /**
      * @param string $key
+     *
      * @throws \UnexpectedValueException
      */
     protected function checkContextKey($key)

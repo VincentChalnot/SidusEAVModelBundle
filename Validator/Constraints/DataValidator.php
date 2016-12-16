@@ -148,7 +148,7 @@ class DataValidator extends ConstraintValidator
         }
         $loader = new BaseLoader();
         foreach ($attribute->getValidationRules() as $validationRule) {
-            foreach ($validationRule as $item => $options) {
+            foreach ((array) $validationRule as $item => $options) {
                 $constraint = $loader->newConstraint($item, $options);
                 $violations = $context->getValidator()->validate($valueData, $constraint, $context->getGroup());
                 /** @var ConstraintViolationInterface $violation */

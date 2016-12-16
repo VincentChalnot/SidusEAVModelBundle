@@ -26,6 +26,9 @@ class Family implements FamilyInterface
 {
     use TranslatableTrait;
 
+    /** @var FamilyConfigurationHandler */
+    protected $familyConfigurationHandler;
+
     /** @var string */
     protected $code;
 
@@ -57,7 +60,7 @@ class Family implements FamilyInterface
     protected $singleton;
 
     /** @var Family[] */
-    protected $children = [];
+    protected $children;
 
     /** @var string */
     protected $dataClass;
@@ -88,6 +91,7 @@ class Family implements FamilyInterface
         array $config = null
     ) {
         $this->code = $code;
+        $this->familyConfigurationHandler = $familyConfigurationHandler;
         $this->contextManager = $contextManager;
 
         if (!empty($config['parent'])) {
@@ -96,7 +100,7 @@ class Family implements FamilyInterface
         }
         unset($config['parent']);
 
-        foreach ($config['attributes'] as $attribute) {
+        foreach ((array) $config['attributes'] as $attribute) {
             $this->attributes[$attribute] = $attributeConfigurationHandler->getAttribute($attribute);
         }
         unset($config['attributes']);
@@ -225,20 +229,11 @@ class Family implements FamilyInterface
      */
     public function getChildren()
     {
-        return $this->children;
-    }
-
-    /**
-     * @param FamilyInterface $child
-     * @throws UnexpectedValueException
-     */
-    public function addChild(FamilyInterface $child)
-    {
-        if ($child->getParent() && $child->getParent()->getCode() === $this->getCode()) {
-            $this->children[$child->getCode()] = $child;
-        } else {
-            throw new UnexpectedValueException("Child must have it's parent set to the current family");
+        if (null === $this->children) {
+            $this->children = $this->familyConfigurationHandler->getByParent($this);
         }
+
+        return $this->children;
     }
 
     /**

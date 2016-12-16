@@ -105,6 +105,13 @@ abstract class Data implements ContextualDataInterface
     protected $integerIdentifier;
 
     /**
+     * Used as an internal cache to access more easily values based on their attribute
+     *
+     * @var ValueInterface[][]
+     */
+    protected $valuesByAttributes;
+
+    /**
      * Initialize the data with an optional (but recommended family code)
      *
      * @param FamilyInterface $family
@@ -525,11 +532,12 @@ abstract class Data implements ContextualDataInterface
         $this->checkAttribute($attribute);
 
         $values = new ArrayCollection();
-        foreach ($this->values as $value) {
-            /** @noinspection NotOptimalIfConditionsInspection */
-            if ($value->getAttributeCode() === $attribute->getCode()
-                && $attribute->isContextMatching($value, $context)
-            ) {
+        foreach ($this->getValuesByAttribute($attribute) as $value) {
+            if ($value instanceof ContextualValueInterface) {
+                if ($attribute->isContextMatching($value, $context)) {
+                    $values->add($value);
+                }
+            } else {
                 $values->add($value);
             }
         }
@@ -690,6 +698,8 @@ abstract class Data implements ContextualDataInterface
         $this->values->removeElement($value);
         $value->setData(null);
 
+        $this->removeValueByAttribute($value);
+
         return $this;
     }
 
@@ -705,8 +715,12 @@ abstract class Data implements ContextualDataInterface
         if ($value instanceof ContextualValueInterface && !$value->getContext()) {
             $value->setContext($this->getCurrentContext());
         }
+        $this->getAttribute($value->getAttributeCode()); // Only to check that the attribute does exists
+
         $this->values->add($value);
         $value->setData($this);
+
+        $this->addValueByAttribute($value);
 
         return $this;
     }
@@ -777,6 +791,7 @@ abstract class Data implements ContextualDataInterface
         $this->id = null;
         $this->stringIdentifier = null;
         $this->integerIdentifier = null;
+        $this->valuesByAttributes = null;
 
         $newValues = new ArrayCollection();
         foreach ($this->values as $value) {
@@ -883,5 +898,62 @@ abstract class Data implements ContextualDataInterface
         }
 
         return (string) $this->getIdentifier();
+    }
+
+    /**
+     * Cache internally the values indexed by their attribute codes to increase performances
+     *
+     * @param AttributeInterface $attribute
+     *
+     * @return ValueInterface[]
+     */
+    protected function getValuesByAttribute(AttributeInterface $attribute)
+    {
+        if (null === $this->valuesByAttributes) {
+            $this->valuesByAttributes = [];
+        }
+
+        if (!array_key_exists($attribute->getCode(), $this->valuesByAttributes)) {
+            $this->valuesByAttributes[$attribute->getCode()] = [];
+            foreach ($this->values as $value) {
+                if ($value->getAttributeCode() === $attribute->getCode()) {
+                    $this->addValueByAttribute($value);
+                }
+            }
+        }
+
+        return $this->valuesByAttributes[$attribute->getCode()];
+    }
+
+    /**
+     * @param ValueInterface $value
+     */
+    protected function addValueByAttribute(ValueInterface $value)
+    {
+        if (null === $this->valuesByAttributes) {
+            $this->valuesByAttributes = [];
+        }
+
+        if (!array_key_exists($value->getAttributeCode(), $this->valuesByAttributes)) {
+            return; // No cache so no need to update anything
+        }
+
+        $this->valuesByAttributes[$value->getAttributeCode()][$value->getIdentifier()] = $value;
+    }
+
+    /**
+     * @param ValueInterface $value
+     */
+    protected function removeValueByAttribute(ValueInterface $value)
+    {
+        if (null === $this->valuesByAttributes) {
+            $this->valuesByAttributes = [];
+        }
+
+        if (!array_key_exists($value->getAttributeCode(), $this->valuesByAttributes)) {
+            return; // No cache so no need to do anything
+        }
+
+        unset($this->valuesByAttributes[$value->getAttributeCode()][$value->getIdentifier()]);
     }
 }

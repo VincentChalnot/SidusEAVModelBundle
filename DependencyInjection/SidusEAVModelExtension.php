@@ -49,7 +49,7 @@ class SidusEAVModelExtension extends Extension
         $container->setParameter('doctrine.dbal.connection_factory.types', $doctrineTypes);
 
         // Automatically declare a service for each attribute configured
-        foreach ($config['attributes'] as $code => $attributeConfiguration) {
+        foreach ((array) $config['attributes'] as $code => $attributeConfiguration) {
             $this->addAttributeServiceDefinition($code, $attributeConfiguration, $container);
         }
 
@@ -69,7 +69,7 @@ class SidusEAVModelExtension extends Extension
     protected function createFamilyServices(array $config, ContainerBuilder $container)
     {
         // Automatically declare a service for each family configured
-        foreach ($config['families'] as $code => $familyConfiguration) {
+        foreach ((array) $config['families'] as $code => $familyConfiguration) {
             if (empty($familyConfiguration['data_class'])) {
                 $familyConfiguration['data_class'] = $config['data_class'];
             }
