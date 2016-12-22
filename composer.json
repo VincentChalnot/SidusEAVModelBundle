@@ -17,15 +17,14 @@
             "role": "Developer"
         }
     ],
-    "target-dir": "Sidus/EAVModelBundle",
     "autoload": {
-        "psr-0": {
-            "Sidus\\EAVModelBundle": ""
+        "psr-4": {
+            "Sidus\\EAVModelBundle\\": ""
         }
     },
     "require": {
         "php": ">=5.4",
-        "symfony/symfony": "~3.0.6|~2.8.6",
+        "symfony/symfony": "~3.0|~2.8.6",
         "doctrine/doctrine-bundle": "~1.6"
     },
     "suggest": {
