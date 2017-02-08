@@ -28,7 +28,7 @@ services:
     sidus_eav_model.doctrine.repository.data:
         class: '%sidus_eav_model.doctrine.repository.data.class%'
         factory:
-            - '@doctrine'
+            - '@=service("doctrine").getManagerForClass(parameter("sidus_eav_model.entity.data.class"))'
             - 'getRepository'
         arguments: ['%sidus_eav_model.entity.data.class%']
 
