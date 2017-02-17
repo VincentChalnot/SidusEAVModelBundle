@@ -6,7 +6,7 @@ use Sidus\EAVModelBundle\Entity\DataInterface;
 use Symfony\Component\Debug\Exception\ContextErrorException;
 
 /**
- * Allow the developper to add extra checks concerning the family of a data entity
+ * Allow the developer to add extra checks concerning the family of a data entity
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
@@ -33,7 +33,7 @@ class WrongFamilyException extends ContextErrorException
             0, // code
             E_RECOVERABLE_ERROR, // severity
             $backtrace[0]['file'], // filename
-            $backtrace[0]['line'], // lineno
+            $backtrace[0]['line'], // line number
             [] // context
         );
     }

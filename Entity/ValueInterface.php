@@ -10,7 +10,7 @@ namespace Sidus\EAVModelBundle\Entity;
 interface ValueInterface
 {
     /**
-     * A unique way of identifying a value accross the all system
+     * A unique way of identifying a value across the all system
      *
      * @return int|string
      */
@@ -27,7 +27,7 @@ interface ValueInterface
      * Set attributeCode : Warning ! No check here to whether or not the attribute actually exists
      *
      * @param string $attributeCode
-     * @return Value
+     * @return ValueInterface
      */
     public function setAttributeCode($attributeCode);
 

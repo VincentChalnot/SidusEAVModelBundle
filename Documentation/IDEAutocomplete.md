@@ -6,7 +6,7 @@ and the type of data they return.
 
 #### Install
 
-In your config_dev.yml, add this line at the begining:
+In your config_dev.yml, add this line at the beginning:
 
 ```yml
 imports:

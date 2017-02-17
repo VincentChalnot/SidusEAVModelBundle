@@ -8,7 +8,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
-use JMS\Serializer\Annotation as JMS;
 use LogicException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -24,7 +23,7 @@ use UnexpectedValueException;
 /**
  * @DataConstraint()
  */
-abstract class Data implements ContextualDataInterface
+abstract class AbstractData implements ContextualDataInterface
 {
     /**
      * @var int
@@ -57,7 +56,6 @@ abstract class Data implements ContextualDataInterface
      * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\ValueInterface", mappedBy="data", cascade={"persist",
      *                                                                           "remove"}, orphanRemoval=true)
      * @ORM\OrderBy({"position" = "ASC"})
-     * @JMS\Exclude()
      */
     protected $values;
 
@@ -79,7 +77,6 @@ abstract class Data implements ContextualDataInterface
      * @var FamilyInterface
      *
      * @ORM\Column(name="family_code", type="sidus_family", length=255)
-     * @JMS\Exclude()
      */
     protected $family;
 
@@ -92,7 +89,6 @@ abstract class Data implements ContextualDataInterface
      * @var string
      *
      * @ORM\Column(name="string_identifier", type="string", length=255, nullable=true)
-     * @JMS\Exclude()
      */
     protected $stringIdentifier;
 
@@ -100,7 +96,6 @@ abstract class Data implements ContextualDataInterface
      * @var string
      *
      * @ORM\Column(name="integer_identifier", type="integer", nullable=true)
-     * @JMS\Exclude()
      */
     protected $integerIdentifier;
 
@@ -579,7 +574,7 @@ abstract class Data implements ContextualDataInterface
     /**
      * @param string $stringIdentifier
      *
-     * @return Data
+     * @return AbstractData
      */
     public function setStringIdentifier($stringIdentifier)
     {
@@ -599,7 +594,7 @@ abstract class Data implements ContextualDataInterface
     /**
      * @param string $integerIdentifier
      *
-     * @return Data
+     * @return AbstractData
      */
     public function setIntegerIdentifier($integerIdentifier)
     {
@@ -617,9 +612,6 @@ abstract class Data implements ContextualDataInterface
     }
 
     /**
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("family")
-     *
      * @return string
      */
     public function getFamilyCode()

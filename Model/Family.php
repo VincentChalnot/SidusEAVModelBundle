@@ -193,7 +193,7 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @return \Symfony\Component\Security\Acl\Permission\PermissionMapInterface[]
+     * @return PermissionMapInterface[]
      */
     public function getPermissions()
     {
@@ -201,7 +201,7 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @param \Symfony\Component\Security\Acl\Permission\PermissionMapInterface[] $permissions
+     * @param PermissionMapInterface[] $permissions
      */
     public function setPermissions(array $permissions)
     {

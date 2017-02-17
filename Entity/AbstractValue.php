@@ -12,7 +12,7 @@ use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-abstract class Value implements ContextualValueInterface
+abstract class AbstractValue implements ContextualValueInterface
 {
     /**
      * @var integer
@@ -129,7 +129,7 @@ abstract class Value implements ContextualValueInterface
     /**
      * @param string $attributeCode
      *
-     * @return Value
+     * @return AbstractValue
      */
     public function setAttributeCode($attributeCode)
     {
@@ -149,7 +149,7 @@ abstract class Value implements ContextualValueInterface
     /**
      * @param boolean $boolValue
      *
-     * @return Value
+     * @return AbstractValue
      */
     public function setBoolValue($boolValue)
     {
@@ -169,7 +169,7 @@ abstract class Value implements ContextualValueInterface
     /**
      * @param integer $integerValue
      *
-     * @return Value
+     * @return AbstractValue
      */
     public function setIntegerValue($integerValue)
     {
@@ -189,7 +189,7 @@ abstract class Value implements ContextualValueInterface
     /**
      * @param float $decimalValue
      *
-     * @return Value
+     * @return AbstractValue
      */
     public function setDecimalValue($decimalValue)
     {
@@ -209,8 +209,9 @@ abstract class Value implements ContextualValueInterface
     /**
      * @param DateTime|int|string $dateValue
      *
-     * @return Value
      * @throws \UnexpectedValueException
+     *
+     * @return AbstractValue
      */
     public function setDateValue($dateValue)
     {
@@ -230,8 +231,9 @@ abstract class Value implements ContextualValueInterface
     /**
      * @param DateTime|int|string $datetimeValue
      *
-     * @return Value
      * @throws \UnexpectedValueException
+     *
+     * @return AbstractValue
      */
     public function setDatetimeValue($datetimeValue)
     {
@@ -251,7 +253,7 @@ abstract class Value implements ContextualValueInterface
     /**
      * @param string $stringValue
      *
-     * @return Value
+     * @return AbstractValue
      */
     public function setStringValue($stringValue)
     {
@@ -271,7 +273,7 @@ abstract class Value implements ContextualValueInterface
     /**
      * @param string $textValue
      *
-     * @return Value
+     * @return AbstractValue
      */
     public function setTextValue($textValue)
     {
@@ -291,7 +293,7 @@ abstract class Value implements ContextualValueInterface
     /**
      * @param DataInterface $dataValue
      *
-     * @return Value
+     * @return AbstractValue
      */
     public function setDataValue(DataInterface $dataValue = null)
     {

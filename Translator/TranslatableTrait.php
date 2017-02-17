@@ -12,7 +12,6 @@ trait TranslatableTrait
 {
     /**
      * @var TranslatorInterface
-     * @\JMS\Serializer\Annotation\Exclude()
      */
     protected $translator;
 

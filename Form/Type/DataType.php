@@ -110,7 +110,6 @@ class DataType extends AbstractType
         DataInterface $data = null,
         array $options = []
     ) {
-
     }
 
     /**

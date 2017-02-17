@@ -151,13 +151,13 @@ In a dedicated bundle or in one of your bundle (it's generally considered as a g
 namespace MyNamespace\EAVModelBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Sidus\EAVModelBundle\Entity\Data as BaseData;
+use Sidus\EAVModelBundle\Entity\AbstractData;
 
 /**
  * @ORM\Table(name="mynamespace_data")
  * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\DataRepository")
  */
-class Data extends BaseData
+class Data extends AbstractData
 {
 }
 ````
@@ -168,13 +168,13 @@ class Data extends BaseData
 namespace MyNamespace\EAVModelBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Sidus\EAVModelBundle\Entity\Value as BaseValue;
+use Sidus\EAVModelBundle\Entity\AbstractValue;
 
 /**
  * @ORM\Table(name="mynamespace_value")
  * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\ValueRepository")
  */
-class Value extends BaseValue
+class Value extends AbstractValue
 {
 }
 ````
@@ -331,7 +331,7 @@ UPDATE : You can now generate automatically fake classes from your EAV Model by 
 imports:
     - { resource: '@SidusEAVModelBundle/Resources/config/annotation_generator.yml' }
 ````
-It is VERY important to never actually use the generated classes appart from annotations because they wont work.
+It is VERY important to never actually use the generated classes apart from annotations because they wont work.
 All classes will be in the namespace \Sidus\EAV and will be named after your families.
 Now you can do this and get autocomplete working in your IDE:
 
@@ -426,14 +426,14 @@ First, add the relation in your Value class:
 namespace MyNamespace\EAVModelBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Sidus\EAVModelBundle\Entity\Value as BaseValue;
+use Sidus\EAVModelBundle\Entity\AbstractValue;
 use MyNamespace\CustomBundle\Entity\Document;
 
 /**
  * @ORM\Table(name="mynamespace_value")
  * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\ValueRepository")
  */
-class Value extends BaseValue
+class Value extends AbstractValue
 {
     /**
      * @var Document
