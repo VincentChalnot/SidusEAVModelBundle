@@ -163,7 +163,7 @@ use Sidus\EAVModelBundle\Entity\AbstractData;
  * })
  * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\DataRepository")
  */
-class Data extends BaseData
+class Data extends AbstractData
 {
 }
 ````
@@ -185,7 +185,7 @@ use Sidus\EAVModelBundle\Entity\AbstractValue;
  * })
  * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\ValueRepository")
  */
-class Value extends BaseValue
+class Value extends AbstractValue
 {
 }
 ````
@@ -497,7 +497,7 @@ use MyNamespace\CustomBundle\Entity\Document;
  * @ORM\Table(name="mynamespace_value")
  * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\ValueRepository")
  */
-class Value extends BaseValue
+class Value extends AbstractValue
 {
     /**
      * @var Document

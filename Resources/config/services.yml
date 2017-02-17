@@ -9,7 +9,6 @@ parameters:
     sidus_eav_model.request.data.param_converter.class: Sidus\EAVModelBundle\Request\ParamConverter\DataParamConverter
     sidus_eav_model.request.family.param_converter.class: Sidus\EAVModelBundle\Request\ParamConverter\FamilyParamConverter
     sidus_eav_model.request.attribute.param_converter.class: Sidus\EAVModelBundle\Request\ParamConverter\AttributeParamConverter
-    sidus_eav_model.serializer.data.subscriber.class: Sidus\EAVModelBundle\Event\DataSerializerHandler
     sidus_eav_model.doctrine.metadata.mapper.class: Sidus\EAVModelBundle\Event\DoctrineMetadataListener
     sidus_eav_model.context.manager.class: Sidus\EAVModelBundle\Context\ContextManager
 
@@ -55,12 +54,6 @@ services:
         arguments: ['@sidus_eav_model.attribute_configuration.handler']
         tags:
             - { name: request.param_converter }
-
-    sidus_eav_model.serializer.data.subscriber.subscriber:
-        class: '%sidus_eav_model.serializer.data.subscriber.class%'
-        arguments: ['@serializer']
-        tags:
-            - { name: jms_serializer.event_subscriber }
 
     sidus_eav_model.doctrine.metadata.mapper:
         class: '%sidus_eav_model.doctrine.metadata.mapper.class%'

@@ -8,7 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormInterface;
 
 /**
- * Alternative data form with subform corresponding to attribute's groups
+ * Alternative data form with sub-form corresponding to attribute's groups
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */

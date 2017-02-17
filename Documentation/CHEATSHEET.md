@@ -1,4 +1,4 @@
-Sidus/EAVModelBundle Cheatsheet
+Sidus/EAVModelBundle Cheat-sheet
 ==================================
 
 #### Family configuration reference

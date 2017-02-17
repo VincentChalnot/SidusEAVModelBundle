@@ -54,7 +54,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      */
     public function in(array $array)
     {
-        $parameterName = uniqid('param');
+        $parameterName = $this->generateUniqueId();
 
         return $this->rawDQL("{$this->getColumn()} IN (:{$parameterName})", [
             $parameterName => $array,
@@ -69,7 +69,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      */
     public function notIn(array $array)
     {
-        $parameterName = uniqid('param');
+        $parameterName = $this->generateUniqueId();
 
         return $this->rawDQL("{$this->getColumn()} NOT IN (:{$parameterName})", [
             $parameterName => $array,
@@ -173,8 +173,8 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      */
     public function between($lower, $upper)
     {
-        $lowerParameterName = uniqid('param');
-        $upperParameterName = uniqid('param');
+        $lowerParameterName = $this->generateUniqueId();
+        $upperParameterName = $this->generateUniqueId();
 
         return $this->rawDQL("{$this->getColumn()} BETWEEN :{$lowerParameterName} AND :{$upperParameterName}", [
             $lowerParameterName => $lower,
@@ -191,8 +191,8 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      */
     public function notBetween($lower, $upper)
     {
-        $lowerParameterName = uniqid('param');
-        $upperParameterName = uniqid('param');
+        $lowerParameterName = $this->generateUniqueId();
+        $upperParameterName = $this->generateUniqueId();
 
         return $this->rawDQL("{$this->getColumn()} NOT BETWEEN :{$lowerParameterName} AND :{$upperParameterName}", [
             $lowerParameterName => $lower,
@@ -235,7 +235,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      */
     protected function simpleDQLStatement($operator, $parameter)
     {
-        $parameterName = uniqid('param');
+        $parameterName = $this->generateUniqueId();
 
         return $this->rawDQL("{$this->getColumn()} {$operator} :{$parameterName}", [
             $parameterName => $parameter,
@@ -247,7 +247,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      */
     protected function applyJoin()
     {
-        $this->joinAlias = uniqid('join');
+        $this->joinAlias = $this->generateUniqueId('join');
         $qb = $this->eavQueryBuilder->getQueryBuilder();
         $qb->leftJoin(
             $this->eavQueryBuilder->getAlias().'.values',
@@ -255,5 +255,15 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
             Join::WITH,
             "({$this->joinAlias}.attributeCode = '{$this->attribute->getCode()}')"
         );
+    }
+
+    /**
+     * @param string $prefix
+     *
+     * @return string
+     */
+    protected function generateUniqueId($prefix = 'param')
+    {
+        return uniqid($prefix, false);
     }
 }
