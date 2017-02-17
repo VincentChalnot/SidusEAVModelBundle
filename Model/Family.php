@@ -14,7 +14,6 @@ use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use UnexpectedValueException;
 
 /**
@@ -46,9 +45,6 @@ class Family implements FamilyInterface
 
     /** @var Attribute[] */
     protected $attributes = [];
-
-    /** @var PermissionMapInterface[] */
-    protected $permissions = [];
 
     /** @var Family */
     protected $parent;
@@ -193,22 +189,6 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @return PermissionMapInterface[]
-     */
-    public function getPermissions()
-    {
-        return $this->permissions;
-    }
-
-    /**
-     * @param PermissionMapInterface[] $permissions
-     */
-    public function setPermissions(array $permissions)
-    {
-        $this->permissions = $permissions;
-    }
-
-    /**
      * @return Family
      */
     public function getParent()
@@ -339,6 +319,7 @@ class Family implements FamilyInterface
     {
         $codes = [$this->getCode()];
         foreach ($this->getChildren() as $child) {
+            /** @noinspection SlowArrayOperationsInLoopInspection */
             $codes = array_merge($codes, $child->getMatchingCodes());
         }
 
