@@ -42,6 +42,7 @@ class GenericCompilerPass implements CompilerPassInterface
      * Inject tagged families into configuration handler
      *
      * @param ContainerBuilder $container
+     *
      * @api
      * @throws InvalidArgumentException
      */

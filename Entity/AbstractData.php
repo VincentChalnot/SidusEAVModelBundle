@@ -845,7 +845,9 @@ abstract class AbstractData implements ContextualDataInterface
         $this->checkAttribute($attribute);
         if (!(is_array($dataValues) || $dataValues instanceof \Traversable)) {
             $type = is_object($dataValues) ? get_class($dataValues) : gettype($dataValues);
-            throw new UnexpectedValueException("Value for multiple attribute {$attribute->getCode()} must be an array, '{$type}' given");
+            throw new UnexpectedValueException(
+                "Value for multiple attribute {$attribute->getCode()} must be an array, '{$type}' given"
+            );
         }
         $values = new ArrayCollection();
         $accessor = PropertyAccess::createPropertyAccessor();
@@ -869,7 +871,9 @@ abstract class AbstractData implements ContextualDataInterface
     protected function checkAttribute(AttributeInterface $attribute)
     {
         if (!$this->getFamily()->hasAttribute($attribute->getCode())) {
-            throw new UnexpectedValueException("Attribute {$attribute->getCode()} doesn't exists in family {$this->getFamilyCode()}");
+            throw new UnexpectedValueException(
+                "Attribute {$attribute->getCode()} doesn't exists in family {$this->getFamilyCode()}"
+            );
         }
     }
 

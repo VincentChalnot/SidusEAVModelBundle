@@ -1,0 +1,10 @@
+services:
+    sidus_eav_model.validator.sidus_data:
+        class: Sidus\EAVModelBundle\Validator\Constraints\DataValidator
+        arguments:
+            - '%sidus_eav_model.entity.data.class%'
+            - '@sidus_eav_model.family_configuration.handler'
+            - '@translator'
+            - '@doctrine'
+        tags:
+            - { name: validator.constraint_validator, alias: sidus_data }

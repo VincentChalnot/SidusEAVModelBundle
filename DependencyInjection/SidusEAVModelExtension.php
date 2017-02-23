@@ -55,15 +55,20 @@ class SidusEAVModelExtension extends Extension
 
         $this->createFamilyServices($config, $container);
 
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.yml');
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config/services'));
         $loader->load('attribute_types.yml');
+        $loader->load('configuration.yml');
+        $loader->load('context.yml');
+        $loader->load('entities.yml');
         $loader->load('forms.yml');
+        $loader->load('param_converters.yml');
+        $loader->load('validators.yml');
     }
 
     /**
      * @param array            $config
      * @param ContainerBuilder $container
+     *
      * @throws \Exception
      */
     protected function createFamilyServices(array $config, ContainerBuilder $container)
@@ -84,18 +89,21 @@ class SidusEAVModelExtension extends Extension
      * @param string           $code
      * @param array            $familyConfiguration
      * @param ContainerBuilder $container
+     *
      * @throws BadMethodCallException
      * @throws InvalidArgumentException
      */
     protected function addFamilyServiceDefinition($code, $familyConfiguration, ContainerBuilder $container)
     {
-        $definition = new Definition(new Parameter('sidus_eav_model.family.class'), [
+        $definition = new Definition(
+            new Parameter('sidus_eav_model.family.class'), [
             $code,
             new Reference('sidus_eav_model.attribute_configuration.handler'),
             new Reference('sidus_eav_model.family_configuration.handler'),
             new Reference('sidus_eav_model.context.manager'),
             $familyConfiguration,
-        ]);
+        ]
+        );
         $definition->addMethodCall('setTranslator', [new Reference('translator')]);
         $definition->addTag('sidus.family');
         $container->setDefinition('sidus_eav_model.family.'.$code, $definition);
@@ -105,6 +113,7 @@ class SidusEAVModelExtension extends Extension
      * @param string           $code
      * @param array            $attributeConfiguration
      * @param ContainerBuilder $container
+     *
      * @throws BadMethodCallException
      * @throws InvalidArgumentException
      */

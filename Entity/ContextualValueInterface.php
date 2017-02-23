@@ -16,6 +16,7 @@ interface ContextualValueInterface extends ValueInterface
 
     /**
      * @param string $key
+     *
      * @return mixed
      * @throws \UnexpectedValueException
      */
@@ -24,6 +25,7 @@ interface ContextualValueInterface extends ValueInterface
     /**
      * @param string $key
      * @param mixed  $value
+     *
      * @throws \UnexpectedValueException
      */
     public function setContextValue($key, $value);
@@ -32,6 +34,7 @@ interface ContextualValueInterface extends ValueInterface
      * Context constructor.
      *
      * @param array $context
+     *
      * @throws \UnexpectedValueException
      */
     public function setContext(array $context);

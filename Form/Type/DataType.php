@@ -59,30 +59,36 @@ class DataType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
-            $form = $event->getForm();
-            /** @var DataInterface $data */
-            $data = $event->getData();
+        $builder->addEventListener(
+            FormEvents::PRE_SET_DATA,
+            function (FormEvent $event) use ($options) {
+                $form = $event->getForm();
+                /** @var DataInterface $data */
+                $data = $event->getData();
 
-            if ($data) {
-                $family = $data->getFamily();
-            } else {
-                $family = $options['family'];
-            }
+                if ($data) {
+                    $family = $data->getFamily();
+                } else {
+                    $family = $options['family'];
+                }
 
-            if ($family) {
-                $this->buildValuesForm($form, $family, $data, $options);
-                $this->buildDataForm($form, $family, $data, $options);
-            } else {
-                $this->buildCreateForm($form, $options);
+                if ($family) {
+                    $this->buildValuesForm($form, $family, $data, $options);
+                    $this->buildDataForm($form, $family, $data, $options);
+                } else {
+                    $this->buildCreateForm($form, $options);
+                }
             }
-        });
-        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
-            $data = $event->getData();
-            if ($data instanceof DataInterface) {
-                $data->setUpdatedAt(new \DateTime());
+        );
+        $builder->addEventListener(
+            FormEvents::POST_SUBMIT,
+            function (FormEvent $event) {
+                $data = $event->getData();
+                if ($data instanceof DataInterface) {
+                    $data->setUpdatedAt(new \DateTime());
+                }
             }
-        });
+        );
     }
 
     /**
@@ -141,50 +147,64 @@ class DataType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults([
-            'family' => null,
-            'data_class' => $this->dataClass,
-        ]);
-        $resolver->setNormalizer('family', function (Options $options, $value) {
-            if ($value === null) {
-                return null;
+        $resolver->setDefaults(
+            [
+                'family' => null,
+                'data_class' => $this->dataClass,
+            ]
+        );
+        $resolver->setNormalizer(
+            'family',
+            function (Options $options, $value) {
+                if ($value === null) {
+                    return null;
+                }
+                if ($value instanceof FamilyInterface) {
+                    return $value;
+                }
+
+                return $this->familyConfigurationHandler->getFamily($value);
             }
-            if ($value instanceof FamilyInterface) {
+        );
+        $resolver->setNormalizer(
+            'empty_data',
+            function (Options $options, $value) {
+                if ($options['family'] instanceof FamilyInterface) {
+                    return $options['family']->createData();
+                }
+
                 return $value;
             }
-
-            return $this->familyConfigurationHandler->getFamily($value);
-        });
-        $resolver->setNormalizer('empty_data', function (Options $options, $value) {
-            if ($options['family'] instanceof FamilyInterface) {
-                return $options['family']->createData();
-            }
-
-            return $value;
-        });
-        $resolver->setNormalizer('data_class', function (Options $options, $value) {
-            if ($options['family'] instanceof FamilyInterface) {
-                return $options['family']->getDataClass();
-            }
-
-            return $value;
-        });
-        $resolver->setNormalizer('data', function (Options $options, $value) {
-            if (null === $value) {
-                return null;
-            }
-            if (!$value instanceof DataInterface) {
-                throw new \UnexpectedValueException("The 'data' option should be a DataInterface");
-            }
-            if ($options['family'] instanceof FamilyInterface) {
-                $dataClass = $options['family']->getDataClass();
-                if (!is_a($value, $dataClass)) {
-                    throw new \UnexpectedValueException("The 'data' option should be a {$dataClass}");
+        );
+        $resolver->setNormalizer(
+            'data_class',
+            function (Options $options, $value) {
+                if ($options['family'] instanceof FamilyInterface) {
+                    return $options['family']->getDataClass();
                 }
-            }
 
-            return $value;
-        });
+                return $value;
+            }
+        );
+        $resolver->setNormalizer(
+            'data',
+            function (Options $options, $value) {
+                if (null === $value) {
+                    return null;
+                }
+                if (!$value instanceof DataInterface) {
+                    throw new \UnexpectedValueException("The 'data' option should be a DataInterface");
+                }
+                if ($options['family'] instanceof FamilyInterface) {
+                    $dataClass = $options['family']->getDataClass();
+                    if (!is_a($value, $dataClass)) {
+                        throw new \UnexpectedValueException("The 'data' option should be a {$dataClass}");
+                    }
+                }
+
+                return $value;
+            }
+        );
     }
 
     /**
@@ -276,7 +296,7 @@ class DataType extends AbstractType
         $formOptions['label'] = false; // Removing label
         $collectionOptions = [
             'label' => $label,
-            'type' => $attribute->getType()->getFormType(),
+            'entry_type' => $attribute->getType()->getFormType(),
             'entry_options' => $formOptions,
             'allow_add' => true,
             'allow_delete' => true,

@@ -10,22 +10,16 @@ In your config_dev.yml, add this line at the beginning:
 
 ```yml
 imports:
-    - { resource: '@SidusEAVModelBundle/Resources/config/annotation_generator.yml' }
+    - { resource: '@SidusEAVModelBundle/Resources/config/services/annotation_generator.yml' }
 ```
 
-Create a folder writable by your web server : /app/annotations
-
-Clear your cache and load a page.
-
-The fake classes should be generated in /app/annotations/Sidus/EAV
+The fake classes should be generated in /var/annotations/Sidus/EAV
 
 Theses classes should __NEVER__ be used for real code, only for annotations as they are not valid
 PHP classes, they are only generated in your dev environement and you should not version them.
 
-Add to your .gitignore:
-```
-/app/annotations/*
-```
+The annotations directory must not be ignored by your IDE, for example in PHPStorm you should only
+manually exclude all directories inside /var without including /var/annotations.
 
 #### Usage:
 

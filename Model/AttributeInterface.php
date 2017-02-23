@@ -38,6 +38,7 @@ interface AttributeInterface
 
     /**
      * @param string $code
+     *
      * @return mixed
      */
     public function getOption($code);
@@ -50,6 +51,7 @@ interface AttributeInterface
 
     /**
      * @param mixed $data
+     *
      * @return array
      */
     public function getFormOptions($data = null);
@@ -134,6 +136,7 @@ interface AttributeInterface
     /**
      * @param ContextualValueInterface $value
      * @param array                    $context
+     *
      * @return bool
      */
     public function isContextMatching(ContextualValueInterface $value, array $context);

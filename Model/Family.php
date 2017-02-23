@@ -73,6 +73,7 @@ class Family implements FamilyInterface
      * @param FamilyConfigurationHandler    $familyConfigurationHandler
      * @param ContextManager                $contextManager
      * @param array                         $config
+     *
      * @throws UnexpectedValueException
      * @throws MissingFamilyException
      * @throws AccessException
@@ -226,6 +227,7 @@ class Family implements FamilyInterface
 
     /**
      * @param string $code
+     *
      * @return AttributeInterface
      * @throws UnexpectedValueException
      */
@@ -240,6 +242,7 @@ class Family implements FamilyInterface
 
     /**
      * @param string $code
+     *
      * @return bool
      */
     public function hasAttribute($code)
@@ -362,6 +365,7 @@ class Family implements FamilyInterface
      * @param DataInterface      $data
      * @param AttributeInterface $attribute
      * @param array              $context
+     *
      * @return ValueInterface
      * @throws UnexpectedValueException
      */
@@ -395,7 +399,9 @@ class Family implements FamilyInterface
             throw new \LogicException("Family {$this->getCode()} is not instantiable");
         }
         if ($this->isSingleton()) {
-            throw new \LogicException("Family {$this->getCode()} is a singleton, use the repository to retrieve the instance");
+            throw new \LogicException(
+                "Family {$this->getCode()} is a singleton, use the repository to retrieve the instance"
+            );
         }
         $dataClass = $this->getDataClass();
 

@@ -33,6 +33,7 @@ class AttributeTypeConfigurationHandler
 
     /**
      * @param string $code
+     *
      * @return AttributeTypeInterface
      * @throws UnexpectedValueException
      */

@@ -1,0 +1,11 @@
+services:
+    sidus_eav_model.attribute_type_configuration.handler:
+        class: Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler
+
+    sidus_eav_model.attribute_configuration.handler:
+        class: Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler
+
+    sidus_eav_model.family_configuration.handler:
+        class: Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler
+        tags:
+            - { name: doctrine.event_listener, event: sidus_family_configuration }

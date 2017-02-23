@@ -27,6 +27,7 @@ interface ValueInterface
      * Set attributeCode : Warning ! No check here to whether or not the attribute actually exists
      *
      * @param string $attributeCode
+     *
      * @return ValueInterface
      */
     public function setAttributeCode($attributeCode);

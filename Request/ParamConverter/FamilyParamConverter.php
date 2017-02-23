@@ -53,6 +53,7 @@ class FamilyParamConverter extends AbstractBaseParamConverter
 
     /**
      * @param string $value
+     *
      * @return FamilyInterface
      * @throws MissingFamilyException
      */

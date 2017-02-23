@@ -30,13 +30,13 @@ class AnnotationGenerator implements CacheWarmerInterface
     /**
      * @param FamilyConfigurationHandler $familyConfigurationHandler
      * @param EntityManager              $manager
-     * @param string                     $rootDir
+     * @param string                     $varDir
      */
-    public function __construct(FamilyConfigurationHandler $familyConfigurationHandler, EntityManager $manager, $rootDir)
+    public function __construct(FamilyConfigurationHandler $familyConfigurationHandler, EntityManager $manager, $varDir)
     {
         $this->familyConfigurationHandler = $familyConfigurationHandler;
         $this->manager = $manager;
-        $this->annotationDir = $rootDir.DIRECTORY_SEPARATOR.'annotations';
+        $this->annotationDir = $varDir.DIRECTORY_SEPARATOR.'annotations';
     }
 
     /**
@@ -58,6 +58,7 @@ class AnnotationGenerator implements CacheWarmerInterface
      * Warms up the cache.
      *
      * @param string $cacheDir The cache directory
+     *
      * @throws \RuntimeException
      */
     public function warmUp($cacheDir)
@@ -127,7 +128,9 @@ EOT;
         $setter = 'set'.ucfirst($attribute->getCode());
         if (!$dataClass->hasMethod($setter)) {
             $content .= $this->generateSetAnnotation($family, $attribute);
-            $content .= 'abstract public function set'.ucfirst($attribute->getCode()).'($value, array $context = null);'."\n\n";
+            $content .= 'abstract public function set'.ucfirst(
+                    $attribute->getCode()
+                ).'($value, array $context = null);'."\n\n";
         }
 
         return $content;
@@ -136,6 +139,7 @@ EOT;
     /**
      * @param $filename
      * @param $content
+     *
      * @throws \RuntimeException
      */
     protected function writeFile($filename, $content)
@@ -168,6 +172,7 @@ EOT;
     /**
      * @param FamilyInterface    $family
      * @param AttributeInterface $attribute
+     *
      * @return string
      */
     protected function generateSetAnnotation(FamilyInterface $family, AttributeInterface $attribute)
@@ -188,6 +193,7 @@ EOT;
     /**
      * @param FamilyInterface    $family
      * @param AttributeInterface $attribute
+     *
      * @return string
      */
     protected function getPHPType(FamilyInterface $family, AttributeInterface $attribute)
@@ -267,6 +273,7 @@ EOT;
     /**
      * @param FamilyInterface    $parentFamily
      * @param AttributeInterface $attribute
+     *
      * @return string
      */
     protected function getTargetClass(FamilyInterface $parentFamily, AttributeInterface $attribute)
@@ -293,6 +300,7 @@ EOT;
     /**
      * @param FamilyInterface    $family
      * @param AttributeInterface $attribute
+     *
      * @return bool
      */
     protected function isAttributeInherited(FamilyInterface $family, AttributeInterface $attribute)

@@ -60,6 +60,7 @@ abstract class AbstractBaseParamConverter implements ParamConverterInterface
     /**
      * @param Request        $request
      * @param ParamConverter $configuration
+     *
      * @return string
      */
     protected function getRequestAttributeName(Request $request, ParamConverter $configuration)
@@ -74,6 +75,7 @@ abstract class AbstractBaseParamConverter implements ParamConverterInterface
 
     /**
      * @param mixed $value
+     *
      * @return mixed
      */
     abstract protected function convertValue($value);

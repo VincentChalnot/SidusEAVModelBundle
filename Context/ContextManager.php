@@ -71,6 +71,7 @@ class ContextManager
      * This method is exposed only for command-line applications, please use the context selector form
      *
      * @param array $context
+     *
      * @internal Warning, this method will save the context without any checks on the values
      */
     public function setContext(array $context)
@@ -125,6 +126,7 @@ class ContextManager
      * Global hook checking if context form was submitted because the context form can appear on any page
      *
      * @param GetResponseEvent $event
+     *
      * @throws \InvalidArgumentException
      */
     public function onKernelRequest(GetResponseEvent $event)
@@ -138,7 +140,7 @@ class ContextManager
 
         $form->handleRequest($this->request);
         // Check if form is submitted and redirect to same url in GET
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->setContext($form->getData());
             $redirectResponse = new RedirectResponse($event->getRequest()->getRequestUri());
             $event->setResponse($redirectResponse);

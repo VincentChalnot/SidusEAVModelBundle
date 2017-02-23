@@ -27,9 +27,13 @@ class GroupedDataType extends DataType
             if ($attribute->getGroup()) {
                 $groupName = $attribute->getGroup();
                 if (!$form->has($groupName)) {
-                    $form->add($groupName, FormType::class, [
-                        'inherit_data' => true,
-                    ]);
+                    $form->add(
+                        $groupName,
+                        FormType::class,
+                        [
+                            'inherit_data' => true,
+                        ]
+                    );
                 }
                 $this->addAttribute($form->get($groupName), $attribute, $family, $data, $options);
             } else {

@@ -31,6 +31,7 @@ trait TranslatableTrait
      * @param array        $parameters
      * @param string       $fallback
      * @param bool         $humanizeFallback
+     *
      * @return string
      */
     protected function tryTranslate($tIds, array $parameters = [], $fallback = null, $humanizeFallback = true)
