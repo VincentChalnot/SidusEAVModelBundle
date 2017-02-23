@@ -33,84 +33,101 @@ class FamilySelectorType extends AbstractType
     /**
      * @param FormBuilderInterface $builder
      * @param array                $options
+     *
      * @throws \InvalidArgumentException
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->addModelTransformer(new CallbackTransformer(
-            function ($originalData) {
-                if ($originalData instanceof FamilyInterface) {
-                    $originalData = $originalData->getCode();
-                }
+        $builder->addModelTransformer(
+            new CallbackTransformer(
+                function ($originalData) {
+                    if ($originalData instanceof FamilyInterface) {
+                        $originalData = $originalData->getCode();
+                    }
 
-                return $originalData;
-            },
-            function ($submittedData) {
-                if ($submittedData === null) {
-                    return $submittedData;
-                } elseif ($submittedData instanceof FamilyInterface) {
-                    // Should actually never happen ?
-                    return $submittedData;
+                    return $originalData;
+                },
+                function ($submittedData) {
+                    if ($submittedData === null) {
+                        return $submittedData;
+                    } elseif ($submittedData instanceof FamilyInterface) {
+                        // Should actually never happen ?
+                        return $submittedData;
+                    }
+                    try {
+                        return $this->familyConfigurationHandler->getFamily($submittedData);
+                    } catch (MissingFamilyException $e) {
+                        throw new \InvalidArgumentException($e->getMessage(), 0, $e);
+                    }
                 }
-                try {
-                    return $this->familyConfigurationHandler->getFamily($submittedData);
-                } catch (MissingFamilyException $e) {
-                    throw new \InvalidArgumentException($e->getMessage(), 0, $e);
-                }
-            }
-        ));
+            )
+        );
     }
 
     /**
      * @param OptionsResolver $resolver
+     *
      * @throws \Exception
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults([
-            'choices_as_values' => true,
-            'choices' => null,
-            'families' => null,
-        ]);
+        $resolver->setDefaults(
+            [
+                'choices_as_values' => true,
+                'choices' => null,
+                'families' => null,
+            ]
+        );
 
-        $resolver->setNormalizer('families', function (Options $options, $values) {
-            if (null === $values) {
-                $values = $this->familyConfigurationHandler->getFamilies();
-            }
-            $families = [];
-            foreach ($values as $value) {
-                if (!$value instanceof FamilyInterface) {
-                    $value = $this->familyConfigurationHandler->getFamily($value);
+        $resolver->setNormalizer(
+            'families',
+            function (Options $options, $values) {
+                if (null === $values) {
+                    $values = $this->familyConfigurationHandler->getFamilies();
                 }
-                if ($value->isInstantiable()) {
-                    $families[$value->getCode()] = $value;
+                $families = [];
+                foreach ($values as $value) {
+                    if (!$value instanceof FamilyInterface) {
+                        $value = $this->familyConfigurationHandler->getFamily($value);
+                    }
+                    if ($value->isInstantiable()) {
+                        $families[$value->getCode()] = $value;
+                    }
                 }
-            }
 
-            return $families;
-        });
-        $resolver->setNormalizer('choices_as_values', function (Options $options, $value) {
-            if ($value !== true) {
-                throw new \UnexpectedValueException("'choices_as_values' must be true (and is by default)");
+                return $families;
             }
-
-            return true;
-        });
-        $resolver->setNormalizer('choices', function (Options $options, $value) {
-            if (null !== $value) {
-                throw new \UnexpectedValueException("'choices' options is not supported for family selector, please use 'families' option");
-            }
-            $choices = [];
-            /** @var FamilyInterface[] $families */
-            $families = $options['families'];
-            foreach ($families as $family) {
-                if ($family->isInstantiable()) {
-                    $choices[ucfirst($family)] = $family->getCode();
+        );
+        $resolver->setNormalizer(
+            'choices_as_values',
+            function (Options $options, $value) {
+                if ($value !== true) {
+                    throw new \UnexpectedValueException("'choices_as_values' must be true (and is by default)");
                 }
-            }
 
-            return $choices;
-        });
+                return true;
+            }
+        );
+        $resolver->setNormalizer(
+            'choices',
+            function (Options $options, $value) {
+                if (null !== $value) {
+                    throw new \UnexpectedValueException(
+                        "'choices' options is not supported for family selector, please use 'families' option"
+                    );
+                }
+                $choices = [];
+                /** @var FamilyInterface[] $families */
+                $families = $options['families'];
+                foreach ($families as $family) {
+                    if ($family->isInstantiable()) {
+                        $choices[ucfirst($family)] = $family->getCode();
+                    }
+                }
+
+                return $choices;
+            }
+        );
     }
 
     /**

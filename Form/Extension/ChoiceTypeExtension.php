@@ -21,18 +21,20 @@ class ChoiceTypeExtension extends AbstractTypeExtension
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->addModelTransformer(new CallbackTransformer(
-            function ($toView) {
-                if ($toView instanceof Collection) {
-                    return $toView->toArray();
-                }
+        $builder->addModelTransformer(
+            new CallbackTransformer(
+                function ($toView) {
+                    if ($toView instanceof Collection) {
+                        return $toView->toArray();
+                    }
 
-                return $toView;
-            },
-            function ($toModel) {
-                return $toModel;
-            }
-        ));
+                    return $toView;
+                },
+                function ($toModel) {
+                    return $toModel;
+                }
+            )
+        );
     }
 
     /**

@@ -35,6 +35,7 @@ interface DataInterface
 
     /**
      * @param DataInterface $parent
+     *
      * @return DataInterface|null
      */
     public function setParent(DataInterface $parent = null);
@@ -44,6 +45,7 @@ interface DataInterface
      *
      * @param string $attributeCode
      * @param array  $context
+     *
      * @return mixed
      */
     public function get($attributeCode, array $context = null);
@@ -54,6 +56,7 @@ interface DataInterface
      * @param string $attributeCode
      * @param mixed  $value
      * @param array  $context
+     *
      * @return DataInterface
      */
     public function set($attributeCode, $value, array $context = null);
@@ -63,6 +66,7 @@ interface DataInterface
      *
      * @param AttributeInterface|null $attribute
      * @param array                   $context
+     *
      * @return Collection|ValueInterface[]
      */
     public function getValues(AttributeInterface $attribute = null, array $context = null);
@@ -72,6 +76,7 @@ interface DataInterface
      *
      * @param AttributeInterface $attribute
      * @param array              $context
+     *
      * @return null|ValueInterface
      */
     public function getValue(AttributeInterface $attribute, array $context = null);
@@ -81,6 +86,7 @@ interface DataInterface
      *
      * @param AttributeInterface $attribute
      * @param array              $context
+     *
      * @return mixed
      */
     public function getValueData(AttributeInterface $attribute, array $context = null);
@@ -90,6 +96,7 @@ interface DataInterface
      *
      * @param AttributeInterface $attribute
      * @param array              $context
+     *
      * @return Collection|array
      */
     public function getValuesData(AttributeInterface $attribute = null, array $context = null);
@@ -100,6 +107,7 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param mixed              $dataValue
      * @param array              $context
+     *
      * @return DataInterface
      */
     public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null);
@@ -110,6 +118,7 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param array|\Traversable $dataValues
      * @param array              $context
+     *
      * @return DataInterface
      */
     public function setValuesData(AttributeInterface $attribute, $dataValues, array $context = null);
@@ -117,12 +126,14 @@ interface DataInterface
     /**
      * @param AttributeInterface $attribute
      * @param array              $context
+     *
      * @return DataInterface
      */
     public function emptyValues(AttributeInterface $attribute = null, array $context = null);
 
     /**
      * @param ValueInterface $value
+     *
      * @return DataInterface
      */
     public function addValue(ValueInterface $value);
@@ -133,12 +144,14 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param mixed              $valueData
      * @param array              $context
+     *
      * @return DataInterface
      */
     public function addValueData(AttributeInterface $attribute, $valueData, array $context = null);
 
     /**
      * @param ValueInterface $value
+     *
      * @return DataInterface
      */
     public function removeValue(ValueInterface $value);
@@ -161,6 +174,7 @@ interface DataInterface
     /**
      * @param AttributeInterface $attribute
      * @param array              $context
+     *
      * @return ValueInterface
      */
     public function createValue(AttributeInterface $attribute, array $context = null);
@@ -168,6 +182,7 @@ interface DataInterface
     /**
      * @param AttributeInterface $attribute
      * @param array              $context
+     *
      * @return bool
      */
     public function isEmpty(AttributeInterface $attribute, array $context = null);

@@ -39,12 +39,14 @@ interface FamilyInterface
 
     /**
      * @param string $code
+     *
      * @return AttributeInterface
      */
     public function getAttribute($code);
 
     /**
      * @param string $code
+     *
      * @return bool
      */
     public function hasAttribute($code);
@@ -73,6 +75,7 @@ interface FamilyInterface
      * @param DataInterface      $data
      * @param AttributeInterface $attribute
      * @param array              $context
+     *
      * @return ValueInterface
      */
     public function createValue(DataInterface $data, AttributeInterface $attribute, array $context = null);

@@ -41,6 +41,7 @@ class FamilyConfigurationHandler
 
     /**
      * @param string $code
+     *
      * @return FamilyInterface
      * @throws MissingFamilyException
      */
@@ -55,6 +56,7 @@ class FamilyConfigurationHandler
 
     /**
      * @param string $code
+     *
      * @return bool
      */
     public function hasFamily($code)

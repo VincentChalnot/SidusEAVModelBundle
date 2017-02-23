@@ -18,20 +18,26 @@ class SidusEAVModelBundle extends Bundle
      */
     public function build(ContainerBuilder $container)
     {
-        $container->addCompilerPass(new GenericCompilerPass(
-            'sidus_eav_model.attribute_type_configuration.handler',
-            'sidus.attribute_type',
-            'addType'
-        ));
-        $container->addCompilerPass(new GenericCompilerPass(
-            'sidus_eav_model.attribute_configuration.handler',
-            'sidus.attribute',
-            'addAttribute'
-        ));
-        $container->addCompilerPass(new GenericCompilerPass(
-            'sidus_eav_model.family_configuration.handler',
-            'sidus.family',
-            'addFamily'
-        ));
+        $container->addCompilerPass(
+            new GenericCompilerPass(
+                'sidus_eav_model.attribute_type_configuration.handler',
+                'sidus.attribute_type',
+                'addType'
+            )
+        );
+        $container->addCompilerPass(
+            new GenericCompilerPass(
+                'sidus_eav_model.attribute_configuration.handler',
+                'sidus.attribute',
+                'addAttribute'
+            )
+        );
+        $container->addCompilerPass(
+            new GenericCompilerPass(
+                'sidus_eav_model.family_configuration.handler',
+                'sidus.family',
+                'addFamily'
+            )
+        );
     }
 }

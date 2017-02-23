@@ -1,0 +1,9 @@
+services:
+    sidus_eav_model.context.manager:
+        class: Sidus\EAVModelBundle\Context\ContextManager
+        arguments:
+            - '@form.factory'
+            - '%sidus_eav_model.context.form_type%'
+            - '%sidus_eav_model.context.default_context%'
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 10 }

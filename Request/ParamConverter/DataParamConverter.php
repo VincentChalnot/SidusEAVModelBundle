@@ -2,6 +2,7 @@
 
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
@@ -18,13 +19,12 @@ class DataParamConverter extends AbstractBaseParamConverter
     protected $dataRepository;
 
     /**
-     * DataParamConverter constructor.
-     *
-     * @param DataRepository $dataRepository
+     * @param string   $dataClass
+     * @param Registry $doctrine
      */
-    public function __construct(DataRepository $dataRepository)
+    public function __construct($dataClass, Registry $doctrine)
     {
-        $this->dataRepository = $dataRepository;
+        $this->dataRepository = $doctrine->getRepository($dataClass);
     }
 
     /**
@@ -73,6 +73,7 @@ class DataParamConverter extends AbstractBaseParamConverter
      *
      * @param Request        $request
      * @param ParamConverter $configuration
+     *
      * @return string
      */
     protected function getRequestAttributeName(Request $request, ParamConverter $configuration)

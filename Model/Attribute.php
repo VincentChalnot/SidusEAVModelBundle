@@ -63,9 +63,10 @@ class Attribute implements AttributeInterface
     protected $default;
 
     /**
-     * @param string                            $code
+     * @param string $code
      * @param AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler
-     * @param array                             $configuration
+     * @param array $configuration
+     *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
@@ -116,6 +117,7 @@ class Attribute implements AttributeInterface
 
     /**
      * @param string $code
+     *
      * @return mixed
      */
     public function getOption($code)
@@ -146,6 +148,7 @@ class Attribute implements AttributeInterface
 
     /**
      * @param mixed $data
+     *
      * @return array
      */
     public function getFormOptions($data = null)
@@ -328,6 +331,7 @@ class Attribute implements AttributeInterface
 
     /**
      * @param string $label
+     *
      * @return Attribute
      */
     public function setLabel($label)
@@ -364,6 +368,7 @@ class Attribute implements AttributeInterface
     /**
      * @param ContextualValueInterface $value
      * @param array                    $context
+     *
      * @return bool
      * @throws UnexpectedValueException
      */
@@ -392,6 +397,7 @@ class Attribute implements AttributeInterface
 
     /**
      * @param mixed $default
+     *
      * @return Attribute
      */
     public function setDefault($default)
@@ -409,14 +415,20 @@ class Attribute implements AttributeInterface
         $default = $this->getDefault();
         if ($this->isCollection()) {
             if ($this->isUnique()) {
-                throw new UnexpectedValueException("Attribute {$this->getCode()} cannot be multiple and unique at the same time");
+                throw new UnexpectedValueException(
+                    "Attribute {$this->getCode()} cannot be multiple and unique at the same time"
+                );
             }
             if (null !== $default && !(is_array($default) || $default instanceof \Traversable)) {
-                throw new UnexpectedValueException("Attribute {$this->getCode()} is multiple and therefore should have an array of values as default option");
+                throw new UnexpectedValueException(
+                    "Attribute {$this->getCode()} is multiple and therefore should have an array of values as default option"
+                );
             }
         }
         if ($default !== null && ($this->getType()->isRelation() || $this->getType()->isEmbedded())) {
-            throw new UnexpectedValueException("Attribute {$this->getCode()} is a relation to an other entity, it doesn't support default values in configuration");
+            throw new UnexpectedValueException(
+                "Attribute {$this->getCode()} is a relation to an other entity, it doesn't support default values in configuration"
+            );
         }
     }
 }

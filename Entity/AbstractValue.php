@@ -37,6 +37,13 @@ abstract class AbstractValue implements ContextualValueInterface
     protected $dataValue;
 
     /**
+     * @var DataInterface
+     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", cascade={"persist"}, fetch="EAGER")
+     * @ORM\JoinColumn(name="constrained_data_value_id", referencedColumnName="id", nullable=true)
+     */
+    protected $constrainedDataValue;
+
+    /**
      * @var string
      * @ORM\Column(name="attribute_code", type="string", length=255)
      */
@@ -298,6 +305,26 @@ abstract class AbstractValue implements ContextualValueInterface
     public function setDataValue(DataInterface $dataValue = null)
     {
         $this->dataValue = $dataValue;
+
+        return $this;
+    }
+
+    /**
+     * @return DataInterface
+     */
+    public function getConstrainedDataValue()
+    {
+        return $this->constrainedDataValue;
+    }
+
+    /**
+     * @param DataInterface $constrainedDataValue
+     *
+     * @return AbstractValue
+     */
+    public function setConstrainedDataValue(DataInterface $constrainedDataValue = null)
+    {
+        $this->constrainedDataValue = $constrainedDataValue;
 
         return $this;
     }

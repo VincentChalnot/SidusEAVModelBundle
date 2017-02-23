@@ -56,9 +56,12 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     {
         $parameterName = $this->generateUniqueId();
 
-        return $this->rawDQL("{$this->getColumn()} IN (:{$parameterName})", [
-            $parameterName => $array,
-        ]);
+        return $this->rawDQL(
+            "{$this->getColumn()} IN (:{$parameterName})",
+            [
+                $parameterName => $array,
+            ]
+        );
     }
 
     /**
@@ -71,9 +74,12 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     {
         $parameterName = $this->generateUniqueId();
 
-        return $this->rawDQL("{$this->getColumn()} NOT IN (:{$parameterName})", [
-            $parameterName => $array,
-        ]);
+        return $this->rawDQL(
+            "{$this->getColumn()} NOT IN (:{$parameterName})",
+            [
+                $parameterName => $array,
+            ]
+        );
     }
 
     /**
@@ -176,10 +182,13 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
         $lowerParameterName = $this->generateUniqueId();
         $upperParameterName = $this->generateUniqueId();
 
-        return $this->rawDQL("{$this->getColumn()} BETWEEN :{$lowerParameterName} AND :{$upperParameterName}", [
-            $lowerParameterName => $lower,
-            $upperParameterName => $upper,
-        ]);
+        return $this->rawDQL(
+            "{$this->getColumn()} BETWEEN :{$lowerParameterName} AND :{$upperParameterName}",
+            [
+                $lowerParameterName => $lower,
+                $upperParameterName => $upper,
+            ]
+        );
     }
 
     /**
@@ -194,10 +203,13 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
         $lowerParameterName = $this->generateUniqueId();
         $upperParameterName = $this->generateUniqueId();
 
-        return $this->rawDQL("{$this->getColumn()} NOT BETWEEN :{$lowerParameterName} AND :{$upperParameterName}", [
-            $lowerParameterName => $lower,
-            $upperParameterName => $upper,
-        ]);
+        return $this->rawDQL(
+            "{$this->getColumn()} NOT BETWEEN :{$lowerParameterName} AND :{$upperParameterName}",
+            [
+                $lowerParameterName => $lower,
+                $upperParameterName => $upper,
+            ]
+        );
     }
 
     /**
@@ -237,9 +249,12 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     {
         $parameterName = $this->generateUniqueId();
 
-        return $this->rawDQL("{$this->getColumn()} {$operator} :{$parameterName}", [
-            $parameterName => $parameter,
-        ]);
+        return $this->rawDQL(
+            "{$this->getColumn()} {$operator} :{$parameterName}",
+            [
+                $parameterName => $parameter,
+            ]
+        );
     }
 
     /**

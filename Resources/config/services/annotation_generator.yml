@@ -1,12 +1,9 @@
-parameters:
-    sidus_eav_model.annotation.generator.class: Sidus\EAVModelBundle\Cache\AnnotationGenerator
-
 services:
     sidus_eav_model.annotation.generator:
-        class: '%sidus_eav_model.annotation.generator.class%'
+        class: Sidus\EAVModelBundle\Cache\AnnotationGenerator
         arguments:
             - '@sidus_eav_model.family_configuration.handler'
             - '@doctrine.orm.entity_manager'
-            - '%kernel.root_dir%'
+            - '%kernel.root_dir%/../var'
         tags:
             - { name: kernel.cache_warmer, priority: 0 }

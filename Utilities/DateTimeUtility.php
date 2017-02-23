@@ -18,6 +18,7 @@ class DateTimeUtility
      *
      * @param DateTime|int|string $data
      * @param bool                $allowNull
+     *
      * @return DateTime
      * @throws UnexpectedValueException
      */
@@ -47,7 +48,9 @@ class DateTimeUtility
             $date = DateTime::createFromFormat(DateTime::ISO8601, $data);
         }
         if (!$date) {
-            throw new \UnexpectedValueException("Unable to parse DateTime value: '{$data}' expecting DateTime or timestamp");
+            throw new \UnexpectedValueException(
+                "Unable to parse DateTime value: '{$data}' expecting DateTime or timestamp"
+            );
         }
 
         return $date;

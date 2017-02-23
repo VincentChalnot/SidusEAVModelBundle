@@ -30,15 +30,18 @@ class SimpleDataSelectorType extends AbstractType
 
     /**
      * @param OptionsResolver $resolver
+     *
      * @throws \Exception
      */
     public function configureOptions(OptionsResolver $resolver)
     {
         $this->fixDoctrineQueryBuilderNormalizer($resolver);
 
-        $resolver->setRequired([
-            'family',
-        ]);
+        $resolver->setRequired(
+            [
+                'family',
+            ]
+        );
 
         $queryBuilder = function (EntityRepository $repository, $options) {
             $qb = $repository->createQueryBuilder('d');
@@ -53,10 +56,12 @@ class SimpleDataSelectorType extends AbstractType
             return $qb;
         };
 
-        $resolver->setDefaults([
-            'class' => $this->dataClass,
-            'query_builder' => $queryBuilder,
-        ]);
+        $resolver->setDefaults(
+            [
+                'class' => $this->dataClass,
+                'query_builder' => $queryBuilder,
+            ]
+        );
     }
 
     /**
@@ -80,6 +85,7 @@ class SimpleDataSelectorType extends AbstractType
      * Taken directly from \Symfony\Bridge\Doctrine\Form\Type\EntityType
      *
      * @param OptionsResolver $resolver
+     *
      * @throws \Exception
      */
     protected function fixDoctrineQueryBuilderNormalizer(OptionsResolver $resolver)
