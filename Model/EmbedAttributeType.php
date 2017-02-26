@@ -7,21 +7,22 @@ namespace Sidus\EAVModelBundle\Model;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class EmbedAttributeType extends AttributeType
+class EmbedAttributeType extends RelationAttributeType
 {
     /**
-     * AttributeType constructor.
-     *
-     * @param string $code
-     * @param string $databaseType
-     * @param string $formType
-     * @param array  $formOptions
+     * @return bool
      */
-    public function __construct($code, $databaseType, $formType, array $formOptions = [])
+    public function isRelation()
     {
-        parent::__construct($code, $databaseType, $formType, $formOptions);
-        $this->setEmbedded(true);
-        $this->setRelation(false);
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEmbedded()
+    {
+        return true;
     }
 
     /**

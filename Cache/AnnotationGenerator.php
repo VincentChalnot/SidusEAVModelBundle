@@ -222,10 +222,9 @@ EOT;
             return $type;
         }
         if ('data' === $type) {
-            $formOptions = $attribute->getFormOptions();
             // Simple case
-            if (array_key_exists('family', $formOptions)) {
-                $type = $formOptions['family'];
+            if ($attribute->getFamily()) {
+                $type = $attribute->getFamily();
                 if ($attribute->isCollection()) {
                     $type .= '[]';
                 }
@@ -234,8 +233,8 @@ EOT;
             }
 
             // Multiple families (some case)
-            if (array_key_exists('families', $formOptions)) {
-                $types = $formOptions['families'];
+            if ($attribute->getFamilies()) {
+                $types = $attribute->getFamilies();
                 if (!is_array($types)) {
                     return 'mixed'; // Shouldn't happen
                 }

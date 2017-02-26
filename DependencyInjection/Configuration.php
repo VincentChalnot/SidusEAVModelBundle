@@ -3,6 +3,7 @@
 namespace Sidus\EAVModelBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
+use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -21,40 +22,44 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('sidus_eav_model');
+        /** @var NodeBuilder $attributeDefinition */
         $attributeDefinition = $rootNode
             ->children()
-            ->scalarNode('data_class')->isRequired()->end()
-            ->scalarNode('value_class')->isRequired()->end()
-            ->scalarNode('collection_type')->defaultValue('collection')->end()
-            ->scalarNode('context_form_type')->defaultNull()->end()
-            ->variableNode('default_context')->end()
-            ->arrayNode('global_context_mask')
-            ->prototype('scalar')->end()
-            ->end()
-            ->arrayNode('attributes')
-            ->useAttributeAsKey('code')
-            ->prototype('array')
-            ->performNoDeepMerging()
-            ->cannotBeOverwritten()
-            ->children();
+                ->scalarNode('data_class')->isRequired()->end()
+                ->scalarNode('value_class')->isRequired()->end()
+                ->scalarNode('collection_type')->defaultValue('collection')->end()
+                ->scalarNode('context_form_type')->defaultNull()->end()
+                ->variableNode('default_context')->end()
+                ->arrayNode('global_context_mask')
+                    ->prototype('scalar')->end()
+                ->end()
+                ->arrayNode('attributes')
+                    ->useAttributeAsKey('code')
+                    ->prototype('array')
+                        ->performNoDeepMerging()
+                        ->cannotBeOverwritten()
+                        ->children();
 
         $this->appendAttributeDefinition($attributeDefinition);
 
-        $familyDefinition = $attributeDefinition->end()
-            ->end()
-            ->end()
-            ->arrayNode('families')
-            ->useAttributeAsKey('code')
-            ->prototype('array')
-            ->performNoDeepMerging()
-            ->cannotBeOverwritten()
-            ->children();
+        /** @var NodeBuilder $familyDefinition */
+        $familyDefinition = $attributeDefinition
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('families')
+                    ->useAttributeAsKey('code')
+                    ->prototype('array')
+                        ->performNoDeepMerging()
+                        ->cannotBeOverwritten()
+                        ->children();
 
         $this->appendFamilyDefinition($familyDefinition);
 
-        $familyDefinition->end()
-            ->end()
-            ->end()
+        $familyDefinition
+                        ->end()
+                    ->end()
+                ->end()
             ->end();
 
         return $treeBuilder;
@@ -67,8 +72,13 @@ class Configuration implements ConfigurationInterface
     protected function appendAttributeDefinition(NodeBuilder $attributeDefinition)
     {
         $attributeDefinition
-            ->scalarNode('type')->defaultValue('string')->end()
+            ->scalarNode('type')->end()
             ->scalarNode('group')->end()
+            ->scalarNode('family')->end()
+            ->scalarNode('form_type')->end()
+            ->arrayNode('families')
+                ->prototype('scalar')->end()
+            ->end()
             ->variableNode('options')->end()
             ->variableNode('form_options')->end()
             ->variableNode('view_options')->end()
@@ -78,7 +88,7 @@ class Configuration implements ConfigurationInterface
             ->booleanNode('unique')->defaultValue(false)->end()
             ->booleanNode('multiple')->defaultValue(false)->end()
             ->arrayNode('context_mask')
-            ->prototype('scalar')->end()
+                ->prototype('scalar')->end()
             ->end();
     }
 
@@ -88,17 +98,29 @@ class Configuration implements ConfigurationInterface
      */
     protected function appendFamilyDefinition(NodeBuilder $familyDefinition)
     {
-        $familyDefinition
+        /** @var NodeBuilder $attributeDefinition */
+        $attributeDefinition = $familyDefinition
             ->scalarNode('data_class')->end()
             ->scalarNode('value_class')->end()
             ->scalarNode('label')->defaultNull()->end()
+            ->variableNode('options')->end()
             ->scalarNode('attributeAsLabel')->defaultNull()->end()
             ->scalarNode('attributeAsIdentifier')->defaultNull()->end()
             ->scalarNode('parent')->end()
             ->booleanNode('singleton')->defaultValue(false)->end()
             ->booleanNode('instantiable')->defaultValue(true)->end()
             ->arrayNode('attributes')
-            ->prototype('scalar')->end()
+                ->useAttributeAsKey('code')
+                ->prototype('array')
+                    ->performNoDeepMerging()
+                    ->cannotBeOverwritten()
+                    ->children();
+
+        $this->appendAttributeDefinition($attributeDefinition);
+
+        $attributeDefinition
+                    ->end()
+                ->end()
             ->end();
     }
 }

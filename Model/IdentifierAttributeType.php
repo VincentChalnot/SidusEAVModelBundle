@@ -21,7 +21,6 @@ class IdentifierAttributeType extends AttributeType
             throw new \UnexpectedValueException($m);
         }
         parent::__construct($code, $databaseType, $formType, $formOptions);
-        $this->isRelation = false;
     }
 
     /**

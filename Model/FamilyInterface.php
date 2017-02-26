@@ -104,4 +104,9 @@ interface FamilyInterface
      * @return array
      */
     public function getContext();
+
+    /**
+     * @return array
+     */
+    public function getOptions();
 }

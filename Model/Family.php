@@ -55,6 +55,9 @@ class Family implements FamilyInterface
     /** @var bool */
     protected $singleton;
 
+    /** @var array */
+    protected $options = [];
+
     /** @var Family[] */
     protected $children;
 
@@ -97,9 +100,7 @@ class Family implements FamilyInterface
         }
         unset($config['parent']);
 
-        foreach ((array) $config['attributes'] as $attribute) {
-            $this->attributes[$attribute] = $attributeConfigurationHandler->getAttribute($attribute);
-        }
+        $this->buildAttributes($attributeConfigurationHandler, $config);
         unset($config['attributes']);
 
         if (!empty($config['attributeAsLabel'])) {
@@ -433,6 +434,22 @@ class Family implements FamilyInterface
     }
 
     /**
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
+     * @param array $options
+     */
+    public function setOptions(array $options)
+    {
+        $this->options = $options;
+    }
+
+    /**
      * @param FamilyInterface $parent
      */
     protected function copyFromFamily(FamilyInterface $parent)
@@ -444,5 +461,22 @@ class Family implements FamilyInterface
         $this->attributeAsIdentifier = $parent->getAttributeAsIdentifier();
         $this->valueClass = $parent->getValueClass();
         $this->dataClass = $parent->getDataClass();
+    }
+
+    protected function buildAttributes(AttributeConfigurationHandler $attributeConfigurationHandler, array $config)
+    {
+        foreach ((array) $config['attributes'] as $attributeCode => $attributeConfig) {
+            if ($attributeConfigurationHandler->hasAttribute($attributeCode)) {
+                // If attribute already exists, merge family config into clone
+                $attribute = clone $attributeConfigurationHandler->getAttribute($attributeCode);
+                if (null !== $attributeConfig) {
+                    $attribute->mergeConfiguration($attributeConfig);
+                }
+            } else {
+                // If attribute doesn't exists, create it locally
+                $attribute = $attributeConfigurationHandler->createAttribute($attributeCode, $attributeConfig);
+            }
+            $this->attributes[$attributeCode] = $attribute;
+        }
     }
 }

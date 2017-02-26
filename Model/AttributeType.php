@@ -9,21 +9,6 @@ namespace Sidus\EAVModelBundle\Model;
  */
 class AttributeType implements AttributeTypeInterface
 {
-    /**
-     * Not exactly scalar types as it includes also Date/Time types but exclude all relationships
-     *
-     * @var array
-     */
-    protected static $scalarDatabaseTypes = [
-        'boolValue',
-        'integerValue',
-        'decimalValue',
-        'dateValue',
-        'datetimeValue',
-        'stringValue',
-        'textValue',
-    ];
-
     /** @var string */
     protected $code;
 
@@ -32,12 +17,6 @@ class AttributeType implements AttributeTypeInterface
 
     /** @var string */
     protected $formType;
-
-    /** @var bool */
-    protected $isEmbedded = false;
-
-    /** @var bool */
-    protected $isRelation = false;
 
     /** @var array */
     protected $formOptions = [];
@@ -56,9 +35,6 @@ class AttributeType implements AttributeTypeInterface
         $this->databaseType = $databaseType;
         $this->formType = $formType;
         $this->formOptions = $formOptions;
-        if (!in_array($this->databaseType, $this::$scalarDatabaseTypes, true)) {
-            $this->isRelation = true;
-        }
     }
 
     /**
@@ -86,22 +62,6 @@ class AttributeType implements AttributeTypeInterface
     }
 
     /**
-     * @return boolean
-     */
-    public function isEmbedded()
-    {
-        return $this->isEmbedded;
-    }
-
-    /**
-     * @param boolean $isEmbedded
-     */
-    public function setEmbedded($isEmbedded)
-    {
-        $this->isEmbedded = $isEmbedded;
-    }
-
-    /**
      * @param AttributeInterface $attribute
      */
     public function setAttributeDefaults(AttributeInterface $attribute)
@@ -109,11 +69,12 @@ class AttributeType implements AttributeTypeInterface
     }
 
     /**
-     * @param mixed $data
+     * @param AttributeInterface $attribute
+     * @param mixed              $data
      *
      * @return array
      */
-    public function getFormOptions($data = null)
+    public function getFormOptions(AttributeInterface $attribute, $data = null)
     {
         return $this->formOptions;
     }
@@ -127,18 +88,18 @@ class AttributeType implements AttributeTypeInterface
     }
 
     /**
+     * @return boolean
+     */
+    public function isEmbedded()
+    {
+        return false;
+    }
+
+    /**
      * @return bool
      */
     public function isRelation()
     {
-        return $this->isRelation;
-    }
-
-    /**
-     * @param boolean $isRelation
-     */
-    public function setRelation($isRelation)
-    {
-        $this->isRelation = $isRelation;
+        return false;
     }
 }

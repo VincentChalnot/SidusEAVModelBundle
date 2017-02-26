@@ -20,6 +20,9 @@ class Attribute implements AttributeInterface
 {
     use TranslatableTrait;
 
+    /** @var AttributeTypeConfigurationHandler */
+    protected $attributeTypeConfigurationHandler;
+
     /** @var string */
     protected $code;
 
@@ -30,10 +33,19 @@ class Attribute implements AttributeInterface
     protected $type;
 
     /** @var string */
+    protected $family;
+
+    /** @var array */
+    protected $families;
+
+    /** @var string */
     protected $group;
 
     /** @var array */
     protected $options = [];
+
+    /** @var string */
+    protected $formType;
 
     /** @var array */
     protected $formOptions = [];
@@ -45,16 +57,16 @@ class Attribute implements AttributeInterface
     protected $validationRules = [];
 
     /** @var bool */
-    protected $isRequired = false;
+    protected $required = false;
 
     /** @var bool */
-    protected $isUnique = false;
+    protected $unique = false;
 
     /** @var bool */
-    protected $isMultiple = false;
+    protected $multiple = false;
 
     /** @var bool */
-    protected $isCollection; // Important to left null
+    protected $collection; // Important to left null
 
     /** @var array */
     protected $contextMask = [];
@@ -63,14 +75,15 @@ class Attribute implements AttributeInterface
     protected $default;
 
     /**
-     * @param string $code
+     * @param string                            $code
      * @param AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler
-     * @param array $configuration
+     * @param array                             $configuration
      *
      * @throws UnexpectedValueException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
+     * @throws \LogicException
      */
     public function __construct(
         $code,
@@ -78,17 +91,12 @@ class Attribute implements AttributeInterface
         array $configuration = null
     ) {
         $this->code = $code;
-        $this->type = $attributeTypeConfigurationHandler->getType($configuration['type']);
-        unset($configuration['type']);
-
-        $accessor = PropertyAccess::createPropertyAccessor();
-        foreach ($configuration as $key => $value) {
-            $accessor->setValue($this, $key, $value);
+        $this->attributeTypeConfigurationHandler = $attributeTypeConfigurationHandler;
+        if (!isset($configuration['type'])) {
+            $configuration['type'] = 'string';
         }
 
-        $this->type->setAttributeDefaults($this); // Allow attribute type service to configure attribute
-
-        $this->checkConflicts();
+        $this->mergeConfiguration($configuration);
     }
 
     /**
@@ -105,6 +113,38 @@ class Attribute implements AttributeInterface
     public function getType()
     {
         return $this->type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFamily()
+    {
+        return $this->family;
+    }
+
+    /**
+     * @param string $family
+     */
+    public function setFamily($family)
+    {
+        $this->family = $family;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFamilies()
+    {
+        return $this->families;
+    }
+
+    /**
+     * @param array $families
+     */
+    public function setFamilies($families)
+    {
+        $this->families = $families;
     }
 
     /**
@@ -147,6 +187,26 @@ class Attribute implements AttributeInterface
     }
 
     /**
+     * @return string
+     */
+    public function getFormType()
+    {
+        if (null === $this->formType) {
+            return $this->getType()->getFormType();
+        }
+
+        return $this->formType;
+    }
+
+    /**
+     * @param string $formType
+     */
+    public function setFormType($formType)
+    {
+        $this->formType = $formType;
+    }
+
+    /**
      * @param mixed $data
      *
      * @return array
@@ -157,7 +217,7 @@ class Attribute implements AttributeInterface
         if (!$this->isCollection()) {
             $defaultOptions = ['required' => $this->isRequired()];
         }
-        $typeOptions = $this->getType()->getFormOptions($data);
+        $typeOptions = $this->getType()->getFormOptions($this, $data);
 
         return array_merge($defaultOptions, $typeOptions, $this->formOptions);
     }
@@ -210,7 +270,7 @@ class Attribute implements AttributeInterface
      */
     public function isRequired()
     {
-        return $this->isRequired;
+        return $this->required;
     }
 
     /**
@@ -218,7 +278,7 @@ class Attribute implements AttributeInterface
      */
     public function setRequired($required)
     {
-        $this->isRequired = $required;
+        $this->required = $required;
     }
 
     /**
@@ -226,7 +286,7 @@ class Attribute implements AttributeInterface
      */
     public function isUnique()
     {
-        return $this->isUnique;
+        return $this->unique;
     }
 
     /**
@@ -234,7 +294,7 @@ class Attribute implements AttributeInterface
      */
     public function setUnique($unique)
     {
-        $this->isUnique = $unique;
+        $this->unique = $unique;
     }
 
     /**
@@ -266,7 +326,7 @@ class Attribute implements AttributeInterface
      */
     public function isMultiple()
     {
-        return $this->isMultiple;
+        return $this->multiple;
     }
 
     /**
@@ -276,7 +336,7 @@ class Attribute implements AttributeInterface
      */
     public function setMultiple($multiple)
     {
-        $this->isMultiple = $multiple;
+        $this->multiple = $multiple;
     }
 
     /**
@@ -284,11 +344,11 @@ class Attribute implements AttributeInterface
      */
     public function isCollection()
     {
-        if ($this->isCollection === null) {
+        if ($this->collection === null) {
             return $this->isMultiple();
         }
 
-        return $this->isCollection;
+        return $this->collection;
     }
 
     /**
@@ -298,7 +358,7 @@ class Attribute implements AttributeInterface
      */
     public function setCollection($collection)
     {
-        $this->isCollection = $collection;
+        $this->collection = $collection;
     }
 
     /**
@@ -430,5 +490,37 @@ class Attribute implements AttributeInterface
                 "Attribute {$this->getCode()} is a relation to an other entity, it doesn't support default values in configuration"
             );
         }
+    }
+
+    /**
+     * @param array $configuration
+     *
+     * @throws \Symfony\Component\PropertyAccess\Exception\AccessException
+     * @throws \UnexpectedValueException
+     * @throws \Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException
+     * @throws \Symfony\Component\PropertyAccess\Exception\InvalidArgumentException
+     * @throws \LogicException
+     */
+    public function mergeConfiguration(array $configuration)
+    {
+        if (isset($configuration['type'])) {
+            $newType = $this->attributeTypeConfigurationHandler->getType($configuration['type']);
+            if ($this->type && $this->type->getDatabaseType() !== $newType->getDatabaseType()) {
+                $e = "The attribute '{$this->code}' cannot be overridden with a new attribute type that don't match ";
+                $e .= "the database type '{$this->type->getDatabaseType()}'";
+                throw new \LogicException($e);
+            }
+            $this->type = $newType;
+            unset($configuration['type']);
+        }
+
+        $accessor = PropertyAccess::createPropertyAccessor();
+        foreach ($configuration as $key => $value) {
+            $accessor->setValue($this, $key, $value);
+        }
+
+        $this->type->setAttributeDefaults($this); // Allow attribute type service to configure attribute
+
+        $this->checkConflicts();
     }
 }
