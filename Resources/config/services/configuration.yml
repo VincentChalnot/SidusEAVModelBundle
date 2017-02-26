@@ -4,6 +4,11 @@ services:
 
     sidus_eav_model.attribute_configuration.handler:
         class: Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler
+        arguments:
+            - '%sidus_eav_model.attribute.class%'
+            - '%sidus_eav_model.context.global_mask%'
+            - '@sidus_eav_model.attribute_type_configuration.handler'
+            - '@translator'
 
     sidus_eav_model.family_configuration.handler:
         class: Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler

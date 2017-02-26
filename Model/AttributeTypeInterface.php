@@ -40,9 +40,10 @@ interface AttributeTypeInterface
     public function setAttributeDefaults(AttributeInterface $attribute);
 
     /**
-     * @param mixed $data
+     * @param AttributeInterface $attribute
+     * @param mixed              $data
      *
      * @return array
      */
-    public function getFormOptions($data = null);
+    public function getFormOptions(AttributeInterface $attribute, $data = null);
 }

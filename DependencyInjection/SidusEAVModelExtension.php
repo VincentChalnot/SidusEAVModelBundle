@@ -26,10 +26,10 @@ class SidusEAVModelExtension extends Extension
     /**
      * Generate automatically services for attributes and families from configuration
      *
-     * {@inheritdoc}
+     * @param array            $configs
+     * @param ContainerBuilder $container
+     *
      * @throws \Exception
-     * @throws BadMethodCallException
-     * @throws InvalidArgumentException
      */
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -42,19 +42,14 @@ class SidusEAVModelExtension extends Extension
         $container->setParameter('sidus_eav_model.form.collection_type', $config['collection_type']);
         $container->setParameter('sidus_eav_model.context.form_type', $config['context_form_type']);
         $container->setParameter('sidus_eav_model.context.default_context', $config['default_context']);
+        $container->setParameter('sidus_eav_model.context.global_mask', $config['global_context_mask']);
 
         // Injecting custom doctrine type
         $doctrineTypes = $container->getParameter('doctrine.dbal.connection_factory.types');
         $doctrineTypes['sidus_family'] = ['class' => FamilyType::class, 'commented' => true];
         $container->setParameter('doctrine.dbal.connection_factory.types', $doctrineTypes);
 
-        // Automatically declare a service for each attribute configured
-        foreach ((array) $config['attributes'] as $code => $attributeConfiguration) {
-            $this->addAttributeServiceDefinition($code, $attributeConfiguration, $container);
-        }
-
-        $this->createFamilyServices($config, $container);
-
+        // Load services config
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config/services'));
         $loader->load('attribute_types.yml');
         $loader->load('configuration.yml');
@@ -63,6 +58,12 @@ class SidusEAVModelExtension extends Extension
         $loader->load('forms.yml');
         $loader->load('param_converters.yml');
         $loader->load('validators.yml');
+
+        // Add global attribute configuration to handler
+        $attributeConfiguration = $container->getDefinition('sidus_eav_model.attribute_configuration.handler');
+        $attributeConfiguration->addMethodCall('parseGlobalConfig', [$config['attributes']]);
+
+        $this->createFamilyServices($config, $container);
     }
 
     /**
@@ -97,41 +98,15 @@ class SidusEAVModelExtension extends Extension
     {
         $definition = new Definition(
             new Parameter('sidus_eav_model.family.class'), [
-            $code,
-            new Reference('sidus_eav_model.attribute_configuration.handler'),
-            new Reference('sidus_eav_model.family_configuration.handler'),
-            new Reference('sidus_eav_model.context.manager'),
-            $familyConfiguration,
-        ]
+                $code,
+                new Reference('sidus_eav_model.attribute_configuration.handler'),
+                new Reference('sidus_eav_model.family_configuration.handler'),
+                new Reference('sidus_eav_model.context.manager'),
+                $familyConfiguration,
+            ]
         );
         $definition->addMethodCall('setTranslator', [new Reference('translator')]);
         $definition->addTag('sidus.family');
         $container->setDefinition('sidus_eav_model.family.'.$code, $definition);
-    }
-
-    /**
-     * @param string           $code
-     * @param array            $attributeConfiguration
-     * @param ContainerBuilder $container
-     *
-     * @throws BadMethodCallException
-     * @throws InvalidArgumentException
-     */
-    protected function addAttributeServiceDefinition($code, $attributeConfiguration, ContainerBuilder $container)
-    {
-        $attributeConfiguration['context_mask'] = array_merge(
-            $this->globalConfig['global_context_mask'],
-            $attributeConfiguration['context_mask']
-        );
-
-        $definitionOptions = [
-            $code,
-            new Reference('sidus_eav_model.attribute_type_configuration.handler'),
-            $attributeConfiguration,
-        ];
-        $definition = new Definition(new Parameter('sidus_eav_model.attribute.class'), $definitionOptions);
-        $definition->addMethodCall('setTranslator', [new Reference('translator')]);
-        $definition->addTag('sidus.attribute');
-        $container->setDefinition('sidus_eav_model.attribute.'.$code, $definition);
     }
 }

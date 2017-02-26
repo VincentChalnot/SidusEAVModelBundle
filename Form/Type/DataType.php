@@ -266,7 +266,7 @@ class DataType extends AbstractType
         $formOptions = array_merge(['label' => $label], $formOptions, $attribute->getFormOptions($data));
         unset($formOptions['collection_options']); // Ignoring collection_options if set
 
-        $form->add($attribute->getCode(), $attribute->getType()->getFormType(), $formOptions);
+        $form->add($attribute->getCode(), $attribute->getFormType(), $formOptions);
     }
 
     /**
@@ -296,7 +296,7 @@ class DataType extends AbstractType
         $formOptions['label'] = false; // Removing label
         $collectionOptions = [
             'label' => $label,
-            'entry_type' => $attribute->getType()->getFormType(),
+            'entry_type' => $attribute->getFormType(),
             'entry_options' => $formOptions,
             'allow_add' => true,
             'allow_delete' => true,

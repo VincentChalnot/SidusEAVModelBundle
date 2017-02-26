@@ -1,6 +1,7 @@
 parameters:
     sidus_eav_model.attribute_type.default.class: Sidus\EAVModelBundle\Model\AttributeType
     sidus_eav_model.attribute_type.choice.class: Sidus\EAVModelBundle\Model\ChoiceAttributeType
+    sidus_eav_model.attribute_type.relation.class: Sidus\EAVModelBundle\Model\RelationAttributeType
     sidus_eav_model.attribute_type.embed.class: Sidus\EAVModelBundle\Model\EmbedAttributeType
     sidus_eav_model.attribute_type.identifier.class: Sidus\EAVModelBundle\Model\IdentifierAttributeType
 
@@ -59,12 +60,6 @@ services:
         tags:
             - { name: sidus.attribute_type }
 
-    sidus_eav_model.attribute_type.data:
-        class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [data, dataValue, Sidus\EAVModelBundle\Form\Type\SimpleDataSelectorType]
-        tags:
-            - { name: sidus.attribute_type }
-
     sidus_eav_model.attribute_type.hidden:
         class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [hidden, stringValue, Symfony\Component\Form\Extension\Core\Type\HiddenType]
@@ -72,6 +67,12 @@ services:
             - { name: sidus.attribute_type }
 
     # NON-STANDARD ATTRIBUTE TYPES
+
+    sidus_eav_model.attribute_type.data:
+        class: '%sidus_eav_model.attribute_type.relation.class%'
+        arguments: [data, dataValue, Sidus\EAVModelBundle\Form\Type\SimpleDataSelectorType]
+        tags:
+            - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.embed:
         class: '%sidus_eav_model.attribute_type.embed.class%'

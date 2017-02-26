@@ -24,6 +24,16 @@ interface AttributeInterface
     /**
      * @return string
      */
+    public function getFamily();
+
+    /**
+     * @return array
+     */
+    public function getFamilies();
+
+    /**
+     * @return string
+     */
     public function getGroup();
 
     /**
@@ -48,6 +58,11 @@ interface AttributeInterface
      * @param mixed  $value
      */
     public function addOption($code, $value);
+
+    /**
+     * @return string
+     */
+    public function getFormType();
 
     /**
      * @param mixed $data
@@ -145,4 +160,9 @@ interface AttributeInterface
      * @return mixed
      */
     public function getDefault();
+
+    /**
+     * @param array $configuration
+     */
+    public function mergeConfiguration(array $configuration);
 }
