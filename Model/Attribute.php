@@ -4,15 +4,17 @@ namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler;
 use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
+use Sidus\EAVModelBundle\Exception\AttributeConfigurationException;
+use Sidus\EAVModelBundle\Exception\ContextException;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
-use Symfony\Component\PropertyAccess\Exception\AccessException;
-use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
-use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use UnexpectedValueException;
 
 /**
  * Define an attribute in the EAV model
+ *
+ * @todo : The properties "family" and "families" should be "allowedFamily" and "allowedFamilies" and the "family"
+ * @todo property should be set when adding an attribute to a family because attributes can't exists outside of families
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
@@ -79,11 +81,7 @@ class Attribute implements AttributeInterface
      * @param AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler
      * @param array                             $configuration
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     * @throws \LogicException
+     * @throws AttributeConfigurationException
      */
     public function __construct(
         $code,
@@ -214,7 +212,7 @@ class Attribute implements AttributeInterface
     public function getFormOptions($data = null)
     {
         $defaultOptions = [];
-        if (!$this->isCollection()) {
+        if (!$this->isMultiple()) {
             $defaultOptions = ['required' => $this->isRequired()];
         }
         $typeOptions = $this->getType()->getFormOptions($this, $data);
@@ -330,8 +328,6 @@ class Attribute implements AttributeInterface
     }
 
     /**
-     * Most of the time, when an attribute is multiple, it's also a collection
-     *
      * @param boolean $multiple
      */
     public function setMultiple($multiple)
@@ -340,6 +336,8 @@ class Attribute implements AttributeInterface
     }
 
     /**
+     * When an attribute is multiple, it's also a collection
+     *
      * @return boolean
      */
     public function isCollection()
@@ -385,8 +383,12 @@ class Attribute implements AttributeInterface
         if ($this->label) {
             return $this->label;
         }
+        $tIds = [
+//            "eav.family.{$this->getFamily()}.attribute.{$this->getCode()}.label", // @todo refactor this
+            "eav.attribute.{$this->getCode()}.label",
+        ];
 
-        return $this->tryTranslate("eav.attribute.{$this->getCode()}.label", [], $this->getCode());
+        return $this->tryTranslate($tIds, [], $this->getCode());
     }
 
     /**
@@ -429,8 +431,9 @@ class Attribute implements AttributeInterface
      * @param ContextualValueInterface $value
      * @param array                    $context
      *
+     * @throws ContextException
+     *
      * @return bool
-     * @throws UnexpectedValueException
      */
     public function isContextMatching(ContextualValueInterface $value, array $context)
     {
@@ -468,47 +471,26 @@ class Attribute implements AttributeInterface
     }
 
     /**
-     * @throws UnexpectedValueException
-     */
-    protected function checkConflicts()
-    {
-        $default = $this->getDefault();
-        if ($this->isCollection()) {
-            if ($this->isUnique()) {
-                throw new UnexpectedValueException(
-                    "Attribute {$this->getCode()} cannot be multiple and unique at the same time"
-                );
-            }
-            if (null !== $default && !(is_array($default) || $default instanceof \Traversable)) {
-                throw new UnexpectedValueException(
-                    "Attribute {$this->getCode()} is multiple and therefore should have an array of values as default option"
-                );
-            }
-        }
-        if ($default !== null && ($this->getType()->isRelation() || $this->getType()->isEmbedded())) {
-            throw new UnexpectedValueException(
-                "Attribute {$this->getCode()} is a relation to an other entity, it doesn't support default values in configuration"
-            );
-        }
-    }
-
-    /**
      * @param array $configuration
      *
-     * @throws \Symfony\Component\PropertyAccess\Exception\AccessException
-     * @throws \UnexpectedValueException
-     * @throws \Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException
-     * @throws \Symfony\Component\PropertyAccess\Exception\InvalidArgumentException
-     * @throws \LogicException
+     * @throws AttributeConfigurationException
      */
     public function mergeConfiguration(array $configuration)
     {
         if (isset($configuration['type'])) {
-            $newType = $this->attributeTypeConfigurationHandler->getType($configuration['type']);
+            try {
+                $newType = $this->attributeTypeConfigurationHandler->getType($configuration['type']);
+            } catch (\UnexpectedValueException $e) {
+                throw new AttributeConfigurationException(
+                    "The attribute {$this->code} has an unknown type '{$configuration['type']}'",
+                    0,
+                    $e
+                );
+            }
             if ($this->type && $this->type->getDatabaseType() !== $newType->getDatabaseType()) {
                 $e = "The attribute '{$this->code}' cannot be overridden with a new attribute type that don't match ";
                 $e .= "the database type '{$this->type->getDatabaseType()}'";
-                throw new \LogicException($e);
+                throw new AttributeConfigurationException($e);
             }
             $this->type = $newType;
             unset($configuration['type']);
@@ -516,11 +498,57 @@ class Attribute implements AttributeInterface
 
         $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($configuration as $key => $value) {
-            $accessor->setValue($this, $key, $value);
+            try {
+                $accessor->setValue($this, $key, $value);
+            } catch (\Exception $e) {
+                throw new AttributeConfigurationException(
+                    "The attribute {$this->code} has an invalid configuration for option '{$key}'",
+                    0,
+                    $e
+                );
+            }
         }
 
         $this->type->setAttributeDefaults($this); // Allow attribute type service to configure attribute
 
         $this->checkConflicts();
+    }
+
+    /**
+     * @throws AttributeConfigurationException
+     */
+    protected function checkConflicts()
+    {
+        $default = $this->getDefault();
+        if ($this->isCollection()) {
+            if ($this->isUnique()) {
+                throw new AttributeConfigurationException(
+                    "Attribute {$this->getCode()} cannot be a collection and unique at the same time"
+                );
+            }
+            if (null !== $default && !(is_array($default) || $default instanceof \Traversable)) {
+                $e = "Attribute {$this->getCode()} is a collection and therefore should have an array of values for";
+                $e .= ' the default option';
+                throw new AttributeConfigurationException($e);
+            }
+        } elseif ($this->isMultiple()) {
+            throw new AttributeConfigurationException(
+                "Attribute {$this->getCode()} cannot be multiple and not a collection"
+            );
+        }
+
+        if ($this->getType()->isRelation() || $this->getType()->isEmbedded()) {
+            if ($default !== null) {
+                $e = "Attribute {$this->getCode()} is a relation to an other entity, it doesn't support default values";
+                $e .= ' in configuration';
+                throw new AttributeConfigurationException($e);
+            }
+        } else {
+            if ($this->getFamily() || $this->getFamilies()) {
+                $e = "Attribute {$this->getCode()} is not a relation nor an embed and therefore doesn't support the";
+                $e .= ' family/families options';
+                throw new AttributeConfigurationException($e);
+            }
+        }
     }
 }

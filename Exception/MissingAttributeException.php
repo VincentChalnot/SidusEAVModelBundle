@@ -3,17 +3,17 @@
 namespace Sidus\EAVModelBundle\Exception;
 
 /**
- * Exception launched when trying to fetch a missing family
+ * Exception thrown when trying to fetch a missing attribute
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class MissingFamilyException extends \UnexpectedValueException
+class MissingAttributeException extends \UnexpectedValueException
 {
     /**
      * @param string $code
      */
     public function __construct($code)
     {
-        parent::__construct("No family with code : {$code}");
+        parent::__construct("No attribute with code : {$code}");
     }
 }

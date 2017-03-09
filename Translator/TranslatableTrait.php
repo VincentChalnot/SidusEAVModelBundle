@@ -24,8 +24,7 @@ trait TranslatableTrait
     }
 
     /**
-     * Will check the translator for the key "eav.family.{$code}.label"
-     * and humanize the code if no translation is found
+     * Will check the translator for the provided keys and humanize the code if no translation is found
      *
      * @param string|array $tIds
      * @param array        $parameters

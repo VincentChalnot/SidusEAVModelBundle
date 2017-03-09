@@ -8,7 +8,7 @@ use UnexpectedValueException;
 
 /**
  * Container for all global attributes.
- * Don't use this service to fetch attributes, use the families instead
+ * @internal Don't use this service to fetch attributes, use the families instead
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */

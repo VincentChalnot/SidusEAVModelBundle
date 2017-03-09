@@ -143,7 +143,8 @@ public function registerBundles()
 
 #### Create your Data and Value classes
 
-In a dedicated bundle or in one of your bundle (it's generally considered as a good practise to separate your model in a dedicated bundle), create two new Doctrine entities:
+In a dedicated bundle or in one of your bundle (it's generally considered as a good practise to separate your model in
+a dedicated bundle), create two new Doctrine entities:
 
 ````php
 <?php
@@ -154,7 +155,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Sidus\EAVModelBundle\Entity\AbstractData;
 
 /**
- * @ORM\Table(name="mynamespace_data")
+ * @ORM\Table(name="mynamespace_data", indexes={
+ *     @ORM\Index(name="family", columns={"family_code"}),
+ *     @ORM\Index(name="integer_identifier", columns={"family_code", "integer_identifier"}),
+ *     @ORM\Index(name="string_identifier", columns={"family_code", "string_identifier"})
+ * })
  * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\DataRepository")
  */
 class Data extends AbstractData
@@ -171,13 +176,23 @@ use Doctrine\ORM\Mapping as ORM;
 use Sidus\EAVModelBundle\Entity\AbstractValue;
 
 /**
- * @ORM\Table(name="mynamespace_value")
+ * @ORM\Table(name="mynamespace_value", indexes={
+ *     @ORM\Index(name="attribute", columns={"attribute_code"}),
+ *     @ORM\Index(name="string_search", columns={"attribute_code", "string_value"}),
+ *     @ORM\Index(name="int_search", columns={"attribute_code", "integer_value"}),
+ *     @ORM\Index(name="position", columns={"position"})
+ * })
  * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\ValueRepository")
  */
 class Value extends AbstractValue
 {
 }
 ````
+
+Note that you're in charge of defining the mysql indexes of theses two classes, the indexes provided in the example are
+not mandatory but strongly advised for performances.
+
+Single table inheritance can be configured to allow different classes for different families.
 
 #### Base configuration
 
@@ -189,7 +204,7 @@ sidus_eav_model:
     value_class: MyNamespace\EAVModelBundle\Entity\Value
 ````
 
-The custom Doctrine type for the families is the only "hack" needed for this bundle, everything else is standard Symfony.
+This will declare the classes used by the bundle to instanciate EAV data.
 
 ## Configuration
 At this point your application should run although you won't be able to do anything without defining first your model configuration.
@@ -200,7 +215,7 @@ Please read the example in the first chapter to familiar yourself with the key f
 If you want to test your configuration against an existing app, you can do it in the [Demo Symfony Project](https://github.com/VincentChalnot/SidusEAVDemo)
 
 #### Family configuration reference
-The families of your model are what would be your classes in a relational model, we call them families instead of classes because they do not correspond to any PHP class in a strict sens. They are "data types" but such a denomination could lead to many mistakes so we prefer to call them "families".
+The families of your model are what would be your classes in a relational model, we call them families instead of classes because they do not necessarily correspond to any PHP class in a strict sens. They are "data types" but such a denomination could lead to many mistakes so we prefer to call them "families".
 
 Each family must define at least an attribute and an attribute as label:
 - The list of attribute is a simple array of attribute codes and the order in which you declare them will define the order in which they appear in their edition form.
@@ -221,10 +236,11 @@ sidus_eav_model:
             singleton: <boolean> # If true, the family will have only one instance accessible through DataRepository::getInstance
             parent: <familyCode> # When specified, the family will inherits its configuration
             data_class: <PhpClass> # Can be used with single table inheritance to declare specific business logic in a dedicated class
+            options: <array> # generic options that can be used by business logic/external libraries
             attributes: # Required
-                - <attributeCode>
-                - <attributeCode>
-                - <attributeCode>
+                <attributeCode>: ~ # When using a globally defined attribute
+                <attributeCode>: <AttributeConfiguration> # When declaring an attribute locally or overriding a globally defined one
+                # ...
 ````
 
 #### Attributes configuration reference
@@ -242,17 +258,20 @@ The full configuration reference will help you see what can be done with attribu
 sidus_eav_model:
     attributes:
         <attributeCode>:
-            type: <attributeType> # Default "string", see following chapter
+            type: <attributeTypeCode> # Default "string", see following chapter
             group: <groupCode> # Default null
-            options: <object> # Some attribute types require specific options here
-            form_options: <object> # Standard symfony form options
-            view_options: <object> # Passed to the view (not used in this bundle)
+            options: <array> # Some attribute types require specific options here
+            form_options: <array> # Standard symfony form options
+            form_type: <FormType> # Overrides the form type of the attribute type
+            default: <mixed> # Default value, not supported for relations for the moment
             validation_rules: <array> # Standard Symfony validation rules
-            default: <mixed> # Default value
             required: <boolean> # Default false, empty() PHP function is used for validation
             unique: <boolean> # Default false
             multiple: <boolean> # Default false, see following chapter
+            collection: <boolean> # Default null, see following chapter
             context_mask: <array> # See dedicated chapter
+            family: <familyCode> # Only for relations/embed: selects the allowed target family
+            families: <familyCode[]> # Only for relations/embed: selects the allowed targets families
 ````
 
 Some codes are reserved like: id, parent, children, values, valueData, createdAt, updatedAt, currentVersion, family and currentContext. If you use any of these words as attribute codes your application behavior will depends of how you try to access the entities' data. Don't do that.
@@ -286,18 +305,54 @@ If you change the type of an attribute, its values will probably be discarded du
 The only safe thing you can do is switch between different attributes that stores their data the same way: For example: data, embed and autocomplete_data are safely interchangeable.
 
 
-#### Multiple option
-The "multiple" option allows you to add multiple values for the same attribute and because of the way the EAV model works, all attribute types are compatible with this option.
+#### Multiple & collection option
+The "collection" option allows you to add multiple values for the same attribute and because of the way the EAV model
+works, all attribute types are compatible with this option.
 
-This option will probably not behave well in forms without the bootstrap-collection extension of the sidus/eav-bootstrap-bundle:
+The "collection" option defines the way the model works, not the form ! If you want to automatically generate a Symfony
+collection of form widgets to edit this attribute you need to use the "multiple" option.
+
+Basically, the multiple option automatically enables the "collection" option but provides in the same time a way to
+automatically generate compatible form types to edit your attribute.
+
+This option will probably not behave well in forms without the bootstrap-collection extension of the
+sidus/eav-bootstrap-bundle:
+
 https://github.com/VincentChalnot/SidusEAVBootstrapBundle
 
-You can safely switch a single-value attribute to multiple, the current values will be kept as the first value of the collection. If you switch from an multiple attribute back to a single-valued one, only the first value of the collection will be kept during the next save of the entity.
+You can safely switch a single-value attribute to multiple, the current values will be kept as the first value of the
+collection. If you switch from an multiple attribute back to a single-valued one, only the first value of the collection
+will be kept during the next save of the entity.
 
-When using the "required" option, the collection will pass validation if containing at least one element (event if the element itself is empty).
+When using the "required" option, the collection will pass validation if containing at least one element (event if the
+element itself is empty).
+
+When using only the collection option (with multiple: false by default), your form type has to provide a way to edit an
+array of values. For example the following configuration is perfectly correct:
+
+````yaml
+sidus_eav_model:
+    attributes:
+        checkboxesExample:
+            type: choice # Store data as a string
+            collection: true # This means the model is waiting for an array of values, so an array of strings
+            form_options:
+                multiple: true # This trigger the ability of the ChoiceType to provide an array of values
+                expanded: true # Just to have checkboxes instead of an ugly multiselect in the rendering
+                choices:
+                    bar: foo
+                    42: life
+````
+
+If you were to use the "multiple" option in the following example the form would not render as expected and saving data
+would result in an exception.
+
+An attribute configured to be multiple but not a collection doesn't make any sense and will trigger an exception during
+the compilation of the model.
 
 ## Basic CRUD
-From there you are already ready to use your model in your application, you can do basically three things with your entities:
+From there you are already ready to use your model in your application, you can do basically three things with your
+entities:
 - Create an entity from a family
 - Editing an entity and accessing its values
 - Using a form

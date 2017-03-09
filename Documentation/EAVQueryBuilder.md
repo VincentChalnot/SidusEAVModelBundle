@@ -1,3 +1,22 @@
+## How to query data
+
+### Fetching the repository
+
+````php
+<?php
+/**
+ * @var \Sidus\EAVModelBundle\Model\FamilyInterface $family
+ * @var \Doctrine\Bundle\DoctrineBundle\Registry $doctrine
+ * @var \CleverAge\EAVManager\EAVModelBundle\Entity\DataRepository $dataRepository
+ * @var integer $id
+*/
+$dataRepository = $doctrine->getRepository($family->getDataClass());
+
+$dataRepository->find($id);
+````
+
+## EAVQueryBuilder
+
 Sometimes you want to programmatically search for entities in your database.
 When using a traditional relational model in Doctrine you can query your database
 with the QueryBuilder and the DQL language.

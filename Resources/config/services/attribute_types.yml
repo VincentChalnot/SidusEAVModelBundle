@@ -55,7 +55,7 @@ services:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.choice:
-        class: '%sidus_eav_model.attribute_type.choice.class%' # Choice has a special class to handle multiple choices
+        class: '%sidus_eav_model.attribute_type.default.class%'
         arguments: [choice, stringValue, Symfony\Component\Form\Extension\Core\Type\ChoiceType]
         tags:
             - { name: sidus.attribute_type }

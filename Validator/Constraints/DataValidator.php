@@ -21,7 +21,7 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * @property ExecutionContextInterface $context
+ * Used to validate Data entities
  */
 class DataValidator extends ConstraintValidator
 {
@@ -73,11 +73,22 @@ class DataValidator extends ConstraintValidator
         $context = $this->context; // VERY IMPORTANT ! context will be lost otherwise
         foreach ($data->getFamily()->getAttributes() as $attribute) {
             if ($attribute->isRequired() && $data->isEmpty($attribute)) {
-                $this->buildAttributeViolation($context, $attribute, 'required', $data->getValueData($attribute));
+                $this->buildAttributeViolation(
+                    $data,
+                    $context,
+                    $attribute,
+                    'required',
+                    $data->get($attribute->getCode())
+                );
             }
             if ($attribute->isUnique()) {
                 $this->checkUnique($context, $attribute, $data);
             }
+
+            if ($attribute->getFamily() || $attribute->getFamilies()) {
+                $this->validateFamilies($context, $attribute, $data);
+            }
+
             if (count($attribute->getValidationRules())) {
                 $this->validateRules($context, $attribute, $data);
             }
@@ -103,7 +114,7 @@ class DataValidator extends ConstraintValidator
             $repo = $this->doctrine->getRepository($data->getFamily()->getDataClass());
             $result = $repo->findByIdentifier($data->getFamily(), $valueData);
             if ($result && $result->getId() !== $data->getId()) {
-                $this->buildAttributeViolation($context, $attribute, 'unique', $valueData);
+                $this->buildAttributeViolation($data, $context, $attribute, 'unique', $valueData);
             }
 
             return;
@@ -123,7 +134,7 @@ class DataValidator extends ConstraintValidator
                 continue; // @warning this should not occur ! Log an error
             }
             if ($value->getData()->getId() !== $data->getId()) {
-                $this->buildAttributeViolation($context, $attribute, 'unique', $valueData);
+                $this->buildAttributeViolation($data, $context, $attribute, 'unique', $valueData);
 
                 return;
             }
@@ -135,18 +146,57 @@ class DataValidator extends ConstraintValidator
      * @param AttributeInterface        $attribute
      * @param DataInterface             $data
      *
-     * @throws Exception
+     * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
+     * @throws \InvalidArgumentException
+     */
+    protected function validateFamilies(
+        ExecutionContextInterface $context,
+        AttributeInterface $attribute,
+        DataInterface $data
+    ) {
+        $families = [];
+        if ($attribute->getFamily()) {
+            $family = $attribute->getFamily();
+            $families[$family] = $this->familyConfigurationHandler->getFamily($family);
+        }
+        if ($attribute->getFamilies()) {
+            foreach ($attribute->getFamilies() as $family) {
+                $families[$family] = $this->familyConfigurationHandler->getFamily($family);
+            }
+        }
+        if (0 === count($families)) {
+            return;
+        }
+
+        $valueData = $data->get($attribute->getCode());
+        if (!$attribute->isCollection()) {
+            $valueData = [$valueData];
+        }
+        /** @var array $valueData */
+        foreach ($valueData as $value) {
+            if (!$value instanceof DataInterface) {
+                $this->buildAttributeViolation($data, $context, $attribute, 'invalid_data', $value);
+            }
+            if (!array_key_exists($value->getFamilyCode(), $families)) {
+                $this->buildAttributeViolation($data, $context, $attribute, 'invalid_family', $value);
+            }
+        }
+    }
+
+    /**
+     * @param ExecutionContextInterface $context
+     * @param AttributeInterface        $attribute
+     * @param DataInterface             $data
+     *
+     * @throws \Symfony\Component\Validator\Exception\MappingException
+     * @throws \InvalidArgumentException
      */
     protected function validateRules(
         ExecutionContextInterface $context,
         AttributeInterface $attribute,
         DataInterface $data
     ) {
-        if ($attribute->isCollection()) {
-            $valueData = $data->getValuesData($attribute);
-        } else {
-            $valueData = $data->getValueData($attribute);
-        }
+        $valueData = $data->get($attribute->getCode());
         $loader = new BaseLoader();
         foreach ($attribute->getValidationRules() as $validationRule) {
             foreach ((array) $validationRule as $item => $options) {
@@ -157,7 +207,7 @@ class DataValidator extends ConstraintValidator
                     /** @noinspection DisconnectedForeachInstructionInspection */
                     $path = $attribute->getCode();
                     if ($attribute->getType()->isEmbedded()) {
-                        if (!$attribute->isMultiple()) { // Or isCollection ?
+                        if (!$attribute->isCollection()) {
                             $path .= '.';
                         }
                         $path .= $violation->getPropertyPath();
@@ -168,7 +218,14 @@ class DataValidator extends ConstraintValidator
                             ->setInvalidValue($valueData)
                             ->addViolation();
                     } else {
-                        $this->buildAttributeViolation($context, $attribute, strtolower($item), $valueData, $path);
+                        $this->buildAttributeViolation(
+                            $data,
+                            $context,
+                            $attribute,
+                            strtolower($item),
+                            $valueData,
+                            $path
+                        );
                     }
                 }
             }
@@ -176,6 +233,7 @@ class DataValidator extends ConstraintValidator
     }
 
     /**
+     * @param DataInterface             $data
      * @param ExecutionContextInterface $context
      * @param AttributeInterface        $attribute
      * @param string                    $type
@@ -185,6 +243,7 @@ class DataValidator extends ConstraintValidator
      * @throws \InvalidArgumentException
      */
     protected function buildAttributeViolation(
+        DataInterface $data,
         ExecutionContextInterface $context,
         AttributeInterface $attribute,
         $type,
@@ -194,28 +253,30 @@ class DataValidator extends ConstraintValidator
         if (null === $path) {
             $path = $attribute->getCode();
         }
-        $context->buildViolation($this->buildMessage($attribute, $type))
+        $context->buildViolation($this->buildMessage($data, $attribute, $type))
             ->atPath($path)
             ->setInvalidValue($invalidValue)
             ->addViolation();
     }
 
     /**
+     * @param DataInterface      $data
      * @param AttributeInterface $attribute
      * @param string             $type
      *
      * @return string
-     * @throws \InvalidArgumentException
      */
-    protected function buildMessage(AttributeInterface $attribute, $type)
+    protected function buildMessage(DataInterface $data, AttributeInterface $attribute, $type)
     {
         return $this->tryTranslate(
             [
+                "eav.family.{$data->getFamilyCode()}.attribute.{$attribute->getCode()}.validation.{$type}",
                 "eav.attribute.{$attribute->getCode()}.validation.{$type}",
-                "eav.attribute.validation.{$type}",
+                "eav.validation.{$type}",
             ],
             [
                 '%attribute%' => $this->translator->trans((string) $attribute),
+                '%family%' => $this->translator->trans((string) $data->getFamily()),
             ],
             $type
         );

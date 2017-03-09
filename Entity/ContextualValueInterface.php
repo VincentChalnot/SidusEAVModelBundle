@@ -2,6 +2,8 @@
 
 namespace Sidus\EAVModelBundle\Entity;
 
+use Sidus\EAVModelBundle\Exception\ContextException;
+
 /**
  * All values must implements this class that defines how context information is handled
  *
@@ -17,8 +19,9 @@ interface ContextualValueInterface extends ValueInterface
     /**
      * @param string $key
      *
+     * @throws ContextException
+     *
      * @return mixed
-     * @throws \UnexpectedValueException
      */
     public function getContextValue($key);
 
@@ -26,7 +29,7 @@ interface ContextualValueInterface extends ValueInterface
      * @param string $key
      * @param mixed  $value
      *
-     * @throws \UnexpectedValueException
+     * @throws ContextException
      */
     public function setContextValue($key, $value);
 
@@ -35,7 +38,7 @@ interface ContextualValueInterface extends ValueInterface
      *
      * @param array $context
      *
-     * @throws \UnexpectedValueException
+     * @throws ContextException
      */
     public function setContext(array $context);
 
