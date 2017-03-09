@@ -9,18 +9,23 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use LogicException;
+use Sidus\EAVModelBundle\Exception\ContextException;
+use Sidus\EAVModelBundle\Exception\InvalidValueDataException;
+use Sidus\EAVModelBundle\Exception\MissingAttributeException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Model\IdentifierAttributeType;
 use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
 use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
-use Symfony\Component\PropertyAccess\Exception\AccessException;
-use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
-use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
+use Symfony\Component\PropertyAccess\Exception\ExceptionInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use UnexpectedValueException;
 
 /**
+ * Base logic to handle the EAV data
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
+ *
  * @DataConstraint()
  */
 abstract class AbstractData implements ContextualDataInterface
@@ -126,11 +131,7 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     * @throws \BadMethodCallException
+     * @throws InvalidValueDataException
      *
      * @return mixed
      */
@@ -138,6 +139,8 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $identifierAttribute = $this->getFamily()->getAttributeAsIdentifier();
         if ($identifierAttribute) {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+
             return $this->get($identifierAttribute->getCode());
         }
 
@@ -215,10 +218,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param mixed              $valueData
      * @param array              $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws MissingAttributeException
+     * @throws InvalidValueDataException
+     * @throws ContextException
      *
      * @return DataInterface
      */
@@ -226,8 +228,8 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $this->checkAttribute($attribute);
         if (!$attribute->isCollection()) {
-            $m = "Cannot append data to non-multiple attribute '{$attribute->getCode()}'";
-            throw new UnexpectedValueException($m);
+            $m = "Cannot append data to a non-collection attribute '{$attribute->getCode()}'";
+            throw new InvalidValueDataException($m);
         }
         $newValue = $this->createValue($attribute, $context);
         $accessor = PropertyAccess::createPropertyAccessor();
@@ -236,7 +238,11 @@ abstract class AbstractData implements ContextualDataInterface
             $position = max($position, $value->getPosition());
         }
         $newValue->setPosition($position + 1);
-        $accessor->setValue($newValue, $attribute->getType()->getDatabaseType(), $valueData);
+        try {
+            $accessor->setValue($newValue, $attribute->getType()->getDatabaseType(), $valueData);
+        } catch (ExceptionInterface $e) {
+            throw new InvalidValueDataException("Invalid data for attribute {$attribute->getCode()}", 0, $e);
+        }
 
         return $this;
     }
@@ -259,10 +265,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return mixed
      */
@@ -279,10 +284,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return ArrayCollection
      */
@@ -292,13 +296,18 @@ abstract class AbstractData implements ContextualDataInterface
         $valuesData = new ArrayCollection();
         $accessor = PropertyAccess::createPropertyAccessor();
         $attributeType = $attribute->getType();
-        if ($attributeType instanceof IdentifierAttributeType) {
-            $valuesData->add($accessor->getValue($this, $attributeType->getDatabaseType()));
-        } else {
-            foreach ($this->getValues($attribute, $context) as $value) {
-                $valuesData->add($accessor->getValue($value, $attributeType->getDatabaseType()));
+        try {
+            if ($attributeType instanceof IdentifierAttributeType) {
+                $valuesData->add($accessor->getValue($this, $attributeType->getDatabaseType()));
+            } else {
+                foreach ($this->getValues($attribute, $context) as $value) {
+                    $valuesData->add($accessor->getValue($value, $attributeType->getDatabaseType()));
+                }
             }
+        } catch (ExceptionInterface $e) {
+            throw new InvalidValueDataException("Unable to access data for attribute {$attribute->getCode()}", 0, $e);
         }
+
 
         return $valuesData;
     }
@@ -341,11 +350,10 @@ abstract class AbstractData implements ContextualDataInterface
      * @param string $methodName
      * @param array  $arguments
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     * @throws BadMethodCallException
+     * @throws \BadMethodCallException
+     * @throws MissingAttributeException
+     * @throws InvalidValueDataException
+     * @throws ContextException
      *
      * @return mixed|null|ValueInterface
      */
@@ -378,11 +386,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param string $attributeCode
      * @param array  $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     * @throws BadMethodCallException
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return mixed
      */
@@ -405,11 +411,9 @@ abstract class AbstractData implements ContextualDataInterface
     /**
      * @param string $attributeCode
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
-     * @throws BadMethodCallException
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return mixed
      */
@@ -425,10 +429,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param mixed  $value
      * @param array  $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     * @throws InvalidValueDataException
      *
      * @return DataInterface
      */
@@ -452,10 +455,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param string $attributeCode
      * @param mixed  $value
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     * @throws InvalidValueDataException
      *
      * @return DataInterface
      */
@@ -480,10 +482,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws ContextException
+     * @throws MissingAttributeException
+     * @throws InvalidValueDataException
      *
      * @return null|ValueInterface
      */
@@ -500,10 +501,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface|null $attribute
      * @param array                   $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws ContextException
+     * @throws MissingAttributeException
+     * @throws InvalidValueDataException
      *
      * @return Collection|ValueInterface[]
      */
@@ -623,7 +623,7 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
-     * @throws \UnexpectedValueException
+     * @throws MissingAttributeException
      *
      * @return ValueInterface
      */
@@ -644,10 +644,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param array|\Traversable $dataValues
      * @param array              $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws MissingAttributeException
+     * @throws InvalidValueDataException
+     * @throws ContextException
      *
      * @return DataInterface
      */
@@ -663,10 +662,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws MissingAttributeException
+     * @throws InvalidValueDataException
+     * @throws ContextException
      *
      * @return DataInterface
      */
@@ -698,7 +696,7 @@ abstract class AbstractData implements ContextualDataInterface
     /**
      * @param ValueInterface $value
      *
-     * @throws UnexpectedValueException
+     * @throws ContextException
      *
      * @return DataInterface
      */
@@ -724,10 +722,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param mixed              $dataValue
      * @param array              $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws MissingAttributeException
+     * @throws InvalidValueDataException
+     * @throws ContextException
      *
      * @return DataInterface
      */
@@ -743,7 +740,11 @@ abstract class AbstractData implements ContextualDataInterface
         }
 
         $accessor = PropertyAccess::createPropertyAccessor();
-        $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
+        try {
+            $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
+        } catch (ExceptionInterface $e) {
+            throw new InvalidValueDataException("Invalid data for attribute {$attribute->getCode()}", 0, $e);
+        }
 
         return $this;
     }
@@ -752,10 +753,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws MissingAttributeException
+     * @throws InvalidValueDataException
+     * @throws ContextException
      *
      * @return bool
      */
@@ -773,10 +773,7 @@ abstract class AbstractData implements ContextualDataInterface
     /**
      * Remove id on clone and clean values
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws \UnexpectedValueException
      */
     public function __clone()
     {
@@ -811,10 +808,8 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface|null $attribute
      * @param array|null              $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
      *
      * @return Collection|ValueInterface[]
      */
@@ -833,10 +828,8 @@ abstract class AbstractData implements ContextualDataInterface
      * @param array|\Traversable $dataValues
      * @param array|null         $context
      *
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
      *
      * @return Collection|ValueInterface[]
      */
@@ -845,8 +838,8 @@ abstract class AbstractData implements ContextualDataInterface
         $this->checkAttribute($attribute);
         if (!(is_array($dataValues) || $dataValues instanceof \Traversable)) {
             $type = is_object($dataValues) ? get_class($dataValues) : gettype($dataValues);
-            throw new UnexpectedValueException(
-                "Value for multiple attribute {$attribute->getCode()} must be an array, '{$type}' given"
+            throw new InvalidValueDataException(
+                "Value for collection attribute {$attribute->getCode()} must be an array, '{$type}' given"
             );
         }
         $values = new ArrayCollection();
@@ -856,7 +849,12 @@ abstract class AbstractData implements ContextualDataInterface
             /** @noinspection DisconnectedForeachInstructionInspection */
             $value = $this->createValue($attribute, $context);
             $value->setPosition($position++);
-            $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
+            try {
+                $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
+            } catch (ExceptionInterface $e) {
+                $m = "Invalid data for attribute {$attribute->getCode()} at position {$position}";
+                throw new InvalidValueDataException($m, 0, $e);
+            }
             $values->add($value);
         }
 
@@ -866,23 +864,21 @@ abstract class AbstractData implements ContextualDataInterface
     /**
      * @param AttributeInterface $attribute
      *
-     * @throws UnexpectedValueException
+     * @throws MissingAttributeException
      */
     protected function checkAttribute(AttributeInterface $attribute)
     {
         if (!$this->getFamily()->hasAttribute($attribute->getCode())) {
-            throw new UnexpectedValueException(
+            throw new MissingAttributeException(
                 "Attribute {$attribute->getCode()} doesn't exists in family {$this->getFamilyCode()}"
             );
         }
     }
 
     /**
-     * @throws \BadMethodCallException
-     * @throws UnexpectedValueException
-     * @throws AccessException
-     * @throws InvalidArgumentException
-     * @throws UnexpectedTypeException
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return string
      */

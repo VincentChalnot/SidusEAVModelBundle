@@ -234,7 +234,11 @@ class DataType extends AbstractType
         if ($attribute->getOption('hidden')) {
             return;
         }
-        if ($attribute->isMultiple() && $attribute->isCollection()) {
+        // The 'multiple' option triggers the usage of the Collection form type
+        if ($attribute->isMultiple()) {
+            // This means that a specific attribute can be a collection of data but might NOT be "multiple" in a sense
+            // that it will not be edited as a "collection" form type.
+            // Be wary of the vocabulary here
             $this->addMultipleAttribute($form, $attribute, $family, $data, $options);
         } else {
             $this->addSingleAttribute($form, $attribute, $family, $data, $options);
@@ -322,8 +326,11 @@ class DataType extends AbstractType
      */
     protected function getFieldLabel(FamilyInterface $family, AttributeInterface $attribute)
     {
-        $tId = "eav.{$family->getCode()}.attribute.{$attribute->getCode()}.label";
+        $tIds = [
+            "eav.family.{$family->getCode()}.attribute.{$attribute->getCode()}.label",
+            "eav.attribute.{$attribute->getCode()}.label",
+        ];
 
-        return $this->tryTranslate($tId, [], ucfirst($attribute));
+        return $this->tryTranslate($tIds, [], ucfirst($attribute));
     }
 }

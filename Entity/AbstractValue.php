@@ -4,6 +4,7 @@ namespace Sidus\EAVModelBundle\Entity;
 
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Sidus\EAVModelBundle\Exception\ContextException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
 
@@ -386,7 +387,8 @@ abstract class AbstractValue implements ContextualValueInterface
      * @param string $key
      *
      * @return mixed
-     * @throws \UnexpectedValueException
+     *
+     * @throws ContextException
      */
     public function getContextValue($key)
     {
@@ -400,7 +402,7 @@ abstract class AbstractValue implements ContextualValueInterface
      *
      * @param array $context
      *
-     * @throws \UnexpectedValueException
+     * @throws ContextException
      */
     public function setContext(array $context)
     {
@@ -424,7 +426,7 @@ abstract class AbstractValue implements ContextualValueInterface
      * @param string $key
      * @param mixed  $value
      *
-     * @throws \UnexpectedValueException
+     * @throws ContextException
      */
     public function setContextValue($key, $value)
     {
@@ -448,12 +450,12 @@ abstract class AbstractValue implements ContextualValueInterface
     /**
      * @param string $key
      *
-     * @throws \UnexpectedValueException
+     * @throws ContextException
      */
     protected function checkContextKey($key)
     {
         if (!in_array($key, $this->getContextKeys(), true)) {
-            throw new \UnexpectedValueException("Trying to get an non-allowed context key {$key}");
+            throw new ContextException("Trying to get an non-allowed context key {$key}");
         }
     }
 }

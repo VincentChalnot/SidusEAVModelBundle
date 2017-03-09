@@ -98,8 +98,7 @@ For a basic blog the configuration will look like this:
         tags:
             multiple: true
             form_options:
-                collection_options:
-                    sortable: true
+                sortable: true
 
         isFeatured:
             type: switch
@@ -205,7 +204,7 @@ sidus_eav_model:
     value_class: MyNamespace\EAVModelBundle\Entity\Value
 ````
 
-This will declare the classes used by the bundle to instantiate EAV data.
+This will declare the classes used by the bundle to instanciate EAV data.
 
 ## Configuration
 At this point your application should run although you won't be able to do anything without defining first your model configuration.
@@ -239,9 +238,9 @@ sidus_eav_model:
             data_class: <PhpClass> # Can be used with single table inheritance to declare specific business logic in a dedicated class
             options: <array> # generic options that can be used by business logic/external libraries
             attributes: # Required
-                - <attributeCode>
-                - <attributeCode>
-                - <attributeCode>
+                <attributeCode>: ~ # When using a globally defined attribute
+                <attributeCode>: <AttributeConfiguration> # When declaring an attribute locally or overriding a globally defined one
+                # ...
 ````
 
 #### Attributes configuration reference
@@ -271,6 +270,8 @@ sidus_eav_model:
             multiple: <boolean> # Default false, see following chapter
             collection: <boolean> # Default null, see following chapter
             context_mask: <array> # See dedicated chapter
+            family: <familyCode> # Only for relations/embed: selects the allowed target family
+            families: <familyCode[]> # Only for relations/embed: selects the allowed targets families
 ````
 
 Some codes are reserved like: id, parent, children, values, valueData, createdAt, updatedAt, currentVersion, family and currentContext. If you use any of these words as attribute codes your application behavior will depends of how you try to access the entities' data. Don't do that.
@@ -349,13 +350,6 @@ would result in an exception.
 An attribute configured to be multiple but not a collection doesn't make any sense and will trigger an exception during
 the compilation of the model.
 
-### WARNING
-When using the multiple option, the form will automatically generate a collection form type. In order to allow to switch
-the attribute from multiple to not multiple, the standard options for the collection have been exchanged with the
-'entry_options' option, meaning that if you want to pass options to the collection you will have to use the
-'collection_options' option. The DataType will automatically provide the proper options for the form type and remove the
-'collection_options' if the attribute is not multiple.
-
 ## Basic CRUD
 From there you are already ready to use your model in your application, you can do basically three things with your
 entities:
@@ -418,10 +412,7 @@ We do not implements the magic getters and setters for properties (\__get, \__se
 Note: In order for the forms to be able to PropertyAccessor (used in forms) to read from magic calls, we enable the "enableMagicCall" option globally.
 
 #### Using a form
-The default form to edit entities is referenced as 'Sidus\EAVModelBundle\Form\Type\DataType' and the only thing to keep
-in mind is that it can't work without an entity or the "family" option.
-Alternatively, you can use the 'Sidus\EAVModelBundle\Form\Type\GroupedDataType' form to separate attribute in different
-fieldsets for different groups.
+The default form to edit entities is referenced as 'sidus_data' and the only thing to keep in mind is that it can't work without an entity or the "family" option.
 
 #### Persisting or deleting an entity
 To persist or delete an entity, you can't flush just the Data entity but you need to do a global flush because values are stored separately from the entity.

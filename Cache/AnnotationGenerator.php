@@ -128,9 +128,8 @@ EOT;
         $setter = 'set'.ucfirst($attribute->getCode());
         if (!$dataClass->hasMethod($setter)) {
             $content .= $this->generateSetAnnotation($family, $attribute);
-            $content .= 'abstract public function set'.ucfirst(
-                    $attribute->getCode()
-                ).'($value, array $context = null);'."\n\n";
+            $content .= 'abstract public function set'.ucfirst($attribute->getCode());
+            $content .= '($value, array $context = null);'."\n\n";
         }
 
         return $content;

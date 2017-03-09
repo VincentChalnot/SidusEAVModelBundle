@@ -1,0 +1,6 @@
+eav:
+    validation:
+        invalid_data: Invalid data
+        invalid_family: Invalid family
+        unique: The same value already exists
+        required: This field is required

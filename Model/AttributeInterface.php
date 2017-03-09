@@ -3,6 +3,8 @@
 namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
+use Sidus\EAVModelBundle\Exception\AttributeConfigurationException;
+use Sidus\EAVModelBundle\Exception\ContextException;
 
 /**
  * Interface for attribute services
@@ -22,16 +24,22 @@ interface AttributeInterface
     public function getType();
 
     /**
+     * Used for relations/embed attributes to declare the allowed family of the relation's target
+     *
      * @return string
      */
     public function getFamily();
 
     /**
+     * Used for relations/embed attributes to declare the allowed families of the relation's target
+     *
      * @return array
      */
     public function getFamilies();
 
     /**
+     * Optional, used to separate attributes in different groups
+     *
      * @return string
      */
     public function getGroup();
@@ -47,6 +55,8 @@ interface AttributeInterface
     public function getOptions();
 
     /**
+     * Generic options that can be used in any applications using the EAV Model
+     *
      * @param string $code
      *
      * @return mixed
@@ -60,11 +70,15 @@ interface AttributeInterface
     public function addOption($code, $value);
 
     /**
+     * The identifier of the Symfony form type
+     *
      * @return string
      */
     public function getFormType();
 
     /**
+     * The options passed to the form, optionally passing the edited data
+     *
      * @param mixed $data
      *
      * @return array
@@ -72,23 +86,18 @@ interface AttributeInterface
     public function getFormOptions($data = null);
 
     /**
+     * Passed as form options to the form widget
+     *
      * @param string $code
      * @param mixed  $value
      */
     public function addFormOption($code, $value);
 
     /**
-     * @return array
-     */
-    public function getViewOptions();
-
-    /**
-     * @param string $code
-     * @param mixed  $value
-     */
-    public function addViewOption($code, $value);
-
-    /**
+     * This option defines if an attribute is meant to be edited with multiple form widgets in forms
+     * A multiple attribute will automatically be a collection but a collection can be edited as a single widget and
+     * therefore NOT be "multiple".
+     *
      * @return boolean
      */
     public function isMultiple();
@@ -152,6 +161,8 @@ interface AttributeInterface
      * @param ContextualValueInterface $value
      * @param array                    $context
      *
+     * @throws ContextException
+     *
      * @return bool
      */
     public function isContextMatching(ContextualValueInterface $value, array $context);
@@ -163,6 +174,8 @@ interface AttributeInterface
 
     /**
      * @param array $configuration
+     *
+     * @throws AttributeConfigurationException
      */
     public function mergeConfiguration(array $configuration);
 }

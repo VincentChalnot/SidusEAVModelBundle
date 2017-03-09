@@ -62,7 +62,7 @@ interface DataInterface
     public function set($attributeCode, $value, array $context = null);
 
     /**
-     * Return all values matching the attribute code
+     * Return all values objects matching the attribute code
      *
      * @param AttributeInterface|null $attribute
      * @param array                   $context
@@ -72,7 +72,7 @@ interface DataInterface
     public function getValues(AttributeInterface $attribute = null, array $context = null);
 
     /**
-     * Return first value found for attribute code in value collection
+     * Return first value object found for attribute code in value collection
      *
      * @param AttributeInterface $attribute
      * @param array              $context
@@ -84,6 +84,9 @@ interface DataInterface
     /**
      * Get the value data of the value matching the attribute
      *
+     * @internal Using this method outside of this class might lead to unexpected behaviors as it won't pass through
+     *           your custom getters, use DataInterface::get() instead
+     *
      * @param AttributeInterface $attribute
      * @param array              $context
      *
@@ -93,6 +96,9 @@ interface DataInterface
 
     /**
      * Get the values data of multiple values for a given attribute
+     *
+     * @internal Using this method outside of this class might lead to unexpected behaviors as it won't pass through
+     *           your custom getters, use DataInterface::get() instead
      *
      * @param AttributeInterface $attribute
      * @param array              $context
@@ -104,6 +110,9 @@ interface DataInterface
     /**
      * Set the value's data of a given attribute
      *
+     * @internal Using this method outside of this class might lead to unexpected behaviors as it won't pass through
+     *           your custom setters, use DataInterface::set() instead
+     *
      * @param AttributeInterface $attribute
      * @param mixed              $dataValue
      * @param array              $context
@@ -113,7 +122,10 @@ interface DataInterface
     public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null);
 
     /**
-     * Set the values' data of a given attribute for multiple fields
+     * Set the data values of a given collection attribute
+     *
+     * @internal Using this method outside of this class might lead to unexpected behaviors as it won't pass through
+     *           your custom setters, use DataInterface::set() instead
      *
      * @param AttributeInterface $attribute
      * @param array|\Traversable $dataValues
@@ -124,6 +136,8 @@ interface DataInterface
     public function setValuesData(AttributeInterface $attribute, $dataValues, array $context = null);
 
     /**
+     * Remove all the values associated with the given attribute
+     *
      * @param AttributeInterface $attribute
      * @param array              $context
      *
@@ -132,6 +146,8 @@ interface DataInterface
     public function emptyValues(AttributeInterface $attribute = null, array $context = null);
 
     /**
+     * Append a value to the internal values stack
+     *
      * @param ValueInterface $value
      *
      * @return DataInterface
@@ -150,6 +166,8 @@ interface DataInterface
     public function addValueData(AttributeInterface $attribute, $valueData, array $context = null);
 
     /**
+     * Removes a specific value from the values stack
+     *
      * @param ValueInterface $value
      *
      * @return DataInterface
@@ -157,6 +175,8 @@ interface DataInterface
     public function removeValue(ValueInterface $value);
 
     /**
+     * Returns the value carried by the attributeAsLabel attribute
+     *
      * @return string
      */
     public function getLabel();
@@ -172,6 +192,8 @@ interface DataInterface
     public function getFamily();
 
     /**
+     * @internal Don't use this method outside of this class
+     *
      * @param AttributeInterface $attribute
      * @param array              $context
      *
@@ -180,6 +202,8 @@ interface DataInterface
     public function createValue(AttributeInterface $attribute, array $context = null);
 
     /**
+     * Check if the data has any value corresponding to the given attribute
+     *
      * @param AttributeInterface $attribute
      * @param array              $context
      *

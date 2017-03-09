@@ -3,14 +3,13 @@
 namespace Sidus\EAVModelBundle\Exception;
 
 use Sidus\EAVModelBundle\Entity\DataInterface;
-use Symfony\Component\Debug\Exception\ContextErrorException;
 
 /**
  * Allow the developer to add extra checks concerning the family of a data entity
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class WrongFamilyException extends ContextErrorException
+class WrongFamilyException extends \ErrorException
 {
     /**
      * @param DataInterface $data
