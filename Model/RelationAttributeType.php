@@ -26,11 +26,8 @@ class RelationAttributeType extends AttributeType
     public function getFormOptions(AttributeInterface $attribute, $data = null)
     {
         $formOptions = parent::getFormOptions($attribute, $data);
-        if ($attribute->getFamily()) {
-            $formOptions['family'] = $attribute->getFamily();
-        }
-        if ($attribute->getFamilies()) {
-            $formOptions['families'] = $attribute->getFamilies();
+        if ($attribute->getOption('allowed_families')) {
+            $formOptions['allowed_families'] = $attribute->getOption('allowed_families');
         }
 
         return $formOptions;

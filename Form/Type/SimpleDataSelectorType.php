@@ -37,19 +37,12 @@ class SimpleDataSelectorType extends AbstractType
     {
         $this->fixDoctrineQueryBuilderNormalizer($resolver);
 
-        $resolver->setRequired(
-            [
-                'family',
-            ]
-        );
-
         $queryBuilder = function (EntityRepository $repository, $options) {
             $qb = $repository->createQueryBuilder('d');
-            if (!empty($options['family'])) {
-                $qb->addSelect('v')
-                    ->leftJoin('d.values', 'v')
-                    ->andWhere('d.family = :family')
-                    ->setParameter('family', $options['family']);
+            if (!empty($options['allowed_families'])) {
+                $qb
+                    ->andWhere('d.family IN (:allowed_families)')
+                    ->setParameter('allowed_families', $options['allowed_families']);
             }
             $qb->setMaxResults(100);
 
@@ -60,6 +53,7 @@ class SimpleDataSelectorType extends AbstractType
             [
                 'class' => $this->dataClass,
                 'query_builder' => $queryBuilder,
+                'allowed_families' => null,
             ]
         );
     }

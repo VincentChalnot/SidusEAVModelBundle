@@ -133,7 +133,7 @@ class DataType extends AbstractType
         array $options = []
     ) {
         foreach ($family->getAttributes() as $attribute) {
-            $this->addAttribute($form, $attribute, $family, $data, $options);
+            $this->addAttribute($form, $attribute, $data, $options);
         }
     }
 
@@ -218,7 +218,6 @@ class DataType extends AbstractType
     /**
      * @param FormInterface      $form
      * @param AttributeInterface $attribute
-     * @param FamilyInterface    $family
      * @param DataInterface|null $data
      * @param array              $options
      *
@@ -227,7 +226,6 @@ class DataType extends AbstractType
     protected function addAttribute(
         FormInterface $form,
         AttributeInterface $attribute,
-        FamilyInterface $family,
         DataInterface $data = null,
         array $options = []
     ) {
@@ -239,16 +237,15 @@ class DataType extends AbstractType
             // This means that a specific attribute can be a collection of data but might NOT be "multiple" in a sense
             // that it will not be edited as a "collection" form type.
             // Be wary of the vocabulary here
-            $this->addMultipleAttribute($form, $attribute, $family, $data, $options);
+            $this->addMultipleAttribute($form, $attribute, $data, $options);
         } else {
-            $this->addSingleAttribute($form, $attribute, $family, $data, $options);
+            $this->addSingleAttribute($form, $attribute, $data, $options);
         }
     }
 
     /**
      * @param FormInterface      $form
      * @param AttributeInterface $attribute
-     * @param FamilyInterface    $family
      * @param DataInterface      $data
      * @param array              $options
      *
@@ -257,7 +254,6 @@ class DataType extends AbstractType
     protected function addSingleAttribute(
         FormInterface $form,
         AttributeInterface $attribute,
-        FamilyInterface $family,
         DataInterface $data = null,
         array $options = []
     ) {
@@ -266,8 +262,7 @@ class DataType extends AbstractType
             $formOptions = $options['form_options'];
         }
 
-        $label = $this->getFieldLabel($family, $attribute);
-        $formOptions = array_merge(['label' => $label], $formOptions, $attribute->getFormOptions($data));
+        $formOptions = array_merge(['label' => (string) $attribute], $formOptions, $attribute->getFormOptions($data));
         unset($formOptions['collection_options']); // Ignoring collection_options if set
 
         $form->add($attribute->getCode(), $attribute->getFormType(), $formOptions);
@@ -276,7 +271,6 @@ class DataType extends AbstractType
     /**
      * @param FormInterface      $form
      * @param AttributeInterface $attribute
-     * @param FamilyInterface    $family
      * @param DataInterface      $data
      * @param array              $options
      *
@@ -285,7 +279,6 @@ class DataType extends AbstractType
     protected function addMultipleAttribute(
         FormInterface $form,
         AttributeInterface $attribute,
-        FamilyInterface $family,
         DataInterface $data = null,
         array $options = []
     ) {
@@ -295,11 +288,10 @@ class DataType extends AbstractType
         }
 
         $formOptions = array_merge($formOptions, $attribute->getFormOptions($data));
-        $label = $this->getFieldLabel($family, $attribute);
 
         $formOptions['label'] = false; // Removing label
         $collectionOptions = [
-            'label' => $label,
+            'label' => (string) $attribute,
             'entry_type' => $attribute->getFormType(),
             'entry_options' => $formOptions,
             'allow_add' => true,
@@ -313,24 +305,5 @@ class DataType extends AbstractType
         }
         unset($collectionOptions['entry_options']['collection_options']);
         $form->add($attribute->getCode(), $this->collectionType, $collectionOptions);
-    }
-
-    /**
-     * Use label from formOptions or use translation or automatically create human readable one
-     *
-     * @param FamilyInterface    $family
-     * @param AttributeInterface $attribute
-     *
-     * @return string
-     * @throws \InvalidArgumentException
-     */
-    protected function getFieldLabel(FamilyInterface $family, AttributeInterface $attribute)
-    {
-        $tIds = [
-            "eav.family.{$family->getCode()}.attribute.{$attribute->getCode()}.label",
-            "eav.attribute.{$attribute->getCode()}.label",
-        ];
-
-        return $this->tryTranslate($tIds, [], ucfirst($attribute));
     }
 }

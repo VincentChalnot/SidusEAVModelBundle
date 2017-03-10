@@ -97,7 +97,8 @@ class SidusEAVModelExtension extends Extension
     protected function addFamilyServiceDefinition($code, $familyConfiguration, ContainerBuilder $container)
     {
         $definition = new Definition(
-            new Parameter('sidus_eav_model.family.class'), [
+            new Parameter('sidus_eav_model.family.class'),
+            [
                 $code,
                 new Reference('sidus_eav_model.attribute_configuration.handler'),
                 new Reference('sidus_eav_model.family_configuration.handler'),

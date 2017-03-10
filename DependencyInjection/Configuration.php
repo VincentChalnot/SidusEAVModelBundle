@@ -3,7 +3,6 @@
 namespace Sidus\EAVModelBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
-use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -74,10 +73,6 @@ class Configuration implements ConfigurationInterface
         $attributeDefinition
             ->scalarNode('type')->end()
             ->scalarNode('group')->end()
-            ->scalarNode('family')->end()
-            ->arrayNode('families')
-                ->prototype('scalar')->end()
-            ->end()
             ->scalarNode('form_type')->end()
             ->variableNode('form_options')->end()
             ->variableNode('options')->end()

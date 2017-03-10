@@ -35,9 +35,9 @@ class GroupedDataType extends DataType
                         ]
                     );
                 }
-                $this->addAttribute($form->get($groupName), $attribute, $family, $data, $options);
+                $this->addAttribute($form->get($groupName), $attribute, $data, $options);
             } else {
-                $this->addAttribute($form, $attribute, $family, $data, $options);
+                $this->addAttribute($form, $attribute, $data, $options);
             }
         }
     }

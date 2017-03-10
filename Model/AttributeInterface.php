@@ -24,18 +24,16 @@ interface AttributeInterface
     public function getType();
 
     /**
-     * Used for relations/embed attributes to declare the allowed family of the relation's target
+     * The family that carries the attribute
      *
      * @return string
      */
     public function getFamily();
 
     /**
-     * Used for relations/embed attributes to declare the allowed families of the relation's target
-     *
-     * @return array
+     * @param FamilyInterface $family
      */
-    public function getFamilies();
+    public function setFamily(FamilyInterface $family);
 
     /**
      * Optional, used to separate attributes in different groups
