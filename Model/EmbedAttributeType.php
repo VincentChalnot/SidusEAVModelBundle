@@ -7,7 +7,7 @@ namespace Sidus\EAVModelBundle\Model;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class EmbedAttributeType extends RelationAttributeType
+class EmbedAttributeType extends AttributeType
 {
     /**
      * @return bool
@@ -31,5 +31,31 @@ class EmbedAttributeType extends RelationAttributeType
     public function setAttributeDefaults(AttributeInterface $attribute)
     {
         $attribute->addValidationRule(['Valid' => []]);
+    }
+
+
+    /**
+     * @param AttributeInterface $attribute
+     * @param mixed              $data
+     *
+     * @throws \LogicException
+     *
+     * @return array
+     */
+    public function getFormOptions(AttributeInterface $attribute, $data = null)
+    {
+        $formOptions = parent::getFormOptions($attribute, $data);
+        if ($attribute->getOption('allowed_families')) {
+            $families = $attribute->getOption('allowed_families');
+            if (1 < count($families)) {
+                $m = "Standard embed attribute '{$attribute->getCode()}' doesn't supports more that one";
+                $m .= ' allowed_families in options';
+                throw new \LogicException($m);
+            }
+            reset($families);
+            $formOptions['family'] = current($families);
+        }
+
+        return $formOptions;
     }
 }

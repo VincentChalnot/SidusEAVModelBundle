@@ -85,7 +85,7 @@ class DataValidator extends ConstraintValidator
                 $this->checkUnique($context, $attribute, $data);
             }
 
-            if ($attribute->getFamily() || $attribute->getFamilies()) {
+            if ($attribute->getOption('allowed_families')) {
                 $this->validateFamilies($context, $attribute, $data);
             }
 
@@ -154,17 +154,18 @@ class DataValidator extends ConstraintValidator
         AttributeInterface $attribute,
         DataInterface $data
     ) {
-        $families = [];
-        if ($attribute->getFamily()) {
-            $family = $attribute->getFamily();
-            $families[$family] = $this->familyConfigurationHandler->getFamily($family);
-        }
-        if ($attribute->getFamilies()) {
-            foreach ($attribute->getFamilies() as $family) {
-                $families[$family] = $this->familyConfigurationHandler->getFamily($family);
+        $allowedFamilies = [];
+        $allowedFamilyCodes = $attribute->getOption('allowed_families');
+        if ($allowedFamilyCodes) {
+            if (!is_array($allowedFamilyCodes)) {
+                $allowedFamilyCodes = [$allowedFamilyCodes];
+            }
+            /** @var array $allowedFamilyCodes */
+            foreach ($allowedFamilyCodes as $familyCode) {
+                $allowedFamilies[$familyCode] = $this->familyConfigurationHandler->getFamily($familyCode);
             }
         }
-        if (0 === count($families)) {
+        if (0 === count($allowedFamilies)) {
             return;
         }
 
@@ -177,7 +178,7 @@ class DataValidator extends ConstraintValidator
             if (!$value instanceof DataInterface) {
                 $this->buildAttributeViolation($data, $context, $attribute, 'invalid_data', $value);
             }
-            if (!array_key_exists($value->getFamilyCode(), $families)) {
+            if (!array_key_exists($value->getFamilyCode(), $allowedFamilies)) {
                 $this->buildAttributeViolation($data, $context, $attribute, 'invalid_family', $value);
             }
         }
@@ -263,6 +264,8 @@ class DataValidator extends ConstraintValidator
      * @param DataInterface      $data
      * @param AttributeInterface $attribute
      * @param string             $type
+     *
+     * @throws \Symfony\Component\Translation\Exception\InvalidArgumentException
      *
      * @return string
      */

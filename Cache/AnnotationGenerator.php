@@ -221,23 +221,13 @@ EOT;
             return $type;
         }
         if ('data' === $type) {
-            // Simple case
-            if ($attribute->getFamily()) {
-                $type = $attribute->getFamily();
-                if ($attribute->isCollection()) {
-                    $type .= '[]';
-                }
-
-                return $type;
-            }
-
-            // Multiple families (some case)
-            if ($attribute->getFamilies()) {
-                $types = $attribute->getFamilies();
+            $types = $attribute->getOption('allowed_families');
+            if ($types) {
                 if (!is_array($types)) {
-                    return 'mixed'; // Shouldn't happen
+                    $types = [$types];
                 }
                 if ($attribute->isCollection()) {
+                    /** @var array $types */
                     foreach ($types as &$type) {
                         $type .= '[]';
                     }

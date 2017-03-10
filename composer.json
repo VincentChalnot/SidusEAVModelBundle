@@ -25,10 +25,10 @@
     "require": {
         "php": ">=5.6",
         "symfony/symfony": "^3.0|^2.8",
+        "doctrine/orm": "^2.5",
         "doctrine/doctrine-bundle": "^1.6"
     },
     "suggest": {
-        "sidus/eav-bootstrap-bundle": "Easy Bootstrap integration",
-        "sidus/eav-filter-bundle": "Data filtering with Elastic Search and Doctrine fallback"
+        "sidus/eav-bootstrap-bundle": "Easy Twitter Bootstrap integration"
     }
 }

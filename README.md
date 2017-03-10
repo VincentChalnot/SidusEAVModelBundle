@@ -260,7 +260,8 @@ sidus_eav_model:
         <attributeCode>:
             type: <attributeTypeCode> # Default "string", see following chapter
             group: <groupCode> # Default null
-            options: <array> # Some attribute types require specific options here
+            options: <array> # Some attribute types require specific options here, example:
+                allowed_families: <familyCode[]> # Only for relations/embed: selects the allowed targets families
             form_options: <array> # Standard symfony form options
             form_type: <FormType> # Overrides the form type of the attribute type
             default: <mixed> # Default value, not supported for relations for the moment
@@ -270,8 +271,6 @@ sidus_eav_model:
             multiple: <boolean> # Default false, see following chapter
             collection: <boolean> # Default null, see following chapter
             context_mask: <array> # See dedicated chapter
-            family: <familyCode> # Only for relations/embed: selects the allowed target family
-            families: <familyCode[]> # Only for relations/embed: selects the allowed targets families
 ````
 
 Some codes are reserved like: id, parent, children, values, valueData, createdAt, updatedAt, currentVersion, family and currentContext. If you use any of these words as attribute codes your application behavior will depends of how you try to access the entities' data. Don't do that.
@@ -286,8 +285,8 @@ Attribute types define a common way of editing and storing data, this bundle pro
 - date: Stored as date, edited as Symfony date widget
 - datetime: Stored as datetime, edited as Symfony datetime widget
 - choice: Stored as varchar(255), edited as choice widget (required "choices" form_options)
-- data: Stored in a real Doctrine Many-To-One relationship with a related Data object, edited as a choice widget, requires the "family" form_option.
-- embed: Stored like data but embed the edition of the foreign entity directly into the form, requires the "family" form_option.
+- data_selector: Stored in a real Doctrine Many-To-One relationship with a related Data object, edited as a choice widget. Accepts a list of allowed families in the 'allowed_families' option.
+- embed: Stored like data but embed the edition of the foreign entity directly into the form. Requires a single family in the 'allowed_families' option.
 - hidden: Stored as varchar(255), will be present in the form as a hidden input.
 - string_identifier: **Experimental**, can be used to store the unique identifier of the family directly in the Data table for better performances.
 - integer_identifier: **Experimental**, see string_identifier
@@ -349,6 +348,13 @@ would result in an exception.
 
 An attribute configured to be multiple but not a collection doesn't make any sense and will trigger an exception during
 the compilation of the model.
+
+### WARNING
+When using the multiple option, the form will automatically generate a collection form type. In order to allow to switch
+the attribute from multiple to not multiple, the standard options for the collection have been exchanged with the
+'entry_options' option, meaning that if you want to pass options to the collection you will have to use the
+'collection_options' option. The DataType will automatically provide the proper options for the form type and remove the
+'collection_options' if the attribute is not multiple.
 
 ## Basic CRUD
 From there you are already ready to use your model in your application, you can do basically three things with your
@@ -412,7 +418,10 @@ We do not implements the magic getters and setters for properties (\__get, \__se
 Note: In order for the forms to be able to PropertyAccessor (used in forms) to read from magic calls, we enable the "enableMagicCall" option globally.
 
 #### Using a form
-The default form to edit entities is referenced as 'sidus_data' and the only thing to keep in mind is that it can't work without an entity or the "family" option.
+The default form to edit entities is referenced as 'Sidus\EAVModelBundle\Form\Type\DataType' and the only thing to keep
+in mind is that it can't work without an entity or the "family" option.
+Alternatively, you can use the 'Sidus\EAVModelBundle\Form\Type\GroupedDataType' form to separate attribute in different
+fieldsets for different groups.
 
 #### Persisting or deleting an entity
 To persist or delete an entity, you can't flush just the Data entity but you need to do a global flush because values are stored separately from the entity.

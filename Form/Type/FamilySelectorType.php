@@ -34,7 +34,7 @@ class FamilySelectorType extends AbstractType
      * @param FormBuilderInterface $builder
      * @param array                $options
      *
-     * @throws \InvalidArgumentException
+     * @throws MissingFamilyException
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -54,11 +54,8 @@ class FamilySelectorType extends AbstractType
                         // Should actually never happen ?
                         return $submittedData;
                     }
-                    try {
-                        return $this->familyConfigurationHandler->getFamily($submittedData);
-                    } catch (MissingFamilyException $e) {
-                        throw new \InvalidArgumentException($e->getMessage(), 0, $e);
-                    }
+
+                    return $this->familyConfigurationHandler->getFamily($submittedData);
                 }
             )
         );
@@ -73,7 +70,6 @@ class FamilySelectorType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'choices_as_values' => true,
                 'choices' => null,
                 'families' => null,
             ]
@@ -96,16 +92,6 @@ class FamilySelectorType extends AbstractType
                 }
 
                 return $families;
-            }
-        );
-        $resolver->setNormalizer(
-            'choices_as_values',
-            function (Options $options, $value) {
-                if ($value !== true) {
-                    throw new \UnexpectedValueException("'choices_as_values' must be true (and is by default)");
-                }
-
-                return true;
             }
         );
         $resolver->setNormalizer(

@@ -34,11 +34,8 @@ class Attribute implements AttributeInterface
     /** @var AttributeType */
     protected $type;
 
-    /** @var string */
+    /** @var FamilyInterface */
     protected $family;
-
-    /** @var array */
-    protected $families;
 
     /** @var string */
     protected $group;
@@ -114,7 +111,7 @@ class Attribute implements AttributeInterface
     }
 
     /**
-     * @return string
+     * @return FamilyInterface
      */
     public function getFamily()
     {
@@ -122,27 +119,11 @@ class Attribute implements AttributeInterface
     }
 
     /**
-     * @param string $family
+     * @param FamilyInterface $family
      */
-    public function setFamily($family)
+    public function setFamily(FamilyInterface $family)
     {
         $this->family = $family;
-    }
-
-    /**
-     * @return array
-     */
-    public function getFamilies()
-    {
-        return $this->families;
-    }
-
-    /**
-     * @param array $families
-     */
-    public function setFamilies($families)
-    {
-        $this->families = $families;
     }
 
     /**
@@ -383,10 +364,11 @@ class Attribute implements AttributeInterface
         if ($this->label) {
             return $this->label;
         }
-        $tIds = [
-//            "eav.family.{$this->getFamily()}.attribute.{$this->getCode()}.label", // @todo refactor this
-            "eav.attribute.{$this->getCode()}.label",
-        ];
+        $tIds = [];
+        if ($this->getFamily()) {
+            $tIds[] = "eav.family.{$this->getFamily()->getCode()}.attribute.{$this->getCode()}.label";
+        }
+        $tIds[] = "eav.attribute.{$this->getCode()}.label";
 
         return $this->tryTranslate($tIds, [], $this->getCode());
     }
@@ -541,12 +523,6 @@ class Attribute implements AttributeInterface
             if ($default !== null) {
                 $e = "Attribute {$this->getCode()} is a relation to an other entity, it doesn't support default values";
                 $e .= ' in configuration';
-                throw new AttributeConfigurationException($e);
-            }
-        } else {
-            if ($this->getFamily() || $this->getFamilies()) {
-                $e = "Attribute {$this->getCode()} is not a relation nor an embed and therefore doesn't support the";
-                $e .= ' family/families options';
                 throw new AttributeConfigurationException($e);
             }
         }

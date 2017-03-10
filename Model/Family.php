@@ -85,6 +85,7 @@ class Family implements FamilyInterface
      */
     public function __construct(
         $code,
+        /** @noinspection PhpInternalEntityUsedInspection */
         AttributeConfigurationHandler $attributeConfigurationHandler,
         FamilyConfigurationHandler $familyConfigurationHandler,
         ContextManager $contextManager,
@@ -187,6 +188,7 @@ class Family implements FamilyInterface
      */
     public function addAttribute(AttributeInterface $attribute)
     {
+        $attribute->setFamily($this);
         $this->attributes[$attribute->getCode()] = $attribute;
     }
 
