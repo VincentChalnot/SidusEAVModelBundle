@@ -35,6 +35,7 @@ class AttributeConfigurationHandler
         'parent',
         'children',
         'values',
+        'refererValues',
         'valueData',
         'createdAt',
         'updatedAt',

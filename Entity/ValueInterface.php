@@ -2,6 +2,8 @@
 
 namespace Sidus\EAVModelBundle\Entity;
 
+use Sidus\EAVModelBundle\Model\AttributeInterface;
+
 /**
  * Interface for value storage
  *
@@ -31,6 +33,18 @@ interface ValueInterface
      * @return ValueInterface
      */
     public function setAttributeCode($attributeCode);
+
+    /**
+     * @return AttributeInterface
+     */
+    public function getAttribute();
+
+    /**
+     * @param AttributeInterface $attribute
+     *
+     * @return ValueInterface
+     */
+    public function setAttribute(AttributeInterface $attribute);
 
     /**
      * The data carrying the current value
