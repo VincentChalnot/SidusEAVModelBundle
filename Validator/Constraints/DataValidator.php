@@ -177,6 +177,8 @@ class DataValidator extends ConstraintValidator
         foreach ($valueData as $value) {
             if (!$value instanceof DataInterface) {
                 $this->buildAttributeViolation($data, $context, $attribute, 'invalid_data', $value);
+
+                continue;
             }
             if (!array_key_exists($value->getFamilyCode(), $allowedFamilies)) {
                 $this->buildAttributeViolation($data, $context, $attribute, 'invalid_family', $value);

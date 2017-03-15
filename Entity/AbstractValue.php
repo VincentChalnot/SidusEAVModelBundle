@@ -147,6 +147,30 @@ abstract class AbstractValue implements ContextualValueInterface
     }
 
     /**
+     * @return AttributeInterface
+     */
+    public function getAttribute()
+    {
+        if (!$this->getData()) {
+            return null;
+        }
+
+        return $this->getData()->getFamily()->getAttribute($this->getAttributeCode());
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     *
+     * @return ValueInterface
+     */
+    public function setAttribute(AttributeInterface $attribute)
+    {
+        $this->setAttributeCode($attribute->getCode());
+
+        return $this;
+    }
+
+    /**
      * @return boolean
      */
     public function getBoolValue()

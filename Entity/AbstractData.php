@@ -65,6 +65,14 @@ abstract class AbstractData implements ContextualDataInterface
     protected $values;
 
     /**
+     * @var ValueInterface[]|Collection
+     *
+     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\ValueInterface", cascade={"persist"},
+     *                                                                           mappedBy="dataValue")
+     */
+    protected $refererValues;
+
+    /**
      * @var DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
@@ -128,6 +136,7 @@ abstract class AbstractData implements ContextualDataInterface
         $this->updatedAt = new DateTime();
         $this->values = new ArrayCollection();
         $this->children = new ArrayCollection();
+        $this->refererValues = new ArrayCollection();
     }
 
     /**
@@ -544,6 +553,66 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
+     * @param FamilyInterface|null    $family
+     * @param AttributeInterface|null $attribute
+     * @param array                   $context
+     *
+     * @throws ContextException
+     *
+     * @return Collection|ValueInterface[]
+     */
+    public function getRefererValues(
+        FamilyInterface $family = null,
+        AttributeInterface $attribute = null,
+        array $context = null
+    ) {
+        if (null === $family && null === $attribute && null === $context) {
+            return $this->refererValues;
+        }
+        $values = new ArrayCollection();
+
+        foreach ($this->refererValues as $refererValue) {
+            if ($attribute && $attribute->getCode() !== $refererValue->getAttributeCode()) {
+                continue;
+            }
+            if ($family && $family->getCode() !== $refererValue->getData()->getFamilyCode()) {
+                continue;
+            }
+            if ($context && !$refererValue->getAttribute()->isContextMatching($refererValue, $context)) {
+                continue;
+            }
+            $values[] = $refererValue;
+        }
+
+        return $values;
+    }
+
+    /**
+     * @param FamilyInterface|null    $family
+     * @param AttributeInterface|null $attribute
+     * @param array                   $context
+     *
+     * @throws ContextException
+     *
+     * @return Collection|DataInterface[]
+     */
+    public function getRefererDatas(
+        FamilyInterface $family = null,
+        AttributeInterface $attribute = null,
+        array $context = null
+    ) {
+        $datas = new ArrayCollection();
+        foreach ($this->getRefererValues($family, $attribute) as $refererValue) {
+            $data = $refererValue->getData();
+            if ($data) {
+                $datas[] = $data;
+            }
+        }
+
+        return $datas;
+    }
+
+    /**
      * @return array
      */
     public function getCurrentContext()
@@ -792,6 +861,35 @@ abstract class AbstractData implements ContextualDataInterface
             $newValue->setData($this);
         }
         $this->setCreatedAt(new DateTime());
+    }
+
+    /**
+     * Automatically append EAV Data as debug info
+     *
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        $reflClass = new \ReflectionClass($this);
+        $data = [];
+        foreach ($reflClass->getProperties() as $property) {
+            try {
+                $property->setAccessible(true);
+                $data[$property->getName()] = $property->getValue($this);
+            } catch (\Exception $e) {
+                $data[$property->getName()] = $e->getMessage();
+            }
+        }
+
+        foreach ($this->getFamily()->getAttributes() as $attribute) {
+            try {
+                $data[$attribute->getCode()] = $this->get($attribute->getCode());
+            } catch (\Exception $e) {
+                $data[$attribute->getCode()] = $e->getMessage();
+            }
+        }
+
+        return $data;
     }
 
     /**

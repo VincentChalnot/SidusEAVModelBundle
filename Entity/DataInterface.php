@@ -175,6 +175,24 @@ interface DataInterface
     public function removeValue(ValueInterface $value);
 
     /**
+     * @param FamilyInterface    $family
+     * @param AttributeInterface $attribute
+     * @param array              $context
+     *
+     * @return Collection|ValueInterface[]
+     */
+    public function getRefererValues(FamilyInterface $family = null, AttributeInterface $attribute = null, array $context = null);
+
+    /**
+     * @param FamilyInterface|null    $family
+     * @param AttributeInterface|null $attribute
+     * @param array                   $context
+     *
+     * @return Collection|DataInterface[]
+     */
+    public function getRefererDatas(FamilyInterface $family = null, AttributeInterface $attribute = null, array $context = null);
+
+    /**
      * Returns the value carried by the attributeAsLabel attribute
      *
      * @return string

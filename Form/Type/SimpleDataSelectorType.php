@@ -4,6 +4,8 @@ namespace Sidus\EAVModelBundle\Form\Type;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
+use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
@@ -17,14 +19,19 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class SimpleDataSelectorType extends AbstractType
 {
+    /** @var FamilyConfigurationHandler */
+    protected $familyConfigurationHandler;
+
     /** @var string */
     protected $dataClass;
 
     /**
-     * @param string $dataClass
+     * @param FamilyConfigurationHandler $familyConfigurationHandler
+     * @param string                     $dataClass
      */
-    public function __construct($dataClass)
+    public function __construct(FamilyConfigurationHandler $familyConfigurationHandler, $dataClass)
     {
+        $this->familyConfigurationHandler = $familyConfigurationHandler;
         $this->dataClass = $dataClass;
     }
 
@@ -40,9 +47,16 @@ class SimpleDataSelectorType extends AbstractType
         $queryBuilder = function (EntityRepository $repository, $options) {
             $qb = $repository->createQueryBuilder('d');
             if (!empty($options['allowed_families'])) {
+                /** @var FamilyInterface[] $families */
+                $families = $options['allowed_families'];
+                $familyCodes = [];
+                foreach ($families as $family) {
+                    $familyCodes[] = $family->getCode();
+                }
+
                 $qb
-                    ->andWhere('d.family IN (:allowed_families)')
-                    ->setParameter('allowed_families', $options['allowed_families']);
+                    ->andWhere('d.family IN (:allowedFamilies)')
+                    ->setParameter('allowedFamilies', $familyCodes);
             }
             $qb->setMaxResults(100);
 
@@ -55,6 +69,28 @@ class SimpleDataSelectorType extends AbstractType
                 'query_builder' => $queryBuilder,
                 'allowed_families' => null,
             ]
+        );
+
+        $resolver->setAllowedTypes('allowed_families', ['array', 'NULL']);
+        /** @noinspection PhpUnusedParameterInspection */
+        $resolver->setNormalizer(
+            'allowed_families',
+            function (Options $options, $values) {
+                if (null === $values) {
+                    $values = $this->familyConfigurationHandler->getFamilies();
+                }
+                $families = [];
+                foreach ($values as $value) {
+                    if (!$value instanceof FamilyInterface) {
+                        $value = $this->familyConfigurationHandler->getFamily($value);
+                    }
+                    if ($value->isInstantiable()) {
+                        $families[$value->getCode()] = $value;
+                    }
+                }
+
+                return $families;
+            }
         );
     }
 
