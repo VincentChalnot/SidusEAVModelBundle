@@ -465,6 +465,10 @@ class Family implements FamilyInterface
         $this->dataClass = $parent->getDataClass();
     }
 
+    /**
+     * @param AttributeConfigurationHandler $attributeConfigurationHandler
+     * @param array $config
+     */
     protected function buildAttributes(AttributeConfigurationHandler $attributeConfigurationHandler, array $config)
     {
         foreach ((array) $config['attributes'] as $attributeCode => $attributeConfig) {
@@ -478,7 +482,7 @@ class Family implements FamilyInterface
                 // If attribute doesn't exists, create it locally
                 $attribute = $attributeConfigurationHandler->createAttribute($attributeCode, $attributeConfig);
             }
-            $this->attributes[$attributeCode] = $attribute;
+            $this->addAttribute($attribute);
         }
     }
 }
