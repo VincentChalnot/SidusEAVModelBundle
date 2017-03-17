@@ -11,10 +11,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use UnexpectedValueException;
 
 /**
- * Define an attribute in the EAV model
- *
- * @todo : The properties "family" and "families" should be "allowedFamily" and "allowedFamilies" and the "family"
- * @todo property should be set when adding an attribute to a family because attributes can't exists outside of families
+ * Defines an attribute in the EAV model
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
