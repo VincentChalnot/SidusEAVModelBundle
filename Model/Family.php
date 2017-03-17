@@ -467,7 +467,9 @@ class Family implements FamilyInterface
 
     /**
      * @param AttributeConfigurationHandler $attributeConfigurationHandler
-     * @param array $config
+     * @param array                         $config
+     *
+     * @throws \UnexpectedValueException
      */
     protected function buildAttributes(AttributeConfigurationHandler $attributeConfigurationHandler, array $config)
     {

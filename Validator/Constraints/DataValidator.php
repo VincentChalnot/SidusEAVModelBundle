@@ -170,6 +170,9 @@ class DataValidator extends ConstraintValidator
         }
 
         $valueData = $data->get($attribute->getCode());
+        if (null === $valueData) {
+            return;
+        }
         if (!$attribute->isCollection()) {
             $valueData = [$valueData];
         }
