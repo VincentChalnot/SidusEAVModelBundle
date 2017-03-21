@@ -50,16 +50,16 @@ abstract class AbstractData implements ContextualDataInterface
     /**
      * @var DataInterface[]
      *
-     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", mappedBy="parent", cascade={"persist",
-     *                                                                          "remove"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", mappedBy="parent",
+     *                                                    cascade={"persist", "remove", "detach"}, orphanRemoval=true)
      */
     protected $children;
 
     /**
      * @var ValueInterface[]|Collection
      *
-     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\ValueInterface", mappedBy="data", cascade={"persist",
-     *                                                                           "remove"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\ValueInterface", mappedBy="data",
+     *                                                    cascade={"persist", "remove", "detach"}, orphanRemoval=true)
      * @ORM\OrderBy({"position" = "ASC"})
      */
     protected $values;

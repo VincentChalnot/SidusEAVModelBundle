@@ -17,6 +17,7 @@ abstract class AbstractValue implements ContextualValueInterface
 {
     /**
      * @var integer
+     *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -25,6 +26,7 @@ abstract class AbstractValue implements ContextualValueInterface
 
     /**
      * @var DataInterface
+     *
      * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", inversedBy="values", fetch="EAGER")
      * @ORM\JoinColumn(name="data_id", referencedColumnName="id", onDelete="cascade", nullable=false)
      */
@@ -32,13 +34,18 @@ abstract class AbstractValue implements ContextualValueInterface
 
     /**
      * @var DataInterface
-     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", cascade={"persist"}, fetch="EAGER")
+     *
+     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", inversedBy="refererValues",
+     *                                                                 fetch="EAGER", cascade={"persist", "detach"})
      * @ORM\JoinColumn(name="data_value_id", referencedColumnName="id", onDelete="cascade", nullable=true)
      */
     protected $dataValue;
 
     /**
+     * Same as dataValue but without the onDelete="cascade"
+     *
      * @var DataInterface
+     *
      * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", cascade={"persist"}, fetch="EAGER")
      * @ORM\JoinColumn(name="constrained_data_value_id", referencedColumnName="id", nullable=true)
      */
@@ -46,54 +53,63 @@ abstract class AbstractValue implements ContextualValueInterface
 
     /**
      * @var string
+     *
      * @ORM\Column(name="attribute_code", type="string", length=255)
      */
     protected $attributeCode;
 
     /**
      * @var integer
+     *
      * @ORM\Column(name="position", type="integer", nullable=true)
      */
     protected $position;
 
     /**
      * @var boolean
+     *
      * @ORM\Column(name="bool_value", type="boolean", nullable=true)
      */
     protected $boolValue;
 
     /**
      * @var integer
+     *
      * @ORM\Column(name="integer_value", type="integer", nullable=true)
      */
     protected $integerValue;
 
     /**
      * @var float
+     *
      * @ORM\Column(name="decimal_value", type="float", nullable=true)
      */
     protected $decimalValue;
 
     /**
      * @var DateTime
+     *
      * @ORM\Column(name="date_value", type="date", nullable=true)
      */
     protected $dateValue;
 
     /**
      * @var DateTime
+     *
      * @ORM\Column(name="datetime_value", type="datetime", nullable=true)
      */
     protected $datetimeValue;
 
     /**
      * @var string
+     *
      * @ORM\Column(name="string_value", type="string", length=255, nullable=true)
      */
     protected $stringValue;
 
     /**
      * @var string
+     * 
      * @ORM\Column(name="text_value", type="text", nullable=true)
      */
     protected $textValue;
