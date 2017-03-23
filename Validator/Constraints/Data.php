@@ -17,7 +17,7 @@ class Data extends Constraint
      */
     public function validatedBy()
     {
-        return 'sidus_data';
+        return DataValidator::class;
     }
 
     /**

@@ -7,4 +7,4 @@ services:
             - '@translator'
             - '@doctrine'
         tags:
-            - { name: validator.constraint_validator, alias: sidus_data }
+            - { name: validator.constraint_validator }
