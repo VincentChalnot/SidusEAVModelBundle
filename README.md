@@ -98,7 +98,8 @@ For a basic blog the configuration will look like this:
         tags:
             multiple: true
             form_options:
-                sortable: true
+                collection_options:
+                    sortable: true
 
         isFeatured:
             type: switch
@@ -204,7 +205,7 @@ sidus_eav_model:
     value_class: MyNamespace\EAVModelBundle\Entity\Value
 ````
 
-This will declare the classes used by the bundle to instanciate EAV data.
+This will declare the classes used by the bundle to instantiate EAV data.
 
 ## Configuration
 At this point your application should run although you won't be able to do anything without defining first your model configuration.
@@ -273,7 +274,9 @@ sidus_eav_model:
             context_mask: <array> # See dedicated chapter
 ````
 
-Some codes are reserved like: id, parent, children, values, valueData, createdAt, updatedAt, currentVersion, family and currentContext. If you use any of these words as attribute codes your application behavior will depends of how you try to access the entities' data. Don't do that.
+Some codes are reserved like: id, parent, children, values, valueData, createdAt, updatedAt, currentVersion, family and
+currentContext. If you use any of these words as attribute codes your application behavior will depends of how you try
+to access the entities' data. Don't do that.
 
 ##### Attribute types
 Attribute types define a common way of editing and storing data, this bundle provides the following types:
@@ -285,10 +288,13 @@ Attribute types define a common way of editing and storing data, this bundle pro
 - date: Stored as date, edited as Symfony date widget
 - datetime: Stored as datetime, edited as Symfony datetime widget
 - choice: Stored as varchar(255), edited as choice widget (required "choices" form_options)
-- data_selector: Stored in a real Doctrine Many-To-One relationship with a related Data object, edited as a choice widget. Accepts a list of allowed families in the 'allowed_families' option.
-- embed: Stored like data but embed the edition of the foreign entity directly into the form. Requires a single family in the 'allowed_families' option.
+- data_selector: Stored in a real Doctrine Many-To-One relationship with a related Data object, edited as a choice
+widget. Accepts a list of allowed families in the 'allowed_families' option.
+- embed: Stored like data but embed the edition of the foreign entity directly into the form. Requires a single family
+in the 'allowed_families' option.
 - hidden: Stored as varchar(255), will be present in the form as a hidden input.
-- string_identifier: **Experimental**, can be used to store the unique identifier of the family directly in the Data table for better performances.
+- string_identifier: **Experimental**, can be used to store the unique identifier of the family directly in the Data
+table for better performances.
 - integer_identifier: **Experimental**, see string_identifier
 
 Additional attribute types can be found in the sidus/eav-bootstrap-bundle:
@@ -298,10 +304,14 @@ Additional attribute types can be found in the sidus/eav-bootstrap-bundle:
 - combo_selector: Allow selection of the family first, then autocomplete of the data, using "autocomplete_data".
 Date and datetime are also improved with bootstrap date/time picker.
 
-The only current limitation of the embed type is that you cannot embed a family inside the same family, this creates an infinite loop during form building.
+The only current limitation of the embed type is that you cannot embed a family inside the same family, this creates an
+infinite loop during form building.
 
-If you change the type of an attribute, its values will probably be discarded during the next save but it can also leads to unexpected behaviors: don't change the type of an attribute, create a new one (and remove the previous one if need be).
-The only safe thing you can do is switch between different attributes that stores their data the same way: For example: data, embed and autocomplete_data are safely interchangeable.
+If you change the type of an attribute, its values will probably be discarded during the next save but it can also leads
+to unexpected behaviors: don't change the type of an attribute, create a new one (and remove the previous one if need
+be).
+The only safe thing you can do is switch between different attributes that stores their data the same way: For example:
+data, embed and autocomplete_data are safely interchangeable.
 
 
 #### Multiple & collection option
@@ -385,9 +395,14 @@ $newPost->setTitle('I LOVE SYMFONY');
 echo $newPost->getTitle();
 ````
 
-Yes, this relies on magic methods to work but magic methods are not evil (while code generation definitely is). You can read sometimes that they are bad in terms of performances but this is less and less true with recent versions of PHP. The only drawback of using them is the lack of annotations that makes them appearing as errors in your IDE which is not cool. There is no simple solution for this but we might explore the benefits of automatically generating annotations in Symfony's cache to allow you to identify them with @var.
+Yes, this relies on magic methods to work but magic methods are not evil (while code generation definitely is). You can
+read sometimes that they are bad in terms of performances but this is less and less true with recent versions of PHP.
+The only drawback of using them is the lack of annotations that makes them appearing as errors in your IDE which is not
+cool. There is no simple solution for this but we might explore the benefits of automatically generating annotations in
+Symfony's cache to allow you to identify them with @var.
 
-UPDATE : You can now generate automatically fake classes from your EAV Model by adding this configuration in config_dev.yml:
+UPDATE : You can now generate automatically fake classes from your EAV Model by adding this configuration in
+config_dev.yml:
 ````yml
 imports:
     - { resource: '@SidusEAVModelBundle/Resources/config/annotation_generator.yml' }
@@ -413,9 +428,11 @@ echo $newPost->get('title');
 
 Which is exactly what the magic method will do in the background.
 
-We do not implements the magic getters and setters for properties (\__get, \__set) because they do not allow you to easily override the business logic in a child class.
+We do not implements the magic getters and setters for properties (\__get, \__set) because they do not allow you to
+easily override the business logic in a child class.
 
-Note: In order for the forms to be able to PropertyAccessor (used in forms) to read from magic calls, we enable the "enableMagicCall" option globally.
+Note: In order for the forms to be able to PropertyAccessor (used in forms) to read from magic calls, we enable the
+"enableMagicCall" option globally.
 
 #### Using a form
 The default form to edit entities is referenced as 'Sidus\EAVModelBundle\Form\Type\DataType' and the only thing to keep
@@ -424,15 +441,19 @@ Alternatively, you can use the 'Sidus\EAVModelBundle\Form\Type\GroupedDataType' 
 fieldsets for different groups.
 
 #### Persisting or deleting an entity
-To persist or delete an entity, you can't flush just the Data entity but you need to do a global flush because values are stored separately from the entity.
+To persist or delete an entity, you can't flush just the Data entity but you need to do a global flush because values
+are stored separately from the entity.
 
 ## Extending the model
-The existing model allows you to store all the basic kinds of scalar (text, number, dates) and relations to other families.
+The existing model allows you to store all the basic kinds of scalar (text, number, dates) and relations to other
+families.
 However, you might need to store different kind of values in your model.
 
 ### Custom attribute types
-Attribute types are the link between the user interface and your model, there are many scenarios where you will need to override existing attribute types or create new ones.
-If you take a look at the base Value class, you will notice that it contains a lot of properties suffixed by "Value", these properties are used to store all the different kind of PHP values and correspond to existing Doctrine types:
+Attribute types are the link between the user interface and your model, there are many scenarios where you will need
+to override existing attribute types or create new ones.
+If you take a look at the base Value class, you will notice that it contains a lot of properties suffixed by "Value",
+these properties are used to store all the different kind of PHP values and correspond to existing Doctrine types:
 
 The scalar types:
 
@@ -444,13 +465,15 @@ The scalar types:
 - date (type="date")
 - datetime (type="datetime")
 
-There is also a "dataValue" which correspond to a Doctrine's association to an other entity (the actual entity is stored in the "data")
+There is also a "dataValue" which correspond to a Doctrine's association to an other entity (the actual entity is stored
+in the "data")
 
 These properties are storage properties and can be reused for multiple attribute types and attributes.
 
 #### Adding new attribute types using existing storage properties
 To create a new attribute type base on one of the properties described earlier, just create a new service.
-The first parameter is the attribute type code, the second one is the name of the property used to store the value in the Value class and the third parameter is the form type.
+The first parameter is the attribute type code, the second one is the name of the property used to store the value in
+the Value class and the third parameter is the form type.
 
 ````yaml
 services:
@@ -465,7 +488,8 @@ Don't forget to tag your service properly.
 
 #### Overriding existing attribute types
 If you need to override an existing attribute type, you can use the following method.
-Attribute types are standard tagged symfony services, you should'nt need to override the default class and you will see that all existing attribute types are based on the same class.
+Attribute types are standard tagged symfony services, you should'nt need to override the default class and you will see
+that all existing attribute types are based on the same class.
 For example if you need to override the form_type of the "html" type:
 
 ````yaml
@@ -544,11 +568,14 @@ The fourth parameter of the attribute's types services can be used to set defaul
 
 Additionally, there is a few other options you might want to set using the "calls" options in the service definition
 
-- setEmbedded: If the edition of your value's data is embedded, set this value to true, this will also cascade the validation of the related value in the current form.
-- setRelation: By default it will be set to true if the storage property is not listed in the default storage properties (excepted "dataValue"). You should not have to concern yourself with this but you can use it.
+- setEmbedded: If the edition of your value's data is embedded, set this value to true, this will also cascade the
+validation of the related value in the current form.
+- setRelation: By default it will be set to true if the storage property is not listed in the default storage properties
+(excepted "dataValue"). You should not have to concern yourself with this but you can use it.
 
 ## Going further: the EAV Toolkit
-To build a typical full-scale web application using a dynamic model like this you generally needs a lot more feature than just a configurable model.
+To build a typical full-scale web application using a dynamic model like this you generally needs a lot more feature
+than just a configurable model.
 
 - Admin configuration
 - Datagrids & filters
