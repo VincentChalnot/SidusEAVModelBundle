@@ -21,6 +21,7 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('sidus_eav_model');
+        /** @var NodeBuilder $attributeDefinition */
         $attributeDefinition = $rootNode
             ->children()
                 ->scalarNode('data_class')->isRequired()->end()
@@ -40,9 +41,11 @@ class Configuration implements ConfigurationInterface
 
         $this->appendAttributeDefinition($attributeDefinition);
 
-        $familyDefinition = $attributeDefinition->end()
+        /** @var NodeBuilder $familyDefinition */
+        $familyDefinition = $attributeDefinition
                         ->end()
                     ->end()
+                ->end()
                 ->arrayNode('families')
                     ->useAttributeAsKey('code')
                     ->prototype('array')
@@ -52,7 +55,8 @@ class Configuration implements ConfigurationInterface
 
         $this->appendFamilyDefinition($familyDefinition);
 
-        $familyDefinition->end()
+        $familyDefinition
+                        ->end()
                     ->end()
                 ->end()
             ->end();
@@ -69,14 +73,15 @@ class Configuration implements ConfigurationInterface
         $attributeDefinition
             ->scalarNode('type')->defaultValue('string')->end()
             ->scalarNode('group')->end()
-            ->variableNode('options')->end()
+            ->scalarNode('form_type')->end()
             ->variableNode('form_options')->end()
-            ->variableNode('view_options')->end()
+            ->variableNode('options')->end()
             ->variableNode('validation_rules')->end()
             ->variableNode('default')->end()
             ->booleanNode('required')->defaultValue(false)->end()
             ->booleanNode('unique')->defaultValue(false)->end()
             ->booleanNode('multiple')->defaultValue(false)->end()
+            ->booleanNode('collection')->end()
             ->arrayNode('context_mask')
                 ->prototype('scalar')->end()
             ->end();
@@ -88,10 +93,12 @@ class Configuration implements ConfigurationInterface
      */
     protected function appendFamilyDefinition(NodeBuilder $familyDefinition)
     {
-        $familyDefinition
+        /** @var NodeBuilder $attributeDefinition */
+        $attributeDefinition = $familyDefinition
             ->scalarNode('data_class')->end()
             ->scalarNode('value_class')->end()
             ->scalarNode('label')->defaultNull()->end()
+            ->variableNode('options')->end()
             ->scalarNode('attributeAsLabel')->defaultNull()->end()
             ->scalarNode('attributeAsIdentifier')->defaultNull()->end()
             ->scalarNode('parent')->end()
