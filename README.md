@@ -313,6 +313,53 @@ be).
 The only safe thing you can do is switch between different attributes that stores their data the same way: For example:
 data, embed and autocomplete_data are safely interchangeable.
 
+##### TinyMCE Configuration
+
+TinyMCE integration is provided by stfalcon/TinymceBundle.
+For further information : https://github.com/stfalcon/TinymceBundle
+
+SidusEAVModelBundle provides the following default configuration :
+
+```yaml
+stfalcon_tinymce:
+    include_jquery: false
+    tinymce_jquery: false
+    use_callback_tinymce_init: true
+    external_plugins:
+        datalink:
+            url: "asset[bundles/cleverageeavmanagerlayout/js/tinymce/plugins/datalink/plugin.js]"
+        datamedia:
+            url: "asset[bundles/cleverageeavmanagerlayout/js/tinymce/plugins/datamedia/plugin.js]"
+    theme:
+        simple:
+            menubar: false
+        # Advanced theme with almost all enabled plugins
+        advanced:
+             plugins:
+                 - "advlist autolink lists link image charmap print preview hr anchor pagebreak"
+                 - "searchreplace wordcount visualblocks visualchars code fullscreen"
+                 - "insertdatetime media nonbreaking save table contextmenu directionality"
+                 - "emoticons template paste textcolor datalink"
+             toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link unlink image"
+             toolbar2: "print preview media | forecolor backcolor emoticons | stfalcon | datalink datamedia"
+             image_advtab: true
+             relative_urls: false
+             remove_script_host: false
+```
+
+The **simple** theme is set to the **html** attribute type by default, however you can set a specific theme for each attribute :
+
+
+```yaml
+attributes:
+    content:
+        type: html
+        group: content
+        form_options:
+            attr:
+                data-theme: advanced
+```
+
 
 #### Multiple & collection option
 The "collection" option allows you to add multiple values for the same attribute and because of the way the EAV model
