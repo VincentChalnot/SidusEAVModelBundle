@@ -56,10 +56,11 @@ interface AttributeInterface
      * Generic options that can be used in any applications using the EAV Model
      *
      * @param string $code
+     * @param mixed  $default
      *
      * @return mixed
      */
-    public function getOption($code);
+    public function getOption($code, $default = null);
 
     /**
      * @param string $code

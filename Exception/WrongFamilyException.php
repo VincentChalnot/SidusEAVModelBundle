@@ -9,7 +9,7 @@ use Sidus\EAVModelBundle\Entity\DataInterface;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class WrongFamilyException extends \ErrorException
+class WrongFamilyException extends \ErrorException implements EAVExceptionInterface
 {
     /**
      * @param DataInterface $data

@@ -553,7 +553,7 @@ Then declare at least an attribute type using a custom form type:
 ````yaml
 services:
     my_namespace.attribute_type.document:
-        class: '%sidus_eav_model.attribute_type.default.class%'
+        class: '%sidus_eav_model.attribute_type.relation.class%'
         arguments: [document, documentValue, <my_namespace_form_type>]
         tags:
             - { name: sidus.attribute_type }

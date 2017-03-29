@@ -7,6 +7,6 @@ namespace Sidus\EAVModelBundle\Exception;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class ContextException extends \UnexpectedValueException
+class ContextException extends \UnexpectedValueException implements EAVExceptionInterface
 {
 }

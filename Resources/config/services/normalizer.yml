@@ -1,0 +1,54 @@
+# WARNING : Symfony's serializer has to be enabled in configuration in order to work
+
+parameters:
+    sidus_eav_model.normalizer.data.ignored_attributes:
+        - refererValues
+        - refererDatas
+        - currentContext
+        - stringIdentifier
+        - integerIdentifier
+        - values
+#        - family # Would work but we prefer to allow only familyCode for performance reasons
+
+    sidus_eav_model.normalizer.data.reference_attributes:
+        - id
+        - identifier
+        - familyCode
+        - label
+
+    sidus_eav_model.normalizer.family.ignored_attributes:
+        - matchingCodes
+        - valueClass
+        - context
+        # @todo pass children and parent families by references
+        - parent
+        - children
+
+    sidus_eav_model.normalizer.attribute.ignored_attributes:
+        - family # Prevent circular reference
+
+services:
+    sidus_eav_model.normalizer.data:
+        parent: serializer.normalizer.object
+        class: Sidus\EAVModelBundle\Serializer\Normalizer\EAVDataNormalizer
+        calls:
+            - [setIgnoredAttributes, ['%sidus_eav_model.normalizer.data.ignored_attributes%']]
+            - [setReferenceAttributes, ['%sidus_eav_model.normalizer.data.reference_attributes%']]
+        tags:
+            - { name: serializer.normalizer }
+
+    sidus_eav_model.normalizer.family:
+        parent: serializer.normalizer.object
+        class: Sidus\EAVModelBundle\Serializer\Normalizer\FamilyNormalizer
+        calls:
+            - [setIgnoredAttributes, ['%sidus_eav_model.normalizer.family.ignored_attributes%']]
+        tags:
+            - { name: serializer.normalizer }
+
+    sidus_eav_model.normalizer.attribute:
+        parent: serializer.normalizer.object
+        class: Sidus\EAVModelBundle\Serializer\Normalizer\AttributeNormalizer
+        calls:
+            - [setIgnoredAttributes, ['%sidus_eav_model.normalizer.attribute.ignored_attributes%']]
+        tags:
+            - { name: serializer.normalizer }

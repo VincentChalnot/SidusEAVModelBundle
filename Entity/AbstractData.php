@@ -227,8 +227,8 @@ abstract class AbstractData implements ContextualDataInterface
      * @param mixed              $valueData
      * @param array              $context
      *
-     * @throws MissingAttributeException
      * @throws InvalidValueDataException
+     * @throws MissingAttributeException
      * @throws ContextException
      *
      * @return DataInterface
@@ -299,7 +299,7 @@ abstract class AbstractData implements ContextualDataInterface
      *
      * @return ArrayCollection
      */
-    public function getValuesData(AttributeInterface $attribute = null, array $context = null)
+    public function getValuesData(AttributeInterface $attribute, array $context = null)
     {
         $this->checkAttribute($attribute);
         $valuesData = new ArrayCollection();
@@ -360,8 +360,8 @@ abstract class AbstractData implements ContextualDataInterface
      * @param array  $arguments
      *
      * @throws \BadMethodCallException
-     * @throws MissingAttributeException
      * @throws InvalidValueDataException
+     * @throws MissingAttributeException
      * @throws ContextException
      *
      * @return mixed|null|ValueInterface
@@ -438,9 +438,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param mixed  $value
      * @param array  $context
      *
+     * @throws InvalidValueDataException
      * @throws MissingAttributeException
      * @throws ContextException
-     * @throws InvalidValueDataException
      *
      * @return DataInterface
      */
@@ -464,9 +464,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param string $attributeCode
      * @param mixed  $value
      *
+     * @throws InvalidValueDataException
      * @throws MissingAttributeException
      * @throws ContextException
-     * @throws InvalidValueDataException
      *
      * @return DataInterface
      */
@@ -491,9 +491,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
-     * @throws ContextException
-     * @throws MissingAttributeException
      * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return null|ValueInterface
      */
@@ -510,9 +510,9 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface|null $attribute
      * @param array                   $context
      *
-     * @throws ContextException
-     * @throws MissingAttributeException
      * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return Collection|ValueInterface[]
      */
@@ -713,8 +713,8 @@ abstract class AbstractData implements ContextualDataInterface
      * @param array|\Traversable $dataValues
      * @param array              $context
      *
-     * @throws MissingAttributeException
      * @throws InvalidValueDataException
+     * @throws MissingAttributeException
      * @throws ContextException
      *
      * @return DataInterface
@@ -731,8 +731,8 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
-     * @throws MissingAttributeException
      * @throws InvalidValueDataException
+     * @throws MissingAttributeException
      * @throws ContextException
      *
      * @return DataInterface
@@ -791,8 +791,8 @@ abstract class AbstractData implements ContextualDataInterface
      * @param mixed              $dataValue
      * @param array              $context
      *
-     * @throws MissingAttributeException
      * @throws InvalidValueDataException
+     * @throws MissingAttributeException
      * @throws ContextException
      *
      * @return DataInterface
@@ -822,8 +822,8 @@ abstract class AbstractData implements ContextualDataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
-     * @throws MissingAttributeException
      * @throws InvalidValueDataException
+     * @throws MissingAttributeException
      * @throws ContextException
      *
      * @return bool

@@ -7,7 +7,7 @@ namespace Sidus\EAVModelBundle\Exception;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class MissingAttributeException extends \UnexpectedValueException
+class MissingAttributeException extends \UnexpectedValueException implements EAVExceptionInterface
 {
     /**
      * @param string $code

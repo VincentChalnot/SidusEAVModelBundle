@@ -6,7 +6,7 @@ namespace Sidus\EAVModelBundle\Exception;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class InvalidValueDataException extends \UnexpectedValueException
+class InvalidValueDataException extends \UnexpectedValueException implements EAVExceptionInterface
 {
 
 }

@@ -5,6 +5,8 @@ namespace Sidus\EAVModelBundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Build extendable configuration tree
@@ -26,6 +28,7 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('data_class')->isRequired()->end()
                 ->scalarNode('value_class')->isRequired()->end()
+                ->booleanNode('serializer_enabled')->defaultFalse()->end()
                 ->scalarNode('collection_type')->defaultValue('collection')->end()
                 ->scalarNode('context_form_type')->defaultNull()->end()
                 ->variableNode('default_context')->end()

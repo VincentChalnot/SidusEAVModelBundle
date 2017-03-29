@@ -133,13 +133,14 @@ class Attribute implements AttributeInterface
 
     /**
      * @param string $code
+     * @param mixed  $default
      *
      * @return mixed
      */
-    public function getOption($code)
+    public function getOption($code, $default = null)
     {
         if (!array_key_exists($code, $this->options)) {
-            return null;
+            return $default;
         }
 
         return $this->options[$code];
@@ -207,38 +208,12 @@ class Attribute implements AttributeInterface
         $this->formOptions[$code] = $value;
     }
 
-
     /**
      * @param array $formOptions
      */
     public function setFormOptions(array $formOptions)
     {
         $this->formOptions = $formOptions;
-    }
-
-    /**
-     * @param string $code
-     * @param mixed  $value
-     */
-    public function addViewOption($code, $value)
-    {
-        $this->viewOptions[$code] = $value;
-    }
-
-    /**
-     * @return array
-     */
-    public function getViewOptions()
-    {
-        return $this->viewOptions;
-    }
-
-    /**
-     * @param array $viewOptions
-     */
-    public function setViewOptions(array $viewOptions)
-    {
-        $this->viewOptions = $viewOptions;
     }
 
     /**

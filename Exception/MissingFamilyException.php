@@ -7,7 +7,7 @@ namespace Sidus\EAVModelBundle\Exception;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class MissingFamilyException extends \UnexpectedValueException
+class MissingFamilyException extends \UnexpectedValueException implements EAVExceptionInterface
 {
     /**
      * @param string $code

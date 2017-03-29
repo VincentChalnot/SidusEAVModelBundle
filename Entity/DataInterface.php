@@ -3,6 +3,9 @@
 namespace Sidus\EAVModelBundle\Entity;
 
 use Doctrine\Common\Collections\Collection;
+use Sidus\EAVModelBundle\Exception\ContextException;
+use Sidus\EAVModelBundle\Exception\InvalidValueDataException;
+use Sidus\EAVModelBundle\Exception\MissingAttributeException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 
@@ -19,6 +22,8 @@ interface DataInterface
     public function getId();
 
     /**
+     * @throws InvalidValueDataException
+     *
      * @return mixed
      */
     public function getIdentifier();
@@ -46,6 +51,10 @@ interface DataInterface
      * @param string $attributeCode
      * @param array  $context
      *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     *
      * @return mixed
      */
     public function get($attributeCode, array $context = null);
@@ -57,6 +66,10 @@ interface DataInterface
      * @param mixed  $value
      * @param array  $context
      *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     *
      * @return DataInterface
      */
     public function set($attributeCode, $value, array $context = null);
@@ -67,6 +80,10 @@ interface DataInterface
      * @param AttributeInterface|null $attribute
      * @param array                   $context
      *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     *
      * @return Collection|ValueInterface[]
      */
     public function getValues(AttributeInterface $attribute = null, array $context = null);
@@ -76,6 +93,10 @@ interface DataInterface
      *
      * @param AttributeInterface $attribute
      * @param array              $context
+     *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return null|ValueInterface
      */
@@ -90,6 +111,10 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     *
      * @return mixed
      */
     public function getValueData(AttributeInterface $attribute, array $context = null);
@@ -103,9 +128,13 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     *
      * @return Collection|array
      */
-    public function getValuesData(AttributeInterface $attribute = null, array $context = null);
+    public function getValuesData(AttributeInterface $attribute, array $context = null);
 
     /**
      * Set the value's data of a given attribute
@@ -116,6 +145,10 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param mixed              $dataValue
      * @param array              $context
+     *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return DataInterface
      */
@@ -131,6 +164,10 @@ interface DataInterface
      * @param array|\Traversable $dataValues
      * @param array              $context
      *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     *
      * @return DataInterface
      */
     public function setValuesData(AttributeInterface $attribute, $dataValues, array $context = null);
@@ -141,6 +178,10 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     *
      * @return DataInterface
      */
     public function emptyValues(AttributeInterface $attribute = null, array $context = null);
@@ -149,6 +190,8 @@ interface DataInterface
      * Append a value to the internal values stack
      *
      * @param ValueInterface $value
+     *
+     * @throws ContextException
      *
      * @return DataInterface
      */
@@ -160,6 +203,10 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param mixed              $valueData
      * @param array              $context
+     *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return DataInterface
      */
@@ -179,6 +226,8 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
+     * @throws ContextException
+     *
      * @return Collection|ValueInterface[]
      */
     public function getRefererValues(FamilyInterface $family = null, AttributeInterface $attribute = null, array $context = null);
@@ -187,6 +236,8 @@ interface DataInterface
      * @param FamilyInterface|null    $family
      * @param AttributeInterface|null $attribute
      * @param array                   $context
+     *
+     * @throws ContextException
      *
      * @return Collection|DataInterface[]
      */
@@ -215,6 +266,8 @@ interface DataInterface
      * @param AttributeInterface $attribute
      * @param array              $context
      *
+     * @throws MissingAttributeException
+     *
      * @return ValueInterface
      */
     public function createValue(AttributeInterface $attribute, array $context = null);
@@ -224,6 +277,10 @@ interface DataInterface
      *
      * @param AttributeInterface $attribute
      * @param array              $context
+     *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return bool
      */

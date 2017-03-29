@@ -7,7 +7,7 @@ namespace Sidus\EAVModelBundle\Exception;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class AttributeConfigurationException extends \UnexpectedValueException
+class AttributeConfigurationException extends \UnexpectedValueException implements EAVExceptionInterface
 {
 
 }
