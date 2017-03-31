@@ -58,7 +58,7 @@ class SimpleDataSelectorType extends AbstractType
                     ->andWhere('d.family IN (:allowedFamilies)')
                     ->setParameter('allowedFamilies', $familyCodes);
             }
-            $qb->setMaxResults(100);
+            $qb->setMaxResults($options['max_results']);
 
             return $qb;
         };
@@ -68,6 +68,7 @@ class SimpleDataSelectorType extends AbstractType
                 'class' => $this->dataClass,
                 'query_builder' => $queryBuilder,
                 'allowed_families' => null,
+                'max_results' => 100,
             ]
         );
 

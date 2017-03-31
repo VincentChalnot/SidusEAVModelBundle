@@ -262,13 +262,18 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      */
     protected function applyJoin()
     {
+        $alias = $this->eavQueryBuilder->getAlias();
         $this->joinAlias = $this->generateUniqueId('join');
         $qb = $this->eavQueryBuilder->getQueryBuilder();
+
+        $joinCondition = "{$this->joinAlias}.attributeCode = '{$this->attribute->getCode()}'";
+        $joinCondition .= " AND {$this->joinAlias}.familyCode = '{$this->attribute->getFamily()->getCode()}'";
+
         $qb->leftJoin(
-            $this->eavQueryBuilder->getAlias().'.values',
+            $alias.'.values',
             $this->joinAlias,
             Join::WITH,
-            "({$this->joinAlias}.attributeCode = '{$this->attribute->getCode()}')"
+            $joinCondition
         );
     }
 

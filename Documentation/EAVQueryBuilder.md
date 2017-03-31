@@ -34,7 +34,7 @@ Introducing the EAVQueryBuilder:
  */
 
 // Initializing a new EAVQueryBuilder from the Category family
-$eavQb = $dataRepository->createEAVQueryBuilder($categoryFamily);
+$eavQb = $dataRepository->createFamilyQueryBuilder($categoryFamily);
 
 // Creating the proper DQL and parameters to match some category codes
 $dqlHandler = $eavQb->a('categoryCode')->in([
@@ -72,7 +72,7 @@ conditions:
  * @var \Sidus\EAVModelBundle\Model\FamilyInterface $bookFamily
  * @var \Sidus\EAVModelBundle\Entity\DataInterface[] $categories
  */
-$eavQb = $dataRepository->createEAVQueryBuilder($bookFamily);
+$eavQb = $dataRepository->createFamilyQueryBuilder($bookFamily);
 
 $eavQb->addOrderBy($eavQb->a('title'), 'DESC');
 

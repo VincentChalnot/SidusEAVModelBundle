@@ -26,13 +26,11 @@ interface ValueInterface
     public function getAttributeCode();
 
     /**
-     * Set attributeCode : Warning ! No check here to whether or not the attribute actually exists
+     * The family code of the attribute, used for advanced multi-family queries
      *
-     * @param string $attributeCode
-     *
-     * @return ValueInterface
+     * @return string
      */
-    public function setAttributeCode($attributeCode);
+    public function getFamilyCode();
 
     /**
      * @return AttributeInterface

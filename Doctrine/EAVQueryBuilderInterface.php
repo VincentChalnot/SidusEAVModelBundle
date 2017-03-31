@@ -14,28 +14,9 @@ use Sidus\EAVModelBundle\Model\FamilyInterface;
 interface EAVQueryBuilderInterface
 {
     /**
-     * @return FamilyInterface
-     */
-    public function getFamily();
-
-    /**
      * @return QueryBuilder
      */
     public function getQueryBuilder();
-
-    /**
-     * @param string $attributeCode
-     *
-     * @return AttributeQueryBuilderInterface
-     */
-    public function attributeByCode($attributeCode);
-
-    /**
-     * @param string $attributeCode
-     *
-     * @return AttributeQueryBuilderInterface
-     */
-    public function a($attributeCode);
 
     /**
      * @param AttributeInterface $attribute

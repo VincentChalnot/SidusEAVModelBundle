@@ -1,0 +1,5 @@
+services:
+    sidus_eav_model.finder:
+        class: Sidus\EAVModelBundle\Doctrine\EAVFinder
+        arguments:
+            - '@doctrine'

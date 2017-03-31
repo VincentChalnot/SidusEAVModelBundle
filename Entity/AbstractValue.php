@@ -59,6 +59,15 @@ abstract class AbstractValue implements ContextualValueInterface
     protected $attributeCode;
 
     /**
+     * Used for advanced multi-family queries
+     *
+     * @var string
+     *
+     * @ORM\Column(name="family_code", type="string", length=255)
+     */
+    protected $familyCode;
+
+    /**
      * @var integer
      *
      * @ORM\Column(name="position", type="integer", nullable=true)
@@ -109,7 +118,7 @@ abstract class AbstractValue implements ContextualValueInterface
 
     /**
      * @var string
-     * 
+     *
      * @ORM\Column(name="text_value", type="text", nullable=true)
      */
     protected $textValue;
@@ -122,7 +131,7 @@ abstract class AbstractValue implements ContextualValueInterface
     {
         $this->data = $data;
         if ($attribute) {
-            $this->attributeCode = $attribute->getCode();
+            $this->setAttribute($attribute);
         }
     }
 
@@ -151,15 +160,11 @@ abstract class AbstractValue implements ContextualValueInterface
     }
 
     /**
-     * @param string $attributeCode
-     *
-     * @return AbstractValue
+     * @return string
      */
-    public function setAttributeCode($attributeCode)
+    public function getFamilyCode()
     {
-        $this->attributeCode = $attributeCode;
-
-        return $this;
+        return $this->familyCode;
     }
 
     /**
@@ -181,7 +186,8 @@ abstract class AbstractValue implements ContextualValueInterface
      */
     public function setAttribute(AttributeInterface $attribute)
     {
-        $this->setAttributeCode($attribute->getCode());
+        $this->attributeCode = $attribute->getCode();
+        $this->familyCode = $attribute->getFamily() ? $attribute->getFamily()->getCode() : null;
 
         return $this;
     }
@@ -495,7 +501,7 @@ abstract class AbstractValue implements ContextualValueInterface
     protected function checkContextKey($key)
     {
         if (!in_array($key, $this->getContextKeys(), true)) {
-            throw new ContextException("Trying to get an non-allowed context key {$key}");
+            throw new ContextException("Trying to get a non-allowed context key {$key}");
         }
     }
 }

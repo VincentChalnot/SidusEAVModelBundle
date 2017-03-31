@@ -4,7 +4,6 @@ namespace Sidus\EAVModelBundle\Doctrine;
 
 use Doctrine\ORM\QueryBuilder;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
-use Sidus\EAVModelBundle\Model\FamilyInterface;
 
 /**
  * Build complex doctrine queries with the EAV model
@@ -13,9 +12,6 @@ use Sidus\EAVModelBundle\Model\FamilyInterface;
  */
 class EAVQueryBuilder implements EAVQueryBuilderInterface
 {
-    /** @var FamilyInterface */
-    protected $family;
-
     /** @var QueryBuilder */
     protected $queryBuilder;
 
@@ -26,27 +22,13 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
     protected $isApplied = false;
 
     /**
-     * @param FamilyInterface $family
-     * @param QueryBuilder    $queryBuilder
-     * @param string          $alias
+     * @param QueryBuilder $queryBuilder
+     * @param string       $alias
      */
-    public function __construct(FamilyInterface $family, QueryBuilder $queryBuilder, $alias = 'e')
+    public function __construct(QueryBuilder $queryBuilder, $alias = 'e')
     {
-        $this->family = $family;
         $this->queryBuilder = $queryBuilder;
         $this->alias = $alias;
-
-        $queryBuilder
-            ->andWhere($alias.'.family = :familyCode')
-            ->setParameter('familyCode', $family->getCode());
-    }
-
-    /**
-     * @return FamilyInterface
-     */
-    public function getFamily()
-    {
-        return $this->family;
     }
 
     /**
@@ -63,28 +45,6 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
     public function getAlias()
     {
         return $this->alias;
-    }
-
-    /**
-     * @param string $attributeCode
-     *
-     * @return AttributeQueryBuilderInterface
-     */
-    public function attributeByCode($attributeCode)
-    {
-        $attribute = $this->getFamily()->getAttribute($attributeCode);
-
-        return $this->attribute($attribute);
-    }
-
-    /**
-     * @param string $attributeCode
-     *
-     * @return AttributeQueryBuilderInterface
-     */
-    public function a($attributeCode)
-    {
-        return $this->attributeByCode($attributeCode);
     }
 
     /**

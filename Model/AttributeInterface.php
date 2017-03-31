@@ -26,7 +26,7 @@ interface AttributeInterface
     /**
      * The family that carries the attribute
      *
-     * @return string
+     * @return FamilyInterface
      */
     public function getFamily();
 

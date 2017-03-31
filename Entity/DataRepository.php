@@ -12,6 +12,7 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Sidus\EAVModelBundle\Doctrine\EAVQueryBuilder;
+use Sidus\EAVModelBundle\Doctrine\SingleFamilyQueryBuilder;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Model\IdentifierAttributeType;
@@ -210,11 +211,41 @@ class DataRepository extends EntityRepository
      * @param FamilyInterface $family
      * @param string          $alias
      *
+     * @return SingleFamilyQueryBuilder
+     */
+    public function createFamilyQueryBuilder(FamilyInterface $family, $alias = 'e')
+    {
+        return new SingleFamilyQueryBuilder($family, $this->createQueryBuilder($alias), $alias);
+    }
+
+    /**
+     * @param string $alias
+     *
      * @return EAVQueryBuilder
      */
-    public function createEAVQueryBuilder(FamilyInterface $family, $alias = 'e')
+    public function createEAVQueryBuilder($alias = 'e')
     {
-        return new EAVQueryBuilder($family, $this->createQueryBuilder($alias), $alias);
+        return new EAVQueryBuilder($this->createQueryBuilder($alias), $alias);
+    }
+
+    /**
+     * @param FamilyInterface[] $families
+     * @param string            $term
+     *
+     * @throws \LogicException
+     * @throws \UnexpectedValueException
+     *
+     * @return QueryBuilder
+     */
+    public function getQbForFamiliesAndLabel(array $families, $term)
+    {
+        $eavQb = $this->createEAVQueryBuilder();
+        $orCondition = [];
+        foreach ($families as $family) {
+            $orCondition[] = $eavQb->attribute($family->getAttributeAsLabel())->like($term);
+        }
+
+        return $eavQb->apply($eavQb->getOr($orCondition));
     }
 
     /**

@@ -453,14 +453,20 @@ class Family implements FamilyInterface
 
     /**
      * @param FamilyInterface $parent
+     *
+     * @throws \UnexpectedValueException
      */
     protected function copyFromFamily(FamilyInterface $parent)
     {
         foreach ($parent->getAttributes() as $attribute) {
-            $this->addAttribute($attribute);
+            $this->addAttribute(clone $attribute);
         }
-        $this->attributeAsLabel = $parent->getAttributeAsLabel();
-        $this->attributeAsIdentifier = $parent->getAttributeAsIdentifier();
+        if ($parent->getAttributeAsLabel()) {
+            $this->attributeAsLabel = $this->getAttribute($parent->getAttributeAsLabel()->getCode());
+        }
+        if ($parent->getAttributeAsIdentifier()) {
+            $this->attributeAsIdentifier = $this->getAttribute($parent->getAttributeAsIdentifier()->getCode());
+        }
         $this->valueClass = $parent->getValueClass();
         $this->dataClass = $parent->getDataClass();
     }
