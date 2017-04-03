@@ -3,7 +3,6 @@
 namespace Sidus\EAVModelBundle\Doctrine;
 
 use Doctrine\ORM\QueryBuilder;
-use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 
 /**

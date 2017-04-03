@@ -113,7 +113,6 @@ class SidusEAVModelExtension extends Extension
         );
         $definition->addMethodCall('setTranslator', [new Reference('translator')]);
         $definition->addTag('sidus.family');
-//        $definition->setPublic(false); //  @todo Why does this trigger a circular reference exception ?
         $container->setDefinition('sidus_eav_model.family.'.$code, $definition);
     }
 }

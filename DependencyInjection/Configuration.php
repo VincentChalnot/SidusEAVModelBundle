@@ -5,8 +5,6 @@ namespace Sidus\EAVModelBundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 
 /**
