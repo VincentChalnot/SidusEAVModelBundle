@@ -81,12 +81,12 @@ services:
 
     sidus_eav_model.attribute_type.string_identifier:
         class: '%sidus_eav_model.attribute_type.identifier.class%'
-        arguments: [string_identifier, stringIdentifier, Symfony\Component\Form\Extension\Core\Type\TextType]
+        arguments: [string_identifier, stringValue, Symfony\Component\Form\Extension\Core\Type\TextType]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.integer_identifier:
         class: '%sidus_eav_model.attribute_type.identifier.class%'
-        arguments: [integer_identifier, integerIdentifier, Symfony\Component\Form\Extension\Core\Type\TextType]
+        arguments: [integer_identifier, integerValue, Symfony\Component\Form\Extension\Core\Type\TextType]
         tags:
             - { name: sidus.attribute_type }

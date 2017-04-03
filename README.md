@@ -146,8 +146,8 @@ use Sidus\EAVModelBundle\Entity\AbstractData;
 /**
  * @ORM\Table(name="mynamespace_data", indexes={
  *     @ORM\Index(name="family", columns={"family_code"}),
- *     @ORM\Index(name="integer_identifier", columns={"family_code", "integer_identifier"}),
- *     @ORM\Index(name="string_identifier", columns={"family_code", "string_identifier"})
+ *     @ORM\Index(name="updated_at", columns={"updated_at"}),
+ *     @ORM\Index(name="created_at", columns={"created_at"})
  * })
  * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\DataRepository")
  */
@@ -281,9 +281,8 @@ widget. Accepts a list of allowed families in the 'allowed_families' option.
 - embed: Stored like data but embed the edition of the foreign entity directly into the form. Requires a single family
 in the 'allowed_families' option.
 - hidden: Stored as varchar(255), will be present in the form as a hidden input.
-- string_identifier: **Experimental**, can be used to store the unique identifier of the family directly in the Data
-table for better performances.
-- integer_identifier: **Experimental**, see string_identifier
+- string_identifier: Same as a string but unique and required
+- integer_identifier: Same as an integer but unique and required
 
 Additional attribute types can be found in the sidus/eav-bootstrap-bundle:
 - html: Stored as text, edited as TinyMCE WYSIWYG editor, featuring full control over configuration

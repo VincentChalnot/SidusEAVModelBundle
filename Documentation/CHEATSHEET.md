@@ -54,8 +54,8 @@ Attribute types define a common way of editing and storing data, this bundle pro
 - data: Stored in a real Doctrine Many-To-One relationship with a related Data object, edited as a choice widget, requires the "family" form_option.
 - embed: Stored like data but embed the edition of the foreign entity directly into the form, requires the "family" form_option.
 - hidden: Stored as varchar(255), will be present in the form as a hidden input.
-- string_identifier: **Experimental**, can be used to store the unique identifier of the family directly in the Data table for better performances.
-- integer_identifier: **Experimental**, see string_identifier
+- string_identifier: Same as a string but unique and required
+- integer_identifier: Same as an integer but unique and required
 
 Additional attribute types can be found in the sidus/eav-bootstrap-bundle:
 - html: Stored as text, edited as TinyMCE WYSIWYG editor, featuring full control over configuration

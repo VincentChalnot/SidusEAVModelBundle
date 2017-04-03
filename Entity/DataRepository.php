@@ -15,7 +15,6 @@ use Sidus\EAVModelBundle\Doctrine\EAVQueryBuilder;
 use Sidus\EAVModelBundle\Doctrine\SingleFamilyQueryBuilder;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
-use Sidus\EAVModelBundle\Model\IdentifierAttributeType;
 
 /**
  * Base repository for Data
@@ -82,9 +81,6 @@ class DataRepository extends EntityRepository
             throw new \LogicException("Cannot find data based on a non-unique attribute '{$attribute->getCode()}'");
         }
         $dataBaseType = $attribute->getType()->getDatabaseType();
-        if ($attribute->getType() instanceof IdentifierAttributeType) {
-            return $this->findByIdentifierColumn($family, $dataBaseType, $reference, $partialLoad);
-        }
         $qb = $this->createQueryBuilder('e');
         $joinCondition = "(identifier.attributeCode = :attributeCode AND identifier.{$dataBaseType} = :reference)";
         $qb
@@ -243,6 +239,26 @@ class DataRepository extends EntityRepository
         $orCondition = [];
         foreach ($families as $family) {
             $orCondition[] = $eavQb->attribute($family->getAttributeAsLabel())->like($term);
+        }
+
+        return $eavQb->apply($eavQb->getOr($orCondition));
+    }
+
+    /**
+     * @param FamilyInterface[] $families
+     * @param string            $term
+     *
+     * @throws \LogicException
+     * @throws \UnexpectedValueException
+     *
+     * @return QueryBuilder
+     */
+    public function getQbForFamiliesAndIdentifier(array $families, $term)
+    {
+        $eavQb = $this->createEAVQueryBuilder();
+        $orCondition = [];
+        foreach ($families as $family) {
+            $orCondition[] = $eavQb->attribute($family->getAttributeAsIdentifier())->like($term);
         }
 
         return $eavQb->apply($eavQb->getOr($orCondition));

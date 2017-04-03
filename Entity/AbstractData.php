@@ -14,7 +14,6 @@ use Sidus\EAVModelBundle\Exception\InvalidValueDataException;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
-use Sidus\EAVModelBundle\Model\IdentifierAttributeType;
 use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
 use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
 use Symfony\Component\PropertyAccess\Exception\ExceptionInterface;
@@ -97,20 +96,6 @@ abstract class AbstractData implements ContextualDataInterface
      * @var array
      */
     protected $currentContext;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="string_identifier", type="string", length=255, nullable=true)
-     */
-    protected $stringIdentifier;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="integer_identifier", type="integer", nullable=true)
-     */
-    protected $integerIdentifier;
 
     /**
      * Used as an internal cache to access more easily values based on their attribute
@@ -306,12 +291,8 @@ abstract class AbstractData implements ContextualDataInterface
         $accessor = PropertyAccess::createPropertyAccessor();
         $attributeType = $attribute->getType();
         try {
-            if ($attributeType instanceof IdentifierAttributeType) {
-                $valuesData->add($accessor->getValue($this, $attributeType->getDatabaseType()));
-            } else {
-                foreach ($this->getValues($attribute, $context) as $value) {
-                    $valuesData->add($accessor->getValue($value, $attributeType->getDatabaseType()));
-                }
+            foreach ($this->getValues($attribute, $context) as $value) {
+                $valuesData->add($accessor->getValue($value, $attributeType->getDatabaseType()));
             }
         } catch (ExceptionInterface $e) {
             throw new InvalidValueDataException("Unable to access data for attribute {$attribute->getCode()}", 0, $e);
@@ -633,46 +614,6 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @return string
-     */
-    public function getStringIdentifier()
-    {
-        return $this->stringIdentifier;
-    }
-
-    /**
-     * @param string $stringIdentifier
-     *
-     * @return AbstractData
-     */
-    public function setStringIdentifier($stringIdentifier)
-    {
-        $this->stringIdentifier = $stringIdentifier;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getIntegerIdentifier()
-    {
-        return $this->integerIdentifier;
-    }
-
-    /**
-     * @param string $integerIdentifier
-     *
-     * @return AbstractData
-     */
-    public function setIntegerIdentifier($integerIdentifier)
-    {
-        $this->integerIdentifier = $integerIdentifier;
-
-        return $this;
-    }
-
-    /**
      * @return FamilyInterface
      */
     public function getFamily()
@@ -799,13 +740,9 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null)
     {
-        if ($attribute->getType() instanceof IdentifierAttributeType) {
-            $value = $this;
-        } else {
-            $value = $this->getValue($attribute, $context);
-            if (!$value) {
-                $value = $this->createValue($attribute, $context);
-            }
+        $value = $this->getValue($attribute, $context);
+        if (!$value) {
+            $value = $this->createValue($attribute, $context);
         }
 
         $accessor = PropertyAccess::createPropertyAccessor();
@@ -847,8 +784,6 @@ abstract class AbstractData implements ContextualDataInterface
     public function __clone()
     {
         $this->id = null;
-        $this->stringIdentifier = null;
-        $this->integerIdentifier = null;
         $this->valuesByAttributes = null;
 
         $newValues = new ArrayCollection();

@@ -29,7 +29,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     {
         $this->eavQueryBuilder = $eavQueryBuilder;
         $this->attribute = $attribute;
-        $this->applyJoin();
+        $this->prepareJoin();
     }
 
     /**
@@ -42,6 +42,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
             $msg = "No condition applied on attribute query builder for attribute {$this->attribute->getCode()}";
             throw new \LogicException($msg);
         }
+        $this->applyJoin();
 
         return $this->dql;
     }
@@ -224,6 +225,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
         if (null !== $this->dql) {
             throw new \LogicException("Condition as already been applied {$this->dql}");
         }
+
         $this->dql = $dql;
         $this->parameters = $parameters;
 
@@ -258,22 +260,32 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     }
 
     /**
+     * Prepare the join for later
+     */
+    protected function prepareJoin()
+    {
+        $this->joinAlias = $this->generateUniqueId('join');
+    }
+
+    /**
      * Apply the join condition on the Query Builder
      */
     protected function applyJoin()
     {
-        $alias = $this->eavQueryBuilder->getAlias();
-        $this->joinAlias = $this->generateUniqueId('join');
         $qb = $this->eavQueryBuilder->getQueryBuilder();
 
-        $joinCondition = "{$this->joinAlias}.attributeCode = '{$this->attribute->getCode()}'";
-        $joinCondition .= " AND {$this->joinAlias}.familyCode = '{$this->attribute->getFamily()->getCode()}'";
+        // Join based on attributeCode and familyCode
+        $attributeCode = $this->generateUniqueId('attribute');
+        $familyCode = $this->generateUniqueId('family');
+
+        $qb->setParameter($attributeCode, $this->attribute->getCode());
+        $qb->setParameter($familyCode, $this->attribute->getFamily()->getCode());
 
         $qb->leftJoin(
-            $alias.'.values',
+            $this->eavQueryBuilder->getAlias().'.values',
             $this->joinAlias,
             Join::WITH,
-            $joinCondition
+            "{$this->joinAlias}.attributeCode = :{$attributeCode} AND {$this->joinAlias}.familyCode = :{$familyCode}"
         );
     }
 

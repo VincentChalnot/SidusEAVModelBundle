@@ -10,20 +10,6 @@ namespace Sidus\EAVModelBundle\Model;
 class IdentifierAttributeType extends AttributeType
 {
     /**
-     * {@inheritdoc}
-     *
-     * @throws \UnexpectedValueException
-     */
-    public function __construct($code, $databaseType, $formType, array $formOptions = [])
-    {
-        if (!in_array($databaseType, ['stringIdentifier', 'integerIdentifier'], true)) {
-            $m = "Identifier attribute {$code} can only be a stringIdentifier or an integerIdentifier, '{$databaseType}' given";
-            throw new \UnexpectedValueException($m);
-        }
-        parent::__construct($code, $databaseType, $formType, $formOptions);
-    }
-
-    /**
      * @param AttributeInterface $attribute
      */
     public function setAttributeDefaults(AttributeInterface $attribute)

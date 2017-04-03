@@ -6,11 +6,9 @@ use Doctrine\Bundle\DoctrineBundle\Registry;
 use Exception;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Entity\DataInterface;
-use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Entity\ValueInterface;
 use Sidus\EAVModelBundle\Entity\ValueRepository;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
-use Sidus\EAVModelBundle\Model\IdentifierAttributeType;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Sidus\EAVModelBundle\Validator\Mapping\Loader\BaseLoader;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -109,17 +107,6 @@ class DataValidator extends ConstraintValidator
     ) {
         $valueData = $data->get($attribute->getCode());
 
-        if ($attribute->getType() instanceof IdentifierAttributeType) {
-            /** @var DataRepository $repo */
-            $repo = $this->doctrine->getRepository($data->getFamily()->getDataClass());
-            $result = $repo->findByIdentifier($data->getFamily(), $valueData);
-            if ($result && $result->getId() !== $data->getId()) {
-                $this->buildAttributeViolation($data, $context, $attribute, 'unique', $valueData);
-            }
-
-            return;
-        }
-
         /** @var ValueRepository $repo */
         $repo = $this->doctrine->getRepository($data->getFamily()->getValueClass());
         $values = $repo->findBy(
@@ -148,6 +135,9 @@ class DataValidator extends ConstraintValidator
      *
      * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      * @throws \InvalidArgumentException
+     * @throws \Sidus\EAVModelBundle\Exception\ContextException
+     * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      */
     protected function validateFamilies(
         ExecutionContextInterface $context,
@@ -196,6 +186,9 @@ class DataValidator extends ConstraintValidator
      *
      * @throws \Symfony\Component\Validator\Exception\MappingException
      * @throws \InvalidArgumentException
+     * @throws \Sidus\EAVModelBundle\Exception\ContextException
+     * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      */
     protected function validateRules(
         ExecutionContextInterface $context,

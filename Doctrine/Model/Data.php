@@ -11,8 +11,6 @@ use Sidus\EAVModelBundle\Entity\AbstractData;
  *
  * @ORM\Table(name="eav_data", indexes={
  *     @ORM\Index(name="family", columns={"family_code"}),
- *     @ORM\Index(name="integer_identifier", columns={"family_code", "integer_identifier"}),
- *     @ORM\Index(name="string_identifier", columns={"family_code", "string_identifier"}),
  *     @ORM\Index(name="updated_at", columns={"updated_at"}),
  *     @ORM\Index(name="created_at", columns={"created_at"})
  * })

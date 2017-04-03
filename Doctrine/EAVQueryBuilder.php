@@ -138,7 +138,7 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
             if (!$dqlHandler instanceof DQLHandlerInterface) {
                 throw new \UnexpectedValueException('$dqlHandlers parameters must be an array of DQLHandlerInterface');
             }
-            $dqlStatement[] = $dqlHandler->getDQL();
+            $dqlStatement[] = '('.$dqlHandler->getDQL().')';
 
             foreach ($dqlHandler->getParameters() as $key => $value) {
                 $parameters[$key] = $value;
