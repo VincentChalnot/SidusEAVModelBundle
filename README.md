@@ -57,59 +57,47 @@ For a basic blog the configuration will look like this:
         Post:
             attributeAsLabel: title
             attributes:
-                - title
-                - content
-                - publicationDate
-                - publicationStatus
-                - author
-                - tags
-                - isFeatured
+                title: # Default type is string
+                    required: true
+
+                content:
+                    type: html
+                    group: content
+
+                publicationDate:
+                    type: datetime
+
+                publicationStatus:
+                    type: choice
+                    form_options:
+                        choices:
+                            draft: Draft
+                            published: Published
+                            archived: Archived
+
+                author:
+                    type: data_selector
+                    options:
+                        allowed_families: Author
+
+                tags:
+                    multiple: true
+                    form_options:
+                        collection_options:
+                            sortable: true
+
+                isFeatured:
+                    type: switch
 
         Author:
             attributeAsLabel: name
             attributes:
-                - name
-                - email
+                name:
+                    required: true
 
-    attributes:
-        title: # Default type is string
-            required: true
-
-        content:
-            type: html
-            group: content
-
-        publicationDate:
-            type: datetime
-
-        publicationStatus:
-            type: choice
-            form_options:
-                choices:
-                    draft: Draft
-                    published: Published
-                    archived: Archived
-
-        author:
-            type: data_selector
-            form_options:
-                family: Author
-
-        tags:
-            multiple: true
-            form_options:
-                collection_options:
-                    sortable: true
-
-        isFeatured:
-            type: switch
-
-        name:
-            required: true
-
-        email:
-            validation_rules:
-                - Email: ~
+                email:
+                    validation_rules:
+                        - Email: ~
 ````
 
 Note that by convention we declare the families in UpperCamelCase and the attributes as lowerCamelCase and we encourage you to do so.
