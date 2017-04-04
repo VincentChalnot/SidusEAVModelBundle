@@ -4,7 +4,7 @@ namespace Sidus\EAVModelBundle\Doctrine\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\StringType;
-use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 
@@ -31,10 +31,10 @@ class FamilyType extends StringType
         }
         $listeners = $platform->getEventManager()->getListeners('sidus_family_configuration');
 
-        /** @var FamilyConfigurationHandler $familyConfigurationHandler */
-        $familyConfigurationHandler = array_shift($listeners);
+        /** @var FamilyRegistry $familyRegistry */
+        $familyRegistry = array_shift($listeners);
 
-        return $familyConfigurationHandler->getFamily($value);
+        return $familyRegistry->getFamily($value);
     }
 
     /**

@@ -20,21 +20,21 @@ class SidusEAVModelBundle extends Bundle
     {
         $container->addCompilerPass(
             new GenericCompilerPass(
-                'sidus_eav_model.attribute_type_configuration.handler',
+                'sidus_eav_model.attribute_type.registry',
                 'sidus.attribute_type',
                 'addType'
             )
         );
         $container->addCompilerPass(
             new GenericCompilerPass(
-                'sidus_eav_model.attribute_configuration.handler',
+                'sidus_eav_model.attribute.registry',
                 'sidus.attribute',
                 'addAttribute'
             )
         );
         $container->addCompilerPass(
             new GenericCompilerPass(
-                'sidus_eav_model.family_configuration.handler',
+                'sidus_eav_model.family.registry',
                 'sidus.family',
                 'addFamily'
             )

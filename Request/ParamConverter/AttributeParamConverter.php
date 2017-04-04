@@ -2,7 +2,7 @@
 
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
-use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
+use Sidus\EAVModelBundle\Registry\AttributeRegistry;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 
 /**
@@ -12,15 +12,15 @@ use Sidus\EAVModelBundle\Model\AttributeInterface;
  */
 class AttributeParamConverter extends AbstractBaseParamConverter
 {
-    /** @var AttributeConfigurationHandler */
-    protected $attributeConfigurationHandler;
+    /** @var AttributeRegistry */
+    protected $attributeRegistry;
 
     /**
-     * @param AttributeConfigurationHandler $attributeConfigurationHandler
+     * @param AttributeRegistry $attributeRegistry
      */
-    public function __construct(AttributeConfigurationHandler $attributeConfigurationHandler)
+    public function __construct(AttributeRegistry $attributeRegistry)
     {
-        $this->attributeConfigurationHandler = $attributeConfigurationHandler;
+        $this->attributeRegistry = $attributeRegistry;
     }
 
     /**
@@ -32,7 +32,7 @@ class AttributeParamConverter extends AbstractBaseParamConverter
      */
     protected function convertValue($value)
     {
-        return $this->attributeConfigurationHandler->getAttribute($value);
+        return $this->attributeRegistry->getAttribute($value);
     }
 
     /**

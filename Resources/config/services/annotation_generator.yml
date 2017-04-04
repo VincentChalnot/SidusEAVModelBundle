@@ -2,7 +2,7 @@ services:
     sidus_eav_model.annotation.generator:
         class: Sidus\EAVModelBundle\Cache\AnnotationGenerator
         arguments:
-            - '@sidus_eav_model.family_configuration.handler'
+            - '@sidus_eav_model.family.registry'
             - '@doctrine.orm.entity_manager'
             - '%kernel.root_dir%/../var'
         tags:

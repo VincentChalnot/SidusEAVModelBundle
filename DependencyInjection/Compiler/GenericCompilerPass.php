@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\Reference;
 class GenericCompilerPass implements CompilerPassInterface
 {
     /** @var string */
-    protected $configurationHandler;
+    protected $registry;
 
     /** @var string */
     protected $tag;
@@ -26,13 +26,13 @@ class GenericCompilerPass implements CompilerPassInterface
     /**
      * FamilyCompilerPass constructor.
      *
-     * @param string $configurationHandler
+     * @param string $registry
      * @param string $tag
      * @param string $method
      */
-    public function __construct($configurationHandler, $tag, $method)
+    public function __construct($registry, $tag, $method)
     {
-        $this->configurationHandler = $configurationHandler;
+        $this->registry = $registry;
         $this->tag = $tag;
         $this->method = $method;
     }
@@ -48,11 +48,11 @@ class GenericCompilerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has($this->configurationHandler)) {
+        if (!$container->has($this->registry)) {
             return;
         }
 
-        $definition = $container->findDefinition($this->configurationHandler);
+        $definition = $container->findDefinition($this->registry);
         $taggedServices = $container->findTaggedServiceIds($this->tag);
 
         foreach ($taggedServices as $id => $tags) {

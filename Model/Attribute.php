@@ -2,7 +2,7 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
-use Sidus\EAVModelBundle\Configuration\AttributeTypeConfigurationHandler;
+use Sidus\EAVModelBundle\Registry\AttributeTypeRegistry;
 use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
 use Sidus\EAVModelBundle\Exception\AttributeConfigurationException;
 use Sidus\EAVModelBundle\Exception\ContextException;
@@ -19,8 +19,8 @@ class Attribute implements AttributeInterface
 {
     use TranslatableTrait;
 
-    /** @var AttributeTypeConfigurationHandler */
-    protected $attributeTypeConfigurationHandler;
+    /** @var AttributeTypeRegistry */
+    protected $attributeTypeRegistry;
 
     /** @var string */
     protected $code;
@@ -71,19 +71,19 @@ class Attribute implements AttributeInterface
     protected $default;
 
     /**
-     * @param string                            $code
-     * @param AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler
-     * @param array                             $configuration
+     * @param string                $code
+     * @param AttributeTypeRegistry $attributeTypeRegistry
+     * @param array                 $configuration
      *
      * @throws AttributeConfigurationException
      */
     public function __construct(
         $code,
-        AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler,
+        AttributeTypeRegistry $attributeTypeRegistry,
         array $configuration = null
     ) {
         $this->code = $code;
-        $this->attributeTypeConfigurationHandler = $attributeTypeConfigurationHandler;
+        $this->attributeTypeRegistry = $attributeTypeRegistry;
         if (!isset($configuration['type'])) {
             $configuration['type'] = 'string';
         }
@@ -433,7 +433,7 @@ class Attribute implements AttributeInterface
     {
         if (isset($configuration['type'])) {
             try {
-                $newType = $this->attributeTypeConfigurationHandler->getType($configuration['type']);
+                $newType = $this->attributeTypeRegistry->getType($configuration['type']);
             } catch (\UnexpectedValueException $e) {
                 throw new AttributeConfigurationException(
                     "The attribute {$this->code} has an unknown type '{$configuration['type']}'",

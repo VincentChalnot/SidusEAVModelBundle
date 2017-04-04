@@ -120,13 +120,16 @@ $ composer require sidus/eav-model-bundle "~1.0"
 <?php
 // app/AppKernel.php
 
-public function registerBundles()
+class AppKernel
 {
-    $bundles = array(
-        // ...
-        new Sidus\EAVModelBundle\SidusEAVModelBundle(),
-        // ...
-    );
+    public function registerBundles()
+    {
+        $bundles = [
+            // ...
+            new Sidus\EAVModelBundle\SidusEAVModelBundle(),
+            // ...
+        ];
+    }
 }
 ````
 
@@ -370,9 +373,9 @@ To create a new entity you must first fetch the family you want from configurati
 
 ````php
 <?php
-/** @var \Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler $familyConfigurationHandler */
-$familyConfigurationHandler = $container->get('sidus_eav_model.family_configuration.handler');
-$postFamily = $familyConfigurationHandler->getFamily('Post');
+/** @var \Sidus\EAVModelBundle\Registry\FamilyRegistry $familyRegistry */
+$familyRegistry = $container->get('sidus_eav_model.family.registry');
+$postFamily = $familyRegistry->getFamily('Post');
 
 $newPost = $postFamily->createData();
 ````

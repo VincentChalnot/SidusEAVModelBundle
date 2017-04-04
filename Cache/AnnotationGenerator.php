@@ -4,7 +4,7 @@ namespace Sidus\EAVModelBundle\Cache;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\MappingException;
-use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
@@ -18,8 +18,8 @@ use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
  */
 class AnnotationGenerator implements CacheWarmerInterface
 {
-    /** @var FamilyConfigurationHandler */
-    protected $familyConfigurationHandler;
+    /** @var FamilyRegistry */
+    protected $familyRegistry;
 
     /** @var EntityManager */
     protected $manager;
@@ -28,13 +28,13 @@ class AnnotationGenerator implements CacheWarmerInterface
     protected $annotationDir;
 
     /**
-     * @param FamilyConfigurationHandler $familyConfigurationHandler
-     * @param EntityManager              $manager
-     * @param string                     $varDir
+     * @param FamilyRegistry $familyRegistry
+     * @param EntityManager  $manager
+     * @param string         $varDir
      */
-    public function __construct(FamilyConfigurationHandler $familyConfigurationHandler, EntityManager $manager, $varDir)
+    public function __construct(FamilyRegistry $familyRegistry, EntityManager $manager, $varDir)
     {
-        $this->familyConfigurationHandler = $familyConfigurationHandler;
+        $this->familyRegistry = $familyRegistry;
         $this->manager = $manager;
         $this->annotationDir = $varDir.DIRECTORY_SEPARATOR.'annotations';
     }
@@ -68,7 +68,7 @@ class AnnotationGenerator implements CacheWarmerInterface
             throw new \RuntimeException("Unable to create annotations directory: {$baseDir}");
         }
 
-        foreach ($this->familyConfigurationHandler->getFamilies() as $family) {
+        foreach ($this->familyRegistry->getFamilies() as $family) {
             $content = $this->getFileHeader($family);
 
             foreach ($family->getAttributes() as $attribute) {

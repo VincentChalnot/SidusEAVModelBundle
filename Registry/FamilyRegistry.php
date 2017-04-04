@@ -1,6 +1,6 @@
 <?php
 
-namespace Sidus\EAVModelBundle\Configuration;
+namespace Sidus\EAVModelBundle\Registry;
 
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -10,7 +10,7 @@ use Sidus\EAVModelBundle\Model\FamilyInterface;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class FamilyConfigurationHandler
+class FamilyRegistry
 {
     /** @var FamilyInterface[] */
     protected $families;
@@ -47,7 +47,7 @@ class FamilyConfigurationHandler
      */
     public function getFamily($code)
     {
-        if (empty($this->families[$code])) {
+        if (!$this->hasFamily($code)) {
             throw new MissingFamilyException($code);
         }
 
@@ -61,7 +61,7 @@ class FamilyConfigurationHandler
      */
     public function hasFamily($code)
     {
-        return !empty($this->families[$code]);
+        return array_key_exists($code, $this->families);
     }
 
     /**

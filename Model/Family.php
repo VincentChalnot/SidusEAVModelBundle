@@ -2,8 +2,8 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
-use Sidus\EAVModelBundle\Configuration\AttributeConfigurationHandler;
-use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Registry\AttributeRegistry;
+use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Context\ContextManager;
 use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
@@ -25,8 +25,8 @@ class Family implements FamilyInterface
 {
     use TranslatableTrait;
 
-    /** @var FamilyConfigurationHandler */
-    protected $familyConfigurationHandler;
+    /** @var FamilyRegistry */
+    protected $familyRegistry;
 
     /** @var string */
     protected $code;
@@ -71,11 +71,11 @@ class Family implements FamilyInterface
     protected $contextManager;
 
     /**
-     * @param string                        $code
-     * @param AttributeConfigurationHandler $attributeConfigurationHandler
-     * @param FamilyConfigurationHandler    $familyConfigurationHandler
-     * @param ContextManager                $contextManager
-     * @param array                         $config
+     * @param string            $code
+     * @param AttributeRegistry $attributeRegistry
+     * @param FamilyRegistry    $familyRegistry
+     * @param ContextManager    $contextManager
+     * @param array             $config
      *
      * @throws UnexpectedValueException
      * @throws MissingFamilyException
@@ -86,22 +86,22 @@ class Family implements FamilyInterface
     public function __construct(
         $code,
         /** @noinspection PhpInternalEntityUsedInspection */
-        AttributeConfigurationHandler $attributeConfigurationHandler,
-        FamilyConfigurationHandler $familyConfigurationHandler,
+        AttributeRegistry $attributeRegistry,
+        FamilyRegistry $familyRegistry,
         ContextManager $contextManager,
         array $config = null
     ) {
         $this->code = $code;
-        $this->familyConfigurationHandler = $familyConfigurationHandler;
+        $this->familyRegistry = $familyRegistry;
         $this->contextManager = $contextManager;
 
         if (!empty($config['parent'])) {
-            $this->parent = $familyConfigurationHandler->getFamily($config['parent']);
+            $this->parent = $familyRegistry->getFamily($config['parent']);
             $this->copyFromFamily($this->parent);
         }
         unset($config['parent']);
 
-        $this->buildAttributes($attributeConfigurationHandler, $config);
+        $this->buildAttributes($attributeRegistry, $config);
         unset($config['attributes']);
 
         if (!empty($config['attributeAsLabel'])) {
@@ -214,7 +214,7 @@ class Family implements FamilyInterface
     public function getChildren()
     {
         if (null === $this->children) {
-            $this->children = $this->familyConfigurationHandler->getByParent($this);
+            $this->children = $this->familyRegistry->getByParent($this);
         }
 
         return $this->children;
@@ -472,23 +472,23 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @param AttributeConfigurationHandler $attributeConfigurationHandler
-     * @param array                         $config
+     * @param AttributeRegistry $attributeRegistry
+     * @param array             $config
      *
      * @throws \UnexpectedValueException
      */
-    protected function buildAttributes(AttributeConfigurationHandler $attributeConfigurationHandler, array $config)
+    protected function buildAttributes(AttributeRegistry $attributeRegistry, array $config)
     {
         foreach ((array) $config['attributes'] as $attributeCode => $attributeConfig) {
-            if ($attributeConfigurationHandler->hasAttribute($attributeCode)) {
+            if ($attributeRegistry->hasAttribute($attributeCode)) {
                 // If attribute already exists, merge family config into clone
-                $attribute = clone $attributeConfigurationHandler->getAttribute($attributeCode);
+                $attribute = clone $attributeRegistry->getAttribute($attributeCode);
                 if (null !== $attributeConfig) {
                     $attribute->mergeConfiguration($attributeConfig);
                 }
             } else {
                 // If attribute doesn't exists, create it locally
-                $attribute = $attributeConfigurationHandler->createAttribute($attributeCode, $attributeConfig);
+                $attribute = $attributeRegistry->createAttribute($attributeCode, $attributeConfig);
             }
             $this->addAttribute($attribute);
         }

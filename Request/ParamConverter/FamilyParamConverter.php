@@ -3,7 +3,7 @@
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,15 +15,15 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class FamilyParamConverter extends AbstractBaseParamConverter
 {
-    /** @var FamilyConfigurationHandler */
-    protected $familyConfigurationHandler;
+    /** @var FamilyRegistry */
+    protected $familyRegistry;
 
     /**
-     * @param FamilyConfigurationHandler $familyConfigurationHandler
+     * @param FamilyRegistry $familyRegistry
      */
-    public function __construct(FamilyConfigurationHandler $familyConfigurationHandler)
+    public function __construct(FamilyRegistry $familyRegistry)
     {
-        $this->familyConfigurationHandler = $familyConfigurationHandler;
+        $this->familyRegistry = $familyRegistry;
     }
 
     /**
@@ -32,8 +32,10 @@ class FamilyParamConverter extends AbstractBaseParamConverter
      * @param Request        $request       The request
      * @param ParamConverter $configuration Contains the name, class and options of the object
      *
-     * @return bool True if the object has been successfully set, else false
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      * @throws \InvalidArgumentException
+     *
+     * @return bool True if the object has been successfully set, else false
      */
     public function apply(Request $request, ParamConverter $configuration)
     {
@@ -59,7 +61,7 @@ class FamilyParamConverter extends AbstractBaseParamConverter
      */
     protected function convertValue($value)
     {
-        return $this->familyConfigurationHandler->getFamily($value);
+        return $this->familyRegistry->getFamily($value);
     }
 
     /**

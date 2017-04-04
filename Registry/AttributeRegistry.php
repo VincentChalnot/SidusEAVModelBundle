@@ -1,18 +1,20 @@
 <?php
 
-namespace Sidus\EAVModelBundle\Configuration;
+namespace Sidus\EAVModelBundle\Registry;
 
+use Sidus\EAVModelBundle\Exception\AttributeConfigurationException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use UnexpectedValueException;
 
 /**
  * Container for all global attributes.
+ *
  * @internal Don't use this service to fetch attributes, use the families instead
  *
- * @author Vincent Chalnot <vincent@sidus.fr>
+ * @author   Vincent Chalnot <vincent@sidus.fr>
  */
-class AttributeConfigurationHandler
+class AttributeRegistry
 {
     /** @var string */
     protected $attributeClass;
@@ -20,8 +22,8 @@ class AttributeConfigurationHandler
     /** @var array */
     protected $globalContextMask;
 
-    /** @var AttributeTypeConfigurationHandler */
-    protected $attributeTypeConfigurationHandler;
+    /** @var AttributeTypeRegistry */
+    protected $attributeTypeRegistry;
 
     /** @var TranslatorInterface */
     protected $translator;
@@ -47,20 +49,20 @@ class AttributeConfigurationHandler
     ];
 
     /**
-     * @param string                            $attributeClass
-     * @param array                             $globalContextMask
-     * @param AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler
-     * @param TranslatorInterface               $translator
+     * @param string                $attributeClass
+     * @param array                 $globalContextMask
+     * @param AttributeTypeRegistry $attributeTypeRegistry
+     * @param TranslatorInterface   $translator
      */
     public function __construct(
         $attributeClass,
         array $globalContextMask,
-        AttributeTypeConfigurationHandler $attributeTypeConfigurationHandler,
+        AttributeTypeRegistry $attributeTypeRegistry,
         TranslatorInterface $translator
     ) {
         $this->attributeClass = $attributeClass;
         $this->globalContextMask = $globalContextMask;
-        $this->attributeTypeConfigurationHandler = $attributeTypeConfigurationHandler;
+        $this->attributeTypeRegistry = $attributeTypeRegistry;
         $this->translator = $translator;
     }
 
@@ -92,7 +94,7 @@ class AttributeConfigurationHandler
 
         $attributeClass = $this->attributeClass;
         /** @var AttributeInterface $attribute */
-        $attribute = new $attributeClass($code, $this->attributeTypeConfigurationHandler, $attributeConfiguration);
+        $attribute = new $attributeClass($code, $this->attributeTypeRegistry, $attributeConfiguration);
         if (method_exists($attribute, 'setTranslator')) {
             $attribute->setTranslator($this->translator);
         }
@@ -131,7 +133,7 @@ class AttributeConfigurationHandler
      */
     public function hasAttribute($code)
     {
-        return !empty($this->attributes[$code]);
+        return array_key_exists($code, $this->attributes);
     }
 
     /**
@@ -142,7 +144,7 @@ class AttributeConfigurationHandler
     protected function addAttribute(AttributeInterface $attribute)
     {
         if (in_array($attribute->getCode(), static::$reservedCodes, true)) {
-            throw new UnexpectedValueException("Attribute code '{$attribute->getCode()}' is a reserved code");
+            throw new AttributeConfigurationException("Attribute code '{$attribute->getCode()}' is a reserved code");
         }
         $this->attributes[$attribute->getCode()] = $attribute;
     }

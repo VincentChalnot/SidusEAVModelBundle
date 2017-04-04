@@ -4,7 +4,7 @@ namespace Sidus\EAVModelBundle\Form\Type;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
-use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -19,19 +19,19 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class SimpleDataSelectorType extends AbstractType
 {
-    /** @var FamilyConfigurationHandler */
-    protected $familyConfigurationHandler;
+    /** @var FamilyRegistry */
+    protected $familyRegistry;
 
     /** @var string */
     protected $dataClass;
 
     /**
-     * @param FamilyConfigurationHandler $familyConfigurationHandler
-     * @param string                     $dataClass
+     * @param FamilyRegistry $familyRegistry
+     * @param string         $dataClass
      */
-    public function __construct(FamilyConfigurationHandler $familyConfigurationHandler, $dataClass)
+    public function __construct(FamilyRegistry $familyRegistry, $dataClass)
     {
-        $this->familyConfigurationHandler = $familyConfigurationHandler;
+        $this->familyRegistry = $familyRegistry;
         $this->dataClass = $dataClass;
     }
 
@@ -78,12 +78,12 @@ class SimpleDataSelectorType extends AbstractType
             'allowed_families',
             function (Options $options, $values) {
                 if (null === $values) {
-                    $values = $this->familyConfigurationHandler->getFamilies();
+                    $values = $this->familyRegistry->getFamilies();
                 }
                 $families = [];
                 foreach ($values as $value) {
                     if (!$value instanceof FamilyInterface) {
-                        $value = $this->familyConfigurationHandler->getFamily($value);
+                        $value = $this->familyRegistry->getFamily($value);
                     }
                     if ($value->isInstantiable()) {
                         $families[$value->getCode()] = $value;

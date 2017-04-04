@@ -2,7 +2,7 @@
 
 namespace Sidus\EAVModelBundle\Form\Type;
 
-use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
@@ -27,8 +27,8 @@ class DataType extends AbstractType
 {
     use TranslatableTrait;
 
-    /** @var FamilyConfigurationHandler */
-    protected $familyConfigurationHandler;
+    /** @var FamilyRegistry */
+    protected $familyRegistry;
 
     /** @var string */
     protected $collectionType;
@@ -37,16 +37,16 @@ class DataType extends AbstractType
     protected $dataClass;
 
     /**
-     * @param FamilyConfigurationHandler $familyConfigurationHandler
-     * @param string                     $dataClass
-     * @param string                     $collectionType
+     * @param FamilyRegistry $familyRegistry
+     * @param string         $dataClass
+     * @param string         $collectionType
      */
     public function __construct(
-        FamilyConfigurationHandler $familyConfigurationHandler,
+        FamilyRegistry $familyRegistry,
         $dataClass,
         $collectionType = 'collection'
     ) {
-        $this->familyConfigurationHandler = $familyConfigurationHandler;
+        $this->familyRegistry = $familyRegistry;
         $this->dataClass = $dataClass;
         $this->collectionType = $collectionType;
     }
@@ -163,7 +163,7 @@ class DataType extends AbstractType
                     return $value;
                 }
 
-                return $this->familyConfigurationHandler->getFamily($value);
+                return $this->familyRegistry->getFamily($value);
             }
         );
         $resolver->setNormalizer(

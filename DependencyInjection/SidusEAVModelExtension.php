@@ -65,7 +65,7 @@ class SidusEAVModelExtension extends Extension
         }
 
         // Add global attribute configuration to handler
-        $attributeConfiguration = $container->getDefinition('sidus_eav_model.attribute_configuration.handler');
+        $attributeConfiguration = $container->getDefinition('sidus_eav_model.attribute.registry');
         $attributeConfiguration->addMethodCall('parseGlobalConfig', [$config['attributes']]);
 
         $this->createFamilyServices($config, $container);
@@ -105,8 +105,8 @@ class SidusEAVModelExtension extends Extension
             new Parameter('sidus_eav_model.family.class'),
             [
                 $code,
-                new Reference('sidus_eav_model.attribute_configuration.handler'),
-                new Reference('sidus_eav_model.family_configuration.handler'),
+                new Reference('sidus_eav_model.attribute.registry'),
+                new Reference('sidus_eav_model.family.registry'),
                 new Reference('sidus_eav_model.context.manager'),
                 $familyConfiguration,
             ]

@@ -1,7 +1,8 @@
 <?php
 
-namespace Sidus\EAVModelBundle\Configuration;
+namespace Sidus\EAVModelBundle\Registry;
 
+use Sidus\EAVModelBundle\Exception\MissingAttributeTypeException;
 use Sidus\EAVModelBundle\Model\AttributeTypeInterface;
 use UnexpectedValueException;
 
@@ -10,7 +11,7 @@ use UnexpectedValueException;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class AttributeTypeConfigurationHandler
+class AttributeTypeRegistry
 {
     /** @var AttributeTypeInterface[] */
     protected $types;
@@ -39,10 +40,20 @@ class AttributeTypeConfigurationHandler
      */
     public function getType($code)
     {
-        if (empty($this->types[$code])) {
-            throw new UnexpectedValueException("No type with code : {$code}");
+        if (!$this->hasType($code)) {
+            throw new MissingAttributeTypeException($code);
         }
 
         return $this->types[$code];
+    }
+
+    /**
+     * @param string $code
+     *
+     * @return bool
+     */
+    public function hasType($code)
+    {
+        return array_key_exists($code, $this->types);
     }
 }

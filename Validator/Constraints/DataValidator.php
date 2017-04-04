@@ -5,7 +5,7 @@ namespace Sidus\EAVModelBundle\Validator\Constraints;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
+use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\ValueInterface;
 use Sidus\EAVModelBundle\Entity\ValueRepository;
@@ -26,8 +26,8 @@ class DataValidator extends ConstraintValidator
 {
     use TranslatableTrait;
 
-    /** @var FamilyConfigurationHandler */
-    protected $familyConfigurationHandler;
+    /** @var FamilyRegistry */
+    protected $familyRegistry;
 
     /** @var string */
     protected $dataClass;
@@ -39,21 +39,21 @@ class DataValidator extends ConstraintValidator
     protected $logger;
 
     /**
-     * @param string                     $dataClass
-     * @param FamilyConfigurationHandler $familyConfigurationHandler
-     * @param TranslatorInterface        $translator
-     * @param Registry                   $doctrine
-     * @param LoggerInterface            $logger
+     * @param string              $dataClass
+     * @param FamilyRegistry      $familyRegistry
+     * @param TranslatorInterface $translator
+     * @param Registry            $doctrine
+     * @param LoggerInterface     $logger
      */
     public function __construct(
         $dataClass,
-        FamilyConfigurationHandler $familyConfigurationHandler,
+        FamilyRegistry $familyRegistry,
         TranslatorInterface $translator,
         Registry $doctrine,
         LoggerInterface $logger
     ) {
         $this->dataClass = $dataClass;
-        $this->familyConfigurationHandler = $familyConfigurationHandler;
+        $this->familyRegistry = $familyRegistry;
         $this->translator = $translator;
         $this->doctrine = $doctrine;
         $this->logger = $logger;
@@ -164,7 +164,7 @@ class DataValidator extends ConstraintValidator
             }
             /** @var array $allowedFamilyCodes */
             foreach ($allowedFamilyCodes as $familyCode) {
-                $allowedFamilies[$familyCode] = $this->familyConfigurationHandler->getFamily($familyCode);
+                $allowedFamilies[$familyCode] = $this->familyRegistry->getFamily($familyCode);
             }
         }
         if (0 === count($allowedFamilies)) {
