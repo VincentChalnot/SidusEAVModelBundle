@@ -6,5 +6,6 @@ services:
             - '@sidus_eav_model.family_configuration.handler'
             - '@translator'
             - '@doctrine'
+            - '@logger'
         tags:
             - { name: validator.constraint_validator }

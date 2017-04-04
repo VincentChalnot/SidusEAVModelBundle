@@ -4,6 +4,7 @@ namespace Sidus\EAVModelBundle\Validator\Constraints;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Sidus\EAVModelBundle\Configuration\FamilyConfigurationHandler;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\ValueInterface;
@@ -34,22 +35,28 @@ class DataValidator extends ConstraintValidator
     /** @var Registry */
     protected $doctrine;
 
+    /** @var LoggerInterface */
+    protected $logger;
+
     /**
      * @param string                     $dataClass
      * @param FamilyConfigurationHandler $familyConfigurationHandler
      * @param TranslatorInterface        $translator
      * @param Registry                   $doctrine
+     * @param LoggerInterface            $logger
      */
     public function __construct(
         $dataClass,
         FamilyConfigurationHandler $familyConfigurationHandler,
         TranslatorInterface $translator,
-        Registry $doctrine
+        Registry $doctrine,
+        LoggerInterface $logger
     ) {
         $this->dataClass = $dataClass;
         $this->familyConfigurationHandler = $familyConfigurationHandler;
         $this->translator = $translator;
         $this->doctrine = $doctrine;
+        $this->logger = $logger;
     }
 
     /**
@@ -107,18 +114,23 @@ class DataValidator extends ConstraintValidator
     ) {
         $valueData = $data->get($attribute->getCode());
 
+        $query = [
+            'attributeCode' => $attribute->getCode(),
+            $attribute->getType()->getDatabaseType() => $valueData,
+        ];
+
         /** @var ValueRepository $repo */
         $repo = $this->doctrine->getRepository($data->getFamily()->getValueClass());
-        $values = $repo->findBy(
-            [
-                'attributeCode' => $attribute->getCode(),
-                $attribute->getType()->getDatabaseType() => $valueData,
-            ]
-        );
+        $values = $repo->findBy($query);
+
         /** @var ValueInterface $value */
         foreach ($values as $value) {
             if (!$value->getData()) {
-                continue; // @warning this should not occur ! Log an error
+                $this->logger->critical(
+                    "Very weird Doctrine behavior: missing data for value #{$value->getIdentifier()}"
+                );
+
+                continue;
             }
             if ($value->getData()->getId() !== $data->getId()) {
                 $this->buildAttributeViolation($data, $context, $attribute, 'unique', $valueData);

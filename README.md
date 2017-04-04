@@ -251,12 +251,16 @@ sidus_eav_model:
             group: <groupCode> # Default null
             options: <array> # Some attribute types require specific options here, example:
                 allowed_families: <familyCode[]> # Only for relations/embed: selects the allowed targets families
+                hidden: <boolean> # If true attribute will never appear in auto-generated forms
+                serializer:
+                    by_short_reference: <boolean> # Used with relations, serializer will output only the identifier
+                # You can also use the options to pass any custom parameter to the attribute and use them in your code
             form_options: <array> # Standard symfony form options
             form_type: <FormType> # Overrides the form type of the attribute type
             default: <mixed> # Default value, not supported for relations for the moment
             validation_rules: <array> # Standard Symfony validation rules
             required: <boolean> # Default false, empty() PHP function is used for validation
-            unique: <boolean> # Default false
+            unique: <boolean> # Default false, check if attribute is unique globally
             multiple: <boolean> # Default false, see following chapter
             collection: <boolean> # Default null, see following chapter
             context_mask: <array> # See dedicated chapter

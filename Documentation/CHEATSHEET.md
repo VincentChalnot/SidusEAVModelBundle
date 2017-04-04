@@ -1,6 +1,8 @@
 Sidus/EAVModelBundle Cheat-sheet
 ==================================
 
+WARNING : This doc is not up-to-date
+
 #### Family configuration reference
 
 ````yaml
