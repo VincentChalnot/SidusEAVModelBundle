@@ -33,8 +33,10 @@ class DataParamConverter extends AbstractBaseParamConverter
      * @param Request        $request       The request
      * @param ParamConverter $configuration Contains the name, class and options of the object
      *
-     * @return bool True if the object has been successfully set, else false
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      * @throws \InvalidArgumentException
+     *
+     * @return bool True if the object has been successfully set, else false
      */
     public function apply(Request $request, ParamConverter $configuration)
     {

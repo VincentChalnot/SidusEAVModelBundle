@@ -5,6 +5,7 @@ namespace Sidus\EAVModelBundle\Request\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Common pattern for param converters
@@ -19,8 +20,10 @@ abstract class AbstractBaseParamConverter implements ParamConverterInterface
      * @param Request        $request
      * @param ParamConverter $configuration Contains the name, class and options of the object
      *
-     * @return bool True if the object has been successfully set, else false
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      * @throws \InvalidArgumentException
+     *
+     * @return bool True if the object has been successfully set, else false
      */
     public function apply(Request $request, ParamConverter $configuration)
     {
@@ -37,6 +40,13 @@ abstract class AbstractBaseParamConverter implements ParamConverterInterface
         }
 
         $convertedValue = $this->convertValue($value);
+
+        if (null === $convertedValue && false === $configuration->isOptional()) {
+            throw new NotFoundHttpException(
+                "Unable to find '{$configuration->getClass()}' with identifier '{$value}' not found"
+            );
+        }
+
         $request->attributes->set($configuration->getName(), $convertedValue);
         if ($param !== $configuration->getName()) {
             $request->attributes->set($param, $convertedValue);
