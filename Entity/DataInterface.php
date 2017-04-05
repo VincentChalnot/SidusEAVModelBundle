@@ -75,6 +75,38 @@ interface DataInterface
     public function set($attributeCode, $value, array $context = null);
 
     /**
+     * Append a new value to a collection
+     *
+     * @param string $attributeCode
+     * @param mixed  $value
+     * @param array  $context
+     *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     * @throws \LogicException
+     *
+     * @return DataInterface
+     */
+    public function add($attributeCode, $value, array $context = null);
+
+    /**
+     * Search the value in the collection and remove it
+     *
+     * @param string $attributeCode
+     * @param mixed  $value
+     * @param array  $context
+     *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     * @throws \LogicException
+     *
+     * @return DataInterface
+     */
+    public function remove($attributeCode, $value, array $context = null);
+
+    /**
      * Return all values objects matching the attribute code
      *
      * @param AttributeInterface|null $attribute

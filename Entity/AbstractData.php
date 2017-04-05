@@ -242,6 +242,41 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
+     * Remove a data from an attribute
+     *
+     * @param AttributeInterface $attribute
+     * @param mixed              $valueData
+     * @param array              $context
+     *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     *
+     * @return DataInterface
+     */
+    public function removeValueData(AttributeInterface $attribute, $valueData, array $context = null)
+    {
+        $this->checkAttribute($attribute);
+        if (!$attribute->isCollection()) {
+            $m = "Cannot remove data from a non-collection attribute '{$attribute->getCode()}'";
+            throw new InvalidValueDataException($m);
+        }
+        $accessor = PropertyAccess::createPropertyAccessor();
+        foreach ($this->getValues($attribute, $context) as $value) {
+            try {
+                if ($accessor->getValue($value, $attribute->getType()->getDatabaseType()) === $valueData) {
+                    $this->removeValue($value);
+                    break;
+                }
+            } catch (ExceptionInterface $e) {
+                throw new InvalidValueDataException("Invalid data for attribute {$attribute->getCode()}", 0, $e);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getLabel()
@@ -351,20 +386,26 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $class = get_class($this);
 
-        if (0 === strpos($methodName, 'get')) {
-            $context = array_key_exists(0, $arguments) ? $arguments[0] : null;
+        $context = array_key_exists(0, $arguments) ? $arguments[0] : null;
 
+        // Standard getter
+        if (0 === strpos($methodName, 'get')) {
             return $this->get(lcfirst(substr($methodName, 3)), $context);
         }
+
         $baseErrorMsg = "Method '{$methodName}' for object '{$class}' with family '{$this->getFamilyCode()}'";
 
-        if (0 === strpos($methodName, 'set')) {
-            if (!array_key_exists(0, $arguments)) {
-                throw new BadMethodCallException($baseErrorMsg.' requires at least one argument');
-            }
-            $context = array_key_exists(1, $arguments) ? $arguments[1] : null;
+        // Test setter, adder and remover
+        foreach (['set', 'add', 'remove'] as $action) {
+            if (0 === strpos($methodName, $action)) {
+                if (!array_key_exists(0, $arguments)) {
+                    throw new BadMethodCallException($baseErrorMsg.' requires at least one argument');
+                }
+                $context = array_key_exists(1, $arguments) ? $arguments[1] : null;
+                $attributeCode = lcfirst(substr($methodName, strlen($action)));
 
-            return $this->set(lcfirst(substr($methodName, 3)), $arguments[0], $context);
+                return $this->$action($attributeCode, $arguments[0], $context);
+            }
         }
 
         throw new BadMethodCallException($baseErrorMsg.' does not exist');
@@ -429,9 +470,9 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $attribute = $this->getAttribute($attributeCode);
 
-        $setter = 'set'.ucfirst($attributeCode);
-        if (method_exists($this, $setter)) {
-            return $this->$setter($value, $context);
+        $method = 'set'.ucfirst($attributeCode);
+        if (method_exists($this, $method)) {
+            return $this->$method($value, $context);
         }
 
         if ($attribute->isCollection()) {
@@ -464,6 +505,56 @@ abstract class AbstractData implements ContextualDataInterface
     public function __isset($attributeCode)
     {
         return $this->getFamily()->hasAttribute($attributeCode);
+    }
+
+    /**
+     * Append a new value to a collection
+     *
+     * @param string $attributeCode
+     * @param mixed  $value
+     * @param array  $context
+     *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     *
+     * @return DataInterface
+     */
+    public function add($attributeCode, $value, array $context = null)
+    {
+        $attribute = $this->getAttribute($attributeCode);
+
+        $method = 'add'.ucfirst($attributeCode);
+        if (method_exists($this, $method)) {
+            return $this->$method($value, $context);
+        }
+
+        return $this->addValueData($attribute, $value, $context);
+    }
+
+    /**
+     * Search the value in the collection and remove it
+     *
+     * @param string $attributeCode
+     * @param mixed  $value
+     * @param array  $context
+     *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     *
+     * @return DataInterface
+     */
+    public function remove($attributeCode, $value, array $context = null)
+    {
+        $attribute = $this->getAttribute($attributeCode);
+
+        $method = 'remove'.ucfirst($attributeCode);
+        if (method_exists($this, $method)) {
+            return $this->$method($value, $context);
+        }
+
+        return $this->removeValueData($attribute, $value, $context);
     }
 
     /**

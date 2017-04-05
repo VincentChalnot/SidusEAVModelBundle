@@ -29,7 +29,7 @@ class AttributeRegistry
     protected $translator;
 
     /** @var AttributeInterface[] */
-    protected $attributes;
+    protected $attributes = [];
 
     /** @var array */
     protected static $reservedCodes = [

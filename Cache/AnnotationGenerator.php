@@ -132,6 +132,23 @@ EOT;
             $content .= '($value, array $context = null);'."\n\n";
         }
 
+        if ($attribute->isCollection()) {
+            // Adder and remover
+            $setter = 'add'.ucfirst($attribute->getCode());
+            if (!$dataClass->hasMethod($setter)) {
+                $content .= $this->generateSetAnnotation($family, $attribute, true);
+                $content .= 'abstract public function add'.ucfirst($attribute->getCode());
+                $content .= '($value, array $context = null);'."\n\n";
+            }
+
+            $setter = 'remove'.ucfirst($attribute->getCode());
+            if (!$dataClass->hasMethod($setter)) {
+                $content .= $this->generateSetAnnotation($family, $attribute, true);
+                $content .= 'abstract public function remove'.ucfirst($attribute->getCode());
+                $content .= '($value, array $context = null);'."\n\n";
+            }
+        }
+
         return $content;
     }
 
@@ -151,16 +168,20 @@ EOT;
     /**
      * @param FamilyInterface    $family
      * @param AttributeInterface $attribute
+     * @param bool               $forceSingle
      *
      * @return string
      */
-    protected function generateGetAnnotation(FamilyInterface $family, AttributeInterface $attribute)
-    {
+    protected function generateGetAnnotation(
+        FamilyInterface $family,
+        AttributeInterface $attribute,
+        $forceSingle = false
+    ) {
         $content = <<<EOT
 /**
  * @param array|null \$context
  *
- * @return {$this->getPHPType($family, $attribute)}
+ * @return {$this->getPHPType($family, $attribute, $forceSingle)}
  */
 
 EOT;
@@ -171,14 +192,18 @@ EOT;
     /**
      * @param FamilyInterface    $family
      * @param AttributeInterface $attribute
+     * @param bool               $forceSingle
      *
      * @return string
      */
-    protected function generateSetAnnotation(FamilyInterface $family, AttributeInterface $attribute)
-    {
+    protected function generateSetAnnotation(
+        FamilyInterface $family,
+        AttributeInterface $attribute,
+        $forceSingle = false
+    ) {
         $content = <<<EOT
 /**
- * @param {$this->getPHPType($family, $attribute)} \$value
+ * @param {$this->getPHPType($family, $attribute, $forceSingle)} \$value
  * @param array|null \$context
  *
  * @return {$family->getCode()}
@@ -192,16 +217,21 @@ EOT;
     /**
      * @param FamilyInterface    $family
      * @param AttributeInterface $attribute
+     * @param bool               $forceSingle
      *
      * @return string
      */
-    protected function getPHPType(FamilyInterface $family, AttributeInterface $attribute)
-    {
+    protected function getPHPType(
+        FamilyInterface $family,
+        AttributeInterface $attribute,
+        $forceSingle = false
+    ) {
         $type = substr($attribute->getType()->getDatabaseType(), 0, -strlen('Value'));
+        $collection = $attribute->isCollection() && !$forceSingle;
 
         // Scalar types
         if (in_array($type, ['bool', 'integer', 'decimal', 'string', 'text'], true)) {
-            if ($attribute->isCollection()) {
+            if ($collection) {
                 return 'array';
             }
             if ('text' === $type) {
@@ -214,7 +244,7 @@ EOT;
         }
         if (in_array($type, ['date', 'datetime'], true)) {
             $type = '\DateTime';
-            if ($attribute->isCollection()) {
+            if ($collection) {
                 $type .= '[]';
             }
 
@@ -226,7 +256,7 @@ EOT;
                 if (!is_array($types)) {
                     $types = [$types];
                 }
-                if ($attribute->isCollection()) {
+                if ($collection) {
                     /** @var array $types */
                     foreach ($types as &$type) {
                         $type .= '[]';
@@ -237,7 +267,7 @@ EOT;
             }
 
             // Couldn't find any family (rare case)
-            if ($attribute->isCollection()) {
+            if ($collection) {
                 return 'array';
             }
 
@@ -245,13 +275,13 @@ EOT;
         }
 
         // Then there are the custom relation cases:
-        $type = $this->getTargetClass($family, $attribute);
+        $type = $this->getTargetClass($family, $attribute, $forceSingle);
         if ($type) {
             return $type;
         }
 
         // Fallback in any other case
-        if ($attribute->isCollection()) {
+        if ($collection) {
             return 'array';
         }
 
@@ -261,11 +291,15 @@ EOT;
     /**
      * @param FamilyInterface    $parentFamily
      * @param AttributeInterface $attribute
+     * @param bool               $forceSingle
      *
      * @return string
      */
-    protected function getTargetClass(FamilyInterface $parentFamily, AttributeInterface $attribute)
-    {
+    protected function getTargetClass(
+        FamilyInterface $parentFamily,
+        AttributeInterface $attribute,
+        $forceSingle = false
+    ) {
         /** @var \Doctrine\ORM\Mapping\ClassMetadata $classMetadata */
         $classMetadata = $this->manager->getClassMetadata($parentFamily->getValueClass());
         try {
@@ -278,7 +312,7 @@ EOT;
         }
 
         $type = $mapping['targetEntity'];
-        if ($attribute->isCollection()) {
+        if ($attribute->isCollection() && !$forceSingle) {
             $type .= '[]';
         }
 
