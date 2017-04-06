@@ -76,13 +76,11 @@ interface AttributeInterface
     public function getFormType();
 
     /**
-     * The options passed to the form, optionally passing the edited data
-     *
-     * @param mixed $data
+     * The options passed to the form
      *
      * @return array
      */
-    public function getFormOptions($data = null);
+    public function getFormOptions();
 
     /**
      * Passed as form options to the form widget

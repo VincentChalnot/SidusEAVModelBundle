@@ -36,15 +36,14 @@ class EmbedAttributeType extends AttributeType
 
     /**
      * @param AttributeInterface $attribute
-     * @param mixed              $data
      *
      * @throws \LogicException
      *
      * @return array
      */
-    public function getFormOptions(AttributeInterface $attribute, $data = null)
+    public function getFormOptions(AttributeInterface $attribute)
     {
-        $formOptions = parent::getFormOptions($attribute, $data);
+        $formOptions = parent::getFormOptions($attribute);
         if ($attribute->getOption('allowed_families')) {
             $families = $attribute->getOption('allowed_families');
             if (1 < count($families)) {

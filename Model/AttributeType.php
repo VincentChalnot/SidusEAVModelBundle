@@ -70,11 +70,10 @@ class AttributeType implements AttributeTypeInterface
 
     /**
      * @param AttributeInterface $attribute
-     * @param mixed              $data
      *
      * @return array
      */
-    public function getFormOptions(AttributeInterface $attribute, $data = null)
+    public function getFormOptions(AttributeInterface $attribute)
     {
         return $this->formOptions;
     }

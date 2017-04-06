@@ -54,15 +54,15 @@ class SidusEAVModelExtension extends Extension
         $loader->load('attribute_types.yml');
         $loader->load('configuration.yml');
         $loader->load('context.yml');
+        $loader->load('doctrine.yml');
         $loader->load('entities.yml');
         $loader->load('forms.yml');
-        $loader->load('param_converters.yml');
-        $loader->load('validators.yml');
-
-        // Only load normalizers if symfony serializer is loaded
         if ($config['serializer_enabled']) {
-            $loader->load('normalizer.yml');
+            $loader->load('normalizer.yml'); // Only load normalizers if symfony serializer is loaded
         }
+        $loader->load('param_converters.yml');
+        $loader->load('twig.yml');
+        $loader->load('validators.yml');
 
         // Add global attribute configuration to handler
         $attributeConfiguration = $container->getDefinition('sidus_eav_model.attribute.registry');

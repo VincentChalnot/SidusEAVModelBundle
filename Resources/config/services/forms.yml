@@ -1,12 +1,17 @@
 services:
-    sidus_eav_model.form.type.data:
-        class: Sidus\EAVModelBundle\Form\Type\DataType
+    sidus_eav_model.form.attribute_builder:
+        class: Sidus\EAVModelBundle\Form\AttributeFormBuilder
         arguments:
-            - '@sidus_eav_model.family.registry'
-            - '%sidus_eav_model.entity.data.class%'
             - '%sidus_eav_model.form.collection_type%'
         calls:
             - [setTranslator, ['@translator']]
+
+    sidus_eav_model.form.type.data:
+        class: Sidus\EAVModelBundle\Form\Type\DataType
+        arguments:
+            - '@sidus_eav_model.form.attribute_builder'
+            - '@sidus_eav_model.family.registry'
+            - '%sidus_eav_model.entity.data.class%'
         tags:
             - { name: form.type }
 

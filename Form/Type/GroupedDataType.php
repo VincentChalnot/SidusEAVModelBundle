@@ -2,10 +2,9 @@
 
 namespace Sidus\EAVModelBundle\Form\Type;
 
-use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormBuilderInterface;
 
 /**
  * Alternative data form with sub-form corresponding to attribute's groups
@@ -17,17 +16,16 @@ class GroupedDataType extends DataType
     /**
      * {@inheritdoc}
      */
-    public function buildValuesForm(
-        FormInterface $form,
-        FamilyInterface $family,
-        DataInterface $data = null,
-        array $options = []
-    ) {
+    public function buildValuesForm(FormBuilderInterface $builder, array $options = [])
+    {
+        /** @var FamilyInterface $family */
+        $family = $options['family'];
+
         foreach ($family->getAttributes() as $attribute) {
             if ($attribute->getGroup()) {
                 $groupName = $attribute->getGroup();
-                if (!$form->has($groupName)) {
-                    $form->add(
+                if (!$builder->has($groupName)) {
+                    $builder->add(
                         $groupName,
                         FormType::class,
                         [
@@ -35,9 +33,9 @@ class GroupedDataType extends DataType
                         ]
                     );
                 }
-                $this->addAttribute($form->get($groupName), $attribute, $data, $options);
+                $this->attributeFormBuilder->addAttribute($builder->get($groupName), $attribute, $options);
             } else {
-                $this->addAttribute($form, $attribute, $data, $options);
+                $this->attributeFormBuilder->addAttribute($builder, $attribute, $options);
             }
         }
     }

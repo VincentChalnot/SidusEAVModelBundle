@@ -312,7 +312,7 @@ EOT;
         }
 
         $type = $mapping['targetEntity'];
-        if ($attribute->isCollection() && !$forceSingle) {
+        if (!$forceSingle && $attribute->isCollection()) {
             $type .= '[]';
         }
 

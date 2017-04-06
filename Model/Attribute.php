@@ -184,17 +184,15 @@ class Attribute implements AttributeInterface
     }
 
     /**
-     * @param mixed $data
-     *
      * @return array
      */
-    public function getFormOptions($data = null)
+    public function getFormOptions()
     {
         $defaultOptions = [];
         if (!$this->isMultiple()) {
             $defaultOptions = ['required' => $this->isRequired()];
         }
-        $typeOptions = $this->getType()->getFormOptions($this, $data);
+        $typeOptions = $this->getType()->getFormOptions($this);
 
         return array_merge($defaultOptions, $typeOptions, $this->formOptions);
     }
