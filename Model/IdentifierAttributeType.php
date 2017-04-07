@@ -16,5 +16,8 @@ class IdentifierAttributeType extends AttributeType
     {
         $attribute->setUnique(true);
         $attribute->setRequired(true);
+        if ($attribute instanceof Attribute) {
+            $attribute->setContextMask([]); // Empty context mask for identifiers
+        }
     }
 }
