@@ -58,7 +58,9 @@ class SidusEAVModelExtension extends Extension
         $loader->load('entities.yml');
         $loader->load('forms.yml');
         if ($config['serializer_enabled']) {
-            $loader->load('normalizer.yml'); // Only load normalizers if symfony serializer is loaded
+            // Only load normalizers if symfony serializer is loaded
+            $loader->load('normalizer.yml');
+            $loader->load('denormalizer.yml');
         }
         $loader->load('param_converters.yml');
         $loader->load('twig.yml');

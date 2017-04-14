@@ -17,6 +17,8 @@ use Sidus\EAVModelBundle\Model\FamilyInterface;
 interface DataInterface
 {
     /**
+     * Should it be removed ?
+     *
      * @return mixed
      */
     public function getId();
