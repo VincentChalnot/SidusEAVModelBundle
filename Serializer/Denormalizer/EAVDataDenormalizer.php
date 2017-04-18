@@ -215,7 +215,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         // Last attempt: try to determine the family from the class
         $matchingFamilies = [];
         foreach ($this->familyRegistry->getFamilies() as $family) {
-            if ($family->isInstantiable() && $family->getCode() === $class) {
+            if ($family->isInstantiable() && $family->getDataClass() === $class) {
                 $matchingFamilies[] = $family;
             }
         }
