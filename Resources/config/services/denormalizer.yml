@@ -25,6 +25,8 @@ services:
             - '%sidus_eav_model.denormalizer.data.ignored_attributes%'
         tags:
             - { name: serializer.normalizer }
+        calls:
+            - ['setDenormalizer', ['@sidus_eav_model.denormalizer.family']]
 
     sidus_eav_model.denormalizer.family:
         class: Sidus\EAVModelBundle\Serializer\Denormalizer\FamilyDenormalizer
