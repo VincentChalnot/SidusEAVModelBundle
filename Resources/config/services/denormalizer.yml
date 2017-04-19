@@ -4,7 +4,6 @@ parameters:
         - updatedBy
         - createdAt
         - updatedAt
-        - label
         - id
         - identifier # Forbids the usage of the setIdentifier, forces to use the actual attribute instead
         - family

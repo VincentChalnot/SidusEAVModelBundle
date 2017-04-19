@@ -176,6 +176,10 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
                 );
             }
         } else {
+            if ($attributeCode === 'label') {
+                // Skip the "setValue" for a standard "label" attribute, due to conflict with the attributeAsLabel option
+                return;
+            }
             $value = $this->denormalizeAttribute(
                 $family,
                 $attributeCode,
