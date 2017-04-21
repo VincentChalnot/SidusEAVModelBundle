@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 
 /**
  * Standard normalizer for EAV Data
@@ -23,6 +24,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
 
     const DEPTH_KEY = 'depth';
     const GROUPS = 'groups';
+    const SERIALIZER_OPTIONS = 'serializer';
 
     /** @var ClassMetadataFactoryInterface */
     protected $classMetadataFactory;
@@ -81,7 +83,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      * @param string        $format  format the normalization result will be encoded as
      * @param array         $context Context options for the normalizer
      *
-     * @throws \Symfony\Component\Serializer\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws \Symfony\Component\PropertyAccess\Exception\ExceptionInterface
      * @throws \Sidus\EAVModelBundle\Exception\EAVExceptionInterface
      * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
@@ -172,8 +174,27 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         array $context = []
     ) {
         $rawValue = $this->propertyAccessor->getValue($object, $attribute);
+        $subContext = $this->getAttributeContext($object, $attribute, $rawValue, $context);
 
-        $subContext = array_merge(
+        return $this->normalizer->normalize($rawValue, $format, $subContext);
+    }
+
+    /**
+     * @param DataInterface $object
+     * @param string        $attribute
+     * @param mixed         $rawValue
+     * @param array         $context
+     *
+     * @return array
+     */
+    protected function getAttributeContext(
+        DataInterface $object,
+        $attribute,
+        /** @noinspection PhpUnusedParameterInspection */
+        $rawValue,
+        array $context
+    ) {
+        return array_merge(
             $context,
             [
                 self::DEPTH_KEY => $context[self::DEPTH_KEY] + 1,
@@ -181,8 +202,6 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
                 'attribute' => $attribute,
             ]
         );
-
-        return $this->normalizer->normalize($rawValue, $format, $subContext);
     }
 
     /**
@@ -202,11 +221,30 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         array $context = []
     ) {
         $rawValue = $object->get($attribute->getCode());
+        $subContext = $this->getEAVAttributeContext($object, $attribute, $rawValue, $context);
 
-        $options = $attribute->getOption('serializer', []);
+        return $this->normalizer->normalize($rawValue, $format, $subContext);
+    }
+
+    /**
+     * @param DataInterface      $object
+     * @param AttributeInterface $attribute
+     * @param mixed              $rawValue
+     * @param array              $context
+     *
+     * @return array
+     */
+    protected function getEAVAttributeContext(
+        DataInterface $object,
+        AttributeInterface $attribute,
+        /** @noinspection PhpUnusedParameterInspection */
+        $rawValue,
+        array $context
+    ) {
+        $options = $attribute->getOption(self::SERIALIZER_OPTIONS, []);
         $shortReference = array_key_exists('by_short_reference', $options) ? $options['by_short_reference'] : false;
 
-        $subContext = array_merge(
+        return array_merge(
             $context,
             [
                 self::DEPTH_KEY => $context[self::DEPTH_KEY] + 1,
@@ -217,8 +255,6 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
                 'by_short_reference' => $shortReference,
             ]
         );
-
-        return $this->normalizer->normalize($rawValue, $format, $subContext);
     }
 
     /**
@@ -226,7 +262,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      * @param string        $format
      * @param array         $context
      *
-     * @throws \Symfony\Component\Serializer\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      *
      * @return array
      */
@@ -275,18 +311,81 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      * @param string        $format
      * @param array         $context
      *
+     * @throws InvalidArgumentException
+     *
      * @return \Sidus\EAVModelBundle\Model\AttributeInterface[]
      */
     protected function extractEAVAttributes(DataInterface $object, $format = null, array $context = [])
     {
         $allowedAttributes = [];
         foreach ($object->getFamily()->getAttributes() as $attribute) {
-            if ($this->isAllowedAttribute($object, $attribute->getCode(), $format, $context)) {
+            if ($this->isAllowedEAVAttribute($object, $attribute, $format, $context)) {
                 $allowedAttributes[] = $attribute;
             }
         }
 
         return $allowedAttributes;
+    }
+
+    /**
+     * Is this EAV attribute allowed?
+     *
+     * @param DataInterface      $object
+     * @param AttributeInterface $attribute
+     * @param string|null        $format
+     * @param array              $context
+     *
+     * @throws InvalidArgumentException
+     *
+     * @return bool
+     */
+    protected function isAllowedEAVAttribute(
+        DataInterface $object,
+        AttributeInterface $attribute,
+        /** @noinspection PhpUnusedParameterInspection */
+        $format = null,
+        array $context = []
+    ) {
+        $options = $attribute->getOption(self::SERIALIZER_OPTIONS, []);
+
+        // Ignore attributes set as serializer: expose: false
+        if (array_key_exists('expose', $options) && !$options['expose']) {
+            return false;
+        }
+
+        return $this->isEAVGroupAllowed($object, $attribute, $context);
+    }
+
+    /**
+     * Gets attributes to normalize using groups.
+     *
+     * @param DataInterface      $object
+     * @param AttributeInterface $attribute
+     * @param array              $context
+     *
+     * @throws InvalidArgumentException
+     *
+     * @return bool
+     */
+    protected function isEAVGroupAllowed(DataInterface $object, AttributeInterface $attribute, array $context)
+    {
+        if (!isset($context[static::GROUPS]) || !is_array($context[static::GROUPS])) {
+            return true;
+        }
+
+        $serializerOptions = $attribute->getOption(self::SERIALIZER_OPTIONS, []);
+        if (!array_key_exists(self::GROUPS, $serializerOptions)) {
+            return false;
+        }
+
+        $groups = $serializerOptions[self::GROUPS];
+        if (!is_array($groups)) {
+            throw new InvalidArgumentException(
+                "Invalid 'serializer.groups' option for attribute {$attribute->getCode()} : should be an array"
+            );
+        }
+
+        return 0 < count(array_intersect($groups, $context[static::GROUPS]));
     }
 
     /**
@@ -297,6 +396,8 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      * @param string|null   $format
      * @param array         $context
      *
+     * @throws InvalidArgumentException
+     *
      * @return bool
      */
     protected function isAllowedAttribute(
@@ -306,19 +407,44 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         $format = null,
         array $context = []
     ) {
-        // Ignore attributes set as serializer: expose: false
-        if ($object->getFamily()->hasAttribute($attribute)) {
-            $eavAttribute = $object->getFamily()->getAttribute($attribute);
-            $options = $eavAttribute->getOption('serializer', []);
-            if (array_key_exists('expose', $options) && !$options['expose']) {
-                return false;
-            }
-        }
-
+        // If normalizing by reference, we just check if it's among the allowed attributes
         if (array_key_exists('by_reference', $context) && $context['by_reference']) {
             return in_array($attribute, $this->referenceAttributes, true);
         }
 
-        return !in_array($attribute, $this->ignoredAttributes, true);
+        // Check ignored attributes
+        if (in_array($attribute, $this->ignoredAttributes, true)) {
+            return false;
+        }
+
+        return $this->isGroupAllowed($object, $attribute, $context);
+    }
+
+    /**
+     * Gets attributes to normalize using groups.
+     *
+     * @param DataInterface $object
+     * @param string        $attribute
+     * @param array         $context
+     *
+     * @throws InvalidArgumentException
+     *
+     * @return bool
+     */
+    protected function isGroupAllowed(DataInterface $object, $attribute, array $context)
+    {
+        if (!$this->classMetadataFactory || !isset($context[static::GROUPS]) || !is_array($context[static::GROUPS])) {
+            return true;
+        }
+
+        $attributesMetadatas = $this->classMetadataFactory->getMetadataFor($object)->getAttributesMetadata();
+        foreach ($attributesMetadatas as $attributeMetadata) {
+            // Alright, it's completely inefficient...
+            if ($attributeMetadata->getName() === $attribute) {
+                return 0 < count(array_intersect($attributeMetadata->getGroups(), $context[static::GROUPS]));
+            }
+        }
+
+        return false;
     }
 }
