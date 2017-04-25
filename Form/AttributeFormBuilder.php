@@ -94,13 +94,14 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
     ) {
         $formOptions = array_merge($attribute->getFormOptions(), $formOptions); // Invert priority ?
 
+        $disabled = array_key_exists('disabled', $formOptions) ? !$formOptions['disabled'] : true;
         $formOptions['label'] = false; // Removing label
         $collectionOptions = [
             'label' => ucfirst($attribute),
             'entry_type' => $attribute->getFormType(),
             'entry_options' => $formOptions,
-            'allow_add' => true,
-            'allow_delete' => true,
+            'allow_add' => $disabled,
+            'allow_delete' => $disabled,
             'required' => $attribute->isRequired(),
             'sortable' => false,
             'prototype_name' => '__'.$attribute->getCode().'__',
