@@ -140,6 +140,14 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
     }
 
     /**
+     * @param array $ignoredAttributes
+     */
+    public function addIgnoredAttributes(array $ignoredAttributes)
+    {
+        $this->ignoredAttributes = array_merge($this->ignoredAttributes, $ignoredAttributes);
+    }
+
+    /**
      * Set attributes used to normalize a data by reference
      *
      * @param array $referenceAttributes
@@ -378,6 +386,16 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
 
         // Ignore attributes set as serializer: expose: false
         if (array_key_exists(self::EXPOSE_KEY, $options) && !$options[self::EXPOSE_KEY]) {
+            return false;
+        }
+
+        // If normalizing by reference, we just check if it's among the allowed attributes
+        if (array_key_exists(self::BY_REFERENCE_KEY, $context) && $context[self::BY_REFERENCE_KEY]) {
+            return in_array($attribute->getCode(), $this->referenceAttributes, true);
+        }
+
+        // Also check ignored attributes
+        if (in_array($attribute->getCode(), $this->ignoredAttributes, true)) {
             return false;
         }
 
