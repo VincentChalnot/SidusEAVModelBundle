@@ -49,12 +49,13 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
 
     /**
      * @param AttributeInterface $attribute
+     * @param bool               $enforceFamilyCondition
      *
      * @return AttributeQueryBuilderInterface
      */
-    public function attribute(AttributeInterface $attribute)
+    public function attribute(AttributeInterface $attribute, $enforceFamilyCondition = true)
     {
-        return new AttributeQueryBuilder($this, $attribute);
+        return new AttributeQueryBuilder($this, $attribute, $enforceFamilyCondition);
     }
 
     /**

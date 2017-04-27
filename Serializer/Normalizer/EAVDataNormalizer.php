@@ -8,6 +8,7 @@ use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
+use Symfony\Component\Serializer\Exception\RuntimeException;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
@@ -23,8 +24,12 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
     use NormalizerAwareTrait;
 
     const DEPTH_KEY = 'depth';
+    const MAX_DEPTH_KEY = 'max_depth';
     const GROUPS = 'groups';
     const SERIALIZER_OPTIONS = 'serializer';
+    const BY_SHORT_REFERENCE_KEY = 'by_short_reference';
+    const BY_REFERENCE_KEY = 'by_reference';
+    const EXPOSE_KEY = 'expose';
 
     /** @var ClassMetadataFactoryInterface */
     protected $classMetadataFactory;
@@ -84,6 +89,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      * @param array         $context Context options for the normalizer
      *
      * @throws InvalidArgumentException
+     * @throws \Symfony\Component\Serializer\Exception\RuntimeException
      * @throws \Symfony\Component\PropertyAccess\Exception\ExceptionInterface
      * @throws \Sidus\EAVModelBundle\Exception\EAVExceptionInterface
      * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
@@ -95,8 +101,14 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         if (!array_key_exists(self::DEPTH_KEY, $context)) {
             $context[self::DEPTH_KEY] = 0;
         }
+        if (!array_key_exists(self::MAX_DEPTH_KEY, $context)) {
+            $context[self::MAX_DEPTH_KEY] = 10;
+        }
+        if ($context[self::DEPTH_KEY] > $context[self::MAX_DEPTH_KEY]) {
+            throw new RuntimeException("Max depth reached while normalizing EAV Data {$object->getId()}");
+        }
 
-        if (array_key_exists('by_short_reference', $context) ? $context['by_short_reference'] : false) {
+        if (array_key_exists(self::BY_SHORT_REFERENCE_KEY, $context) ? $context[self::BY_SHORT_REFERENCE_KEY] : false) {
             return $object->getIdentifier();
         }
 
@@ -104,7 +116,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
 
         foreach ($this->extractStandardAttributes($object, $format, $context) as $attribute) {
             $subContext = $context; // Copy context and force by reference
-            $subContext['by_reference'] = true; // Keep in mind that the normalizer might not support it
+            $subContext[self::BY_REFERENCE_KEY] = true; // Keep in mind that the normalizer might not support it
             $attributeValue = $this->getAttributeValue($object, $attribute, $format, $subContext);
             $data = $this->updateData($data, $attribute, $attributeValue);
         }
@@ -242,17 +254,33 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         array $context
     ) {
         $options = $attribute->getOption(self::SERIALIZER_OPTIONS, []);
-        $shortReference = array_key_exists('by_short_reference', $options) ? $options['by_short_reference'] : false;
+
+        $byReference = $attribute->getType()->isRelation();
+        if (array_key_exists(self::BY_SHORT_REFERENCE_KEY, $options)) {
+            $byReference = $options[self::BY_SHORT_REFERENCE_KEY];
+        }
+
+        $shortReference = false;
+        if (array_key_exists(self::BY_SHORT_REFERENCE_KEY, $options)) {
+            $shortReference = $options[self::BY_SHORT_REFERENCE_KEY];
+        }
+
+        $maxDepth = $context[self::MAX_DEPTH_KEY];
+        if (array_key_exists(self::MAX_DEPTH_KEY, $options)) {
+            $maxDepth = $options[self::MAX_DEPTH_KEY];
+        }
+
 
         return array_merge(
             $context,
             [
                 self::DEPTH_KEY => $context[self::DEPTH_KEY] + 1,
+                self::MAX_DEPTH_KEY => $maxDepth,
                 'parent' => $object,
                 'attribute' => $attribute->getCode(),
                 'eav_attribute' => $attribute,
-                'by_reference' => $attribute->getType()->isRelation(),
-                'by_short_reference' => $shortReference,
+                self::BY_REFERENCE_KEY => $byReference,
+                self::BY_SHORT_REFERENCE_KEY => $shortReference,
             ]
         );
     }
@@ -349,7 +377,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         $options = $attribute->getOption(self::SERIALIZER_OPTIONS, []);
 
         // Ignore attributes set as serializer: expose: false
-        if (array_key_exists('expose', $options) && !$options['expose']) {
+        if (array_key_exists(self::EXPOSE_KEY, $options) && !$options[self::EXPOSE_KEY]) {
             return false;
         }
 
@@ -408,7 +436,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         array $context = []
     ) {
         // If normalizing by reference, we just check if it's among the allowed attributes
-        if (array_key_exists('by_reference', $context) && $context['by_reference']) {
+        if (array_key_exists(self::BY_REFERENCE_KEY, $context) && $context[self::BY_REFERENCE_KEY]) {
             return in_array($attribute, $this->referenceAttributes, true);
         }
 

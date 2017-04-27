@@ -3,6 +3,7 @@
 namespace Sidus\EAVModelBundle\Doctrine;
 
 use Doctrine\ORM\Query\Expr\Join;
+use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 
 /**
@@ -18,23 +19,35 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     /** @var AttributeInterface */
     protected $attribute;
 
+    /** @var bool */
+    protected $enforceFamilyCondition;
+
     /** @var string */
     protected $joinAlias;
+
+    /** @var bool */
+    protected $joinApplied = false;
 
     /**
      * @param EAVQueryBuilderInterface $eavQueryBuilder
      * @param AttributeInterface       $attribute
+     * @param bool                     $enforceFamilyCondition
      */
-    public function __construct(EAVQueryBuilderInterface $eavQueryBuilder, AttributeInterface $attribute)
-    {
+    public function __construct(
+        EAVQueryBuilderInterface $eavQueryBuilder,
+        AttributeInterface $attribute,
+        $enforceFamilyCondition = true
+    ) {
         $this->eavQueryBuilder = $eavQueryBuilder;
         $this->attribute = $attribute;
         $this->prepareJoin();
     }
 
     /**
-     * @return string
      * @throws \LogicException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
+     *
+     * @return string
      */
     public function getDQL()
     {
@@ -42,7 +55,9 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
             $msg = "No condition applied on attribute query builder for attribute {$this->attribute->getCode()}";
             throw new \LogicException($msg);
         }
-        $this->applyJoin();
+        if (!$this->joinApplied) {
+            $this->applyJoin();
+        }
 
         return $this->dql;
     }
@@ -51,6 +66,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param array $array
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function in(array $array)
@@ -69,6 +85,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param array $array
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function notIn(array $array)
@@ -87,6 +104,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param mixed $scalar
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function equals($scalar)
@@ -98,6 +116,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param mixed $scalar
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function notEquals($scalar)
@@ -109,6 +128,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param mixed $scalar
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function like($scalar)
@@ -120,6 +140,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param mixed $scalar
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function notLike($scalar)
@@ -131,6 +152,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param mixed $number
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function gt($number)
@@ -142,6 +164,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param mixed $number
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function gte($number)
@@ -153,6 +176,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param mixed $number
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function lt($number)
@@ -164,6 +188,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param mixed $number
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function lte($number)
@@ -176,6 +201,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param mixed $upper
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function between($lower, $upper)
@@ -197,6 +223,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param mixed $upper
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function notBetween($lower, $upper)
@@ -218,6 +245,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param array  $parameters
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     public function rawDQL($dql, array $parameters = [])
@@ -242,7 +270,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
 
     /**
      * @param string $operator
-     * @param        $parameter
+     * @param mixed  $parameter
      *
      * @throws \LogicException
      * @return AttributeQueryBuilderInterface
@@ -260,7 +288,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     }
 
     /**
-     * Prepare the join for later
+     * Prepare the join alias for later
      */
     protected function prepareJoin()
     {
@@ -269,24 +297,41 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
 
     /**
      * Apply the join condition on the Query Builder
+     *
+     * @throws \LogicException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      */
     protected function applyJoin()
     {
+        $attributeCode = $this->attribute->getCode();
+        if ($this->joinApplied) {
+            throw new \LogicException("Join for attribute query builder {$attributeCode} already applied");
+        }
         $qb = $this->eavQueryBuilder->getQueryBuilder();
 
-        // Join based on attributeCode and familyCode
-        $attributeCode = $this->generateUniqueId('attribute');
-        $familyCode = $this->generateUniqueId('family');
+        // Join based on attributeCode
+        $attributeParameter = $this->generateUniqueId('attribute');
+        $qb->setParameter($attributeParameter, $attributeCode);
+        $joinDql = "{$this->joinAlias}.attributeCode = :{$attributeParameter}";
 
-        $qb->setParameter($attributeCode, $this->attribute->getCode());
-        $qb->setParameter($familyCode, $this->attribute->getFamily()->getCode());
+        if ($this->enforceFamilyCondition) {
+            $family = $this->attribute->getFamily();
+            if (!$family) {
+                throw new MissingFamilyException("Unable to resolve family for attribute {$attributeCode}");
+            }
+            $familyParameter = $this->generateUniqueId('family');
+            $qb->setParameter($familyParameter, $family->getCode());
+            $joinDql .= " AND {$this->joinAlias}.familyCode = :{$familyParameter}";
+        }
 
         $qb->leftJoin(
             $this->eavQueryBuilder->getAlias().'.values',
             $this->joinAlias,
             Join::WITH,
-            "{$this->joinAlias}.attributeCode = :{$attributeCode} AND {$this->joinAlias}.familyCode = :{$familyCode}"
+            $joinDql
         );
+
+        $this->joinApplied = true;
     }
 
     /**
