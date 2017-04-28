@@ -143,6 +143,9 @@ class DataType extends AbstractType
         $resolver->setNormalizer(
             'empty_data',
             function (Options $options, $value) {
+                if (null !== $value) {
+                    return $value;
+                }
                 if ($options['family'] instanceof FamilyInterface) {
                     return $options['family']->createData();
                 }
