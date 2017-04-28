@@ -44,16 +44,7 @@ class EmbedAttributeType extends AttributeType
     public function getFormOptions(AttributeInterface $attribute)
     {
         $formOptions = parent::getFormOptions($attribute);
-        if ($attribute->getOption('allowed_families')) {
-            $families = $attribute->getOption('allowed_families');
-            if (1 < count($families)) {
-                $m = "Standard embed attribute '{$attribute->getCode()}' doesn't supports more that one";
-                $m .= ' allowed_families in options';
-                throw new \LogicException($m);
-            }
-            reset($families);
-            $formOptions['family'] = current($families);
-        }
+        $formOptions['attribute'] = $attribute;
 
         return $formOptions;
     }

@@ -4,6 +4,7 @@ namespace Sidus\EAVModelBundle\Form\Type;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
+use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -67,18 +68,28 @@ class SimpleDataSelectorType extends AbstractType
             [
                 'class' => $this->dataClass,
                 'query_builder' => $queryBuilder,
-                'allowed_families' => null,
                 'max_results' => 100,
+                'attribute' => null,
+                'allowed_families' => null,
             ]
         );
 
+        $resolver->setAllowedTypes('attribute', [AttributeInterface::class, 'NULL']);
         $resolver->setAllowedTypes('allowed_families', ['array', 'NULL']);
         /** @noinspection PhpUnusedParameterInspection */
         $resolver->setNormalizer(
             'allowed_families',
             function (Options $options, $values) {
                 if (null === $values) {
-                    $values = $this->familyRegistry->getFamilies();
+                    /** @var AttributeInterface $attribute */
+                    $attribute = $options['attribute'];
+                    if ($attribute) {
+                        /** @var array $values */
+                        $values = $attribute->getOption('allowed_families');
+                    }
+                    if (!$values) {
+                        $values = $this->familyRegistry->getFamilies();
+                    }
                 }
                 $families = [];
                 foreach ($values as $value) {

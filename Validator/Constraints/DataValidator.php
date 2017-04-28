@@ -112,15 +112,20 @@ class DataValidator extends ConstraintValidator
         AttributeInterface $attribute,
         DataInterface $data
     ) {
+        $family = $data->getFamily();
         $valueData = $data->get($attribute->getCode());
 
         $query = [
             'attributeCode' => $attribute->getCode(),
+            'familyCode' => $family->getCode(),
             $attribute->getType()->getDatabaseType() => $valueData,
         ];
+        if ($attribute->getOption('global_unique')) {
+            unset($query['familyCode']);
+        }
 
         /** @var ValueRepository $repo */
-        $repo = $this->doctrine->getRepository($data->getFamily()->getValueClass());
+        $repo = $this->doctrine->getRepository($family->getValueClass());
         $values = $repo->findBy($query);
 
         /** @var ValueInterface $value */

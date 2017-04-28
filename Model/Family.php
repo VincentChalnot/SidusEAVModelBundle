@@ -2,6 +2,7 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
+use Sidus\EAVModelBundle\Exception\MissingAttributeException;
 use Sidus\EAVModelBundle\Registry\AttributeRegistry;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Context\ContextManager;
@@ -231,13 +232,14 @@ class Family implements FamilyInterface
     /**
      * @param string $code
      *
+     * @throws MissingAttributeException
+     *
      * @return AttributeInterface
-     * @throws UnexpectedValueException
      */
     public function getAttribute($code)
     {
         if (!$this->hasAttribute($code)) {
-            throw new UnexpectedValueException("Unknown attribute {$code} in family {$this->code}");
+            throw new MissingAttributeException("Unknown attribute {$code} in family {$this->code}");
         }
 
         return $this->attributes[$code];

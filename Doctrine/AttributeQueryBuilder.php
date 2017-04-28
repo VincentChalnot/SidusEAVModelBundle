@@ -40,6 +40,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     ) {
         $this->eavQueryBuilder = $eavQueryBuilder;
         $this->attribute = $attribute;
+        $this->enforceFamilyCondition = $enforceFamilyCondition;
         $this->prepareJoin();
     }
 

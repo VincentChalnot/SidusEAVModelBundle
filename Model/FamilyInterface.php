@@ -4,6 +4,7 @@ namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\ValueInterface;
+use Sidus\EAVModelBundle\Exception\MissingAttributeException;
 
 /**
  * Interface for family services
@@ -23,7 +24,7 @@ interface FamilyInterface
     public function getType();
 
     /**
-     * @return AttributeInterface
+     * @return AttributeInterface|null
      */
     public function getAttributeAsLabel();
 
@@ -39,6 +40,8 @@ interface FamilyInterface
 
     /**
      * @param string $code
+     *
+     * @throws MissingAttributeException
      *
      * @return AttributeInterface
      */
