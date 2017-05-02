@@ -3,6 +3,7 @@
 namespace Sidus\EAVModelBundle\Form\Type;
 
 use Sidus\EAVModelBundle\Form\AttributeFormBuilderInterface;
+use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
@@ -12,6 +13,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
+use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -115,6 +117,7 @@ class DataType extends AbstractType
      * @throws MissingFamilyException
      * @throws \UnexpectedValueException
      * @throws \Sidus\EAVModelBundle\Exception\WrongFamilyException
+     * @throws \Symfony\Component\OptionsResolver\Exception\MissingOptionsException
      */
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -122,17 +125,36 @@ class DataType extends AbstractType
             [
                 'data_class' => $this->dataClass,
                 'fields_config' => null,
+                'attribute' => null,
+                'family' => null,
             ]
         );
         $resolver->setAllowedTypes('fields_config', ['NULL', 'array']);
-        $resolver->setRequired(
-            [
-                'family',
-            ]
-        );
+        $resolver->setAllowedTypes('attribute', ['NULL', AttributeInterface::class]);
+        $resolver->setAllowedTypes('family', ['NULL', 'string', FamilyInterface::class]);
+
         $resolver->setNormalizer(
             'family',
             function (Options $options, $value) {
+                // If family option is not set, try to fetch the family from the attribute option
+                if ($value === null) {
+                    /** @var AttributeInterface $attribute */
+                    $attribute = $options['attribute'];
+                    if (!$attribute) {
+                        throw new MissingOptionsException(
+                            "An option is missing: you must set either the 'family' option or the 'attribute' option"
+                        );
+                    }
+                    $allowedFamilies = $attribute->getOption('allowed_families', []);
+                    if (1 !== count($allowedFamilies)) {
+                        $m = "Can't automatically compute the 'family' option with an attribute with no family allowed";
+                        $m .= " or multiple allowed families, please set the 'family' option manually";
+                        throw new MissingOptionsException($m);
+                    }
+
+                    $value = reset($allowedFamilies);
+                }
+
                 if ($value instanceof FamilyInterface) {
                     return $value;
                 }
@@ -146,21 +168,19 @@ class DataType extends AbstractType
                 if (null !== $value) {
                     return $value;
                 }
-                if ($options['family'] instanceof FamilyInterface) {
-                    return $options['family']->createData();
-                }
+                /** @var FamilyInterface $family */
+                $family = $options['family'];
 
-                return $value;
+                return $family->createData();
             }
         );
         $resolver->setNormalizer(
             'data_class',
             function (Options $options, $value) {
-                if ($options['family'] instanceof FamilyInterface) {
-                    return $options['family']->getDataClass();
-                }
+                /** @var FamilyInterface $family */
+                $family = $options['family'];
 
-                return $value;
+                return $family->getDataClass();
             }
         );
     }
