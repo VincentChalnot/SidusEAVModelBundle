@@ -88,12 +88,12 @@ class DataType extends AbstractType
         /** @var FamilyInterface $family */
         $family = $options['family'];
 
-        if ($options['fields_config']) {
-            /** @var array $fieldsConfig */
-            $fieldsConfig = $options['fields_config'];
+        /** @var array $fieldsConfig */
+        $fieldsConfig = $options['fields_config'];
+        if ($fieldsConfig) {
             foreach ($fieldsConfig as $attributeCode => $fieldConfig) {
                 $attribute = $family->getAttribute($attributeCode);
-                $this->attributeFormBuilder->addAttribute($builder, $attribute, $fieldConfig);
+                $this->attributeFormBuilder->addAttribute($builder, $attribute, $fieldConfig ?: []);
             }
         } else {
             foreach ($family->getAttributes() as $attribute) {

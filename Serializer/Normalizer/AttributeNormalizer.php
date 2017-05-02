@@ -3,6 +3,7 @@
 namespace Sidus\EAVModelBundle\Serializer\Normalizer;
 
 use Sidus\EAVModelBundle\Model\AttributeInterface;
+use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 /**
@@ -10,6 +11,18 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
  */
 class AttributeNormalizer extends ObjectNormalizer
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function normalize($object, $format = null, array $context = [])
+    {
+        try {
+            return parent::normalize($object, $format, $context);
+        } catch (CircularReferenceException $e) {
+            return $object->getCode();
+        }
+    }
+
     /**
      * Checks whether the given class is supported for denormalization by this normalizer.
      *
