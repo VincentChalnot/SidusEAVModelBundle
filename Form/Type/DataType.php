@@ -31,22 +31,16 @@ class DataType extends AbstractType
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var string */
-    protected $dataClass;
-
     /**
      * @param AttributeFormBuilderInterface $attributeFormBuilder
      * @param FamilyRegistry                $familyRegistry
-     * @param string                        $dataClass
      */
     public function __construct(
         AttributeFormBuilderInterface $attributeFormBuilder,
-        FamilyRegistry $familyRegistry,
-        $dataClass
+        FamilyRegistry $familyRegistry
     ) {
         $this->attributeFormBuilder = $attributeFormBuilder;
         $this->familyRegistry = $familyRegistry;
-        $this->dataClass = $dataClass;
     }
 
     /**
@@ -123,7 +117,7 @@ class DataType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => $this->dataClass,
+                'data_class' => null,
                 'fields_config' => null,
                 'attribute' => null,
                 'family' => null,
@@ -177,6 +171,11 @@ class DataType extends AbstractType
         $resolver->setNormalizer(
             'data_class',
             function (Options $options, $value) {
+                if (null !== $value) {
+                    $m = "DataType form does not supports the 'data_class' option, it will be automatically resolved";
+                    $m .= ' with the family';
+                    throw new \UnexpectedValueException($m);
+                }
                 /** @var FamilyInterface $family */
                 $family = $options['family'];
 
