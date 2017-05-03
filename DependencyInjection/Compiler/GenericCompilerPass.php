@@ -24,8 +24,6 @@ class GenericCompilerPass implements CompilerPassInterface
     protected $method;
 
     /**
-     * FamilyCompilerPass constructor.
-     *
      * @param string $registry
      * @param string $tag
      * @param string $method
@@ -37,13 +35,13 @@ class GenericCompilerPass implements CompilerPassInterface
         $this->method = $method;
     }
 
-
     /**
-     * Inject tagged families into configuration handler
+     * Inject tagged services into defined registry
+     *
+     * @api
      *
      * @param ContainerBuilder $container
      *
-     * @api
      * @throws InvalidArgumentException
      */
     public function process(ContainerBuilder $container)
@@ -56,10 +54,27 @@ class GenericCompilerPass implements CompilerPassInterface
         $taggedServices = $container->findTaggedServiceIds($this->tag);
 
         foreach ($taggedServices as $id => $tags) {
+            $priority = $this->resolvePriority($tags);
             $definition->addMethodCall(
                 $this->method,
-                [new Reference($id)]
+                [new Reference($id), $priority]
             );
         }
+    }
+
+    /**
+     * @param array $tags
+     *
+     * @return int
+     */
+    protected function resolvePriority(array $tags)
+    {
+        foreach ($tags as $tag) {
+            if (array_key_exists('priority', $tag)) {
+                return $tag['priority'];
+            }
+        }
+
+        return 0;
     }
 }
