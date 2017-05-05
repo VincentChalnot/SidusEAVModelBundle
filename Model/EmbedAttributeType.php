@@ -12,14 +12,6 @@ class EmbedAttributeType extends AttributeType
     /**
      * @return bool
      */
-    public function isRelation()
-    {
-        return false;
-    }
-
-    /**
-     * @return bool
-     */
     public function isEmbedded()
     {
         return true;
@@ -31,21 +23,5 @@ class EmbedAttributeType extends AttributeType
     public function setAttributeDefaults(AttributeInterface $attribute)
     {
         $attribute->addValidationRule(['Valid' => []]);
-    }
-
-
-    /**
-     * @param AttributeInterface $attribute
-     *
-     * @throws \LogicException
-     *
-     * @return array
-     */
-    public function getFormOptions(AttributeInterface $attribute)
-    {
-        $formOptions = parent::getFormOptions($attribute);
-        $formOptions['attribute'] = $attribute;
-
-        return $formOptions;
     }
 }

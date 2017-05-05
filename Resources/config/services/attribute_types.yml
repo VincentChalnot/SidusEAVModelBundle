@@ -1,7 +1,9 @@
 parameters:
     sidus_eav_model.attribute_type.default.class: Sidus\EAVModelBundle\Model\AttributeType
     sidus_eav_model.attribute_type.relation.class: Sidus\EAVModelBundle\Model\RelationAttributeType
+    sidus_eav_model.attribute_type.eav_relation.class: Sidus\EAVModelBundle\Model\EAVRelationAttributeType
     sidus_eav_model.attribute_type.embed.class: Sidus\EAVModelBundle\Model\EmbedAttributeType
+    sidus_eav_model.attribute_type.eav_embed.class: Sidus\EAVModelBundle\Model\EAVEmbedAttributeType
     sidus_eav_model.attribute_type.identifier.class: Sidus\EAVModelBundle\Model\IdentifierAttributeType
 
 services:
@@ -68,13 +70,13 @@ services:
     # NON-STANDARD ATTRIBUTE TYPES
 
     sidus_eav_model.attribute_type.data_selector:
-        class: '%sidus_eav_model.attribute_type.relation.class%'
+        class: '%sidus_eav_model.attribute_type.eav_relation.class%'
         arguments: [data_selector, dataValue, Sidus\EAVModelBundle\Form\Type\SimpleDataSelectorType]
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.embed:
-        class: '%sidus_eav_model.attribute_type.embed.class%'
+        class: '%sidus_eav_model.attribute_type.eav_embed.class%'
         arguments: [embed, dataValue, Sidus\EAVModelBundle\Form\Type\DataType]
         tags:
             - { name: sidus.attribute_type }

@@ -16,17 +16,4 @@ class RelationAttributeType extends AttributeType
     {
         return true;
     }
-
-    /**
-     * @param AttributeInterface $attribute
-     *
-     * @return array
-     */
-    public function getFormOptions(AttributeInterface $attribute)
-    {
-        $formOptions = parent::getFormOptions($attribute);
-        $formOptions['attribute'] = $attribute;
-
-        return $formOptions;
-    }
 }
