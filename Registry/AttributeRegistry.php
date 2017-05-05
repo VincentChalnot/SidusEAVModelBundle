@@ -34,18 +34,20 @@ class AttributeRegistry
     /** @var array */
     protected static $reservedCodes = [
         'id',
+        'identifier',
         'parent',
         'children',
         'values',
-        'refererValues',
+        'value',
         'valueData',
+        'valuesData',
+        'refererValues',
         'createdAt',
         'updatedAt',
         'family',
+        'familyCode',
         'currentContext',
-        'identifier',
-        'stringIdentifier',
-        'integerIdentifier',
+        'empty',
     ];
 
     /**

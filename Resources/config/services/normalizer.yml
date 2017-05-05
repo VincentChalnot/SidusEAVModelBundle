@@ -5,10 +5,12 @@ parameters:
         - refererValues
         - refererDatas
         - currentContext
-        - stringIdentifier
-        - integerIdentifier
         - values
-#        - family # Would work but we prefer to allow only familyCode for performance reasons
+        - valueData
+        - valuesData
+        - value
+        - familyCode
+        - empty
 
     sidus_eav_model.normalizer.data.reference_attributes:
         - id

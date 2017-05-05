@@ -3,6 +3,7 @@
 namespace Sidus\EAVModelBundle\Serializer\Normalizer;
 
 use Sidus\EAVModelBundle\Model\FamilyInterface;
+use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 /**
@@ -10,6 +11,37 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
  */
 class FamilyNormalizer extends ObjectNormalizer
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function normalize($object, $format = null, array $context = [])
+    {
+        /** @var FamilyInterface $object */
+        $byShortReference = false;
+        if (array_key_exists(EAVDataNormalizer::BY_SHORT_REFERENCE_KEY, $context)) {
+            $byShortReference = $context[EAVDataNormalizer::BY_SHORT_REFERENCE_KEY];
+        }
+        if ($byShortReference) {
+            return $object->getCode();
+        }
+
+        $byReference = false;
+        if (array_key_exists(EAVDataNormalizer::BY_REFERENCE_KEY, $context)) {
+            $byReference = $context[EAVDataNormalizer::BY_REFERENCE_KEY];
+        }
+        if ($byReference) {
+            return [
+                'code' => $object->getCode(),
+            ];
+        }
+
+        try {
+            return parent::normalize($object, $format, $context);
+        } catch (CircularReferenceException $e) {
+            return $object->getCode();
+        }
+    }
+
     /**
      * Checks whether the given class is supported for denormalization by this normalizer.
      *
