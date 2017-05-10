@@ -104,7 +104,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             if ($this->nameConverter) {
                 $attributeCode = $this->nameConverter->denormalize($attributeCode);
             }
-            if (!$this->isAllowedAttributes($attributeCode)) {
+            if (!$this->isAllowedAttributes($family, $attributeCode)) {
                 continue;
             }
             $this->handleAttributeValue($family, $attributeCode, $entity, $value, $format, $context);
@@ -299,12 +299,17 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
     }
 
     /**
-     * @param string $attributeCode
+     * @param FamilyInterface $family
+     * @param string          $attributeCode
      *
      * @return bool
      */
-    protected function isAllowedAttributes($attributeCode)
+    protected function isAllowedAttributes(FamilyInterface $family, $attributeCode)
     {
+        if ($attributeCode === 'label' && $family->hasAttribute('label')) {
+            return true;
+        }
+
         return !in_array($attributeCode, $this->ignoredAttributes, true);
     }
 
