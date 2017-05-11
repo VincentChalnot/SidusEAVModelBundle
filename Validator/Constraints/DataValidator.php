@@ -123,6 +123,9 @@ class DataValidator extends ConstraintValidator
         if ($attribute->getOption('global_unique')) {
             unset($query['familyCode']);
         }
+        if ($attribute->getOption('unique_families')) {
+            $query['familyCode'] = $attribute->getOption('unique_families');
+        }
 
         /** @var ValueRepository $repo */
         $repo = $this->doctrine->getRepository($family->getValueClass());
