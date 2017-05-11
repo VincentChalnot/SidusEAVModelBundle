@@ -117,6 +117,7 @@ class DataType extends AbstractType
     {
         $resolver->setDefaults(
             [
+                'empty_data' => null,
                 'data_class' => null,
                 'fields_config' => null,
                 'attribute' => null,
