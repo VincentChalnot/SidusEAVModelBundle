@@ -85,14 +85,17 @@ class AttributeRegistry
      * @param string $code
      * @param array  $attributeConfiguration
      *
+     * @throws \UnexpectedValueException
+     *
      * @return AttributeInterface
      */
     public function createAttribute($code, array $attributeConfiguration = [])
     {
-        $attributeConfiguration['context_mask'] = array_merge(
-            $this->globalContextMask,
-            $attributeConfiguration['context_mask']
-        );
+        if (null === $attributeConfiguration['context_mask']) {
+            $attributeConfiguration['context_mask'] = $this->globalContextMask;
+        } elseif (!is_array($attributeConfiguration['context_mask'])) {
+            throw new UnexpectedValueException('context_mask should be an array or null');
+        }
 
         $attributeClass = $this->attributeClass;
         /** @var AttributeInterface $attribute */
