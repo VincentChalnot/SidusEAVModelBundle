@@ -296,8 +296,8 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         $options = $attribute->getOption(self::SERIALIZER_OPTIONS, []);
 
         $byReference = $attribute->getType()->isRelation();
-        if (array_key_exists(self::BY_SHORT_REFERENCE_KEY, $options)) {
-            $byReference = $options[self::BY_SHORT_REFERENCE_KEY];
+        if (array_key_exists(self::BY_REFERENCE_KEY, $options)) {
+            $byReference = $options[self::BY_REFERENCE_KEY];
         }
 
         $byShortReference = false;
