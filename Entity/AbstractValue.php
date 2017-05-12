@@ -168,6 +168,8 @@ abstract class AbstractValue implements ContextualValueInterface
     }
 
     /**
+     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
+     *
      * @return AttributeInterface
      */
     public function getAttribute()
@@ -482,13 +484,14 @@ abstract class AbstractValue implements ContextualValueInterface
 
     /**
      * Remove id on clone and clone embedded data
+     *
+     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      */
     public function __clone()
     {
         $this->id = null;
-        $family = $this->getData()->getFamily();
-        $attribute = $family->getAttribute($this->getAttributeCode());
-        if ($this->dataValue && !$attribute->getType()->isRelation()) {
+        $attribute = $this->getAttribute();
+        if ($this->dataValue && $attribute->getType()->isEmbedded()) {
             $this->dataValue = clone $this->dataValue;
         }
     }

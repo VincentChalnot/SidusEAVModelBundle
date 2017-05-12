@@ -880,9 +880,17 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $this->id = null;
         $this->valuesByAttributes = null;
+        $this->refererValues = new ArrayCollection();
 
         $newValues = new ArrayCollection();
+        $identifierAttribute = $this->getFamily()->getAttributeAsIdentifier();
         foreach ($this->values as $value) {
+            if (!$this->getFamily()->hasAttribute($value->getAttributeCode())) {
+                continue; // Purging attributes that does not exists anymore in the model
+            }
+            if ($identifierAttribute && $identifierAttribute->getCode() === $value->getAttributeCode()) {
+                continue; // Skipping identifier attribute
+            }
             $newValues[] = clone $value;
         }
         $this->values = new ArrayCollection();
@@ -891,6 +899,7 @@ abstract class AbstractData implements ContextualDataInterface
             $newValue->setData($this);
         }
         $this->setCreatedAt(new DateTime());
+        $this->setUpdatedAt(new DateTime());
     }
 
     /**
