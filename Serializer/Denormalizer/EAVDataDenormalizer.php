@@ -176,6 +176,10 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
                 );
             }
         } else {
+            if ($attributeCode === 'label') {
+                // Skip the "setValue" for a standard "label" attribute, due to conflict with the attributeAsLabel option
+                return;
+            }
             $value = $this->denormalizeAttribute(
                 $family,
                 $attributeCode,
@@ -408,6 +412,6 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
 //        dump($targetClass, $context, $value);
 //        exit;
 
-        return $this->denormalizer->denormalize($value, $targetClass, $format, $context);
+        return $this->denormalize($value, $targetClass, $format, $context);
     }
 }
