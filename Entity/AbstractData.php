@@ -105,7 +105,7 @@ abstract class AbstractData implements ContextualDataInterface
     protected $valuesByAttributes;
 
     /**
-     * Initialize the data with an optional (but recommended family code)
+     * Initialize the data with the mandatory family
      *
      * @param FamilyInterface $family
      *
@@ -875,13 +875,14 @@ abstract class AbstractData implements ContextualDataInterface
      * Remove id on clone and clean values
      *
      * @throws \UnexpectedValueException
+     * @throws \LogicException
      */
     public function __clone()
     {
         $this->id = null;
-        $this->valuesByAttributes = null;
-        $this->refererValues = new ArrayCollection();
+        $this->valuesByAttributes = null; // Cleaning internal "cache"
 
+        // Cloning the previous values
         $newValues = new ArrayCollection();
         $identifierAttribute = $this->getFamily()->getAttributeAsIdentifier();
         foreach ($this->values as $value) {
@@ -893,13 +894,15 @@ abstract class AbstractData implements ContextualDataInterface
             }
             $newValues[] = clone $value;
         }
-        $this->values = new ArrayCollection();
+
+        // Calling the constructor manually to reset everything
+        /** @noinspection ImplicitMagicMethodCallInspection */
+        $this->__construct($this->getFamily());
+
         foreach ($newValues as $newValue) {
             $this->values->add($newValue);
             $newValue->setData($this);
         }
-        $this->setCreatedAt(new DateTime());
-        $this->setUpdatedAt(new DateTime());
     }
 
     /**
