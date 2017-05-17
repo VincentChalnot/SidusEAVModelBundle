@@ -19,13 +19,25 @@ class WrongFamilyException extends \ErrorException implements EAVExceptionInterf
      */
     public static function assertFamily(DataInterface $data, $familyCode)
     {
-        if ($data->getFamilyCode() === $familyCode) {
+        self::assertFamilies($data, [$familyCode]);
+    }
+
+    /**
+     * @param DataInterface $data
+     * @param array        $familyCodes
+     *
+     * @throws WrongFamilyException
+     */
+    public static function assertFamilies(DataInterface $data, array $familyCodes)
+    {
+        if (in_array($data->getFamilyCode(), $familyCodes, true)) {
             return;
         }
 
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
         $function = $backtrace[1]['class'].'::'.$backtrace[1]['function'];
-        $m = "Argument 1 passed to {$function} must be of family {$familyCode}, {$data->getFamilyCode()} given";
+        $families = implode(', ', $familyCodes);
+        $m = "Argument 1 passed to {$function} must be of one of the following families: {$families}, '{$data->getFamilyCode()}' given";
 
         throw new self(
             'WrongFamilyException: '.$m, // message
