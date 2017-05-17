@@ -88,18 +88,20 @@ class DataType extends AbstractType
         /** @var FamilyInterface $family */
         $family = $options['family'];
 
-        /** @var array $fieldsConfig */
-        $fieldsConfig = $options['fields_config'];
-        if ($fieldsConfig) {
-            foreach ($fieldsConfig as $attributeCode => $fieldConfig) {
-                $attribute = $family->getAttribute($attributeCode);
-                $this->attributeFormBuilder->addAttribute($builder, $attribute, $fieldConfig ?: []);
+        $attributes = $family->getAttributes();
+        if ($options['attributes_config']) {
+            $attributes = [];
+            foreach (array_keys($options['attributes_config']) as $attributeCode) {
+                $attributes[] = $family->getAttribute($attributeCode);
             }
-        } else {
-            foreach ($family->getAttributes() as $attribute) {
-                $fieldConfig = [];
-                $this->attributeFormBuilder->addAttribute($builder, $attribute, $fieldConfig);
-            }
+        }
+
+        foreach ($attributes as $attribute) {
+            $this->attributeFormBuilder->addAttribute(
+                $builder,
+                $attribute,
+                $this->resolveAttributeConfig($attribute, $options)
+            );
         }
     }
 
@@ -119,12 +121,12 @@ class DataType extends AbstractType
             [
                 'empty_data' => null,
                 'data_class' => null,
-                'fields_config' => null,
+                'attributes_config' => null,
                 'attribute' => null,
                 'family' => null,
             ]
         );
-        $resolver->setAllowedTypes('fields_config', ['NULL', 'array']);
+        $resolver->setAllowedTypes('attributes_config', ['NULL', 'array']);
         $resolver->setAllowedTypes('attribute', ['NULL', AttributeInterface::class]);
         $resolver->setAllowedTypes('family', ['NULL', 'string', FamilyInterface::class]);
 
@@ -191,5 +193,20 @@ class DataType extends AbstractType
     public function getBlockPrefix()
     {
         return 'sidus_data';
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @param array              $options
+     *
+     * @return array
+     */
+    protected function resolveAttributeConfig(AttributeInterface $attribute, array $options)
+    {
+        if (isset($options['attributes_config'][$attribute->getCode()])) {
+            return $options['attributes_config'][$attribute->getCode()];
+        }
+
+        return [];
     }
 }

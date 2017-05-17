@@ -126,13 +126,17 @@ abstract class AbstractValue implements ContextualValueInterface
     /**
      * @param DataInterface      $data
      * @param AttributeInterface $attribute
+     *
+     * @throws \LogicException
      */
-    public function __construct(DataInterface $data = null, AttributeInterface $attribute = null)
+    public function __construct(DataInterface $data, AttributeInterface $attribute)
     {
-        $this->data = $data;
-        if ($attribute) {
-            $this->setAttribute($attribute);
+        if (null === $attribute->getFamily()) {
+            throw new \LogicException("Attribute '{$attribute->getCode()}' does not have a configured family");
         }
+        $this->data = $data;
+        $this->attributeCode = $attribute->getCode();
+        $this->familyCode = $attribute->getFamily()->getCode();
     }
 
     /**
@@ -179,19 +183,6 @@ abstract class AbstractValue implements ContextualValueInterface
         }
 
         return $this->getData()->getFamily()->getAttribute($this->getAttributeCode());
-    }
-
-    /**
-     * @param AttributeInterface $attribute
-     *
-     * @return ValueInterface
-     */
-    public function setAttribute(AttributeInterface $attribute)
-    {
-        $this->attributeCode = $attribute->getCode();
-        $this->familyCode = $attribute->getFamily() ? $attribute->getFamily()->getCode() : null;
-
-        return $this;
     }
 
     /**

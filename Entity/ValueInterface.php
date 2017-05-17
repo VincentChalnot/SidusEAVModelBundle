@@ -38,13 +38,6 @@ interface ValueInterface
     public function getAttribute();
 
     /**
-     * @param AttributeInterface $attribute
-     *
-     * @return ValueInterface
-     */
-    public function setAttribute(AttributeInterface $attribute);
-
-    /**
      * The data carrying the current value
      *
      * @return DataInterface
