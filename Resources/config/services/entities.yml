@@ -1,12 +1,3 @@
 parameters:
     sidus_eav_model.attribute.class: Sidus\EAVModelBundle\Model\Attribute
     sidus_eav_model.family.class: Sidus\EAVModelBundle\Model\Family
-
-services:
-    sidus_eav_model.doctrine.metadata.mapper:
-        class: Sidus\EAVModelBundle\Event\DoctrineMetadataListener
-        arguments:
-            - '%sidus_eav_model.entity.data.class%'
-            - '%sidus_eav_model.entity.value.class%'
-        tags:
-            - { name: doctrine.event_listener, event: loadClassMetadata }

@@ -28,7 +28,7 @@ abstract class AbstractValue implements ContextualValueInterface
      * @var DataInterface
      *
      * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", inversedBy="values", fetch="EAGER")
-     * @ORM\JoinColumn(name="data_id", referencedColumnName="id", onDelete="cascade", nullable=false)
+     * @ORM\JoinColumn(name="data_id", referencedColumnName="id", onDelete="cascade")
      */
     protected $data;
 

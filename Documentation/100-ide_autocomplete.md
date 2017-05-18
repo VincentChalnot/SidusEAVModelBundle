@@ -1,8 +1,7 @@
 #### Intro
-You can optionally activate a code generator to create fake abstract classes for your IDE
-autocomplete.
-This means that when coding you can instantly know what are the attributes present in your model
-and the type of data they return.
+You can optionally activate a code generator to create fake abstract classes for your IDE autocomplete.
+This means that when coding you can instantly know what are the attributes present in your model and the type of data
+they return.
 
 #### Install
 
@@ -23,7 +22,12 @@ manually exclude all directories inside /var without including /var/annotations.
 
 #### Usage:
 
-Use the __@var__ annotation : ```/** @var \Sidus\EAV\FamilyCode $var */```
+Use the __@var__ annotation :
+
+```php
+/** @var \Sidus\EAV\FamilyCode $var */
+$var->getTitle();
+```
 
 ![Autocomplete Example](assets/autocomplete_example.png)
 

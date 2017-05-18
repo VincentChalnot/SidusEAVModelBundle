@@ -56,6 +56,7 @@ class SidusEAVModelExtension extends Extension
         $loader->load('context.yml');
         $loader->load('doctrine.yml');
         $loader->load('entities.yml');
+        $loader->load('events.yml');
         $loader->load('forms.yml');
         if ($config['serializer_enabled']) {
             // Only load normalizers if symfony serializer is loaded
