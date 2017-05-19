@@ -1,0 +1,9 @@
+services:
+    sidus_eav_model.serializer.handler.max_depth:
+        class: Sidus\EAVModelBundle\Serializer\MaxDepthHandler
+
+    sidus_eav_model.serializer.handler.circular_reference:
+        class: Sidus\EAVModelBundle\Serializer\CircularReferenceHandler
+
+    sidus_eav_model.serializer.handler.by_reference:
+        class: Sidus\EAVModelBundle\Serializer\ByReferenceHandler

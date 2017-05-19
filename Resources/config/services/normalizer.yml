@@ -33,6 +33,10 @@ services:
     sidus_eav_model.normalizer.data:
         parent: serializer.normalizer.object
         class: Sidus\EAVModelBundle\Serializer\Normalizer\EAVDataNormalizer
+        arguments:
+            - '@sidus_eav_model.serializer.handler.max_depth'
+            - '@sidus_eav_model.serializer.handler.circular_reference'
+            - '@sidus_eav_model.serializer.handler.by_reference'
         calls:
             - [setIgnoredAttributes, ['%sidus_eav_model.normalizer.data.ignored_attributes%']]
             - [setReferenceAttributes, ['%sidus_eav_model.normalizer.data.reference_attributes%']]
@@ -42,6 +46,9 @@ services:
     sidus_eav_model.normalizer.family:
         parent: serializer.normalizer.object
         class: Sidus\EAVModelBundle\Serializer\Normalizer\FamilyNormalizer
+        arguments:
+            - '@sidus_eav_model.serializer.handler.max_depth'
+            - '@sidus_eav_model.serializer.handler.by_reference'
         calls:
             - [setIgnoredAttributes, ['%sidus_eav_model.normalizer.family.ignored_attributes%']]
         tags:
@@ -50,7 +57,35 @@ services:
     sidus_eav_model.normalizer.attribute:
         parent: serializer.normalizer.object
         class: Sidus\EAVModelBundle\Serializer\Normalizer\AttributeNormalizer
+        arguments:
+            - '@sidus_eav_model.serializer.handler.max_depth'
+            - '@sidus_eav_model.serializer.handler.by_reference'
         calls:
             - [setIgnoredAttributes, ['%sidus_eav_model.normalizer.attribute.ignored_attributes%']]
         tags:
             - { name: serializer.normalizer }
+
+# Normalizer variants for flat formats
+    sidus_eav_model.normalizer.data.flat:
+        class: Sidus\EAVModelBundle\Serializer\Normalizer\Flat\FlatNormalizer
+        arguments:
+            - '@sidus_eav_model.normalizer.data'
+            - [csv]
+        tags:
+            - { name: serializer.normalizer, priority: 1 }
+
+    sidus_eav_model.normalizer.family.flat:
+        class: Sidus\EAVModelBundle\Serializer\Normalizer\Flat\FlatNormalizer
+        arguments:
+            - '@sidus_eav_model.normalizer.family'
+            - [csv]
+        tags:
+            - { name: serializer.normalizer, priority: 1 }
+
+    sidus_eav_model.normalizer.attribute.flat:
+        class: Sidus\EAVModelBundle\Serializer\Normalizer\Flat\FlatNormalizer
+        arguments:
+            - '@sidus_eav_model.normalizer.attribute'
+            - [csv]
+        tags:
+            - { name: serializer.normalizer, priority: 1 }

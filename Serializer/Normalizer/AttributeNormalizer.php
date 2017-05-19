@@ -3,7 +3,13 @@
 namespace Sidus\EAVModelBundle\Serializer\Normalizer;
 
 use Sidus\EAVModelBundle\Model\AttributeInterface;
+use Sidus\EAVModelBundle\Serializer\ByReferenceHandler;
+use Sidus\EAVModelBundle\Serializer\MaxDepthHandler;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
+use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 /**
@@ -11,11 +17,54 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
  */
 class AttributeNormalizer extends ObjectNormalizer
 {
+    /** @var MaxDepthHandler */
+    protected $maxDepthHandler;
+
+    /** @var ByReferenceHandler */
+    protected $byReferenceHandler;
+
+    /**
+     * @param ClassMetadataFactoryInterface|null  $classMetadataFactory
+     * @param NameConverterInterface|null         $nameConverter
+     * @param PropertyAccessorInterface|null      $propertyAccessor
+     * @param PropertyTypeExtractorInterface|null $propertyTypeExtractor
+     * @param MaxDepthHandler                     $maxDepthHandler
+     * @param ByReferenceHandler                  $byReferenceHandler
+     */
+    public function __construct(
+        ClassMetadataFactoryInterface $classMetadataFactory = null,
+        NameConverterInterface $nameConverter = null,
+        PropertyAccessorInterface $propertyAccessor = null,
+        PropertyTypeExtractorInterface $propertyTypeExtractor = null,
+        MaxDepthHandler $maxDepthHandler,
+        ByReferenceHandler $byReferenceHandler
+    ) {
+        parent::__construct($classMetadataFactory, $nameConverter, $propertyAccessor, $propertyTypeExtractor);
+        $this->maxDepthHandler = $maxDepthHandler;
+        $this->byReferenceHandler = $byReferenceHandler;
+    }
+
     /**
      * {@inheritdoc}
+     * @throws \Symfony\Component\Serializer\Exception\RuntimeException
      */
     public function normalize($object, $format = null, array $context = [])
     {
+        $this->maxDepthHandler->handleMaxDepth($context);
+
+        /** @var AttributeInterface $object */
+        if ($this->byReferenceHandler->isByShortReference($context)) {
+            return $object->getCode();
+        }
+
+        if ($this->byReferenceHandler->isByReference($context)) {
+            return [
+                'code' => $object->getCode(),
+                'type' => $object->getType()->getCode(),
+                'collection' => $object->isCollection(),
+            ];
+        }
+
         try {
             return parent::normalize($object, $format, $context);
         } catch (CircularReferenceException $e) {

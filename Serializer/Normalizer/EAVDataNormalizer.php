@@ -5,14 +5,15 @@ namespace Sidus\EAVModelBundle\Serializer\Normalizer;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Exception\EAVExceptionInterface;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
+use Sidus\EAVModelBundle\Serializer\AttributesHandlerTrait;
+use Sidus\EAVModelBundle\Serializer\ByReferenceHandler;
+use Sidus\EAVModelBundle\Serializer\CircularReferenceHandler;
+use Sidus\EAVModelBundle\Serializer\MaxDepthHandler;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
-use Symfony\Component\Serializer\Exception\CircularReferenceException;
-use Symfony\Component\Serializer\Exception\RuntimeException;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -24,13 +25,10 @@ use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
 {
     use NormalizerAwareTrait;
+    use AttributesHandlerTrait;
 
-    const DEPTH_KEY = 'depth';
-    const MAX_DEPTH_KEY = 'max_depth';
     const GROUPS = 'groups';
     const SERIALIZER_OPTIONS = 'serializer';
-    const BY_SHORT_REFERENCE_KEY = 'by_short_reference';
-    const BY_REFERENCE_KEY = 'by_reference';
     const EXPOSE_KEY = 'expose';
 
     /** @var ClassMetadataFactoryInterface */
@@ -45,62 +43,40 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
     /** @var PropertyTypeExtractorInterface */
     protected $propertyTypeExtractor;
 
-    /** @var array */
-    protected $ignoredAttributes;
+    /** @var MaxDepthHandler */
+    protected $maxDepthHandler;
 
-    /** @var array */
-    protected $referenceAttributes;
-
-    /** @var int */
-    protected $circularReferenceLimit = 2;
-
-    /** @var callable */
+    /** @var CircularReferenceHandler */
     protected $circularReferenceHandler;
+
+    /** @var ByReferenceHandler */
+    protected $byReferenceHandler;
 
     /**
      * @param ClassMetadataFactoryInterface|null  $classMetadataFactory
      * @param NameConverterInterface|null         $nameConverter
      * @param PropertyAccessorInterface|null      $propertyAccessor
      * @param PropertyTypeExtractorInterface|null $propertyTypeExtractor
+     * @param MaxDepthHandler                     $maxDepthHandler
+     * @param CircularReferenceHandler            $circularReferenceHandler
+     * @param ByReferenceHandler                  $byReferenceHandler
      */
     public function __construct(
         ClassMetadataFactoryInterface $classMetadataFactory = null,
         NameConverterInterface $nameConverter = null,
         PropertyAccessorInterface $propertyAccessor = null,
-        PropertyTypeExtractorInterface $propertyTypeExtractor = null
+        PropertyTypeExtractorInterface $propertyTypeExtractor = null,
+        MaxDepthHandler $maxDepthHandler,
+        CircularReferenceHandler $circularReferenceHandler,
+        ByReferenceHandler $byReferenceHandler
     ) {
         $this->classMetadataFactory = $classMetadataFactory;
         $this->nameConverter = $nameConverter;
         $this->propertyAccessor = $propertyAccessor ?: PropertyAccess::createPropertyAccessor();
         $this->propertyTypeExtractor = $propertyTypeExtractor;
-    }
-
-    /**
-     * Set circular reference limit.
-     *
-     * @param int $circularReferenceLimit limit of iterations for the same object
-     *
-     * @return self
-     */
-    public function setCircularReferenceLimit($circularReferenceLimit)
-    {
-        $this->circularReferenceLimit = $circularReferenceLimit;
-
-        return $this;
-    }
-
-    /**
-     * Set circular reference handler.
-     *
-     * @param callable $circularReferenceHandler
-     *
-     * @return self
-     */
-    public function setCircularReferenceHandler(callable $circularReferenceHandler)
-    {
+        $this->maxDepthHandler = $maxDepthHandler;
         $this->circularReferenceHandler = $circularReferenceHandler;
-
-        return $this;
+        $this->byReferenceHandler = $byReferenceHandler;
     }
 
     /**
@@ -134,21 +110,22 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      */
     public function normalize($object, $format = null, array $context = [])
     {
-        if (array_key_exists(self::BY_SHORT_REFERENCE_KEY, $context) ? $context[self::BY_SHORT_REFERENCE_KEY] : false) {
+        $this->maxDepthHandler->handleMaxDepth($context);
+
+        if ($this->byReferenceHandler->isByShortReference($context)) {
             return $object->getIdentifier();
         }
 
-        $this->handleMaxDepth($context, $object->getId());
 
-        if ($this->isCircularReference($object, $context)) {
-            return $this->handleCircularReference($object);
+        if ($this->circularReferenceHandler->isCircularReference($object, $context)) {
+            return $this->circularReferenceHandler->handleCircularReference($object);
         }
 
         $data = [];
 
         foreach ($this->extractStandardAttributes($object, $format, $context) as $attribute) {
             $subContext = $context; // Copy context and force by reference
-            $subContext[self::BY_REFERENCE_KEY] = true; // Keep in mind that the normalizer might not support it
+            $subContext[ByReferenceHandler::BY_REFERENCE_KEY] = true; // Keep in mind that the normalizer might not support it
             $attributeValue = $this->getAttributeValue($object, $attribute, $format, $subContext);
             $data = $this->updateData($data, $attribute, $attributeValue);
         }
@@ -159,34 +136,6 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         }
 
         return $data;
-    }
-
-    /**
-     * Set ignored attributes for normalization and denormalization.
-     *
-     * @param array $ignoredAttributes
-     */
-    public function setIgnoredAttributes(array $ignoredAttributes)
-    {
-        $this->ignoredAttributes = $ignoredAttributes;
-    }
-
-    /**
-     * @param array $ignoredAttributes
-     */
-    public function addIgnoredAttributes(array $ignoredAttributes)
-    {
-        $this->ignoredAttributes = array_merge($this->ignoredAttributes, $ignoredAttributes);
-    }
-
-    /**
-     * Set attributes used to normalize a data by reference
-     *
-     * @param array $referenceAttributes
-     */
-    public function setReferenceAttributes(array $referenceAttributes)
-    {
-        $this->referenceAttributes = $referenceAttributes;
     }
 
     /**
@@ -249,7 +198,6 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         return array_merge(
             $context,
             [
-                self::DEPTH_KEY => $context[self::DEPTH_KEY] + 1,
                 'parent' => $object,
                 'attribute' => $attribute,
             ]
@@ -296,31 +244,29 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         $options = $attribute->getOption(self::SERIALIZER_OPTIONS, []);
 
         $byReference = $attribute->getType()->isRelation();
-        if (array_key_exists(self::BY_REFERENCE_KEY, $options)) {
-            $byReference = $options[self::BY_REFERENCE_KEY];
+        if (array_key_exists(ByReferenceHandler::BY_REFERENCE_KEY, $options)) {
+            $byReference = $options[ByReferenceHandler::BY_REFERENCE_KEY];
         }
 
         $byShortReference = false;
-        if (array_key_exists(self::BY_SHORT_REFERENCE_KEY, $options)) {
-            $byShortReference = $options[self::BY_SHORT_REFERENCE_KEY];
+        if (array_key_exists(ByReferenceHandler::BY_SHORT_REFERENCE_KEY, $options)) {
+            $byShortReference = $options[ByReferenceHandler::BY_SHORT_REFERENCE_KEY];
         }
 
-        $maxDepth = $context[self::MAX_DEPTH_KEY];
-        if (array_key_exists(self::MAX_DEPTH_KEY, $options)) {
-            $maxDepth = $options[self::MAX_DEPTH_KEY];
+        $maxDepth = $context[MaxDepthHandler::MAX_DEPTH_KEY];
+        if (array_key_exists(MaxDepthHandler::MAX_DEPTH_KEY, $options)) {
+            $maxDepth = $options[MaxDepthHandler::MAX_DEPTH_KEY];
         }
-
 
         return array_merge(
             $context,
             [
-                self::DEPTH_KEY => $context[self::DEPTH_KEY] + 1,
-                self::MAX_DEPTH_KEY => $maxDepth,
+                MaxDepthHandler::MAX_DEPTH_KEY => $maxDepth,
+                ByReferenceHandler::BY_REFERENCE_KEY => $byReference,
+                ByReferenceHandler::BY_SHORT_REFERENCE_KEY => $byShortReference,
                 'parent' => $object,
                 'attribute' => $attribute->getCode(),
                 'eav_attribute' => $attribute,
-                self::BY_REFERENCE_KEY => $byReference,
-                self::BY_SHORT_REFERENCE_KEY => $byShortReference,
             ]
         );
     }
@@ -422,7 +368,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         }
 
         // If normalizing by reference, we just check if it's among the allowed attributes
-        if (array_key_exists(self::BY_REFERENCE_KEY, $context) && $context[self::BY_REFERENCE_KEY]) {
+        if ($this->byReferenceHandler->isByReference($context)) {
             return in_array($attribute->getCode(), $this->referenceAttributes, true);
         }
 
@@ -490,7 +436,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         array $context = []
     ) {
         // If normalizing by reference, we just check if it's among the allowed attributes
-        if (array_key_exists(self::BY_REFERENCE_KEY, $context) && $context[self::BY_REFERENCE_KEY]) {
+        if ($this->byReferenceHandler->isByReference($context)) {
             return in_array($attribute, $this->referenceAttributes, true);
         }
 
@@ -528,76 +474,5 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         }
 
         return false;
-    }
-
-    /**
-     * @param array  $context
-     * @param string $reference
-     *
-     * @throws \Symfony\Component\Serializer\Exception\RuntimeException
-     */
-    protected function handleMaxDepth(array &$context, $reference = null)
-    {
-        if (!array_key_exists(self::DEPTH_KEY, $context)) {
-            $context[self::DEPTH_KEY] = 0;
-        }
-        if (!array_key_exists(self::MAX_DEPTH_KEY, $context)) {
-            $context[self::MAX_DEPTH_KEY] = 10;
-        }
-        if ($context[self::DEPTH_KEY] > $context[self::MAX_DEPTH_KEY]) {
-            throw new RuntimeException("Max depth reached while normalizing EAV Data '{$reference}'");
-        }
-    }
-
-    /**
-     * Detects if the configured circular reference limit is reached.
-     *
-     * @param DataInterface $object
-     * @param array         $context
-     *
-     * @throws CircularReferenceException
-     *
-     * @return bool
-     */
-    protected function isCircularReference($object, &$context)
-    {
-        $objectHash = spl_object_hash($object);
-
-        if (isset($context[AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT][$objectHash])) {
-            if ($context[AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT][$objectHash] >= $this->circularReferenceLimit) {
-                unset($context[AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT][$objectHash]);
-
-                return true;
-            }
-
-            ++$context[AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT][$objectHash];
-        } else {
-            $context[AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT][$objectHash] = 1;
-        }
-
-        return false;
-    }
-
-    /**
-     * Handles a circular reference.
-     *
-     * If a circular reference handler is set, it will be called. Otherwise, a
-     * {@class CircularReferenceException} will be thrown.
-     *
-     * @param DataInterface $object
-     *
-     * @throws CircularReferenceException
-     *
-     * @return mixed
-     */
-    protected function handleCircularReference($object)
-    {
-        if ($this->circularReferenceHandler) {
-            return call_user_func($this->circularReferenceHandler, $object);
-        }
-
-        throw new CircularReferenceException(
-            sprintf('A circular reference has been detected (configured limit: %d).', $this->circularReferenceLimit)
-        );
     }
 }
