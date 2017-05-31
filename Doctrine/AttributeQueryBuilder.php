@@ -110,6 +110,10 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      */
     public function equals($scalar)
     {
+        if (null === $scalar) {
+            return $this->isNull(); // Special case for null, might not be a good idea to handle this here...
+        }
+
         return $this->simpleDQLStatement('=', $scalar);
     }
 
@@ -122,6 +126,10 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      */
     public function notEquals($scalar)
     {
+        if (null === $scalar) {
+            return $this->isNotNull(); // Special case for null, might not be a good idea to handle this here...
+        }
+
         return $this->simpleDQLStatement('!=', $scalar);
     }
 
@@ -242,6 +250,26 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     }
 
     /**
+     * @throws \LogicException
+     *
+     * @return AttributeQueryBuilderInterface
+     */
+    public function isNull()
+    {
+        return $this->rawDQL("{$this->getColumn()} IS NULL");
+    }
+
+    /**
+     * @throws \LogicException
+     *
+     * @return AttributeQueryBuilderInterface
+     */
+    public function isNotNull()
+    {
+        return $this->rawDQL("{$this->getColumn()} IS NOT NULL");
+    }
+
+    /**
      * @param string $dql
      * @param array  $parameters
      *
@@ -270,39 +298,14 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     }
 
     /**
-     * @param string $operator
-     * @param mixed  $parameter
-     *
-     * @throws \LogicException
-     * @return AttributeQueryBuilderInterface
-     */
-    protected function simpleDQLStatement($operator, $parameter)
-    {
-        $parameterName = $this->generateUniqueId();
-
-        return $this->rawDQL(
-            "{$this->getColumn()} {$operator} :{$parameterName}",
-            [
-                $parameterName => $parameter,
-            ]
-        );
-    }
-
-    /**
-     * Prepare the join alias for later
-     */
-    protected function prepareJoin()
-    {
-        $this->joinAlias = $this->generateUniqueId('join');
-    }
-
-    /**
      * Apply the join condition on the Query Builder
      *
      * @throws \LogicException
      * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
+     *
+     * @return AttributeQueryBuilderInterface
      */
-    protected function applyJoin()
+    public function applyJoin()
     {
         $attributeCode = $this->attribute->getCode();
         if ($this->joinApplied) {
@@ -333,6 +336,35 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
         );
 
         $this->joinApplied = true;
+
+        return $this;
+    }
+
+    /**
+     * @param string $operator
+     * @param mixed  $parameter
+     *
+     * @throws \LogicException
+     * @return AttributeQueryBuilderInterface
+     */
+    protected function simpleDQLStatement($operator, $parameter)
+    {
+        $parameterName = $this->generateUniqueId();
+
+        return $this->rawDQL(
+            "{$this->getColumn()} {$operator} :{$parameterName}",
+            [
+                $parameterName => $parameter,
+            ]
+        );
+    }
+
+    /**
+     * Prepare the join alias for later
+     */
+    protected function prepareJoin()
+    {
+        $this->joinAlias = $this->generateUniqueId('join');
     }
 
     /**

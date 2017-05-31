@@ -92,7 +92,7 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
      */
     public function addOrderBy(AttributeQueryBuilderInterface $attributeQueryBuilder, $direction = null)
     {
-        $this->queryBuilder->addOrderBy($attributeQueryBuilder->getColumn(), $direction);
+        $this->queryBuilder->addOrderBy($attributeQueryBuilder->applyJoin()->getColumn(), $direction);
 
         return $this;
     }

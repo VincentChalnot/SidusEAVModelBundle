@@ -102,6 +102,16 @@ interface AttributeQueryBuilderInterface extends DQLHandlerInterface
     public function notBetween($lower, $upper);
 
     /**
+     * @return AttributeQueryBuilderInterface
+     */
+    public function isNull();
+
+    /**
+     * @return AttributeQueryBuilderInterface
+     */
+    public function isNotNull();
+
+    /**
      * @param string $dql
      *
      * @return AttributeQueryBuilderInterface
@@ -112,4 +122,9 @@ interface AttributeQueryBuilderInterface extends DQLHandlerInterface
      * @return string
      */
     public function getColumn();
+
+    /**
+     * @return AttributeQueryBuilderInterface
+     */
+    public function applyJoin();
 }
