@@ -4,6 +4,7 @@ namespace Sidus\EAVModelBundle\Serializer\Denormalizer;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
@@ -85,6 +86,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param array  $context options available to the denormalizer
      *
      * @throws UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      *
      * @return DataInterface
      */
@@ -92,6 +95,9 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
     {
         if ($data instanceof DataInterface) {
             return $data; // Just in case...
+        }
+        if (empty($data)) {
+            return null; // No need to do anything if the data is empty
         }
 
         $family = $this->getFamily($data, $class, $context);
@@ -136,6 +142,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param array           $context
      *
      * @throws \Symfony\Component\Serializer\Exception\UnexpectedValueException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
+     * @throws \InvalidArgumentException
      */
     protected function handleAttributeValue(
         FamilyInterface $family,
@@ -201,7 +209,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
     {
         if (is_array($data) || $data instanceof \ArrayAccess) {
             foreach (['familyCode', 'family_code', 'family'] as $property) {
-                if (array_key_exists($property, $data)) {
+                if (array_key_exists($property, $data) && $data[$property]) {
                     return $this->denormalizer->denormalize($data[$property], FamilyInterface::class, $context);
                 }
             }
@@ -236,11 +244,16 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      */
     protected function resolveIdentifier($data, FamilyInterface $family)
     {
-        if ($family->getAttributeAsIdentifier()) {
-            $attributeCode = $family->getAttributeAsIdentifier()->getCode();
-            if ($this->accessor->isReadable($data, $attributeCode)) {
-                return $this->accessor->getValue($data, $attributeCode);
-            }
+        if (!$family->getAttributeAsIdentifier()) {
+            return null;
+        }
+        $attributeCode = $family->getAttributeAsIdentifier()->getCode();
+        if ($this->accessor->isReadable($data, $attributeCode)) {
+            return $this->accessor->getValue($data, $attributeCode);
+        }
+        // Property accessor syntax is different for arrays so we use the basic API of PHP instead
+        if (is_array($data) && array_key_exists($attributeCode, $data)) {
+            return $data[$attributeCode];
         }
 
         return null;
@@ -288,14 +301,18 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         // Try to resolve the identifier
         $reference = $this->resolveIdentifier($data, $family);
 
-        if (null === $reference) {
-            return $family->createData();
+        if (null !== $reference) {
+            try {
+                $entity = $repository->findByIdentifier($family, $reference);
+                if ($entity) {
+                    return $entity;
+                }
+            } catch (\Exception $e) {
+                throw new UnexpectedValueException("Unable to resolve identifier {$reference}", 0, $e);
+            }
         }
-        try {
-            return $repository->findByIdentifier($family, $reference);
-        } catch (\Exception $e) {
-            throw new UnexpectedValueException("Unable to resolve identifier {$reference}", 0, $e);
-        }
+
+        return $family->createData();
     }
 
     /**
@@ -320,8 +337,10 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param string             $format
      * @param array              $context
      *
-     * @return mixed
+     * @throws \InvalidArgumentException
      * @throws \Symfony\Component\Serializer\Exception\UnexpectedValueException
+     *
+     * @return mixed
      */
     protected function denormalizeEAVAttribute(
         FamilyInterface $family,
@@ -331,7 +350,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         array $context
     ) {
         $attributeType = $attribute->getType();
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        /** @var ClassMetadataInfo $valueMetadata */
         $valueMetadata = $this->doctrine->getManager()->getClassMetadata($family->getValueClass());
         $storageField = $attributeType->getDatabaseType();
         if ($valueMetadata->hasAssociation($storageField)) {
@@ -351,6 +370,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             if ($type === 'datetime' || $type === 'date') {
                 return $this->denormalizeRelation($value, \DateTime::class, $format, $context);
             }
+
             return $value;
         }
 
@@ -404,10 +424,6 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      */
     protected function denormalizeRelation($value, $targetClass, $format, array $context)
     {
-        // @todo Handles DataInterface properly ?
-//        dump($targetClass, $context, $value);
-//        exit;
-
         return $this->denormalizer->denormalize($value, $targetClass, $format, $context);
     }
 }
