@@ -7,3 +7,8 @@ services:
 
     sidus_eav_model.serializer.handler.by_reference:
         class: Sidus\EAVModelBundle\Serializer\ByReferenceHandler
+
+    sidus_eav_model.serializer.entity_provider:
+        class: Sidus\EAVModelBundle\Serializer\EntityProvider
+        arguments:
+            - '@doctrine'

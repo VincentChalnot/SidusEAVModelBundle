@@ -22,6 +22,7 @@ services:
         arguments:
             - '@sidus_eav_model.family.registry'
             - '@doctrine'
+            - '@sidus_eav_model.serializer.entity_provider'
             - '%sidus_eav_model.denormalizer.data.ignored_attributes%'
         tags:
             - { name: serializer.normalizer }
@@ -32,3 +33,4 @@ services:
             - '@sidus_eav_model.family.registry'
         tags:
             - { name: serializer.normalizer, priority: 2 }
+

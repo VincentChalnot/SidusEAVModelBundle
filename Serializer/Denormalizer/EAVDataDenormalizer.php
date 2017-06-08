@@ -10,6 +10,7 @@ use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
+use Sidus\EAVModelBundle\Serializer\EntityProvider;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
@@ -30,6 +31,9 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
     /** @var Registry */
     protected $doctrine;
 
+    /** @var EntityProvider */
+    protected $entityProvider;
+
     /** @var NameConverterInterface */
     protected $nameConverter;
 
@@ -49,6 +53,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param PropertyTypeExtractorInterface $propertyTypeExtractor
      * @param FamilyRegistry                 $familyRegistry
      * @param Registry                       $doctrine
+     * @param EntityProvider                 $entityProvider
      * @param array                          $ignoredAttributes
      */
     public function __construct(
@@ -58,12 +63,14 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         PropertyTypeExtractorInterface $propertyTypeExtractor = null,
         FamilyRegistry $familyRegistry,
         Registry $doctrine,
+        EntityProvider $entityProvider,
         array $ignoredAttributes
     ) {
-        $this->familyRegistry = $familyRegistry;
-        $this->doctrine = $doctrine;
         $this->nameConverter = $nameConverter;
         $this->accessor = $accessor ?: PropertyAccess::createPropertyAccessor();
+        $this->familyRegistry = $familyRegistry;
+        $this->doctrine = $doctrine;
+        $this->entityProvider = $entityProvider;
         $this->ignoredAttributes = $ignoredAttributes;
     }
 
@@ -101,7 +108,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         }
 
         $family = $this->getFamily($data, $class, $context);
-        $entity = $this->getEntity($family, $data);
+        $entity = $this->entityProvider->getEntity($family, $data, $this->nameConverter);
         if (is_scalar($data)) {
             return $entity; // In case we are trying to resolve a simple reference
         }
@@ -234,85 +241,6 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         }
 
         throw new UnexpectedValueException("Unable to determine the Family for the class {$class}");
-    }
-
-    /**
-     * @param array|\ArrayAccess $data
-     * @param FamilyInterface    $family
-     *
-     * @return mixed
-     */
-    protected function resolveIdentifier($data, FamilyInterface $family)
-    {
-        if (!$family->getAttributeAsIdentifier()) {
-            return null;
-        }
-        $attributeCode = $family->getAttributeAsIdentifier()->getCode();
-        if ($this->accessor->isReadable($data, $attributeCode)) {
-            return $this->accessor->getValue($data, $attributeCode);
-        }
-        // Property accessor syntax is different for arrays so we use the basic API of PHP instead
-        if (is_array($data) && array_key_exists($attributeCode, $data)) {
-            return $data[$attributeCode];
-        }
-
-        return null;
-    }
-
-    /**
-     * @param FamilyInterface $family
-     * @param mixed           $data
-     *
-     * @throws \Symfony\Component\Serializer\Exception\UnexpectedValueException
-     *
-     * @return DataInterface
-     */
-    protected function getEntity(FamilyInterface $family, $data)
-    {
-        /** @var DataRepository $repository */
-        $repository = $this->doctrine->getRepository($family->getDataClass());
-
-        if ($family->isSingleton()) {
-            try {
-                return $repository->getInstance($family);
-            } catch (\Exception $e) {
-                throw new UnexpectedValueException("Unable to get singleton for family {$family->getCode()}", 0, $e);
-            }
-        }
-
-        // In case we are trying to resolve a simple reference
-        if (is_scalar($data)) {
-            try {
-                return $repository->findByIdentifier($family, $data, true);
-            } catch (\Exception $e) {
-                throw new UnexpectedValueException("Unable to resolve id/identifier {$data}", 0, $e);
-            }
-        }
-
-        if (!is_array($data) && !$data instanceof \ArrayAccess) {
-            throw new UnexpectedValueException('Unable to denormalize data from unknown format');
-        }
-
-        // If the id is set, don't even look for the identifier
-        if (array_key_exists('id', $data)) {
-            return $repository->find($data['id']);
-        }
-
-        // Try to resolve the identifier
-        $reference = $this->resolveIdentifier($data, $family);
-
-        if (null !== $reference) {
-            try {
-                $entity = $repository->findByIdentifier($family, $reference);
-                if ($entity) {
-                    return $entity;
-                }
-            } catch (\Exception $e) {
-                throw new UnexpectedValueException("Unable to resolve identifier {$reference}", 0, $e);
-            }
-        }
-
-        return $family->createData();
     }
 
     /**
