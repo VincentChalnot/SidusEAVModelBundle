@@ -285,11 +285,16 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function getLabel(array $context = null)
     {
+        $label = null;
         try {
-            return $this->getLabelValue($context);
+            $label = $this->getLabelValue($context);
         } catch (Exception $e) {
-            return "[{$this->getIdentifier()}]";
         }
+        if (empty($label)) {
+            $label = "[{$this->getIdentifier()}]";
+        }
+
+        return $label;
     }
 
     /**
