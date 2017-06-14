@@ -312,6 +312,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param string          $format
      * @param array           $context
      *
+     * @throws \InvalidArgumentException
+     *
      * @return mixed
      */
     protected function denormalizeAttribute(
@@ -322,8 +324,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         array $context
     ) {
         // @todo handles standard serializer annotations ?
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        /** @var ClassMetadataInfo $classMetadata */
         $classMetadata = $this->doctrine->getManager()->getClassMetadata($family->getDataClass());
         if ($classMetadata->hasAssociation($attributeCode)) {
             $targetClass = $classMetadata->getAssociationTargetClass($attributeCode);
