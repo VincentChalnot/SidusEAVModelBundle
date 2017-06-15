@@ -323,7 +323,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         $format,
         array $context
     ) {
-        // @todo handles standard serializer annotations ?
+        // @T0D0 handles standard serializer annotations ?
         /** @var ClassMetadataInfo $classMetadata */
         $classMetadata = $this->doctrine->getManager()->getClassMetadata($family->getDataClass());
         if ($classMetadata->hasAssociation($attributeCode)) {
