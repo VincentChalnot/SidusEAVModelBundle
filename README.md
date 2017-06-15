@@ -133,19 +133,19 @@ you to do so.
 
 ## Documentation index
 
-[01 - Installation](Documentation/01-install.md)
-[02 - Model configuration](Documentation/02-model.md)
-[03 - Multiple attributes & collections](Documentation/03-multiple.md)
-[04 - Handling Entities](Documentation/04-entities.md)
-[05 - Form](Documentation/05-form.md)
-[06 - Validation](Documentation/06-validate.md)
-[07 - Query](Documentation/07-query.md)
-[08 - Translate model](Documentation/08-translate.md)
-[19 - Contextualisation](Documentation/09-context.md)
-[10 - Extending & customizing the model](Documentation/10-extend.md)
-[11 - Serialization](Documentation/11-serialize.md)
+- [01 - Installation](Documentation/01-install.md)
+- [02 - Model configuration](Documentation/02-model.md)
+- [03 - Multiple attributes & collections](Documentation/03-multiple.md)
+- [04 - Handling Entities](Documentation/04-entities.md)
+- [05 - Form](Documentation/05-form.md)
+- [06 - Validation](Documentation/06-validate.md)
+- [07 - Query](Documentation/07-query.md)
+- [08 - Translate model](Documentation/08-translate.md)
+- [19 - Contextualisation](Documentation/09-context.md)
+- [10 - Extending & customizing the model](Documentation/10-extend.md)
+- [11 - Serialization](Documentation/11-serialize.md)
 
 ### Other documentation entries
-[IDE Autocomplete](Documentation/100-ide_autocomplete.md)
-[Questions & Answers](Documentation/200-questions.md)
-[Performances](Documentation/300-performances.md)
+- [IDE Autocomplete](Documentation/100-ide_autocomplete.md)
+- [Questions & Answers](Documentation/200-questions.md)
+- [Performances](Documentation/300-performances.md)

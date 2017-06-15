@@ -107,8 +107,8 @@ in the 'allowed_families' option.
 Additional attribute types can be found in the sidus/eav-bootstrap-bundle:
 - html: Stored as text, edited as TinyMCE WYSIWYG editor, featuring full control over configuration
 - switch: Stored as boolean, edited as a nice checkbox
-- autocomplete_data: Stored like data, edited as an auto-complete input, requires the "family" form_option.
-- combo_selector: Allow selection of the family first, then autocomplete of the data, using "autocomplete_data".
+- autocomplete_data_selector: Stored like data, edited as an auto-complete input, requires the "allowed_families" form_option.
+- combo_selector: Allow selection of the family first, then autocomplete of the data, using "autocomplete_data_selector".
 Date and datetime are also improved with bootstrap date/time picker.
 
 The only current limitation of the embed type is that you cannot embed a family inside the same family, this creates an
