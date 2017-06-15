@@ -219,6 +219,24 @@ class DataRepository extends EntityRepository
     }
 
     /**
+     * @param string            $alias
+     * @param string            $indexBy
+     * @param QueryBuilder|null $qb
+     *
+     * @return QueryBuilder
+     */
+    public function createOptimizedQueryBuilder($alias, $indexBy = null, QueryBuilder $qb = null)
+    {
+        if (!$qb) {
+            $qb = $this->createQueryBuilder($alias, $indexBy);
+        }
+        $qb->addSelect('values')
+            ->leftJoin($alias.'.values', 'values');
+
+        return $qb;
+    }
+
+    /**
      * Returns a EAVQueryBuilder to allow you to build a complex query to search your database
      *
      * @param FamilyInterface $family
@@ -279,6 +297,43 @@ class DataRepository extends EntityRepository
         }
 
         return $eavQb->apply($eavQb->getOr($orCondition));
+    }
+
+    /**
+     * @param int $id
+     *
+     * @throws NonUniqueResultException
+     *
+     * @return DataInterface
+     */
+    public function loadFullEntity($id)
+    {
+        $qb = $this->createOptimizedQueryBuilder('e');
+        $qb
+            ->leftJoin('values.dataValue', 'associations')
+            ->addSelect('associations')
+            ->leftJoin('associations.values', 'associationValues')
+            ->addSelect('associationValues')
+            ->andWhere('e.id = :id')
+            ->setParameter('id', $id)
+        ;
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
+
+    /**
+     * @param DataInterface $data
+     *
+     * @return DataInterface[]
+     */
+    public function fetchEAVAssociations(DataInterface $data)
+    {
+        $qb = $this->createOptimizedQueryBuilder('e');
+        $qb
+            ->join('e.refererValues', 'refererValues', Join::WITH, 'refererValues.data = :id')
+            ->setParameter('id', $data->getId());
+
+        return $qb->getQuery()->getResult();
     }
 
     /**

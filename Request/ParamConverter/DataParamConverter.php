@@ -72,11 +72,13 @@ class DataParamConverter extends AbstractBaseParamConverter
     /**
      * @param int|string $value
      *
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     *
      * @return null|DataInterface
      */
     protected function convertValue($value)
     {
-        return $this->dataRepository->find($value);
+        return $this->dataRepository->loadFullEntity($value);
     }
 
     /**

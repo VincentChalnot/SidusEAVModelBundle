@@ -117,6 +117,14 @@ abstract class AbstractData implements ContextualDataInterface
     protected $valuesByAttributes;
 
     /**
+     * This value is meant to mark objects when var_dumping them so they don't return all their values to prevent too
+     * much strain on the database.
+     *
+     * @var bool
+     */
+    protected $debugByReference = false;
+
+    /**
      * Initialize the data with the mandatory family
      *
      * @param FamilyInterface $family
@@ -926,6 +934,8 @@ abstract class AbstractData implements ContextualDataInterface
     /**
      * Automatically append EAV Data as debug info
      *
+     * @internal
+     *
      * @return array
      */
     public function __debugInfo()
@@ -937,19 +947,59 @@ abstract class AbstractData implements ContextualDataInterface
                 $property->setAccessible(true);
                 $data[$property->getName()] = $property->getValue($this);
             } catch (\Exception $e) {
-                $data[$property->getName()] = $e->getMessage();
+                $data[$property->getName()] = 'ERROR: '.$e->getMessage();
             }
+        }
+
+        if ($this->debugByReference) {
+            $data['__debugByReference'] = true;
+
+            return $data;
         }
 
         foreach ($this->getFamily()->getAttributes() as $attribute) {
             try {
-                $data[$attribute->getCode()] = $this->get($attribute->getCode());
+                $value = $this->get($attribute->getCode());
+                $data[$attribute->getCode()] = $this->handleDebugValue($value);
             } catch (\Exception $e) {
-                $data[$attribute->getCode()] = $e->getMessage();
+                $data[$attribute->getCode()] = 'ERROR: '.$e->getMessage();
             }
         }
 
         return $data;
+    }
+
+    /**
+     * @param bool $value
+     */
+    protected function setDebugByReference($value)
+    {
+        $this->debugByReference = $value;
+    }
+
+    /**
+     * @internal
+     *
+     * @param mixed $value
+     *
+     * @return mixed
+     */
+    protected function handleDebugValue($value)
+    {
+        if ($value instanceof AbstractData) {
+            $value->setDebugByReference(true);
+        }
+        if (is_array($value) || $value instanceof \Traversable) {
+            /** @var array $value */
+            foreach ($value as &$item) {
+                if ($item instanceof AbstractData) {
+                    $item->setDebugByReference(true);
+                }
+            }
+            unset($item);
+        }
+
+        return $value;
     }
 
     /**
