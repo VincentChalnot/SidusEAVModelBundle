@@ -1,14 +1,27 @@
 <?php
+/*
+ *  Sidus/EAVModelBundle : EAV Data management in Symfony 3
+ *  Copyright (C) 2015-2017 Vincent Chalnot
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 namespace Sidus\EAVModelBundle\Entity;
 
-use BadMethodCallException;
-use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
-use LogicException;
 use Sidus\EAVModelBundle\Exception\ContextException;
 use Sidus\EAVModelBundle\Exception\InvalidValueDataException;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
@@ -18,7 +31,6 @@ use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
 use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
 use Symfony\Component\PropertyAccess\Exception\ExceptionInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use UnexpectedValueException;
 
 /**
  * Base logic to handle the EAV data
@@ -72,14 +84,14 @@ abstract class AbstractData implements ContextualDataInterface
     protected $refererValues;
 
     /**
-     * @var DateTime
+     * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
      */
     protected $createdAt;
 
     /**
-     * @var DateTime
+     * @var \DateTime
      *
      * @ORM\Column(name="updated_at", type="datetime")
      */
@@ -109,16 +121,16 @@ abstract class AbstractData implements ContextualDataInterface
      *
      * @param FamilyInterface $family
      *
-     * @throws LogicException
+     * @throws \LogicException
      */
     public function __construct(FamilyInterface $family)
     {
         if (!$family->isInstantiable()) {
-            throw new LogicException("Family {$family->getCode()} is not instantiable");
+            throw new \LogicException("Family {$family->getCode()} is not instantiable");
         }
         $this->family = $family;
-        $this->createdAt = new DateTime();
-        $this->updatedAt = new DateTime();
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
         $this->values = new ArrayCollection();
         $this->children = new ArrayCollection();
         $this->refererValues = new ArrayCollection();
@@ -142,7 +154,7 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @return DateTime
+     * @return \DateTime
      */
     public function getCreatedAt()
     {
@@ -150,9 +162,9 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @param DateTime $createdAt
+     * @param \DateTime $createdAt
      *
-     * @throws UnexpectedValueException
+     * @throws \UnexpectedValueException
      *
      * @return DataInterface
      */
@@ -164,7 +176,7 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @return DateTime
+     * @return \DateTime
      */
     public function getUpdatedAt()
     {
@@ -172,9 +184,9 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @param DateTime $updatedAt
+     * @param \DateTime $updatedAt
      *
-     * @throws UnexpectedValueException
+     * @throws \UnexpectedValueException
      *
      * @return DataInterface
      */
@@ -288,7 +300,7 @@ abstract class AbstractData implements ContextualDataInterface
         $label = null;
         try {
             $label = $this->getLabelValue($context);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
         if (empty($label)) {
             $label = "[{$this->getIdentifier()}]";
@@ -373,7 +385,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         try {
             return $this->getLabelValue();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return '';
         }
     }
@@ -408,7 +420,7 @@ abstract class AbstractData implements ContextualDataInterface
         foreach (['set', 'add', 'remove'] as $action) {
             if (0 === strpos($methodName, $action)) {
                 if (!array_key_exists(0, $arguments)) {
-                    throw new BadMethodCallException($baseErrorMsg.' requires at least one argument');
+                    throw new \BadMethodCallException($baseErrorMsg.' requires at least one argument');
                 }
                 $context = array_key_exists(1, $arguments) ? $arguments[1] : null;
                 $attributeCode = lcfirst(substr($methodName, strlen($action)));
@@ -417,7 +429,7 @@ abstract class AbstractData implements ContextualDataInterface
             }
         }
 
-        throw new BadMethodCallException($baseErrorMsg.' does not exist');
+        throw new \BadMethodCallException($baseErrorMsg.' does not exist');
     }
 
     /**
@@ -807,6 +819,7 @@ abstract class AbstractData implements ContextualDataInterface
      * @param ValueInterface $value
      *
      * @throws ContextException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      *
      * @return DataInterface
      */
@@ -941,6 +954,8 @@ abstract class AbstractData implements ContextualDataInterface
 
     /**
      * @param string $attributeCode
+     *
+     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      *
      * @return AttributeInterface
      */

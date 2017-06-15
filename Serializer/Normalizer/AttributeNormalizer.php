@@ -1,75 +1,59 @@
 <?php
+/*
+ *  Sidus/EAVModelBundle : EAV Data management in Symfony 3
+ *  Copyright (C) 2015-2017 Vincent Chalnot
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 namespace Sidus\EAVModelBundle\Serializer\Normalizer;
 
 use Sidus\EAVModelBundle\Model\AttributeInterface;
-use Sidus\EAVModelBundle\Serializer\ByReferenceHandler;
-use Sidus\EAVModelBundle\Serializer\MaxDepthHandler;
-use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
-use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
-use Symfony\Component\Serializer\Exception\CircularReferenceException;
-use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
-use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 /**
  * Standard normalizer and denormalizer for attributes
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class AttributeNormalizer extends ObjectNormalizer
+class AttributeNormalizer extends AbstractGenericNormalizer
 {
-    /** @var MaxDepthHandler */
-    protected $maxDepthHandler;
-
-    /** @var ByReferenceHandler */
-    protected $byReferenceHandler;
-
     /**
-     * @param ClassMetadataFactoryInterface|null  $classMetadataFactory
-     * @param NameConverterInterface|null         $nameConverter
-     * @param PropertyAccessorInterface|null      $propertyAccessor
-     * @param PropertyTypeExtractorInterface|null $propertyTypeExtractor
-     * @param MaxDepthHandler                     $maxDepthHandler
-     * @param ByReferenceHandler                  $byReferenceHandler
+     * @param AttributeInterface $object
+     * @param string             $format
+     * @param array              $context
+     *
+     * @return string
      */
-    public function __construct(
-        ClassMetadataFactoryInterface $classMetadataFactory = null,
-        NameConverterInterface $nameConverter = null,
-        PropertyAccessorInterface $propertyAccessor = null,
-        PropertyTypeExtractorInterface $propertyTypeExtractor = null,
-        MaxDepthHandler $maxDepthHandler,
-        ByReferenceHandler $byReferenceHandler
-    ) {
-        parent::__construct($classMetadataFactory, $nameConverter, $propertyAccessor, $propertyTypeExtractor);
-        $this->maxDepthHandler = $maxDepthHandler;
-        $this->byReferenceHandler = $byReferenceHandler;
+    protected function getReference($object, $format, array $context)
+    {
+        return $object->getCode();
     }
 
     /**
-     * {@inheritdoc}
-     * @throws \Symfony\Component\Serializer\Exception\RuntimeException
+     * @param AttributeInterface $object
+     * @param string             $format
+     * @param array              $context
+     *
+     * @return array
      */
-    public function normalize($object, $format = null, array $context = [])
+    protected function getShortReference($object, $format, array $context)
     {
-        $this->maxDepthHandler->handleMaxDepth($context);
-
-        /** @var AttributeInterface $object */
-        if ($this->byReferenceHandler->isByShortReference($context)) {
-            return $object->getCode();
-        }
-
-        if ($this->byReferenceHandler->isByReference($context)) {
-            return [
-                'code' => $object->getCode(),
-                'type' => $object->getType()->getCode(),
-                'collection' => $object->isCollection(),
-            ];
-        }
-
-        try {
-            return parent::normalize($object, $format, $context);
-        } catch (CircularReferenceException $e) {
-            return $object->getCode();
-        }
+        return [
+            'code' => $object->getCode(),
+            'type' => $object->getType()->getCode(),
+            'collection' => $object->isCollection(),
+        ];
     }
 
     /**

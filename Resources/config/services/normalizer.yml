@@ -43,29 +43,30 @@ services:
         tags:
             - { name: serializer.normalizer }
 
-    sidus_eav_model.normalizer.family:
+    sidus_eav_model.normalizer.generic:
+        abstract: true
         parent: serializer.normalizer.object
-        class: Sidus\EAVModelBundle\Serializer\Normalizer\FamilyNormalizer
         arguments:
             - '@sidus_eav_model.serializer.handler.max_depth'
             - '@sidus_eav_model.serializer.handler.by_reference'
+
+    sidus_eav_model.normalizer.family:
+        parent: sidus_eav_model.normalizer.generic
+        class: Sidus\EAVModelBundle\Serializer\Normalizer\FamilyNormalizer
         calls:
             - [setIgnoredAttributes, ['%sidus_eav_model.normalizer.family.ignored_attributes%']]
         tags:
             - { name: serializer.normalizer }
 
     sidus_eav_model.normalizer.attribute:
-        parent: serializer.normalizer.object
+        parent: sidus_eav_model.normalizer.generic
         class: Sidus\EAVModelBundle\Serializer\Normalizer\AttributeNormalizer
-        arguments:
-            - '@sidus_eav_model.serializer.handler.max_depth'
-            - '@sidus_eav_model.serializer.handler.by_reference'
         calls:
             - [setIgnoredAttributes, ['%sidus_eav_model.normalizer.attribute.ignored_attributes%']]
         tags:
             - { name: serializer.normalizer }
 
-# Normalizer variants for flat formats
+    # Normalizer variants for flat formats
     sidus_eav_model.normalizer.data.flat:
         class: Sidus\EAVModelBundle\Serializer\Normalizer\Flat\FlatNormalizer
         arguments:
