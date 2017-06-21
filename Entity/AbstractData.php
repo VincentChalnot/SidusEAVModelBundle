@@ -299,18 +299,23 @@ abstract class AbstractData implements ContextualDataInterface
     /**
      * @param array $context
      *
-     * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return string
      */
     public function getLabel(array $context = null)
     {
+        if ($this->getFamily()->hasAttribute('label')) {
+            return $this->getValueData($this->getAttribute('label'), $context);
+        }
         $label = null;
         try {
             $label = $this->getLabelValue($context);
         } catch (\Exception $e) {
         }
-        if (empty($label)) {
+        if (empty($label) && $this->getIdentifier()) {
             $label = "[{$this->getIdentifier()}]";
         }
 
@@ -827,7 +832,7 @@ abstract class AbstractData implements ContextualDataInterface
      * @param ValueInterface $value
      *
      * @throws ContextException
-     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
+     * @throws MissingAttributeException
      *
      * @return DataInterface
      */
@@ -1005,7 +1010,7 @@ abstract class AbstractData implements ContextualDataInterface
     /**
      * @param string $attributeCode
      *
-     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
+     * @throws MissingAttributeException
      *
      * @return AttributeInterface
      */
