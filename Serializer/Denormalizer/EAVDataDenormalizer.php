@@ -126,6 +126,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         }
 
         $family = $this->getFamily($data, $class, $context);
+        unset($context['family'], $context['family_code'], $context['familyCode']); // Removing family info from context
+
         $entity = $this->entityProvider->getEntity($family, $data, $this->nameConverter);
         if (is_scalar($data)) {
             return $entity; // In case we are trying to resolve a simple reference
