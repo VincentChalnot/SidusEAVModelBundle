@@ -82,7 +82,10 @@ class Attribute implements AttributeInterface
     protected $collection; // Important to left null
 
     /** @var array */
-    protected $contextMask = [];
+    protected $contextMask;
+
+    /** @var array */
+    protected $globalContextMask = [];
 
     /** @var mixed */
     protected $default;
@@ -91,16 +94,19 @@ class Attribute implements AttributeInterface
      * @param string                $code
      * @param AttributeTypeRegistry $attributeTypeRegistry
      * @param array                 $configuration
+     * @param array                 $globalContextMask
      *
      * @throws AttributeConfigurationException
      */
     public function __construct(
         $code,
         AttributeTypeRegistry $attributeTypeRegistry,
-        array $configuration = null
+        array $configuration = null,
+        array $globalContextMask = []
     ) {
         $this->code = $code;
         $this->attributeTypeRegistry = $attributeTypeRegistry;
+        $this->globalContextMask = $globalContextMask;
         if (!isset($configuration['type'])) {
             $configuration['type'] = 'string';
         }
@@ -385,13 +391,17 @@ class Attribute implements AttributeInterface
      */
     public function getContextMask()
     {
+        if (null === $this->contextMask) {
+            return $this->globalContextMask;
+        }
+
         return $this->contextMask;
     }
 
     /**
      * @param array $contextMask
      */
-    public function setContextMask($contextMask)
+    public function setContextMask(array $contextMask)
     {
         $this->contextMask = $contextMask;
     }

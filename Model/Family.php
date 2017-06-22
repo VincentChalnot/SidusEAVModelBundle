@@ -68,10 +68,10 @@ class Family implements FamilyInterface
     protected $parent;
 
     /** @var bool */
-    protected $instantiable;
+    protected $instantiable = true;
 
     /** @var bool */
-    protected $singleton;
+    protected $singleton = false;
 
     /** @var array */
     protected $options = [];

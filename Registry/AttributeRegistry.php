@@ -68,10 +68,10 @@ class AttributeRegistry
     ];
 
     /**
-     * @param string                $attributeClass
-     * @param array                 $globalContextMask
+     * @param string $attributeClass
+     * @param array $globalContextMask
      * @param AttributeTypeRegistry $attributeTypeRegistry
-     * @param TranslatorInterface   $translator
+     * @param TranslatorInterface $translator
      */
     public function __construct(
         $attributeClass,
@@ -108,15 +108,14 @@ class AttributeRegistry
      */
     public function createAttribute($code, array $attributeConfiguration = [])
     {
-        if (null === $attributeConfiguration['context_mask']) {
-            $attributeConfiguration['context_mask'] = $this->globalContextMask;
-        } elseif (!is_array($attributeConfiguration['context_mask'])) {
-            throw new UnexpectedValueException('context_mask should be an array or null');
-        }
-
         $attributeClass = $this->attributeClass;
         /** @var AttributeInterface $attribute */
-        $attribute = new $attributeClass($code, $this->attributeTypeRegistry, $attributeConfiguration);
+        $attribute = new $attributeClass(
+            $code,
+            $this->attributeTypeRegistry,
+            $attributeConfiguration,
+            $this->globalContextMask
+        );
         if (method_exists($attribute, 'setTranslator')) {
             $attribute->setTranslator($this->translator);
         }

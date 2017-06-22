@@ -49,7 +49,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('context_form_type')->defaultNull()->end()
                 ->variableNode('default_context')->defaultValue([])->end()
                 ->arrayNode('global_context_mask')
-                    ->prototype('scalar')->end()
+                    ->prototype('scalar')->defaultValue([])->end()
                 ->end()
                 ->arrayNode('attributes')
                     ->useAttributeAsKey('code')
@@ -97,11 +97,11 @@ class Configuration implements ConfigurationInterface
             ->variableNode('options')->end()
             ->variableNode('validation_rules')->end()
             ->variableNode('default')->end()
-            ->booleanNode('required')->defaultValue(false)->end()
-            ->booleanNode('unique')->defaultValue(false)->end()
-            ->booleanNode('multiple')->defaultValue(false)->end()
+            ->booleanNode('required')->end()
+            ->booleanNode('unique')->end()
+            ->booleanNode('multiple')->end()
             ->booleanNode('collection')->end()
-            ->variableNode('context_mask')->defaultNull()->end();
+            ->variableNode('context_mask')->end();
     }
 
 
@@ -114,13 +114,13 @@ class Configuration implements ConfigurationInterface
         $attributeDefinition = $familyDefinition
             ->scalarNode('data_class')->end()
             ->scalarNode('value_class')->end()
-            ->scalarNode('label')->defaultNull()->end()
+            ->scalarNode('label')->end()
             ->variableNode('options')->end()
-            ->scalarNode('attributeAsLabel')->defaultNull()->end()
-            ->scalarNode('attributeAsIdentifier')->defaultNull()->end()
+            ->scalarNode('attributeAsLabel')->end()
+            ->scalarNode('attributeAsIdentifier')->end()
             ->scalarNode('parent')->end()
-            ->booleanNode('singleton')->defaultValue(false)->end()
-            ->booleanNode('instantiable')->defaultValue(true)->end()
+            ->booleanNode('singleton')->end()
+            ->booleanNode('instantiable')->end()
             ->arrayNode('attributes')
                 ->useAttributeAsKey('code')
                 ->prototype('array')
