@@ -45,6 +45,9 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     /** @var bool */
     protected $joinApplied = false;
 
+    /** @var bool */
+    protected $skipJoin = false;
+
     /**
      * @param EAVQueryBuilderInterface $eavQueryBuilder
      * @param AttributeInterface       $attribute
@@ -324,6 +327,9 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      */
     public function applyJoin()
     {
+        if ($this->skipJoin) {
+            return $this;
+        }
         $attributeCode = $this->attribute->getCode();
         if ($this->joinApplied) {
             throw new \LogicException("Join for attribute query builder {$attributeCode} already applied");
@@ -355,6 +361,15 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
         $this->joinApplied = true;
 
         return $this;
+    }
+
+    /**
+     * Cloning an attribute query builder can be used to allow multiple conditions to be applied to a same join
+     */
+    public function __clone()
+    {
+        $this->dql = null;
+        $this->skipJoin = true;
     }
 
     /**
