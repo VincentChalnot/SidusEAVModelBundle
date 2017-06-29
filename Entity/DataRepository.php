@@ -273,7 +273,14 @@ class DataRepository extends EntityRepository
         $eavQb = $this->createEAVQueryBuilder();
         $orCondition = [];
         foreach ($families as $family) {
-            $orCondition[] = $eavQb->attribute($family->getAttributeAsLabel())->like($term);
+            $attribute = $family->getAttributeAsLabel();
+            if (!$attribute) {
+                throw new \LogicException("Family {$family->getCode()} does not have an attribute as label");
+            }
+            if ($attribute->getType()->isRelation() || $attribute->getType()->isEmbedded()) {
+                continue; // @todo fixme
+            }
+            $orCondition[] = $eavQb->attribute($attribute)->like($term);
         }
 
         return $eavQb->apply($eavQb->getOr($orCondition));
@@ -293,7 +300,11 @@ class DataRepository extends EntityRepository
         $eavQb = $this->createEAVQueryBuilder();
         $orCondition = [];
         foreach ($families as $family) {
-            $orCondition[] = $eavQb->attribute($family->getAttributeAsIdentifier())->like($term);
+            $identifierAttribute = $family->getAttributeAsIdentifier();
+            if (!$identifierAttribute) {
+                throw new \LogicException("Family {$family->getCode()} has no identifier");
+            }
+            $orCondition[] = $eavQb->attribute($identifierAttribute)->like($term);
         }
 
         return $eavQb->apply($eavQb->getOr($orCondition));
