@@ -223,6 +223,10 @@ class DataType extends AbstractType
         if (isset($options['attributes_config'][$attribute->getCode()])) {
             return $options['attributes_config'][$attribute->getCode()];
         }
+        $attributeConfig = $attribute->getOption('attribute_config');
+        if (null !== $attributeConfig) {
+            return $attributeConfig;
+        }
 
         return [];
     }
