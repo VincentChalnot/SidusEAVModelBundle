@@ -1147,7 +1147,8 @@ abstract class AbstractData implements ContextualDataInterface
             return; // No cache so no need to update anything
         }
 
-        $this->valuesByAttributes[$value->getAttributeCode()][$value->getIdentifier()] = $value;
+        $key = spl_object_hash($value);
+        $this->valuesByAttributes[$value->getAttributeCode()][$key] = $value;
     }
 
     /**
@@ -1163,6 +1164,7 @@ abstract class AbstractData implements ContextualDataInterface
             return; // No cache so no need to do anything
         }
 
-        unset($this->valuesByAttributes[$value->getAttributeCode()][$value->getIdentifier()]);
+        $key = spl_object_hash($value);
+        unset($this->valuesByAttributes[$value->getAttributeCode()][$key]);
     }
 }
