@@ -278,9 +278,11 @@ class DataRepository extends EntityRepository
                 throw new \LogicException("Family {$family->getCode()} does not have an attribute as label");
             }
             if ($attribute->getType()->isRelation() || $attribute->getType()->isEmbedded()) {
-                continue; // @todo fixme
+                // @todo fixme properly with eav join support
+                $orCondition[] = $eavQb->attribute($attribute)->isNotNull();
+            } else {
+                $orCondition[] = $eavQb->attribute($attribute)->like($term);
             }
-            $orCondition[] = $eavQb->attribute($attribute)->like($term);
         }
 
         return $eavQb->apply($eavQb->getOr($orCondition));
