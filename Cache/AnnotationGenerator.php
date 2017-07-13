@@ -267,7 +267,7 @@ EOT;
 
             return $type;
         }
-        if ('data' === $type) {
+        if ('data' === $type || 'constrainedData' === $type) {
             $types = $attribute->getOption('allowed_families');
             if ($types) {
                 if (!is_array($types)) {
