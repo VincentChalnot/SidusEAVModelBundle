@@ -122,13 +122,14 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
             // TODO add count
 
             do {
-                $stmt = $em->getConnection()->prepare($valueSql);
+                $stmt = $em->getConnection()->prepare($sql);
                 $success = $stmt->execute();
                 $count = $stmt->rowCount();
                 $progress->advance($count);
             } while ($success && $count > 0);
 
             $progress->finish();
+            $output->writeln('');
         }
     }
 
