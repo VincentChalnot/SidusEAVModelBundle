@@ -130,6 +130,7 @@ abstract class AbstractData implements ContextualDataInterface
      * @param FamilyInterface $family
      *
      * @throws \LogicException
+     * @throws InvalidValueDataException
      */
     public function __construct(FamilyInterface $family)
     {
@@ -142,6 +143,13 @@ abstract class AbstractData implements ContextualDataInterface
         $this->values = new ArrayCollection();
         $this->children = new ArrayCollection();
         $this->refererValues = new ArrayCollection();
+
+        foreach ($family->getAttributes() as $attribute) {
+            if (null !== $attribute->getDefault()) {
+                /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+                $this->createDefaultValues($attribute);
+            }
+        }
     }
 
     /**
