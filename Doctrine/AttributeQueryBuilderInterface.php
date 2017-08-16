@@ -136,6 +136,16 @@ interface AttributeQueryBuilderInterface extends DQLHandlerInterface
     public function rawDQL($dql);
 
     /**
+     * Use this attribute to join on a related entity.
+     * Returns an EAVQueryBuilder by default but can be used for other Doctrine entities too.
+     *
+     * @param string $alias
+     *
+     * @return EAVQueryBuilderInterface
+     */
+    public function join($alias = null);
+
+    /**
      * @return string
      */
     public function getColumn();

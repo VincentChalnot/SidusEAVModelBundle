@@ -327,8 +327,8 @@ class DataRepository extends EntityRepository
             ->addSelect('associations')
             ->leftJoin('associations.values', 'associationValues')
             ->addSelect('associationValues')
-            ->andWhere('e.id = :id')
-            ->setParameter('id', $id)
+            ->andWhere('e.id = :dataId')
+            ->setParameter('dataId', $id)
         ;
 
         return $qb->getQuery()->getOneOrNullResult();

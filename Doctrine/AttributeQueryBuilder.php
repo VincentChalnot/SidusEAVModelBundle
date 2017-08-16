@@ -48,6 +48,9 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     /** @var bool */
     protected $skipJoin = false;
 
+    /** @var bool */
+    protected $joinRelation = false;
+
     /**
      * @param EAVQueryBuilderInterface $eavQueryBuilder
      * @param AttributeInterface       $attribute
@@ -310,6 +313,25 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     }
 
     /**
+     * Use this attribute to join on a related entity.
+     * Returns an EAVQueryBuilder by default but can be used for other Doctrine entities too.
+     *
+     * @param string $alias
+     *
+     * @return EAVQueryBuilderInterface
+     */
+    public function join($alias = null)
+    {
+        if (null === $alias) {
+            $alias = $this->generateUniqueId('join');
+        }
+        $this->joinRelation = $alias;
+        $this->applyJoin();
+
+        return new EAVQueryBuilder($this->eavQueryBuilder->getQueryBuilder(), $alias);
+    }
+
+    /**
      * @return string
      */
     public function getColumn()
@@ -357,6 +379,13 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
             Join::WITH,
             $joinDql
         );
+
+        if ($this->joinRelation) {
+            $qb->leftJoin(
+                $this->joinAlias.'.'.$this->attribute->getType()->getDatabaseType(),
+                $this->joinRelation
+            );
+        }
 
         $this->joinApplied = true;
 
