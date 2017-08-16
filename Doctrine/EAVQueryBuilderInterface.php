@@ -56,6 +56,14 @@ interface EAVQueryBuilderInterface
     public function getOr(array $eavQueryBuilders);
 
     /**
+     * @param AttributeQueryBuilderInterface $attributeQueryBuilder
+     * @param string                         $direction
+     *
+     * @return EAVQueryBuilder
+     */
+    public function addOrderBy(AttributeQueryBuilderInterface $attributeQueryBuilder, $direction = null);
+
+    /**
      * @return string
      */
     public function getAlias();
