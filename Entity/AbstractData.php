@@ -62,7 +62,7 @@ abstract class AbstractData implements ContextualDataInterface
      * @var DataInterface[]
      *
      * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", mappedBy="parent",
-     *                                                    cascade={"persist", "remove", "detach"}, orphanRemoval=true)
+     *                                                    cascade={"all"}, orphanRemoval=true)
      */
     protected $children;
 
@@ -70,7 +70,7 @@ abstract class AbstractData implements ContextualDataInterface
      * @var ValueInterface[]|Collection
      *
      * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\ValueInterface", mappedBy="data",
-     *                                                    cascade={"persist", "remove", "detach"}, orphanRemoval=true)
+     *                                                    cascade={"all"}, orphanRemoval=true)
      * @ORM\OrderBy({"position" = "ASC"})
      */
     protected $values;
