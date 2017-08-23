@@ -316,9 +316,6 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             $type = $valueMetadata->getTypeOfField($storageField);
 
             if ($type === 'datetime' || $type === 'date') {
-                if (null === $value || '' === $value) {
-                    return null;
-                }
                 return $this->denormalizeRelation($value, \DateTime::class, $format, $context);
             }
 
@@ -376,6 +373,9 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      */
     protected function denormalizeRelation($value, $targetClass, $format, array $context)
     {
+        if (null === $value || '' === $value) {
+            return null;
+        }
         return $this->denormalizer->denormalize($value, $targetClass, $format, $context);
     }
 }
