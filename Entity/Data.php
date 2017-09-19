@@ -793,10 +793,19 @@ abstract class Data implements ContextualDataInterface
         $this->integerIdentifier = null;
         $this->valuesByAttributes = null;
 
+        // Cloning the previous values
         $newValues = new ArrayCollection();
+        $identifierAttribute = $this->getFamily()->getAttributeAsIdentifier();
         foreach ($this->values as $value) {
+            if (!$this->getFamily()->hasAttribute($value->getAttributeCode())) {
+                continue; // Purging attributes that does not exists anymore in the model
+            }
+            if ($identifierAttribute && $identifierAttribute->getCode() === $value->getAttributeCode()) {
+                continue; // Skipping identifier attribute
+            }
             $newValues[] = clone $value;
         }
+
         $this->values = new ArrayCollection();
         foreach ($newValues as $newValue) {
             $this->values->add($newValue);
