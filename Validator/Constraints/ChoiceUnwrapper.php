@@ -19,22 +19,15 @@
 
 namespace Sidus\EAVModelBundle\Validator\Constraints;
 
-use Symfony\Component\Validator\Constraint;
+use Symfony\Component\Validator\Constraints\Choice;
 
 /**
- * Define Data constraint
+ * Allows to input the same kind of data in a choice validator than in a ChoiceType (unwrap choice groups)
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  *
  * @Annotation
  */
-class Data extends Constraint
+class ChoiceUnwrapper extends Choice
 {
-    /**
-     * @return string
-     */
-    public function getTargets()
-    {
-        return self::CLASS_CONSTRAINT;
-    }
 }
