@@ -37,6 +37,9 @@ class ChoiceUnwrapperValidator extends ChoiceValidator
     public function validate($value, Constraint $constraint)
     {
         if ($constraint instanceof ChoiceUnwrapper) {
+            if ((null === $value || '' === $value) && $constraint->allowBlank) {
+                return;
+            }
             $resolvedChoices = [];
             if (is_array($constraint->choices)) {
                 /** @noinspection ForeachSourceInspection */

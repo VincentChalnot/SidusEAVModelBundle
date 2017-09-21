@@ -30,4 +30,5 @@ use Symfony\Component\Validator\Constraints\Choice;
  */
 class ChoiceUnwrapper extends Choice
 {
+    public $allowBlank = true;
 }
