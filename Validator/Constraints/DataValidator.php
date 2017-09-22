@@ -134,6 +134,10 @@ class DataValidator extends ConstraintValidator
         $family = $data->getFamily();
         $valueData = $data->get($attribute->getCode());
 
+        if (null === $valueData) { // Do not check uniqueness for null values
+            return;
+        }
+
         $query = [
             'attributeCode' => $attribute->getCode(),
             'familyCode' => $family->getCode(),
