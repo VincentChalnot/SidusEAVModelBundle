@@ -196,18 +196,8 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
      */
     protected function parseValidationRules(array $validationRules)
     {
-        $constraints = [];
         $loader = new BaseLoader();
-        foreach ($validationRules as $validationRule) {
-            if (!is_array($validationRule)) {
-                throw new \UnexpectedValueException('Invalid validation rules definition');
-            }
-            /** @var array $validationRule */
-            foreach ($validationRule as $item => $options) {
-                $constraints[] = $loader->newConstraint($item, $options);
-            }
-        }
 
-        return $constraints;
+        return $loader->loadCustomConstraints($validationRules);
     }
 }

@@ -240,35 +240,33 @@ class DataValidator extends ConstraintValidator
     ) {
         $valueData = $data->get($attribute->getCode());
         $loader = new BaseLoader();
-        foreach ($attribute->getValidationRules() as $validationRule) {
-            foreach ((array) $validationRule as $item => $options) {
-                $constraint = $loader->newConstraint($item, $options);
-                $violations = $context->getValidator()->validate($valueData, $constraint, $context->getGroup());
-                /** @var ConstraintViolationInterface $violation */
-                foreach ($violations as $violation) {
-                    /** @noinspection DisconnectedForeachInstructionInspection */
-                    $path = $attribute->getCode();
-                    if ($attribute->getType()->isEmbedded()) {
-                        if (!$attribute->isCollection()) {
-                            $path .= '.';
-                        }
-                        $path .= $violation->getPropertyPath();
+
+        foreach ($loader->loadCustomConstraints($attribute->getValidationRules()) as $constraint) {
+            $violations = $context->getValidator()->validate($valueData, $constraint, $context->getGroup());
+            /** @var ConstraintViolationInterface $violation */
+            foreach ($violations as $violation) {
+                /** @noinspection DisconnectedForeachInstructionInspection */
+                $path = $attribute->getCode();
+                if ($attribute->getType()->isEmbedded()) {
+                    if (!$attribute->isCollection()) {
+                        $path .= '.';
                     }
-                    if ($violation->getMessage()) {
-                        $context->buildViolation($violation->getMessage())
-                            ->atPath($path)
-                            ->setInvalidValue($valueData)
-                            ->addViolation();
-                    } else {
-                        $this->buildAttributeViolation(
-                            $data,
-                            $context,
-                            $attribute,
-                            strtolower($item),
-                            $valueData,
-                            $path
-                        );
-                    }
+                    $path .= $violation->getPropertyPath();
+                }
+                if ($violation->getMessage()) {
+                    $context->buildViolation($violation->getMessage())
+                        ->atPath($path)
+                        ->setInvalidValue($valueData)
+                        ->addViolation();
+                } else {
+                    $this->buildAttributeViolation(
+                        $data,
+                        $context,
+                        $attribute,
+                        $this->getConstraintType($constraint),
+                        $valueData,
+                        $path
+                    );
                 }
             }
         }
@@ -324,5 +322,21 @@ class DataValidator extends ConstraintValidator
             ],
             $type
         );
+    }
+
+    /**
+     * Get the constraint type (e.g. "email"), used for error message
+     *
+     * @see https://stackoverflow.com/questions/19901850/how-do-i-get-an-objects-unqualified-short-class-name#19909556
+     *
+     * @param Constraint $constraint
+     *
+     * @return string
+     */
+    protected function getConstraintType(Constraint $constraint): string
+    {
+        $reflect = new \ReflectionClass($constraint);
+
+        return strtolower($reflect->getShortName());
     }
 }
