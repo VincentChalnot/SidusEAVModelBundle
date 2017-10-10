@@ -22,15 +22,23 @@ namespace Sidus\EAVModelBundle\Validator\Mapping\Loader;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\MappingException;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
-use Symfony\Component\Validator\Mapping\Loader\AbstractLoader;
+use Symfony\Component\Validator\Mapping\Loader\YamlFileLoader;
 
 /**
  * Custom loader to manually call constraints on values based on their attributes
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class BaseLoader extends AbstractLoader
+class BaseLoader extends YamlFileLoader
 {
+    /** @noinspection PhpMissingParentConstructorInspection
+     *
+     * Overriding file loader constructor
+     * There is no need for a file
+     */
+    public function __construct()
+    {
+    }
 
     /**
      * Loads validation metadata into a {@link ClassMetadata} instance.
@@ -45,14 +53,13 @@ class BaseLoader extends AbstractLoader
     }
 
     /**
-     * @param string $name
-     * @param null   $options
+     * @param array $constraints
      *
-     * @return Constraint
+     * @return Constraint[]
      * @throws MappingException
      */
-    public function newConstraint($name, $options = null)
+    public function loadCustomConstraints(array $constraints)
     {
-        return parent::newConstraint($name, $options);
+        return $this->parseNodes($constraints);
     }
 }
