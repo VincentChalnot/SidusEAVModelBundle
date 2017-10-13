@@ -270,8 +270,33 @@ class DataRepository extends EntityRepository
      */
     public function getQbForFamiliesAndLabel(array $families, $term)
     {
+        // Removing empty terms with wildcards on both sides
+        if ($term === '%%') {
+            $term = '%';
+        }
+
+        // Specific optimisation for match-all queries
+        if ($term === '%') {
+            $familyCodes = array_map(
+                function (FamilyInterface $family) {
+                    return $family->getCode();
+                },
+                $families
+            );
+            $qb = $this->createQueryBuilder('e');
+            $qb
+                ->andWhere('e.family IN (:families)')
+                ->setParameter(
+                    'families',
+                    $familyCodes
+                );
+
+            return $qb;
+        }
+
         $eavQb = $this->createEAVQueryBuilder();
         $orCondition = [];
+
         foreach ($families as $family) {
             $attribute = $family->getAttributeAsLabel();
             if (!$attribute) {
@@ -328,8 +353,7 @@ class DataRepository extends EntityRepository
             ->leftJoin('associations.values', 'associationValues')
             ->addSelect('associationValues')
             ->andWhere('e.id = :dataId')
-            ->setParameter('dataId', $id)
-        ;
+            ->setParameter('dataId', $id);
 
         return $qb->getQuery()->getOneOrNullResult();
     }
