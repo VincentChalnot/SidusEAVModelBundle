@@ -88,8 +88,8 @@ class EntityProvider
             throw new UnexpectedValueException('Unable to denormalize data from unknown format');
         }
 
-        // If the id is set, don't even look for the identifier
-        if (array_key_exists('id', $data)) {
+        // If the id is set (and not null), don't even look for the identifier
+        if (isset($data['id'])) {
             return $repository->find($data['id']);
         }
 
