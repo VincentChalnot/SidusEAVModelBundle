@@ -12,3 +12,5 @@ services:
         class: Sidus\EAVModelBundle\Serializer\EntityProvider
         arguments:
             - '@doctrine'
+        tags:
+            - { name: doctrine.event_listener, event: postFlush }
