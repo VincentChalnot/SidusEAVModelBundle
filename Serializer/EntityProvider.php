@@ -20,6 +20,7 @@
 namespace Sidus\EAVModelBundle\Serializer;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\ORM\Event\PostFlushEventArgs;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -35,6 +36,14 @@ class EntityProvider
 {
     /** @var Registry */
     protected $doctrine;
+
+    /**
+     * This is a temporary storage, to get created entity for a given reference before they are persisted & flushed by
+     * doctrine. It's mapped by family and reference
+     *
+     * @var DataInterface[][]
+     */
+    protected $createdEntities = [];
 
     /**
      * @param Registry $doctrine
@@ -107,7 +116,35 @@ class EntityProvider
             }
         }
 
-        return $family->createData();
+        // Maybe the entity already exists but is not yet persisted
+        if (null !== $reference && $this->hasCreatedEntity($family, $reference)) {
+            return $this->getCreatedEntity($family, $reference);
+        }
+
+        $entity = $family->createData();
+
+        // If we can, store the created entity for later
+        if (null !== $reference) {
+            $this->addCreatedEntity($entity, $reference);
+        }
+
+        return $entity;
+    }
+
+    /**
+     * When an entity is created, we don't need to keep the reference anymore
+     *
+     * @param PostFlushEventArgs $event
+     */
+    public function postFlush(PostFlushEventArgs $event)
+    {
+        $uow = $event->getEntityManager()->getUnitOfWork();
+
+        foreach ($uow->getScheduledEntityInsertions() as $entity) {
+            if ($entity instanceof DataInterface && $this->hasCreatedEntity($entity->getFamily(), $entity->getIdentifier())) {
+                $this->removeCreatedEntity($entity->getFamily(), $entity->getIdentifier());
+            }
+        }
     }
 
     /**
@@ -121,7 +158,8 @@ class EntityProvider
         array $data,
         FamilyInterface $family,
         NameConverterInterface $nameConverter = null
-    ) {
+    )
+    {
         if (!$family->getAttributeAsIdentifier()) {
             return null;
         }
@@ -134,5 +172,55 @@ class EntityProvider
         }
 
         return null;
+    }
+
+    /**
+     * @param FamilyInterface $family
+     * @param int|string      $reference
+     *
+     * @return DataInterface
+     */
+    protected function getCreatedEntity(FamilyInterface $family, $reference)
+    {
+        if (!$this->hasCreatedEntity($family, $reference)) {
+            return null;
+        }
+
+        return $this->createdEntities[$family->getCode()][$reference];
+    }
+
+    /**
+     * @param DataInterface $entity
+     * @param int|string    $reference
+     */
+    protected function addCreatedEntity(DataInterface $entity, $reference)
+    {
+        $family = $entity->getFamily();
+
+        if (!array_key_exists($family->getCode(), $this->createdEntities)) {
+            $this->createdEntities[$family->getCode()] = [];
+        }
+
+        $this->createdEntities[$family->getCode()][$reference] = $entity;
+    }
+
+    /**
+     * @param FamilyInterface $family
+     * @param int|string      $reference
+     *
+     * @return bool
+     */
+    protected function hasCreatedEntity(FamilyInterface $family, $reference)
+    {
+        return array_key_exists($family->getCode(), $this->createdEntities) && array_key_exists($reference, $this->createdEntities[$family->getCode()]);
+    }
+
+    /**
+     * @param FamilyInterface $family
+     * @param int|string      $reference
+     */
+    protected function removeCreatedEntity(FamilyInterface $family, $reference)
+    {
+        unset($this->createdEntities[$family->getCode()][$reference]);
     }
 }
