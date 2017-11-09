@@ -101,14 +101,14 @@ widget. Accepts a list of allowed families in the 'allowed_families' option.
 - embed: Stored like data but embed the edition of the foreign entity directly into the form. Requires a single family
 in the 'allowed_families' option.
 - hidden: Stored as varchar(255), will be present in the form as a hidden input.
-- string_identifier: Same as a string but unique and required
-- integer_identifier: Same as an integer but unique and required
+- string_identifier: Same as a string but unique and required, also automatically removes any context mask.
+- integer_identifier: Same as an integer but unique and required, also automatically removes any context mask.
 
 Additional attribute types can be found in the sidus/eav-bootstrap-bundle:
 - html: Stored as text, edited as TinyMCE WYSIWYG editor, featuring full control over configuration
 - switch: Stored as boolean, edited as a nice checkbox
 - autocomplete_data_selector: Stored like data, edited as an auto-complete input, requires the "allowed_families" form_option.
-- combo_selector: Allow selection of the family first, then autocomplete of the data, using "autocomplete_data_selector".
+- combo_data_selector: Allow selection of the family first, then autocomplete of the data, using "autocomplete_data_selector".
 Date and datetime are also improved with bootstrap date/time picker.
 
 The only current limitation of the embed type is that you cannot embed a family inside the same family, this creates an
