@@ -222,16 +222,26 @@ class DataRepository extends EntityRepository
      * @param string            $alias
      * @param string            $indexBy
      * @param QueryBuilder|null $qb
+     * @param bool              $associations
      *
      * @return QueryBuilder
      */
-    public function createOptimizedQueryBuilder($alias, $indexBy = null, QueryBuilder $qb = null)
+    public function createOptimizedQueryBuilder($alias, $indexBy = null, QueryBuilder $qb = null, $associations = false)
     {
         if (!$qb) {
             $qb = $this->createQueryBuilder($alias, $indexBy);
         }
-        $qb->addSelect('values')
-            ->leftJoin($alias.'.values', 'values');
+        $qb
+            ->leftJoin($alias.'.values', 'values')
+            ->addSelect('values');
+
+        if ($associations) {
+            $qb
+                ->leftJoin('values.dataValue', 'associations')
+                ->addSelect('associations')
+                ->leftJoin('associations.values', 'associationValues')
+                ->addSelect('associationValues');
+        }
 
         return $qb;
     }
@@ -246,7 +256,7 @@ class DataRepository extends EntityRepository
      */
     public function createFamilyQueryBuilder(FamilyInterface $family, $alias = 'e')
     {
-        return new SingleFamilyQueryBuilder($family, $this->createQueryBuilder($alias), $alias);
+        return new SingleFamilyQueryBuilder($family, $this->createOptimizedQueryBuilder($alias), $alias);
     }
 
     /**
@@ -346,12 +356,9 @@ class DataRepository extends EntityRepository
      */
     public function loadFullEntity($id)
     {
-        $qb = $this->createOptimizedQueryBuilder('e');
+        $qb = $this->createOptimizedQueryBuilder('e', null, null, true);
+
         $qb
-            ->leftJoin('values.dataValue', 'associations')
-            ->addSelect('associations')
-            ->leftJoin('associations.values', 'associationValues')
-            ->addSelect('associationValues')
             ->andWhere('e.id = :dataId')
             ->setParameter('dataId', $id);
 

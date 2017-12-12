@@ -127,6 +127,7 @@ EOT;
      * @param AttributeInterface $attribute
      *
      * @return string
+     * @throws \ReflectionException
      */
     protected function getAttributeMethods(FamilyInterface $family, AttributeInterface $attribute)
     {
@@ -237,29 +238,31 @@ EOT;
      * @param bool               $forceSingle
      *
      * @return string
+     * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      */
     protected function getPHPType(
         FamilyInterface $family,
         AttributeInterface $attribute,
         $forceSingle = false
     ) {
-        $type = substr($attribute->getType()->getDatabaseType(), 0, -strlen('Value'));
+        $type = substr($attribute->getType()->getDatabaseType(), 0, -\strlen('Value'));
         $collection = $attribute->isCollection() && !$forceSingle;
 
         // Scalar types
-        if (in_array($type, ['bool', 'integer', 'decimal', 'string', 'text'], true)) {
+        if (\in_array($type, ['bool', 'integer', 'decimal', 'string', 'text'], true)) {
             if ($collection) {
                 return 'array';
             }
             if ('text' === $type) {
                 return 'string';
-            } elseif ('decimal' === $type) {
+            }
+            if ('decimal' === $type) {
                 return 'double';
             }
 
             return $type;
         }
-        if (in_array($type, ['date', 'datetime'], true)) {
+        if (\in_array($type, ['date', 'datetime'], true)) {
             $type = '\DateTime';
             if ($collection) {
                 $type .= '[]';
@@ -268,15 +271,17 @@ EOT;
             return $type;
         }
         if ('data' === $type || 'constrainedData' === $type) {
-            $types = $attribute->getOption('allowed_families');
-            if ($types) {
-                if (!is_array($types)) {
-                    $types = [$types];
+            $familyCodes = $attribute->getOption('allowed_families');
+            if ($familyCodes) {
+                if (!\is_array($familyCodes)) {
+                    $familyCodes = [$familyCodes];
                 }
-                if ($collection) {
-                    /** @var array $types */
-                    foreach ($types as &$type) {
-                        $type .= '[]';
+                $types = [];
+                foreach ($familyCodes as $familyCode) {
+                    $types[] = $familyCode.($collection ? '[]' : '');
+                    $family = $this->familyRegistry->getFamily($familyCode);
+                    if ($family->getDataClass()) {
+                        $types[] = '\\'.ltrim($family->getDataClass(), '\\').($collection ? '[]' : '');
                     }
                 }
 

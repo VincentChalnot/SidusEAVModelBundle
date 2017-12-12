@@ -129,7 +129,6 @@ class DataType extends AbstractType
      * @throws UndefinedOptionsException
      * @throws MissingFamilyException
      * @throws \UnexpectedValueException
-     * @throws \Sidus\EAVModelBundle\Exception\WrongFamilyException
      * @throws \Symfony\Component\OptionsResolver\Exception\MissingOptionsException
      */
     public function configureOptions(OptionsResolver $resolver)
@@ -160,7 +159,7 @@ class DataType extends AbstractType
                         );
                     }
                     $allowedFamilies = $attribute->getOption('allowed_families', []);
-                    if (1 !== count($allowedFamilies)) {
+                    if (1 !== \count($allowedFamilies)) {
                         $m = "Can't automatically compute the 'family' option with an attribute with no family allowed";
                         $m .= " or multiple allowed families, please set the 'family' option manually";
                         throw new MissingOptionsException($m);

@@ -54,7 +54,7 @@ class EAVFinder
      * @throws \LogicException
      * @throws MissingAttributeException
      *
-     * @return array
+     * @return DataInterface[]
      */
     public function findBy(FamilyInterface $family, array $filterBy, array $orderBy = [])
     {
