@@ -57,18 +57,39 @@ class FamilySelectorType extends AbstractType
     {
         $builder->addModelTransformer(
             new CallbackTransformer(
-                function ($originalData) {
+                function ($originalData) use ($options) {
+                    if ($options['multiple'] && \is_array($originalData)) {
+                        foreach ($originalData as $key => $originalDatum) {
+                            if ($originalDatum instanceof FamilyInterface) {
+                                $originalData[$key] = $originalDatum->getCode();
+                            }
+                        }
+
+                        return $originalData;
+                    }
                     if ($originalData instanceof FamilyInterface) {
                         $originalData = $originalData->getCode();
                     }
 
                     return $originalData;
                 },
-                function ($submittedData) {
+                function ($submittedData) use ($options) {
                     if ($submittedData === null) {
                         return $submittedData;
-                    } elseif ($submittedData instanceof FamilyInterface) {
+                    }
+                    if ($submittedData instanceof FamilyInterface) {
                         // Should actually never happen ?
+                        return $submittedData;
+                    }
+
+                    if ($options['multiple'] && \is_array($submittedData)) {
+                        foreach ($submittedData as $key => $submittedDatum) {
+                            if ($submittedDatum instanceof FamilyInterface) {
+                                continue;
+                            }
+                            $submittedData[$key] = $this->familyRegistry->getFamily($submittedDatum);
+                        }
+
                         return $submittedData;
                     }
 
