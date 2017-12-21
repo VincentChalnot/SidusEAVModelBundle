@@ -143,11 +143,25 @@ class FamilySelectorType extends AbstractType
                 $choices = [];
                 /** @var FamilyInterface[] $families */
                 $families = $options['families'];
+                $duplicates = [];
                 foreach ($families as $family) {
                     if ($family->isInstantiable()) {
-                        $choices[ucfirst($family)] = $family->getCode();
+                        $label = ucfirst($family);
+                        if (array_key_exists($label, $choices)) {
+                            // Storing duplicates
+                            $duplicates[] = $label;
+                            $label = "{$label} ({$family->getCode()})";
+                        }
+                        $choices[$label] = $family->getCode();
                     }
                 }
+
+                // Recreating duplicates
+                foreach ($duplicates as $duplicate) {
+                    $choices["{$duplicate} ({$choices[$duplicate]})"] = $choices[$duplicate];
+                    unset($choices[$duplicate]);
+                }
+                ksort($choices);
 
                 return $choices;
             }
