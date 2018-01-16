@@ -333,7 +333,7 @@ class DataValidator extends ConstraintValidator
      *
      * @return string
      */
-    protected function getConstraintType(Constraint $constraint): string
+    protected function getConstraintType(Constraint $constraint)
     {
         $reflect = new \ReflectionClass($constraint);
 

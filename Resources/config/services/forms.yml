@@ -14,12 +14,6 @@ services:
         tags:
             - { name: form.type }
 
-    sidus_eav_model.form.type.grouped_data:
-        class: Sidus\EAVModelBundle\Form\Type\GroupedDataType
-        parent: 'sidus_eav_model.form.type.data'
-        tags:
-            - { name: form.type }
-
     sidus_eav_model.form.type.family_selector:
         class: Sidus\EAVModelBundle\Form\Type\FamilySelectorType
         arguments: ['@sidus_eav_model.family.registry']

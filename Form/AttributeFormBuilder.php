@@ -22,6 +22,7 @@ namespace Sidus\EAVModelBundle\Form;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Sidus\EAVModelBundle\Validator\Mapping\Loader\BaseLoader;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -67,6 +68,8 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
             return;
         }
 
+        $builder = $this->resolveBuilder($builder, $attribute, $options);
+
         // The 'multiple' option triggers the usage of the Collection form type
         if ($options['multiple']) {
             // This means that a specific attribute can be a collection of data but might NOT be "multiple" in a sense
@@ -76,6 +79,91 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
         } else {
             $this->addSingleAttribute($builder, $attribute, $options);
         }
+    }
+
+    /**
+     * @param FormBuilderInterface $builder
+     * @param AttributeInterface   $attribute
+     * @param array                $options
+     *
+     * @throws \Symfony\Component\Form\Exception\InvalidArgumentException
+     * @throws \InvalidArgumentException
+     *
+     * @return FormBuilderInterface
+     */
+    protected function resolveBuilder(
+        FormBuilderInterface $builder,
+        AttributeInterface $attribute,
+        array $options = []
+    ) {
+        $group = $attribute->getGroup();
+        if (null === $group || $options['ignore_group']) {
+            return $builder;
+        }
+
+        $groupPath = explode('.', $group);
+
+        $subBuilder = $builder;
+        foreach ($groupPath as $level => $groupCode) {
+            $subBuilder = $this->buildFieldset($subBuilder, $attribute, $groupPath, $level);
+        }
+
+        return $subBuilder;
+    }
+
+    /**
+     * @param FormBuilderInterface $parentBuilder
+     * @param AttributeInterface   $attribute
+     * @param array                $groupPath
+     * @param                      $level
+     *
+     * @throws \Symfony\Component\Form\Exception\InvalidArgumentException
+     * @throws \InvalidArgumentException
+     *
+     * @return FormBuilderInterface
+     */
+    protected function buildFieldset(
+        FormBuilderInterface $parentBuilder,
+        AttributeInterface $attribute,
+        array $groupPath,
+        $level
+    ) {
+        $fieldsetCode = '__'.$groupPath[$level];
+        if ($parentBuilder->has($fieldsetCode)) {
+            return $parentBuilder->get($fieldsetCode);
+        }
+
+        $fieldsetOptions = [
+            'label' => $this->getGroupLabel($attribute, $groupPath, $level),
+            'inherit_data' => true,
+        ];
+
+        $parentBuilder->add($fieldsetCode, FormType::class, $fieldsetOptions);
+
+        return $parentBuilder->get($fieldsetCode);
+    }
+
+    /**
+     * Use label from formOptions or use translation or automatically create human readable one
+     *
+     * @param AttributeInterface $attribute
+     * @param array              $groupPath
+     * @param int                $level
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return string
+     */
+    protected function getGroupLabel(AttributeInterface $attribute, array $groupPath, $level)
+    {
+        $fieldsetPath = implode('.', array_splice($groupPath, 0, $level));
+        $family = $attribute->getFamily();
+        $transKeys = [
+            "eav.family.{$family->getCode()}.group.{$fieldsetPath}.label",
+            "eav.group.{$fieldsetPath}.label",
+        ];
+
+        return ucfirst($this->tryTranslate($transKeys, [], isset($groupPath[$level]) ? $groupPath[$level] : null));
     }
 
     /**
@@ -152,6 +240,7 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
                 'form_options' => [],
                 'validation_rules' => null,
                 'collection_type' => $this->collectionType,
+                'ignore_group' => false,
             ]
         );
         $resolver->setAllowedTypes('label', ['string']);
@@ -162,6 +251,7 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
         $resolver->setAllowedTypes('form_options', ['array']);
         $resolver->setAllowedTypes('validation_rules', ['NULL', 'array']);
         $resolver->setAllowedTypes('collection_type', ['string']);
+        $resolver->setAllowedTypes('ignore_group', ['boolean']);
 
         $resolver->setNormalizer(
             'form_options',

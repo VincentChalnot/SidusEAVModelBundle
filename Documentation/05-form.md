@@ -1,11 +1,9 @@
 ## Using a form
 The default form to edit entities is referenced as 'Sidus\EAVModelBundle\Form\Type\DataType' and the only thing to keep
 in mind is that it can't work without an entity or the "family" option.
-Alternatively, you can use the 'Sidus\EAVModelBundle\Form\Type\GroupedDataType' form to separate attribute in different
-fieldsets for different groups.
 
 ### DataType forms
-The DataType form and those who inherit from it (GroupedDataType, TabbedDataType) allows you to automatically generate
+The DataType form and those who inherit from it (TabbedDataType) allows you to automatically generate
 forms to manipulate entities inside the model.
 
 ````php
