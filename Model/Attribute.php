@@ -460,11 +460,10 @@ class Attribute implements AttributeInterface
             try {
                 $newType = $this->attributeTypeRegistry->getType($configuration['type']);
             } catch (\UnexpectedValueException $e) {
-                throw new AttributeConfigurationException(
-                    "The attribute {$this->code} has an unknown type '{$configuration['type']}'",
-                    0,
-                    $e
-                );
+                $attributeTypeCodes = implode(', ', array_keys($this->attributeTypeRegistry->getTypes()));
+                $m = "The attribute {$this->code} has an unknown type '{$configuration['type']}'.\n";
+                $m .= "Available types are: {$attributeTypeCodes}";
+                throw new AttributeConfigurationException($m, 0, $e);
             }
             if ($this->type && $this->type->getDatabaseType() !== $newType->getDatabaseType()) {
                 $e = "The attribute '{$this->code}' cannot be overridden with a new attribute type that don't match ";

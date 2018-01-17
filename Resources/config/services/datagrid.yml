@@ -1,0 +1,12 @@
+parameters:
+    sidus_eav_model.datagrid.renderer.choice_types:
+        - choice
+
+services:
+    sidus_eav_model.datagrid.renderer:
+        class: Sidus\EAVModelBundle\DataGrid\DataRenderer
+        decorates: sidus_data_grid.renderer
+        arguments:
+            - '@sidus_eav_model.datagrid.renderer.inner'
+            - '@translator'
+            - '%sidus_eav_model.datagrid.renderer.choice_types%'
