@@ -22,6 +22,7 @@ namespace Sidus\EAVModelBundle\Serializer\Denormalizer;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Sidus\EAVModelBundle\Entity\ContextualDataInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -113,6 +114,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @throws UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
+     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
      *
      * @return DataInterface
      */
@@ -131,6 +133,9 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         $entity = $this->entityProvider->getEntity($family, $data, $this->nameConverter);
         if (is_scalar($data)) {
             return $entity; // In case we are trying to resolve a simple reference
+        }
+        if ($data instanceof ContextualDataInterface && isset($context['context']) && \is_array($context['context'])) {
+            $data->setCurrentContext($context['context']);
         }
         /** @var array $data At this point we know for sure data is a \ArrayAccess or a PHP array */
         foreach ($data as $attributeCode => $value) {
@@ -168,7 +173,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param string          $format
      * @param array           $context
      *
-     * @throws \Symfony\Component\Serializer\Exception\UnexpectedValueException
+     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
      * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      * @throws \InvalidArgumentException
      */
@@ -185,7 +190,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         } elseif ($family->hasAttribute($attributeCode)) {
             $attribute = $family->getAttribute($attributeCode);
             if ($attribute->isCollection()) {
-                if (!is_array($normalizedValue) && !$normalizedValue instanceof \Traversable) {
+                if (!\is_array($normalizedValue) && !$normalizedValue instanceof \Traversable) {
                     throw new UnexpectedValueException(
                         "Given data should be an array of values for attribute {$attributeCode}"
                     );
@@ -234,7 +239,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      */
     protected function getFamily($data, $class, array $context)
     {
-        if (is_array($data) || $data instanceof \ArrayAccess) {
+        if (\is_array($data) || $data instanceof \ArrayAccess) {
             foreach (['familyCode', 'family_code', 'family'] as $property) {
                 if (array_key_exists($property, $data) && $data[$property]) {
                     return $this->denormalizer->denormalize($data[$property], FamilyInterface::class, $context);
@@ -256,7 +261,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         }
 
         // If there is only ONE family exactly matching the data class, let's use this one
-        if (1 === count($matchingFamilies)) {
+        if (1 === \count($matchingFamilies)) {
             return array_pop($matchingFamilies);
         }
 
@@ -275,7 +280,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             return true;
         }
 
-        return !in_array($attributeCode, $this->ignoredAttributes, true);
+        return !\in_array($attributeCode, $this->ignoredAttributes, true);
     }
 
     /**
@@ -286,7 +291,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param array              $context
      *
      * @throws \InvalidArgumentException
-     * @throws \Symfony\Component\Serializer\Exception\UnexpectedValueException
+     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
      *
      * @return mixed
      */
@@ -305,7 +310,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             $targetClass = $valueMetadata->getAssociationTargetClass($attributeType->getDatabaseType());
             $context['relatedAttribute'] = $attribute; // Add attribute info
             $allowedFamilies = $attribute->getOption('allowed_families', []);
-            if (1 === count($allowedFamilies)) {
+            if (1 === \count($allowedFamilies)) {
                 $context['family'] = array_pop($allowedFamilies);
             }
 
@@ -333,6 +338,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param array           $context
      *
      * @throws \InvalidArgumentException
+     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
      *
      * @return mixed
      */
@@ -369,6 +375,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param string $format
      * @param array  $context
      *
+     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     *
      * @return mixed
      */
     protected function denormalizeRelation($value, $targetClass, $format, array $context)
@@ -376,6 +384,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         if (null === $value || '' === $value) {
             return null;
         }
+
         return $this->denormalizer->denormalize($value, $targetClass, $format, $context);
     }
 }
