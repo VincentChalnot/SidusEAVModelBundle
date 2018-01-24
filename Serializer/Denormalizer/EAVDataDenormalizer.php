@@ -134,8 +134,11 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         if (is_scalar($data)) {
             return $entity; // In case we are trying to resolve a simple reference
         }
-        if ($data instanceof ContextualDataInterface && isset($context['context']) && \is_array($context['context'])) {
-            $data->setCurrentContext($context['context']);
+        if ($entity instanceof ContextualDataInterface
+            && isset($context['context'])
+            && \is_array($context['context'])
+        ) {
+            $entity->setCurrentContext($context['context']);
         }
         /** @var array $data At this point we know for sure data is a \ArrayAccess or a PHP array */
         foreach ($data as $attributeCode => $value) {
