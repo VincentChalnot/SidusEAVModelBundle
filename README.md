@@ -3,10 +3,6 @@ Sidus/EAVModelBundle Documentation
 
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/621ec123-268d-4a6b-a1d0-03a1e4e84b48/big.png)](https://insight.sensiolabs.com/projects/621ec123-268d-4a6b-a1d0-03a1e4e84b48)
 
-| WARNING |
-| ------- |
-| The documentation of this bundle is going through a major refactoring for the v1.2 release, don't hesitate to report any problem or missing information |
-
 ## Introduction
 This bundle allows you to quickly set up a dynamic model in a Symfony project using Doctrine.  
 Model configuration is done in Yaml and everything can be easily extended.
