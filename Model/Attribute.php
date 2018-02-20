@@ -1,20 +1,11 @@
 <?php
 /*
- *  Sidus/EAVModelBundle : EAV Data management in Symfony 3
- *  Copyright (C) 2015-2017 Vincent Chalnot
+ * This file is part of the Sidus/EAVModelBundle package.
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * Copyright (c) 2015-2018 Vincent Chalnot
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Sidus\EAVModelBundle\Model;
@@ -515,12 +506,10 @@ class Attribute implements AttributeInterface
             );
         }
 
-        if ($this->getType()->isRelation() || $this->getType()->isEmbedded()) {
-            if ($default !== null) {
-                $e = "Attribute {$this->getCode()} is a relation to an other entity, it doesn't support default values";
-                $e .= ' in configuration';
-                throw new AttributeConfigurationException($e);
-            }
+        if (null !== $default && ($this->getType()->isRelation() || $this->getType()->isEmbedded())) {
+            $e = "Attribute {$this->getCode()} is a relation to an other entity, it doesn't support default values";
+            $e .= ' in configuration';
+            throw new AttributeConfigurationException($e);
         }
     }
 }

@@ -144,6 +144,7 @@ you to do so.
 - [19 - Contextualisation](Documentation/09-context.md)
 - [10 - Extending & customizing the model](Documentation/10-extend.md)
 - [11 - Serialization](Documentation/11-serialize.md)
+- [12 - Custom classes](Documentation/12-custom_classes.md)
 
 ### Other documentation entries
 - [IDE Autocomplete](Documentation/100-ide_autocomplete.md)

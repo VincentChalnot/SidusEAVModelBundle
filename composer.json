@@ -1,6 +1,6 @@
 {
     "name": "sidus/eav-model-bundle",
-    "description": "Symfony2 & Doctrine implementation of a Entity-Attribute-Value model, easily extendable",
+    "description": "Symfony3 & Doctrine implementation of a Entity-Attribute-Value model, easily extendable",
     "keywords": [
         "eav",
         "doctrine",
@@ -8,7 +8,7 @@
     ],
     "homepage": "https://github.com/VincentChalnot/SidusEAVModelBundle",
     "type": "library",
-    "license": "LGPL-3.0-or-later",
+    "license": "MIT",
     "authors": [
         {
             "name": "Vincent Chalnot",

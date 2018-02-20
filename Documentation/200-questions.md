@@ -8,11 +8,11 @@ higher problems than just the model.
 
 It features:
 - Configurable admins, datagrids and CRUD
-- Import & export functions
+- Advanced import & export features using the [CleverAge/ProcessBundle](https://github.com/cleverage/process-bundle)
 - User management
 - Bootstrap UI in SASS
 
-The Clever Data Manager is already in production for several projects but the documentation is still a work in progress
+The Clever Data Manager is already in production for a dozen projects but the documentation is still a work in progress
 so it's currently not advised to bootstrap new projects with it unless you really know what you're doing.
 
 Also, this bundle is my intellectual property whereas the Clever Data Manager is the property of
