@@ -17,7 +17,6 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\BadMethodCallException;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Loader;
-use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
@@ -66,19 +65,21 @@ class SidusEAVModelExtension extends Extension
         $loader->load('entities.yml');
         $loader->load('events.yml');
         $loader->load('forms.yml');
+        $loader->load('manager.yml');
+        $loader->load('param_converters.yml');
+        $loader->load('twig.yml');
+        $loader->load('validators.yml');
+
         if ($config['serializer_enabled']) {
             // Only load normalizers if symfony serializer is loaded
             $loader->load('serializer.yml');
             $loader->load('normalizer.yml');
             $loader->load('denormalizer.yml');
         }
-        /** @noinspection ClassConstantCanBeUsedInspection */
+
         if (interface_exists('Sidus\DataGridBundle\Renderer\RenderableInterface')) {
             $loader->load('datagrid.yml');
         }
-        $loader->load('param_converters.yml');
-        $loader->load('twig.yml');
-        $loader->load('validators.yml');
 
         // Add global attribute configuration to handler
         $attributeConfiguration = $container->getDefinition('sidus_eav_model.attribute.registry');

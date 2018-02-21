@@ -1,0 +1,7 @@
+services:
+    sidus_eav_model.manager.data:
+        class: Sidus\EAVModelBundle\Manager\DataManager
+        arguments:
+            - '@sidus_eav_model.family.registry'
+            - '@doctrine'
+            - '%sidus_eav_model.entity.data.class%'

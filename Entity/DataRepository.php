@@ -30,6 +30,8 @@ use Sidus\EAVModelBundle\Model\FamilyInterface;
  * The $partialLoad option triggers the Query Hint HINT_FORCE_PARTIAL_LOAD
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
+ *
+ * @method DataInterface|null findOneBy(array $criteria, array $orderBy = null)
  */
 class DataRepository extends EntityRepository
 {
@@ -44,11 +46,9 @@ class DataRepository extends EntityRepository
      * @throws NonUniqueResultException
      * @throws \UnexpectedValueException
      * @throws ORMException
-     * @throws NoResultException
-     * @throws MappingException
-     *
-     * @return null|DataInterface
      * @throws \LogicException
+     *
+     * @return DataInterface|null
      */
     public function findByIdentifier(FamilyInterface $family, $reference, $idFallback = false, $partialLoad = false)
     {
@@ -73,9 +73,8 @@ class DataRepository extends EntityRepository
      * @param string|int         $reference
      * @param bool               $partialLoad
      *
-     * @return Proxy|mixed|null|DataInterface
+     * @return Proxy|mixed|DataInterface|null
      * @throws \LogicException
-     * @throws \Doctrine\ORM\Mapping\MappingException
      * @throws \Doctrine\ORM\ORMException
      * @throws NonUniqueResultException
      */
@@ -123,7 +122,7 @@ class DataRepository extends EntityRepository
      *
      * @throws \Doctrine\ORM\ORMException
      *
-     * @return Proxy|null|DataInterface
+     * @return Proxy|DataInterface|null
      */
     public function findByPrimaryKey(
         FamilyInterface $family,
@@ -261,57 +260,39 @@ class DataRepository extends EntityRepository
     }
 
     /**
-     * @param FamilyInterface[] $families
-     * @param string            $term
+     * @deprecated Use DataManager::getQbForFamiliesAndLabel instead
      *
-     * @throws \LogicException
-     * @throws \UnexpectedValueException
+     * @see DataManager::getQbForFamiliesAndLabel
+     *
+     * @throws \RuntimeException
+     */
+    public function getQbForFamiliesAndLabel()
+    {
+        throw new \RuntimeException('This method is deprecated, use DataManager::getQbForFamiliesAndLabel instead');
+    }
+
+    /**
+     * @param array $families
      *
      * @return QueryBuilder
      */
-    public function getQbForFamiliesAndLabel(array $families, $term)
+    public function getQbForFamilies(array $families)
     {
-        // Removing empty terms with wildcards on both sides
-        if ($term === '%%') {
-            $term = '%';
-        }
-
-        // Specific optimisation for match-all queries
-        if ($term === '%') {
-            $familyCodes = array_map(
-                function (FamilyInterface $family) {
-                    return $family->getCode();
-                },
-                $families
+        $familyCodes = array_map(
+            function (FamilyInterface $family) {
+                return $family->getCode();
+            },
+            $families
+        );
+        $qb = $this->createQueryBuilder('e');
+        $qb
+            ->andWhere('e.family IN (:families)')
+            ->setParameter(
+                'families',
+                $familyCodes
             );
-            $qb = $this->createQueryBuilder('e');
-            $qb
-                ->andWhere('e.family IN (:families)')
-                ->setParameter(
-                    'families',
-                    $familyCodes
-                );
 
-            return $qb;
-        }
-
-        $eavQb = $this->createEAVQueryBuilder();
-        $orCondition = [];
-
-        foreach ($families as $family) {
-            $attribute = $family->getAttributeAsLabel();
-            if (!$attribute) {
-                throw new \LogicException("Family {$family->getCode()} does not have an attribute as label");
-            }
-            if ($attribute->getType()->isRelation() || $attribute->getType()->isEmbedded()) {
-                // @todo fixme properly with eav join support
-                $orCondition[] = $eavQb->attribute($attribute)->isNotNull();
-            } else {
-                $orCondition[] = $eavQb->attribute($attribute)->like($term);
-            }
-        }
-
-        return $eavQb->apply($eavQb->getOr($orCondition));
+        return $qb;
     }
 
     /**
