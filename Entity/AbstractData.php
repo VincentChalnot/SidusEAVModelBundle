@@ -22,6 +22,7 @@ use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
 use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
 use Symfony\Component\PropertyAccess\Exception\ExceptionInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 /**
  * Base logic to handle the EAV data
@@ -96,6 +97,8 @@ abstract class AbstractData implements ContextualDataInterface
     protected $family;
 
     /**
+     * Current context of the data, not stored in the database, only used at runtime
+     *
      * @var array
      */
     protected $currentContext;
@@ -114,6 +117,13 @@ abstract class AbstractData implements ContextualDataInterface
      * @var bool
      */
     protected $debugByReference = false;
+
+    /**
+     * Common property accessor for all methods
+     *
+     * @var PropertyAccessorInterface
+     */
+    protected $accessor;
 
     /**
      * Initialize the data with the mandatory family
@@ -245,17 +255,12 @@ abstract class AbstractData implements ContextualDataInterface
             throw new InvalidValueDataException($m);
         }
         $newValue = $this->createValue($attribute, $context);
-        $accessor = PropertyAccess::createPropertyAccessor();
         $position = -1;
-        foreach ($this->getValues($attribute, $context) as $value) {
+        foreach ($this->getInternalValues($attribute, $context) as $value) {
             $position = max($position, $value->getPosition());
         }
         $newValue->setPosition($position + 1);
-        try {
-            $accessor->setValue($newValue, $attribute->getType()->getDatabaseType(), $valueData);
-        } catch (ExceptionInterface $e) {
-            throw new InvalidValueDataException("Invalid data for attribute {$attribute->getCode()}", 0, $e);
-        }
+        $this->setInternalValueData($attribute, $newValue, $valueData);
 
         return $this;
     }
@@ -280,10 +285,9 @@ abstract class AbstractData implements ContextualDataInterface
             $m = "Cannot remove data from a non-collection attribute '{$attribute->getCode()}'";
             throw new InvalidValueDataException($m);
         }
-        $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->getValues($attribute, $context) as $value) {
             try {
-                if ($accessor->getValue($value, $attribute->getType()->getDatabaseType()) === $valueData) {
+                if ($this->getAccessor()->getValue($value, $attribute->getType()->getDatabaseType()) === $valueData) {
                     $this->removeValue($value);
                     break;
                 }
@@ -314,7 +318,7 @@ abstract class AbstractData implements ContextualDataInterface
             $label = $this->getLabelValue($context);
         } catch (\Exception $e) {
         }
-        if (empty($label) && $this->getIdentifier()) {
+        if (null === $label && $this->getIdentifier()) {
             $label = "[{$this->getIdentifier()}]";
         }
 
@@ -337,7 +341,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $valuesData = $this->getValuesData($attribute, $context);
 
-        return count($valuesData) === 0 ? null : $valuesData->first();
+        return \count($valuesData) === 0 ? null : $valuesData->first();
     }
 
     /**
@@ -356,11 +360,10 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $this->checkAttribute($attribute);
         $valuesData = new ArrayCollection();
-        $accessor = PropertyAccess::createPropertyAccessor();
         $attributeType = $attribute->getType();
         try {
             foreach ($this->getValues($attribute, $context) as $value) {
-                $valuesData->add($accessor->getValue($value, $attributeType->getDatabaseType()));
+                $valuesData->add($this->getAccessor()->getValue($value, $attributeType->getDatabaseType()));
             }
         } catch (ExceptionInterface $e) {
             throw new InvalidValueDataException("Unable to access data for attribute {$attribute->getCode()}", 0, $e);
@@ -417,7 +420,7 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function __call($methodName, $arguments)
     {
-        $class = get_class($this);
+        $class = \get_class($this);
 
         $context = array_key_exists(0, $arguments) ? $arguments[0] : null;
 
@@ -432,16 +435,16 @@ abstract class AbstractData implements ContextualDataInterface
         foreach (['set', 'add', 'remove'] as $action) {
             if (0 === strpos($methodName, $action)) {
                 if (!array_key_exists(0, $arguments)) {
-                    throw new \BadMethodCallException($baseErrorMsg.' requires at least one argument');
+                    throw new \BadMethodCallException("{$baseErrorMsg} requires at least one argument");
                 }
                 $context = array_key_exists(1, $arguments) ? $arguments[1] : null;
-                $attributeCode = lcfirst(substr($methodName, strlen($action)));
+                $attributeCode = lcfirst(substr($methodName, \strlen($action)));
 
                 return $this->$action($attributeCode, $arguments[0], $context);
             }
         }
 
-        throw new \BadMethodCallException($baseErrorMsg.' does not exist');
+        throw new \BadMethodCallException("{$baseErrorMsg} does not exist");
     }
 
     /**
@@ -606,7 +609,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $values = $this->getValues($attribute, $context);
 
-        return count($values) === 0 ? null : $values->first();
+        return \count($values) === 0 ? null : $values->first();
     }
 
     /**
@@ -623,34 +626,9 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function getValues(AttributeInterface $attribute = null, array $context = null)
     {
-        if (!$context) {
-            $context = $this->getCurrentContext();
-        }
+        $values = $this->getInternalValues($attribute, $context);
 
-        if (null === $attribute) {
-            $values = new ArrayCollection();
-            foreach ($this->values as $value) {
-                $attribute = $this->getFamily()->getAttribute($value->getAttributeCode());
-                if ($attribute->isContextMatching($value, $context)) {
-                    $values->add($value);
-                }
-            }
-
-            return $values;
-        }
-        $this->checkAttribute($attribute);
-
-        $values = new ArrayCollection();
-        foreach ($this->getValuesByAttribute($attribute) as $value) {
-            if ($value instanceof ContextualValueInterface) {
-                if ($attribute->isContextMatching($value, $context)) {
-                    $values->add($value);
-                }
-            } else {
-                $values->add($value);
-            }
-        }
-        if (0 === count($values) && null !== $attribute->getDefault()) {
+        if ($attribute && 0 === \count($values) && null !== $attribute->getDefault()) {
             return $this->createDefaultValues($attribute, $context);
         }
 
@@ -786,7 +764,6 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function setValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
     {
-        $this->emptyValues($attribute, $context);
         $this->setInternalValuesData($attribute, $dataValues, $context);
 
         return $this;
@@ -804,7 +781,7 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function emptyValues(AttributeInterface $attribute = null, array $context = null)
     {
-        $values = $this->getValues($attribute, $context);
+        $values = $this->getInternalValues($attribute, $context);
         foreach ($values as $value) {
             $this->removeValue($value);
         }
@@ -870,12 +847,7 @@ abstract class AbstractData implements ContextualDataInterface
             $value = $this->createValue($attribute, $context);
         }
 
-        $accessor = PropertyAccess::createPropertyAccessor();
-        try {
-            $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
-        } catch (ExceptionInterface $e) {
-            throw new InvalidValueDataException("Invalid data for attribute {$attribute->getCode()}", 0, $e);
-        }
+        $this->setInternalValueData($attribute, $value, $dataValue);
 
         return $this;
     }
@@ -893,7 +865,7 @@ abstract class AbstractData implements ContextualDataInterface
     public function isEmpty(AttributeInterface $attribute, array $context = null)
     {
         foreach ($this->getValuesData($attribute, $context) as $valueData) {
-            if ($valueData !== null && $valueData !== '') {
+            if (null !== $valueData && '' !== $valueData) {
                 return false;
             }
         }
@@ -904,6 +876,7 @@ abstract class AbstractData implements ContextualDataInterface
     /**
      * Remove id on clone and clean values
      *
+     * @throws InvalidValueDataException
      * @throws \UnexpectedValueException
      * @throws \LogicException
      */
@@ -940,6 +913,8 @@ abstract class AbstractData implements ContextualDataInterface
      *
      * @internal
      *
+     * @throws \ReflectionException
+     *
      * @return array
      */
     public function __debugInfo()
@@ -954,6 +929,7 @@ abstract class AbstractData implements ContextualDataInterface
                 $data[$property->getName()] = 'ERROR: '.$e->getMessage();
             }
         }
+        unset($data['accessor']);
 
         if ($this->debugByReference) {
             $data['__debugByReference'] = true;
@@ -993,7 +969,7 @@ abstract class AbstractData implements ContextualDataInterface
         if ($value instanceof AbstractData) {
             $value->setDebugByReference(true);
         }
-        if (is_array($value) || $value instanceof \Traversable) {
+        if (\is_array($value) || $value instanceof \Traversable) {
             /** @var array $value */
             foreach ($value as &$item) {
                 if ($item instanceof AbstractData) {
@@ -1019,15 +995,16 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @param AttributeInterface|null $attribute
-     * @param array|null              $context
+     * @param AttributeInterface $attribute
+     * @param array|null         $context
      *
      * @throws InvalidValueDataException
      * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return Collection|ValueInterface[]
      */
-    protected function createDefaultValues(AttributeInterface $attribute = null, array $context = null)
+    protected function createDefaultValues(AttributeInterface $attribute, array $context = null)
     {
         $default = $attribute->getDefault();
         if (!$attribute->isCollection()) {
@@ -1038,41 +1015,114 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
+     * @param AttributeInterface|null $attribute
+     * @param array|null              $context
+     *
+     * @throws InvalidValueDataException
+     * @throws MissingAttributeException
+     * @throws ContextException
+     *
+     * @return Collection|ValueInterface[]
+     */
+    protected function getInternalValues(AttributeInterface $attribute = null, array $context = null)
+    {
+        if (!$context) {
+            $context = $this->getCurrentContext();
+        }
+
+        if (null === $attribute) {
+            $values = new ArrayCollection();
+            foreach ($this->values as $value) {
+                $attribute = $this->getFamily()->getAttribute($value->getAttributeCode());
+                if ($attribute->isContextMatching($value, $context)) {
+                    $values->add($value);
+                }
+            }
+
+            return $values;
+        }
+        $this->checkAttribute($attribute);
+
+        $values = new ArrayCollection();
+        foreach ($this->getValuesByAttribute($attribute) as $value) {
+            if ($value instanceof ContextualValueInterface) {
+                if ($attribute->isContextMatching($value, $context)) {
+                    $values->add($value);
+                }
+            } else {
+                $values->add($value);
+            }
+        }
+
+        return $values;
+    }
+
+    /**
      * @param AttributeInterface $attribute
      * @param array|\Traversable $dataValues
      * @param array|null         $context
      *
      * @throws InvalidValueDataException
      * @throws MissingAttributeException
+     * @throws ContextException
      *
      * @return Collection|ValueInterface[]
      */
     protected function setInternalValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
     {
         $this->checkAttribute($attribute);
-        if (!(is_array($dataValues) || $dataValues instanceof \Traversable)) {
-            $type = is_object($dataValues) ? get_class($dataValues) : gettype($dataValues);
-            throw new InvalidValueDataException(
-                "Value for collection attribute {$attribute->getCode()} must be an array, '{$type}' given"
-            );
-        }
+        $dataValues = $this->parseArray($attribute, $dataValues);
         $values = new ArrayCollection();
-        $accessor = PropertyAccess::createPropertyAccessor();
-        $position = 0;
-        foreach ($dataValues as $dataValue) {
-            /** @noinspection DisconnectedForeachInstructionInspection */
-            $value = $this->createValue($attribute, $context);
-            $value->setPosition($position++);
-            try {
-                $accessor->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
-            } catch (ExceptionInterface $e) {
-                $m = "Invalid data for attribute {$attribute->getCode()} at position {$position}";
-                throw new InvalidValueDataException($m, 0, $e);
+        $position = 0; // Reset position to zero
+
+        foreach ($this->getInternalValues($attribute, $context) as $value) {
+            // If there values to replace
+            if (\count($dataValues)) {
+                // Extract new values and replaces them one by one
+                $dataValue = array_shift($dataValues);
+                $value->setPosition(++$position);
+                $this->setInternalValueData($attribute, $value, $dataValue);
+                $values->add($value);
+            } else {
+                // If there are too much existing values previously, remove the extra ones
+                $this->removeValue($value);
             }
+        }
+
+        // If there are still values to add
+        foreach ($dataValues as $dataValue) {
+            $value = $this->createValue($attribute, $context);
+            $value->setPosition(++$position);
+            $this->setInternalValueData($attribute, $value, $dataValue);
             $values->add($value);
         }
 
         return $values;
+    }
+
+    /**
+     * Sets the value's data
+     *
+     * @param AttributeInterface $attribute
+     * @param ValueInterface     $value
+     * @param mixed              $dataValue
+     *
+     * @throws InvalidValueDataException
+     */
+    protected function setInternalValueData(
+        AttributeInterface $attribute,
+        ValueInterface $value,
+        $dataValue
+    ) {
+        try {
+            $this->getAccessor()->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
+        } catch (ExceptionInterface $e) {
+            $m = "Invalid data for attribute {$attribute->getCode()} at position {$value->getPosition()}";
+            throw new InvalidValueDataException($m, 0, $e);
+        } catch (\TypeError $e) {
+            $m = "Invalid data type for attribute {$attribute->getCode()} at position {$value->getPosition()}";
+            throw new InvalidValueDataException($m, 0, $e);
+        }
     }
 
     /**
@@ -1165,5 +1215,48 @@ abstract class AbstractData implements ContextualDataInterface
 
         $key = spl_object_hash($value);
         unset($this->valuesByAttributes[$value->getAttributeCode()][$key]);
+    }
+
+    /**
+     * @return PropertyAccessorInterface
+     */
+    protected function getAccessor()
+    {
+        if (!$this->accessor) {
+            // Instantiate common property accessor
+            $this->accessor = PropertyAccess::createPropertyAccessor();
+        }
+
+        return $this->accessor;
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @param \Traversable|array $dataValues
+     *
+     * @throws InvalidValueDataException
+     *
+     * @return array
+     */
+    protected function parseArray(AttributeInterface $attribute, $dataValues)
+    {
+        if (\is_array($dataValues)) {
+            return $dataValues;
+        }
+
+        // Converting traversable to standard array
+        if ($dataValues instanceof \Traversable) {
+            $arrayDataValues = [];
+            foreach ($dataValues as $key => $dataValue) {
+                $arrayDataValues[$key] = $dataValue;
+            }
+
+            return $arrayDataValues;
+        }
+
+        $type = \is_object($dataValues) ? \get_class($dataValues) : \gettype($dataValues);
+        throw new InvalidValueDataException(
+            "Value for collection attribute {$attribute->getCode()} must be an array, '{$type}' given"
+        );
     }
 }
