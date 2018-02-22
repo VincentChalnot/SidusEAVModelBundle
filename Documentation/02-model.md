@@ -70,6 +70,7 @@ sidus_eav_model:
                     by_reference: <boolean> # Used with relations, serializer will output only the minimum fields
                     by_short_reference: <boolean> # Used with relations, serializer will output only the identifier
                 global_unique: <boolean> # Use with unique attributes, will check the unicity accross all families
+                orphan_removal: <boolean> # Only for embed attributes, will remove embed data if true. Default: true
                 # You can also use the options to pass any custom parameter to the attribute and use them in your code
             form_options: <array> # Standard symfony form options
             form_type: <FormType> # Overrides the form type of the attribute type

@@ -6,3 +6,10 @@ services:
             - '%sidus_eav_model.entity.value.class%'
         tags:
             - { name: doctrine.event_listener, event: loadClassMetadata }
+
+    sidus_eav_model.doctrine.embed.orphan_remover:
+        class: Sidus\EAVModelBundle\Event\OrphanEmbedRemovalListener
+        arguments:
+            - '@sidus_eav_model.family.registry'
+        tags:
+            - { name: doctrine.event_listener, event: preRemove }

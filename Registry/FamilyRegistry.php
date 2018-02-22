@@ -50,8 +50,9 @@ class FamilyRegistry
     /**
      * @param string $code
      *
-     * @return FamilyInterface
      * @throws MissingFamilyException
+     *
+     * @return FamilyInterface
      */
     public function getFamily($code)
     {
