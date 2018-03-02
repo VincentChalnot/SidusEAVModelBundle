@@ -3,10 +3,17 @@ parameters:
         - choice
 
 services:
-    sidus_eav_model.datagrid.renderer:
+    sidus_eav_model.datagrid.renderer.value:
         class: Sidus\EAVModelBundle\DataGrid\DataRenderer
         decorates: sidus_data_grid.renderer
         arguments:
-            - '@sidus_eav_model.datagrid.renderer.inner'
+            - '@sidus_eav_model.datagrid.renderer.value.inner'
             - '@translator'
             - '%sidus_eav_model.datagrid.renderer.choice_types%'
+
+    sidus_eav_model.datagrid.renderer.eav_column:
+        class: Sidus\EAVModelBundle\DataGrid\EAVColumnRenderer
+        decorates: sidus_data_grid.column_renderer
+        arguments:
+            - '@sidus_eav_model.datagrid.renderer.eav_column.inner'
+            - '@translator'

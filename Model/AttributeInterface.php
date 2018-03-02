@@ -32,6 +32,11 @@ interface AttributeInterface
     public function getType();
 
     /**
+     * @return string
+     */
+    public function getLabel();
+
+    /**
      * The family that carries the attribute
      *
      * @return FamilyInterface

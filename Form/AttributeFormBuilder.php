@@ -11,6 +11,7 @@
 namespace Sidus\EAVModelBundle\Form;
 
 use Sidus\EAVModelBundle\Model\AttributeInterface;
+use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Translator\TranslatableTrait;
 use Sidus\EAVModelBundle\Validator\Mapping\Loader\BaseLoader;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -125,7 +126,7 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
         }
 
         $fieldsetOptions = [
-            'label' => $this->getGroupLabel($attribute, $groupPath, $level),
+            'label' => $this->getGroupLabel($attribute->getFamily(), $groupPath, $level),
             'inherit_data' => true,
         ];
 
@@ -137,24 +138,24 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
     /**
      * Use label from formOptions or use translation or automatically create human readable one
      *
-     * @param AttributeInterface $attribute
-     * @param array              $groupPath
-     * @param int                $level
+     * @param FamilyInterface $family
+     * @param array           $groupPath
+     * @param int             $level
      *
      * @throws \InvalidArgumentException
      *
      * @return string
      */
-    protected function getGroupLabel(AttributeInterface $attribute, array $groupPath, $level)
+    protected function getGroupLabel(FamilyInterface $family, array $groupPath, $level)
     {
-        $fieldsetPath = implode('.', array_splice($groupPath, 0, $level));
-        $family = $attribute->getFamily();
+        $fallBack = isset($groupPath[$level]) ? $groupPath[$level] : null;
+        $fieldsetPath = implode('.', array_splice($groupPath, 0, $level + 1));
         $transKeys = [
             "eav.family.{$family->getCode()}.group.{$fieldsetPath}.label",
             "eav.group.{$fieldsetPath}.label",
         ];
 
-        return ucfirst($this->tryTranslate($transKeys, [], isset($groupPath[$level]) ? $groupPath[$level] : null));
+        return ucfirst($this->tryTranslate($transKeys, [], $fallBack));
     }
 
     /**
