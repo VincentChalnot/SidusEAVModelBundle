@@ -251,7 +251,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         $rawValue,
         array $context
     ) {
-        $options = $attribute->getOption(self::SERIALIZER_OPTIONS, []);
+        $options = $attribute->getOption(static::SERIALIZER_OPTIONS, []);
 
         $byReference = $attribute->getType()->isRelation();
         if (array_key_exists(ByReferenceHandler::BY_REFERENCE_KEY, $options)) {
@@ -370,10 +370,10 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         $format = null,
         array $context = []
     ) {
-        $options = $attribute->getOption(self::SERIALIZER_OPTIONS, []);
+        $options = $attribute->getOption(static::SERIALIZER_OPTIONS, []);
 
         // Ignore attributes set as serializer: expose: false
-        if (array_key_exists(self::EXPOSE_KEY, $options) && !$options[self::EXPOSE_KEY]) {
+        if (array_key_exists(static::EXPOSE_KEY, $options) && !$options[static::EXPOSE_KEY]) {
             return false;
         }
 
@@ -411,12 +411,12 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
             return true;
         }
 
-        $serializerOptions = $attribute->getOption(self::SERIALIZER_OPTIONS, []);
-        if (!array_key_exists(self::GROUPS, $serializerOptions)) {
+        $serializerOptions = $attribute->getOption(static::SERIALIZER_OPTIONS, []);
+        if (!array_key_exists(static::GROUPS, $serializerOptions)) {
             return false;
         }
 
-        $groups = $serializerOptions[self::GROUPS];
+        $groups = $serializerOptions[static::GROUPS];
         if (!is_array($groups)) {
             throw new InvalidArgumentException(
                 "Invalid 'serializer.groups' option for attribute {$attribute->getCode()} : should be an array"

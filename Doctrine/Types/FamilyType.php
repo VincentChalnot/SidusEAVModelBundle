@@ -66,6 +66,6 @@ class FamilyType extends StringType
      */
     public function getName()
     {
-        return self::FAMILY; // modify to match your constant name
+        return static::FAMILY; // modify to match your constant name
     }
 }

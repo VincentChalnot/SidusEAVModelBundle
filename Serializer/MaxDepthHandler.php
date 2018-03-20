@@ -30,14 +30,14 @@ class MaxDepthHandler
      */
     public function handleMaxDepth(array &$context, $defaultMaxDepth = 10)
     {
-        if (!array_key_exists(self::DEPTH_KEY, $context)) {
-            $context[self::DEPTH_KEY] = 0;
+        if (!array_key_exists(static::DEPTH_KEY, $context)) {
+            $context[static::DEPTH_KEY] = 0;
         }
-        $context[self::DEPTH_KEY]++;
-        if (!array_key_exists(self::MAX_DEPTH_KEY, $context)) {
-            $context[self::MAX_DEPTH_KEY] = $defaultMaxDepth;
+        $context[static::DEPTH_KEY]++;
+        if (!array_key_exists(static::MAX_DEPTH_KEY, $context)) {
+            $context[static::MAX_DEPTH_KEY] = $defaultMaxDepth;
         }
-        if ($context[self::DEPTH_KEY] > $context[self::MAX_DEPTH_KEY]) {
+        if ($context[static::DEPTH_KEY] > $context[static::MAX_DEPTH_KEY]) {
             throw new RuntimeException('Max depth reached');
         }
     }
@@ -47,6 +47,6 @@ class MaxDepthHandler
      */
     public function incrementDepth(array &$context)
     {
-        $context[self::DEPTH_KEY]++;
+        $context[static::DEPTH_KEY]++;
     }
 }

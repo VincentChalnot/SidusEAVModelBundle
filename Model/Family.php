@@ -10,6 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
+use Sidus\EAVModelBundle\Entity\ContextualDataInterface;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
 use Sidus\EAVModelBundle\Registry\AttributeRegistry;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
@@ -86,12 +87,14 @@ class Family implements FamilyInterface
      * @param ContextManager    $contextManager
      * @param array             $config
      *
+     * @throws \Sidus\EAVModelBundle\Exception\ContextException
      * @throws UnexpectedValueException
      * @throws MissingFamilyException
      * @throws AccessException
      * @throws InvalidArgumentException
      * @throws UnexpectedTypeException
      * @throws MissingAttributeException
+     * @throws \TypeError
      */
     public function __construct(
         $code,
@@ -141,7 +144,7 @@ class Family implements FamilyInterface
             if ($this->attributeAsIdentifier->isCollection()) {
                 throw new UnexpectedValueException("{$commonMessage} should NOT be a collection");
             }
-            if (0 !== count($this->attributeAsIdentifier->getContextMask())) {
+            if (0 !== \count($this->attributeAsIdentifier->getContextMask())) {
                 throw new UnexpectedValueException("{$commonMessage} should NOT be contextualized");
             }
         }
@@ -150,6 +153,12 @@ class Family implements FamilyInterface
         $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($config as $key => $value) {
             $accessor->setValue($this, $key, $value);
+        }
+
+        $valueClass = $this->getValueClass();
+        if (is_a($valueClass, ContextualValueInterface::class, true)) {
+            /** @noinspection PhpUndefinedMethodInspection */
+            $valueClass::checkContext($this->contextManager->getDefaultContext());
         }
     }
 
@@ -391,10 +400,14 @@ class Family implements FamilyInterface
         $value = new $valueClass($data, $attribute);
         $data->addValue($value);
 
-        if ($value instanceof ContextualValueInterface && count($attribute->getContextMask())) {
-            /** @var ContextualValueInterface $value */
-            if (!$context) {
-                $context = $this->getContext();
+        if ($value instanceof ContextualValueInterface
+            && $data instanceof ContextualDataInterface
+            && \count($attribute->getContextMask())
+        ) {
+            if ($context) {
+                $context = array_merge($data->getCurrentContext(), $context);
+            } else {
+                $context = $data->getCurrentContext();
             }
             foreach ($attribute->getContextMask() as $key) {
                 $value->setContextValue($key, $context[$key]);

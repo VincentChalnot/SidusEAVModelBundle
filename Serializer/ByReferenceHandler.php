@@ -27,8 +27,8 @@ class ByReferenceHandler
      */
     public function isByShortReference(array $context)
     {
-        if (array_key_exists(self::BY_SHORT_REFERENCE_KEY, $context)) {
-            return $context[self::BY_SHORT_REFERENCE_KEY];
+        if (array_key_exists(static::BY_SHORT_REFERENCE_KEY, $context)) {
+            return $context[static::BY_SHORT_REFERENCE_KEY];
         }
 
         return false;
@@ -41,8 +41,8 @@ class ByReferenceHandler
      */
     public function isByReference(array $context)
     {
-        if (array_key_exists(self::BY_REFERENCE_KEY, $context)) {
-            return $context[self::BY_REFERENCE_KEY];
+        if (array_key_exists(static::BY_REFERENCE_KEY, $context)) {
+            return $context[static::BY_REFERENCE_KEY];
         }
 
         return false;

@@ -37,8 +37,8 @@ class DoctrineMetadataListener
     public function __construct($dataClass, $valueClass)
     {
         $this->mapping = [
-            self::BASE_DATA_CLASS => $dataClass,
-            self::BASE_VALUE_CLASS => $valueClass,
+            static::BASE_DATA_CLASS => $dataClass,
+            static::BASE_VALUE_CLASS => $valueClass,
         ];
     }
 

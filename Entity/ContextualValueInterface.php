@@ -58,5 +58,12 @@ interface ContextualValueInterface extends ValueInterface
     /**
      * @return array
      */
-    public function getContextKeys();
+    public static function getContextKeys();
+
+    /**
+     * @param array $context
+     *
+     * @throws ContextException
+     */
+    public static function checkContext(array $context);
 }

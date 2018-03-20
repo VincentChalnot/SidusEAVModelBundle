@@ -645,6 +645,9 @@ abstract class AbstractData implements ContextualDataInterface
             return $this->refererValues;
         }
         $values = new ArrayCollection();
+        if ($context) {
+            $context = array_merge($this->getCurrentContext(), $context);
+        }
 
         foreach ($this->refererValues as $refererValue) {
             if ($attribute && $attribute->getCode() !== $refererValue->getAttributeCode()) {
@@ -677,7 +680,7 @@ abstract class AbstractData implements ContextualDataInterface
         array $context = null
     ) {
         $datas = new ArrayCollection();
-        foreach ($this->getRefererValues($family, $attribute) as $refererValue) {
+        foreach ($this->getRefererValues($family, $attribute, $context) as $refererValue) {
             $data = $refererValue->getData();
             if ($data) {
                 $datas[] = $data;
@@ -704,7 +707,7 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function setCurrentContext(array $currentContext = [])
     {
-        $this->currentContext = $currentContext;
+        $this->currentContext = array_merge($this->getCurrentContext(), $currentContext);
     }
 
     /**
@@ -734,9 +737,6 @@ abstract class AbstractData implements ContextualDataInterface
     public function createValue(AttributeInterface $attribute, array $context = null)
     {
         $this->checkAttribute($attribute);
-        if (!$context) {
-            $context = $this->getCurrentContext();
-        }
 
         return $this->getFamily()->createValue($this, $attribute, $context);
     }
@@ -834,14 +834,7 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function setValueData(AttributeInterface $attribute, $dataValue, array $context = null)
     {
-        $value = $this->getValue($attribute, $context);
-        if (!$value) {
-            $value = $this->createValue($attribute, $context);
-        }
-
-        $this->setInternalValueData($attribute, $value, $dataValue);
-
-        return $this;
+        return $this->setValuesData($attribute, [$dataValue], $context);
     }
 
     /**
@@ -944,7 +937,9 @@ abstract class AbstractData implements ContextualDataInterface
      */
     protected function getInternalValues(AttributeInterface $attribute = null, array $context = null)
     {
-        if (!$context) {
+        if ($context) {
+            $context = array_merge($this->getCurrentContext(), $context);
+        } else {
             $context = $this->getCurrentContext();
         }
 

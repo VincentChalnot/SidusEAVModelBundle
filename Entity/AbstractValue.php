@@ -415,7 +415,7 @@ abstract class AbstractValue implements ContextualValueInterface
     public function getContext()
     {
         $context = [];
-        foreach ($this->getContextKeys() as $key) {
+        foreach ($this::getContextKeys() as $key) {
             $context[$key] = $this->$key;
         }
 
@@ -425,9 +425,26 @@ abstract class AbstractValue implements ContextualValueInterface
     /**
      * @return array
      */
-    public function getContextKeys()
+    public static function getContextKeys()
     {
         return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function checkContext(array $context)
+    {
+        $missingKeys = array_diff(static::getContextKeys(), array_keys($context));
+        if (0 !== \count($missingKeys)) {
+            $flattenedContext = implode(', ', $missingKeys);
+            throw new ContextException("Missing key(s) in context: {$flattenedContext}");
+        }
+        $extraKeys = array_diff(array_keys($context), static::getContextKeys());
+        if (0 !== \count($extraKeys)) {
+            $flattenedContext = implode(', ', $extraKeys);
+            throw new ContextException("Extra key(s) in context: {$flattenedContext}");
+        }
     }
 
     /**
@@ -464,7 +481,7 @@ abstract class AbstractValue implements ContextualValueInterface
      */
     public function clearContext()
     {
-        foreach ($this->getContextKeys() as $key) {
+        foreach ($this::getContextKeys() as $key) {
             $this->$key = null;
         }
     }
@@ -502,7 +519,7 @@ abstract class AbstractValue implements ContextualValueInterface
      */
     protected function checkContextKey($key)
     {
-        if (!in_array($key, $this->getContextKeys(), true)) {
+        if (!\in_array($key, $this::getContextKeys(), true)) {
             throw new ContextException("Trying to get a non-allowed context key {$key}");
         }
     }

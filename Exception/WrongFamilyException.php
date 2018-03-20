@@ -27,7 +27,7 @@ class WrongFamilyException extends \ErrorException implements EAVExceptionInterf
      */
     public static function assertFamily(DataInterface $data, $familyCode)
     {
-        self::assertFamilies($data, [$familyCode]);
+        static::assertFamilies($data, [$familyCode]);
     }
 
     /**

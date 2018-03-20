@@ -65,8 +65,8 @@ class ContextManager
         $session = $this->getSession();
         try {
             // If context exists in the session, use this information
-            if ($session && $session->has(self::SESSION_KEY)) {
-                return $session->get(self::SESSION_KEY);
+            if ($session && $session->has(static::SESSION_KEY)) {
+                return $session->get(static::SESSION_KEY);
             }
         } catch (\Exception $e) {
             // @todo log exception
@@ -97,7 +97,7 @@ class ContextManager
 
         // Try to save the context in session,
         if ($session) {
-            $session->set(self::SESSION_KEY, $context);
+            $session->set(static::SESSION_KEY, $context);
             $session->save();
         }
     }
@@ -129,7 +129,7 @@ class ContextManager
                 ],
             ];
             $this->contextSelectorForm = $this->formFactory->createNamed(
-                self::SESSION_KEY,
+                static::SESSION_KEY,
                 $this->contextSelectorType,
                 $this->getContext(),
                 $formOptions

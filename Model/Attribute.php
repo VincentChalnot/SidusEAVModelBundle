@@ -398,6 +398,8 @@ class Attribute implements AttributeInterface
     }
 
     /**
+     * Warning, the context array must contain all context axis
+     *
      * @param ContextualValueInterface $value
      * @param array                    $context
      *
@@ -410,6 +412,7 @@ class Attribute implements AttributeInterface
         if (!$value->getContext()) {
             return true;
         }
+        $value::checkContext($context);
         foreach ($this->getContextMask() as $key) {
             $contextKey = array_key_exists($key, $context) ? $context[$key] : null;
             if ($contextKey !== $value->getContextValue($key)) {
