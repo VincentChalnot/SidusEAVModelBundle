@@ -236,7 +236,8 @@ class DataValidator extends ConstraintValidator
             foreach ($violations as $violation) {
                 /** @noinspection DisconnectedForeachInstructionInspection */
                 $path = $attribute->getCode();
-                if ($attribute->getType()->isEmbedded()) {
+                // If attribute is a relation this can lead to some weird error reporting but at least the path is right
+                if ($attribute->getType()->isEmbedded() || $attribute->getType()->isRelation()) {
                     if (!$attribute->isCollection()) {
                         $path .= '.';
                     }

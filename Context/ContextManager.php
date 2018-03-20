@@ -62,12 +62,17 @@ class ContextManager
      */
     public function getContext()
     {
-        // If context exists in the session, use this information
-        if ($this->getSession() && $this->getSession()->has(self::SESSION_KEY)) {
-            return $this->getSession()->get(self::SESSION_KEY);
+        $session = $this->getSession();
+        try {
+            // If context exists in the session, use this information
+            if ($session && $session->has(self::SESSION_KEY)) {
+                return $session->get(self::SESSION_KEY);
+            }
+        } catch (\Exception $e) {
+            // @todo log exception
         }
 
-        // If context was saved in the service, this means we are probably in command-line
+        // If context was saved in the service, this means we are probably in command-line or no session was started
         if ($this->context) {
             return $this->context;
         }
@@ -84,12 +89,16 @@ class ContextManager
      */
     public function setContext(array $context)
     {
-        // Try to save the context in session, fallback to property in service otherwise
-        if ($this->getSession()) {
-            $this->getSession()->set(self::SESSION_KEY, $context);
-            $this->getSession()->save();
-        } else {
-            $this->context = $context;
+        $context = array_merge($this->getDefaultContext(), $context);
+        $session = $this->getSession();
+
+        // Always save to property in service for fallback
+        $this->context = $context;
+
+        // Try to save the context in session,
+        if ($session) {
+            $session->set(self::SESSION_KEY, $context);
+            $session->save();
         }
     }
 
@@ -161,7 +170,12 @@ class ContextManager
     protected function getSession()
     {
         if ($this->request) {
-            return $this->request->getSession();
+            try {
+                return $this->request->getSession();
+            } catch (\Exception $e) {
+                // @todo log exception
+                return null;
+            }
         }
 
         return null;
