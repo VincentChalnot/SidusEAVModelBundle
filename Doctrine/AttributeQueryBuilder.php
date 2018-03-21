@@ -11,6 +11,9 @@
 namespace Sidus\EAVModelBundle\Doctrine;
 
 use Doctrine\ORM\Query\Expr\Join;
+use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
+use Sidus\EAVModelBundle\Entity\ValueInterface;
+use Sidus\EAVModelBundle\Exception\ContextException;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 
@@ -41,6 +44,9 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
 
     /** @var bool */
     protected $joinRelation = false;
+
+    /** @var array|null */
+    protected $context;
 
     /**
      * @param EAVQueryBuilderInterface $eavQueryBuilder
@@ -310,6 +316,8 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param string $alias
      *
      * @return EAVQueryBuilderInterface
+     * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
+     * @throws \LogicException
      */
     public function join($alias = null)
     {
@@ -333,6 +341,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     /**
      * Apply the join condition on the Query Builder
      *
+     * @throws \Sidus\EAVModelBundle\Exception\ContextException
      * @throws \LogicException
      * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      *
@@ -364,6 +373,25 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
             $joinDql .= " AND {$this->joinAlias}.familyCode = :{$familyParameter}";
         }
 
+        if ($this->context) {
+            /** @var ContextualValueInterface $valueClass */
+            $valueClass = $this->attribute->getFamily()->getValueClass();
+            if (!is_a($valueClass, ContextualValueInterface::class, true)) {
+                throw new ContextException('Unable to filter by context on a non-contextual value class');
+            }
+            foreach ($this->context as $axis => $axisValues) {
+                if (!\in_array($axis, $valueClass::getContextKeys(), true)) {
+                    throw new ContextException("Trying to filter on invalid axis '{$axis}'");
+                }
+                if (!\in_array($axis, $this->attribute->getContextMask(), true)) {
+                    continue;
+                }
+                $axisValueParameter = $this->generateUniqueId($axis.'Axis');
+                $qb->setParameter($axisValueParameter, (array) $axisValues);
+                $joinDql .= " AND {$this->joinAlias}.{$axis} IN (:{$axisValueParameter})";
+            }
+        }
+
         $qb->leftJoin(
             $this->eavQueryBuilder->getAlias().'.values',
             $this->joinAlias,
@@ -381,6 +409,17 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
         $this->joinApplied = true;
 
         return $this;
+    }
+
+    /**
+     * Warning: this method does not enforce the presence of all context axis
+     * It's completely fine to skip some axis if you don't want to search in those but beware of this behavior
+     *
+     * @param array|null $context
+     */
+    public function setContext(array $context = null)
+    {
+        $this->context = $context;
     }
 
     /**

@@ -155,9 +155,9 @@ class Family implements FamilyInterface
             $accessor->setValue($this, $key, $value);
         }
 
+        /** @var ContextualValueInterface $valueClass */
         $valueClass = $this->getValueClass();
         if (is_a($valueClass, ContextualValueInterface::class, true)) {
-            /** @noinspection PhpUndefinedMethodInspection */
             $valueClass::checkContext($this->contextManager->getDefaultContext());
         }
     }

@@ -65,4 +65,9 @@ interface EAVQueryBuilderInterface
      * @return QueryBuilder
      */
     public function apply(DQLHandlerInterface $DQLHandler);
+
+    /**
+     * @param array|null $context
+     */
+    public function setContext(array $context = null);
 }

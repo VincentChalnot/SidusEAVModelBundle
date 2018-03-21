@@ -29,6 +29,9 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
     /** @var bool */
     protected $isApplied = false;
 
+    /** @var array|null */
+    protected $context;
+
     /**
      * @param QueryBuilder $queryBuilder
      * @param string       $alias
@@ -63,7 +66,12 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
      */
     public function attribute(AttributeInterface $attribute, $enforceFamilyCondition = true)
     {
-        return new AttributeQueryBuilder($this, $attribute, $enforceFamilyCondition);
+        $attributeQb = new AttributeQueryBuilder($this, $attribute, $enforceFamilyCondition);
+        if ($this->context) {
+            $attributeQb->setContext($this->context);
+        }
+
+        return $attributeQb;
     }
 
     /**
@@ -125,6 +133,14 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
         }
 
         return $qb;
+    }
+
+    /**
+     * @param array|null $context
+     */
+    public function setContext(array $context = null)
+    {
+        $this->context = $context;
     }
 
     /**

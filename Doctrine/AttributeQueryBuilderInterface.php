@@ -145,4 +145,11 @@ interface AttributeQueryBuilderInterface extends DQLHandlerInterface
      * @return AttributeQueryBuilderInterface
      */
     public function applyJoin();
+
+    /**
+     * @param array|null $context
+     *
+     * @throws \Sidus\EAVModelBundle\Exception\ContextException
+     */
+    public function setContext(array $context = null);
 }
