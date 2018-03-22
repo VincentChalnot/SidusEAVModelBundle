@@ -16,6 +16,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Sidus\EAVModelBundle\Exception\ContextException;
 use Sidus\EAVModelBundle\Exception\InvalidValueDataException;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
+use Sidus\EAVModelBundle\Exception\WrongFamilyException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
@@ -1049,6 +1050,11 @@ abstract class AbstractData implements ContextualDataInterface
             throw new MissingAttributeException(
                 "Attribute {$attribute->getCode()} doesn't exists in family {$this->getFamilyCode()}"
             );
+        }
+        if ($attribute->getFamily() !== $this->getFamily()) {
+            $m = "Attribute {$attribute->getCode()} (from family '{$attribute->getFamily()->getCode()}') doesn't ";
+            $m .= "belong to this family ('{$this->getFamilyCode()}')";
+            throw new MissingAttributeException($m);
         }
     }
 
