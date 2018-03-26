@@ -327,7 +327,10 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
         $this->joinRelation = $alias;
         $this->applyJoin();
 
-        return new EAVQueryBuilder($this->eavQueryBuilder->getQueryBuilder(), $alias);
+        $joinedEAVQb = new EAVQueryBuilder($this->eavQueryBuilder->getQueryBuilder(), $alias);
+        $joinedEAVQb->setContext($this->context);
+
+        return $joinedEAVQb;
     }
 
     /**
