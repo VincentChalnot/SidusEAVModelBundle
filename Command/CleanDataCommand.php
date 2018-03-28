@@ -22,20 +22,33 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class CleanDataCommand
- *
- * Clean log table
+ * Clean data based on various filters
  *
  * Exemple :
  * - `--family-filter="Order"` : remove data of Order family only
- * - `--family-filter="Order" --attribute-filter="number:like:000%" --attribute-filter="createdAt:>:+ 1 year"` : remove all orders with number starts with '000' and older than 1 year
- * - `--family-filter='OrderItem' --attribute-filters='id:not in:Order.items'` : remove all order items not related with orders
+ * - `--family-filter="Order" --attribute-filter="number:like:000%" --attribute-filter="createdAt:>:+ 1 year"` : remove
+ * all orders with number starts with '000' and older than 1 year
+ * - `--family-filter='OrderItem' --attribute-filters='id:not in:Order.items'` : remove all order items not related
+ * with orders
  *
- * @package CleverAge\ProcessBundle\Command
  * @author  Madeline Veyrenc <mveyrenc@clever-age.com>
  */
 class CleanDataCommand extends ContainerAwareCommand
 {
+    /** @var array */
+    protected static $comparisonMap = [
+        '=' => 'eq',
+        '!=' => 'neq',
+        '>' => 'gt',
+        '<' => 'lt',
+        '>=' => 'gte',
+        '<=' => 'lte',
+        'in' => 'in',
+        'not in' => 'notIn',
+        'like' => 'like',
+        'not like' => 'notLike',
+    ];
+
     /** @var EntityManager */
     protected $entityManager;
 
@@ -109,20 +122,12 @@ class CleanDataCommand extends ContainerAwareCommand
     }
 
     /**
-     * {@inheritdoc}
-     * @throws \UnexpectedValueException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\Common\Persistence\Mapping\MappingException
-     * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
-     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
-     * @throws \RuntimeException
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
-     * @throws \InvalidArgumentException
-     * @throws \LogicException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     *
+     * @throws \Exception
+     *
+     * @return null|int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -147,40 +152,36 @@ class CleanDataCommand extends ContainerAwareCommand
         }
 
         if ($familyFilter) {
-            $result = $this
-                ->cleanDataWithAttributeFilter(
-                    $familyFilter,
-                    $attributeFilters
-                );
-            $output->writeln(sprintf('Data : %d filtred item(s) removed', $result));
+            $result = $this->cleanDataWithAttributeFilter($familyFilter, $attributeFilters);
+            $output->writeln("<info>Data: {$result} filtred item(s) removed</info>");
         }
 
         if ($input->getOption('remove-orphan-data')) {
-            $result = $this
-                ->cleanOrphanData();
-            $output->writeln(sprintf('Data : %d orphan item(s) removed', $result));
+            $result = $this->cleanOrphanData();
+            $output->writeln("<info>Data: {$result} orphan item(s) removed</info>");
         }
 
         if ($input->getOption('remove-missing-families')) {
-            $result = $this
-                ->purgeMissingFamilies();
-            $output->writeln(sprintf('Family : %d missing item(s) removed', $result));
+            $result = $this->purgeMissingFamilies();
+            $output->writeln("<info>Family: {$result} missing item(s) removed</info>");
         }
 
         if ($input->getOption('remove-missing-attributes')) {
-            $result = $this
-                ->purgeMissingAttributes();
-            $output->writeln(sprintf('Attribute : %d missing item(s) removed', $result));
+            $result = $this->purgeMissingAttributes();
+            $output->writeln("<info>Attribute: {$result} missing item(s) removed</info>");
         }
+
+        return null;
     }
 
     /**
      * @param string $input
+     *
      * @return FamilyInterface
      * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      * @throws \InvalidArgumentException
      */
-    protected function extractFamilyFilterOption(string $input)
+    protected function extractFamilyFilterOption($input)
     {
         if (!$input) {
             return null;
@@ -196,6 +197,7 @@ class CleanDataCommand extends ContainerAwareCommand
     /**
      * @param FamilyInterface $family
      * @param array           $input
+     *
      * @return array
      * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      * @throws \InvalidArgumentException
@@ -226,10 +228,11 @@ class CleanDataCommand extends ContainerAwareCommand
     /**
      * @param string $input
      * @param array  $validProperties
+     *
      * @return array
      * @throws \InvalidArgumentException
      */
-    protected function parseFilter(string $input, array $validProperties)
+    protected function parseFilter($input, array $validProperties)
     {
         $pattern = sprintf(
             '/(%s):(%s):(.+)/',
@@ -247,12 +250,13 @@ class CleanDataCommand extends ContainerAwareCommand
 
     /**
      * @param array $filter
+     *
      * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      */
     protected function fixFilter(array &$filter)
     {
-        if (in_array($filter['comparison'], ['in', 'not in'], true)) {
+        if (\in_array($filter['comparison'], ['in', 'not in'], true)) {
             $families = $this->familyRegistry->getFamilyCodes();
             $pattern = sprintf(
                 '/(%s).([\w]+)/',
@@ -287,7 +291,7 @@ class CleanDataCommand extends ContainerAwareCommand
         }
 
         if ($filter['attribute']
-            && in_array($filter['attribute']->getType()->getCode(), ['date', 'datetime'], true)) {
+            && \in_array($filter['attribute']->getType()->getCode(), ['date', 'datetime'], true)) {
             $filter['value'] = new \DateTime($filter['value']);
         }
     }
@@ -297,6 +301,7 @@ class CleanDataCommand extends ContainerAwareCommand
      *
      * @param FamilyInterface $family
      * @param array[]         $filters
+     *
      * @return int
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
@@ -346,29 +351,12 @@ class CleanDataCommand extends ContainerAwareCommand
                 }
                 $value = $value->getQuery()->getDQL();
             }
-            if ('=' === $comparison) {
-                $queryPart = $queryBuilder->expr()->eq($queryBuilderAlias, $value);
-            } elseif ('!=' === $comparison) {
-                $queryPart = $queryBuilder->expr()->neq($queryBuilderAlias, $value);
-            } elseif ('>' === $comparison) {
-                $queryPart = $queryBuilder->expr()->gt($queryBuilderAlias, $value);
-            } elseif ('<' === $comparison) {
-                $queryPart = $queryBuilder->expr()->lt($queryBuilderAlias, $value);
-            } elseif ('>=' === $comparison) {
-                $queryPart = $queryBuilder->expr()->gte($queryBuilderAlias, $value);
-            } elseif ('<=' === $comparison) {
-                $queryPart = $queryBuilder->expr()->lte($queryBuilderAlias, $value);
-            } elseif ('in' === $comparison) {
-                $queryPart = $queryBuilder->expr()->in($queryBuilderAlias, $value);
-            } elseif ('not in' === $comparison) {
-                $queryPart = $queryBuilder->expr()->notIn($queryBuilderAlias, $value);
-            } elseif ('like' === $comparison) {
-                $queryPart = $queryBuilder->expr()->like($queryBuilderAlias, $value);
-            } elseif ('not like' === $comparison) {
-                $queryPart = $queryBuilder->expr()->notLike($queryBuilderAlias, $value);
-            } else {
+
+            if (!array_key_exists($comparison, static::$comparisonMap)) {
                 throw new \InvalidArgumentException('Invalid comparison');
             }
+            $method = static::$comparisonMap[$comparison];
+            $queryPart = $queryBuilder->expr()->$method($queryBuilderAlias, $value);
 
             $queryBuilder->andWhere($queryPart);
         }
@@ -401,10 +389,11 @@ class CleanDataCommand extends ContainerAwareCommand
     /**
      * Remove data history items without value history
      *
-     * @return int
      * @throws \LogicException
      * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
      * @throws \InvalidArgumentException
+     *
+     * @return int
      */
     protected function cleanOrphanData()
     {
@@ -427,11 +416,10 @@ class CleanDataCommand extends ContainerAwareCommand
     }
 
     /**
-     * @return int
-     *
-     * @throws \Doctrine\DBAL\DBALException
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
+     *
+     * @return int
      */
     protected function purgeMissingFamilies()
     {
@@ -447,11 +435,10 @@ class CleanDataCommand extends ContainerAwareCommand
     }
 
     /**
-     * @return int
-     *
-     * @throws \Doctrine\DBAL\DBALException
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
+     *
+     * @return int
      */
     protected function purgeMissingAttributes()
     {

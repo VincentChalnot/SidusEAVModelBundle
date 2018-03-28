@@ -11,8 +11,8 @@
 namespace Sidus\EAVModelBundle\Doctrine;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
@@ -25,20 +25,20 @@ use Sidus\EAVModelBundle\Model\FamilyInterface;
  */
 class EAVFinder
 {
-    public const FILTER_OPERATORS = [
-        '=',
-        '!=',
-        '<>',
-        '>',
-        '<',
-        '>=',
-        '<=',
-        'in',
-        'not in',
-        'like',
-        'not like',
-        'is null',
-        'is not null',
+    const FILTER_OPERATORS = [
+        '=' => 'equals',
+        '!=' => 'notEquals',
+        '<>' => 'notEquals',
+        '>' => 'gt',
+        '<' => 'lt',
+        '>=' => 'gte',
+        '<=' => 'lte',
+        'in' => 'in',
+        'not in' => 'notIn',
+        'like' => 'like',
+        'not like' => 'notLike',
+        'is null' => 'isNull',
+        'is not null' => 'isNotNull',
     ];
 
     /** @var Registry */
@@ -57,6 +57,7 @@ class EAVFinder
      * @param array           $filterBy
      * @param array           $orderBy
      *
+     * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws MissingAttributeException
@@ -74,9 +75,9 @@ class EAVFinder
      * @param FamilyInterface $family
      * @param array           $filterBy
      *
+     * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
-     * @throws NonUniqueResultException
      * @throws MissingAttributeException
      *
      * @return DataInterface
@@ -84,15 +85,19 @@ class EAVFinder
     public function findOneBy(FamilyInterface $family, array $filterBy)
     {
         $qb = $this->getQb($family, $filterBy);
+        $pager = new Paginator($qb);
+        $pager->getQuery()->setMaxResults(1);
 
-        return $qb->getQuery()->getOneOrNullResult();
+        return $pager->getIterator()->current();
     }
 
     /**
      * @param FamilyInterface $family
      * @param array           $filterBy
      * @param array           $orderBy
+     *
      * @return mixed
+     * @throws \InvalidArgumentException
      */
     public function filterBy(FamilyInterface $family, array $filterBy, array $orderBy = [])
     {
@@ -107,6 +112,12 @@ class EAVFinder
      *                                  ['attribute2','operator2','value2'], etc.]
      * @param array           $orderBy
      * @param string          $alias
+     *
+     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     *
      * @return QueryBuilder
      */
     public function getFilterByQb(FamilyInterface $family, array $filterBy, array $orderBy = [], $alias = 'e')
@@ -120,62 +131,36 @@ class EAVFinder
 
         $dqlHandlers = [];
         foreach ($filterBy as $filter) {
-            $attributeCode = $filter[0];
-            $operator = $filter[1];
-            $value = $filter[2];
+            list($attributeCode, $operator, $value) = $filter;
 
             $attributeQb = $eavQb->a($attributeCode);
             $handleDefaultValues = true;
-            switch ($operator) {
-                case '=':
 
-                    $dqlHandler = $attributeQb->equals($value);
-                    break;
-                case '!=':
-                case '<>':
-                    $dqlHandler = $attributeQb->notEquals($value);
-                    break;
-                case '>':
-                    $dqlHandler = $attributeQb->gt($value);
-                    break;
-                case '<':
-                    $dqlHandler = $attributeQb->lt($value);
-                    break;
-                case '>=':
-                    $dqlHandler = $attributeQb->gte($value);
-                    break;
-                case '<=':
-                    $dqlHandler = $attributeQb->lte($value);
+            if (!array_key_exists($operator, static::FILTER_OPERATORS)) {
+                $m = "Invalid filter operator '{$operator}', valid operators are: ";
+                $m .= implode(', ', array_keys(self::FILTER_OPERATORS));
+                throw new \InvalidArgumentException($m);
+            }
+
+            $method = static::FILTER_OPERATORS[$operator];
+            switch ($operator) {
+                case 'is null':
+                case 'is not null':
+                    $dqlHandler = $attributeQb->$method();
+                    $handleDefaultValues = false;
                     break;
                 case 'in':
-                    $dqlHandler = $attributeQb->in($value);
-                    $handleDefaultValues = false;
-                    break;
+                    /** @noinspection PhpMissingBreakStatementInspection */
                 case 'not in':
-                    $dqlHandler = $attributeQb->notIn($value);
                     $handleDefaultValues = false;
-                    break;
-                case 'like':
-                    $dqlHandler = $attributeQb->like($value);
-                    break;
-                case 'not like':
-                    $dqlHandler = $attributeQb->notLike($value);
-                    break;
-                case 'is null':
-                    $dqlHandler = $attributeQb->isNull();
-                    $handleDefaultValues = false;
-                    break;
-                case 'is not null':
-                    $dqlHandler = $attributeQb->isNotNull();
-                    $handleDefaultValues = false;
-                    break;
                 default:
-                    throw new \InvalidArgumentException('Invalid filter operator');
+                    $dqlHandler = $attributeQb->$method($value);
             }
 
             if ($handleDefaultValues
                 && null !== $value
-                && $value === $family->getAttribute($attributeCode)->getDefault()) {
+                && $value === $family->getAttribute($attributeCode)->getDefault()
+            ) {
                 $dqlHandlers[] = $eavQb->getOr(
                     [
                         $dqlHandler,
@@ -196,6 +181,7 @@ class EAVFinder
      * @param array           $orderBy
      * @param string          $alias
      *
+     * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws MissingAttributeException
@@ -206,7 +192,7 @@ class EAVFinder
     {
         $fixedFilterBy = [];
         foreach ($filterBy as $attributeCode => $value) {
-            if (is_array($value)) {
+            if (\is_array($value)) {
                 $fixedFilterBy[] = [$attributeCode, 'in', $value];
             } else {
                 $fixedFilterBy[] = [$attributeCode, '=', $value];
