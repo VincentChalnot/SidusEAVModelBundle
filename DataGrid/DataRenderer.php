@@ -9,6 +9,8 @@ use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Overrides base renderer for Sidus/DataGridBundle
+ *
+ * This code is written for PHP7 because it can only work with the Sidus/DataGridBundle that supports PHP7+ only
  */
 class DataRenderer implements RenderableInterface
 {
