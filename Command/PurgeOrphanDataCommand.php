@@ -11,12 +11,10 @@
 namespace Sidus\EAVModelBundle\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
-use Sidus\EAVModelBundle\Entity\DataRepository;
-use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -84,6 +82,8 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
     }
 
     /**
+     * The purge is processed 1000 by 1000 to avoid everlasting mysql process when the count is way too massive
+     *
      * @param OutputInterface $output
      *
      * @throws \Doctrine\DBAL\DBALException
@@ -96,17 +96,31 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
         /** @var EntityManager $em */
         $em = $this->doctrine->getManager();
 
-        $qb = $em->createQueryBuilder()
-            ->delete($this->dataClass, 'e')
-            ->where('e.family NOT IN (:familyCodes)')
-            ->setParameter('familyCodes', $familyCodes)
-        ;
-        $count = $qb->getQuery()->getResult();
+        // Raw SQL because Doctrine does not handle limit in delete
+        $parameterSql = '';
+        foreach ($familyCodes as $familyCode) {
+            $parameterSql .= "'".$familyCode."',";
+        }
+        $parameterSql = trim($parameterSql, ',');
 
-        if ($count) {
-            $output->writeln("<comment>{$count} data purged with missing family</comment>");
-        } else {
-            $output->writeln('<info>No data to purge</info>');
+        // TODO is it necessary ?
+        $valueSql = 'DELETE FROM eav_value WHERE family_code NOT IN ('.$parameterSql.') LIMIT 10000';
+        $dataSql = 'DELETE FROM eav_data WHERE family_code NOT IN ('.$parameterSql.') LIMIT 10000';
+
+        foreach (['value' => $valueSql, 'data' => $dataSql] as $type => $sql) {
+            $output->writeln("<info>Cleaning $type</info>");
+            $progress = new ProgressBar($output);
+            // TODO add count
+
+            do {
+                $stmt = $em->getConnection()->prepare($sql);
+                $success = $stmt->execute();
+                $count = $stmt->rowCount();
+                $progress->advance($count);
+            } while ($success && $count > 0);
+
+            $progress->finish();
+            $output->writeln('');
         }
     }
 
@@ -132,8 +146,7 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
         $qb = $em->createQueryBuilder()
             ->delete($this->valueClass, 'e')
             ->where('e.attributeCode NOT IN (:attributeCodes)')
-            ->setParameter('attributeCodes', $attributeCodes)
-        ;
+            ->setParameter('attributeCodes', $attributeCodes);
         $count = $qb->getQuery()->getResult();
 
         if ($count) {
