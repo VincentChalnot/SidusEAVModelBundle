@@ -11,10 +11,9 @@
 namespace Sidus\EAVModelBundle\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
-use Sidus\EAVModelBundle\Entity\DataRepository;
-use Sidus\EAVModelBundle\Model\FamilyInterface;
+use Doctrine\ORM\NativeQuery;
+use Doctrine\ORM\Query\ResultSetMapping;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -44,7 +43,7 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
      */
     protected function configure()
     {
-        $description = 'Purges all the data with a missing family and all the values with missing attributes';
+        $description = 'Purges all the data with a missing families and all the values with missing attributes';
         $this
             ->setName('sidus:data:purge-orphan-data')
             ->setDescription($description);
@@ -73,9 +72,9 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
      *
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
-     * @throws \Doctrine\DBAL\DBALException
      *
      * @return int|null|void
+     * @throws \Doctrine\DBAL\DBALException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -86,22 +85,22 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
     /**
      * @param OutputInterface $output
      *
-     * @throws \Doctrine\DBAL\DBALException
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
+     * @throws \Doctrine\DBAL\DBALException
      */
     protected function purgeMissingFamilies(OutputInterface $output)
     {
-        $familyCodes = $this->familyRegistry->getFamilyCodes();
         /** @var EntityManager $em */
         $em = $this->doctrine->getManager();
+        $metadata = $em->getClassMetadata($this->dataClass);
+        $table = $metadata->getTableName();
+        $flattenedFamilyCodes = $this->quoteArray($em, $this->familyRegistry->getFamilyCodes());
 
-        $qb = $em->createQueryBuilder()
-            ->delete($this->dataClass, 'e')
-            ->where('e.family NOT IN (:familyCodes)')
-            ->setParameter('familyCodes', $familyCodes)
-        ;
-        $count = $qb->getQuery()->getResult();
+        // LIMIT is not natively supported for delete statements in Doctrine
+        $sql = "DELETE FROM `{$table}` WHERE family_code NOT IN ({$flattenedFamilyCodes}) LIMIT 1000";
+
+        $count = $this->executeWithPaging($em, $sql);
 
         if ($count) {
             $output->writeln("<comment>{$count} data purged with missing family</comment>");
@@ -113,33 +112,77 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
     /**
      * @param OutputInterface $output
      *
-     * @throws \Doctrine\DBAL\DBALException
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
+     * @throws \Doctrine\DBAL\DBALException
      */
     protected function purgeMissingAttributes(OutputInterface $output)
     {
-        $attributeCodes = [];
+        /** @var EntityManager $em */
+        $em = $this->doctrine->getManager();
+        $metadata = $em->getClassMetadata($this->valueClass);
+        $table = $metadata->getTableName();
+
         foreach ($this->familyRegistry->getFamilies() as $family) {
+            $attributeCodes = [];
             foreach ($family->getAttributes() as $attribute) {
                 $attributeCodes[] = $attribute->getCode();
             }
-        }
-        $attributeCodes = array_unique($attributeCodes);
-        /** @var EntityManager $em */
-        $em = $this->doctrine->getManager();
 
-        $qb = $em->createQueryBuilder()
-            ->delete($this->valueClass, 'e')
-            ->where('e.attributeCode NOT IN (:attributeCodes)')
-            ->setParameter('attributeCodes', $attributeCodes)
-        ;
-        $count = $qb->getQuery()->getResult();
+            $quotedFamilyCode = $em->getConnection()->quote($family->getCode());
+            $flattenedAttributeCodes = $this->quoteArray($em, $attributeCodes);
 
-        if ($count) {
-            $output->writeln("<comment>{$count} values purged with missing attributes</comment>");
-        } else {
-            $output->writeln('<info>No values to purge</info>');
+            // LIMIT is not natively supported for delete statements in Doctrine
+            $sql = "DELETE FROM `{$table}` WHERE family_code = {$quotedFamilyCode} AND attribute_code NOT IN ({$flattenedAttributeCodes}) LIMIT 1000";
+
+            $count = $this->executeWithPaging($em, $sql);
+
+            if ($count) {
+                $output->writeln("<comment>{$count} values purged in family {$family->getCode()} with missing attributes</comment>");
+            } else {
+                $output->writeln("<info>No values to purge for family {$family->getCode()}</info>");
+            }
         }
+    }
+
+    /**
+     * @param EntityManager $em
+     * @param string        $sql
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     *
+     * @return int
+     */
+    protected function executeWithPaging(EntityManager $em, $sql)
+    {
+        $count = 0;
+        do {
+            $stmt = $em->getConnection()->executeQuery($sql);
+            $stmt->execute();
+            $lastCount = $stmt->rowCount();
+            $count += $lastCount;
+        } while ($lastCount > 0);
+
+        return $count;
+    }
+
+    /**
+     * Quote a PHP array to allow using it in native SQL query
+     *
+     * @param EntityManager $em
+     * @param array         $array
+     *
+     * @return string
+     */
+    protected function quoteArray(EntityManager $em, array $array)
+    {
+        array_walk(
+            $array,
+            function (&$value) use ($em) {
+                $value = $em->getConnection()->quote($value);
+            }
+        );
+
+        return implode(', ', $array);
     }
 }
