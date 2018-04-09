@@ -10,6 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
+use Sidus\BaseBundle\Request\ParamConverter\AbstractParamConverter;
 use Sidus\EAVModelBundle\Registry\AttributeRegistry;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 
@@ -18,7 +19,7 @@ use Sidus\EAVModelBundle\Model\AttributeInterface;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class AttributeParamConverter extends AbstractBaseParamConverter
+class AttributeParamConverter extends AbstractParamConverter
 {
     /** @var AttributeRegistry */
     protected $attributeRegistry;

@@ -12,6 +12,7 @@ namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Sidus\BaseBundle\Request\ParamConverter\AbstractParamConverter;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,7 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class DataParamConverter extends AbstractBaseParamConverter
+class DataParamConverter extends AbstractParamConverter
 {
     /** @var DataRepository */
     protected $dataRepository;

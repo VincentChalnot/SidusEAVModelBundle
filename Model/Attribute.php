@@ -14,9 +14,8 @@ use Sidus\EAVModelBundle\Registry\AttributeTypeRegistry;
 use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
 use Sidus\EAVModelBundle\Exception\AttributeConfigurationException;
 use Sidus\EAVModelBundle\Exception\ContextException;
-use Sidus\EAVModelBundle\Translator\TranslatableTrait;
+use Sidus\BaseBundle\Translator\TranslatableTrait;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use UnexpectedValueException;
 
 /**
  * Defines an attribute in the EAV model

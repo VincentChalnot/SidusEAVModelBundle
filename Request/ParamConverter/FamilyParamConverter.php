@@ -11,6 +11,7 @@
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Sidus\BaseBundle\Request\ParamConverter\AbstractParamConverter;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -21,7 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class FamilyParamConverter extends AbstractBaseParamConverter
+class FamilyParamConverter extends AbstractParamConverter
 {
     /** @var FamilyRegistry */
     protected $familyRegistry;

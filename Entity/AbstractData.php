@@ -16,10 +16,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Sidus\EAVModelBundle\Exception\ContextException;
 use Sidus\EAVModelBundle\Exception\InvalidValueDataException;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
-use Sidus\EAVModelBundle\Exception\WrongFamilyException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
-use Sidus\EAVModelBundle\Utilities\DateTimeUtility;
+use Sidus\BaseBundle\Utilities\DateTimeUtility;
 use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
 use Symfony\Component\PropertyAccess\Exception\ExceptionInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -381,7 +380,7 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function setId($id)
     {
-        $this->id = (int) $id;
+        $this->id = (int)$id;
 
         return $this;
     }
@@ -920,7 +919,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $default = $attribute->getDefault();
         if (!$attribute->isCollection()) {
-            $default = (array) $default;
+            $default = (array)$default;
         }
 
         return $this->setInternalValuesData($attribute, $default, $context);
@@ -947,6 +946,10 @@ abstract class AbstractData implements ContextualDataInterface
         if (null === $attribute) {
             $values = new ArrayCollection();
             foreach ($this->values as $value) {
+                if (!$this->getFamily()->hasAttribute($value->getAttributeCode())) {
+                    $this->removeValue($value);
+                    continue;
+                }
                 $attribute = $this->getFamily()->getAttribute($value->getAttributeCode());
                 if ($attribute->isContextMatching($value, $context)) {
                     $values->add($value);
@@ -1071,10 +1074,10 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $attributeAsLabel = $this->getFamily()->getAttributeAsLabel();
         if ($attributeAsLabel) {
-            return (string) $this->getValueData($attributeAsLabel, $context);
+            return (string)$this->getValueData($attributeAsLabel, $context);
         }
 
-        return (string) $this->getIdentifier();
+        return (string)$this->getIdentifier();
     }
 
     /**
