@@ -92,7 +92,7 @@ class DataManager
      *
      * @return AttributeQueryBuilderInterface[]
      */
-    protected function resolveEavQbAttributes(
+    public function resolveEavQbAttributes(
         FamilyInterface $family,
         EAVQueryBuilderInterface $eavQb,
         AttributeQueryBuilderInterface $parentAttributeQb = null
