@@ -44,12 +44,17 @@ class EAVFinder
     /** @var Registry */
     protected $doctrine;
 
+    /** @var DataLoaderInterface */
+    protected $dataLoader;
+
     /**
-     * @param Registry $doctrine
+     * @param Registry            $doctrine
+     * @param DataLoaderInterface $dataLoader
      */
-    public function __construct(Registry $doctrine)
+    public function __construct(Registry $doctrine, DataLoaderInterface $dataLoader)
     {
         $this->doctrine = $doctrine;
+        $this->dataLoader = $dataLoader;
     }
 
     /**
@@ -67,8 +72,10 @@ class EAVFinder
     public function findBy(FamilyInterface $family, array $filterBy, array $orderBy = [])
     {
         $qb = $this->getQb($family, $filterBy, $orderBy);
+        $results = $qb->getQuery()->getResult();
+        $this->dataLoader->load($results);
 
-        return $qb->getQuery()->getResult();
+        return $results;
     }
 
     /**
@@ -88,7 +95,10 @@ class EAVFinder
         $pager = new Paginator($qb);
         $pager->getQuery()->setMaxResults(1);
 
-        return $pager->getIterator()->current();
+        $result = $pager->getIterator()->current();
+        $this->dataLoader->loadSingle($result);
+
+        return $result;
     }
 
     /**
@@ -103,7 +113,10 @@ class EAVFinder
     {
         $qb = $this->getFilterByQb($family, $filterBy, $orderBy);
 
-        return $qb->getQuery()->getResult();
+        $results = $qb->getQuery()->getResult();
+        $this->dataLoader->load($results);
+
+        return $results;
     }
 
     /**

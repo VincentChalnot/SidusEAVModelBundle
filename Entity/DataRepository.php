@@ -20,6 +20,7 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Sidus\EAVModelBundle\Doctrine\EAVQueryBuilder;
+use Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader;
 use Sidus\EAVModelBundle\Doctrine\SingleFamilyQueryBuilder;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -104,11 +105,6 @@ class DataRepository extends EntityRepository
         if ($partialLoad) {
             return $this->executeWithPartialLoad($qb);
         }
-
-        // Optimize values querying, @T0D0 check if really a good idea ?
-        $qb
-            ->addSelect('values')
-            ->join('e.values', 'values');
 
         return $qb->getQuery()->getOneOrNullResult();
     }
@@ -209,6 +205,8 @@ class DataRepository extends EntityRepository
     }
 
     /**
+     * @deprecated Do not use this function anymore, use the OptimizedDataLoader on your query results instead
+     *
      * @param string            $alias
      * @param string            $indexBy
      * @param QueryBuilder|null $qb
@@ -218,6 +216,9 @@ class DataRepository extends EntityRepository
      */
     public function createOptimizedQueryBuilder($alias, $indexBy = null, QueryBuilder $qb = null, $associations = false)
     {
+        $m = 'Do not use this function anymore, use the OptimizedDataLoader on your query results instead';
+        @trigger_error($m, E_DEPRECATED);
+
         if (!$qb) {
             $qb = $this->createQueryBuilder($alias, $indexBy);
         }
@@ -246,7 +247,7 @@ class DataRepository extends EntityRepository
      */
     public function createFamilyQueryBuilder(FamilyInterface $family, $alias = 'e')
     {
-        return new SingleFamilyQueryBuilder($family, $this->createOptimizedQueryBuilder($alias), $alias);
+        return new SingleFamilyQueryBuilder($family, $this->createQueryBuilder($alias), $alias);
     }
 
     /**
@@ -262,7 +263,7 @@ class DataRepository extends EntityRepository
     /**
      * @deprecated Use DataManager::getQbForFamiliesAndLabel instead
      *
-     * @see DataManager::getQbForFamiliesAndLabel
+     * @see        DataManager::getQbForFamiliesAndLabel
      *
      * @throws \RuntimeException
      */
@@ -322,19 +323,16 @@ class DataRepository extends EntityRepository
     /**
      * @param int $id
      *
-     * @throws NonUniqueResultException
-     *
      * @return DataInterface
      */
     public function loadFullEntity($id)
     {
-        $qb = $this->createOptimizedQueryBuilder('e', null, null, true);
+        /** @var DataInterface $data */
+        $data = $this->find($id);
+        $loader = new OptimizedDataLoader($this->getEntityManager());
+        $loader->loadSingle($data);
 
-        $qb
-            ->andWhere('e.id = :dataId')
-            ->setParameter('dataId', $id);
-
-        return $qb->getQuery()->getOneOrNullResult();
+        return $data;
     }
 
     /**
@@ -344,12 +342,15 @@ class DataRepository extends EntityRepository
      */
     public function fetchEAVAssociations(DataInterface $data)
     {
-        $qb = $this->createOptimizedQueryBuilder('e');
+        $qb = $this->createQueryBuilder('e');
         $qb
             ->join('e.refererValues', 'refererValues', Join::WITH, 'refererValues.data = :id')
             ->setParameter('id', $data->getId());
+        $results = $qb->getQuery()->getResult();
+        $loader = new OptimizedDataLoader($this->getEntityManager());
+        $loader->load($results);
 
-        return $qb->getQuery()->getResult();
+        return $results;
     }
 
     /**
