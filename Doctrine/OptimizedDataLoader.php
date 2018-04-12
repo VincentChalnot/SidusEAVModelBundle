@@ -63,9 +63,7 @@ class OptimizedDataLoader implements DataLoaderInterface
      */
     public function loadSingle(DataInterface $entity = null, $depth = 2)
     {
-        if (null !== $entity) {
-            $this->load([$entity], $depth);
-        }
+        $this->load([$entity], $depth);
     }
 
     /**
@@ -77,6 +75,9 @@ class OptimizedDataLoader implements DataLoaderInterface
     {
         $entitiesByValueClassByIds = [];
         foreach ($entities as $entity) {
+            if (null === $entity) {
+                continue;
+            }
             if (!$entity instanceof DataInterface) {
                 throw new \InvalidArgumentException(self::E_MSG);
             }
