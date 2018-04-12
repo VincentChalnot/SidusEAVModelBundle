@@ -142,6 +142,9 @@ class OptimizedDataLoader implements DataLoaderInterface
         }
         $relatedEntities = [];
         foreach ($entities as $entity) {
+            if (null === $entity) {
+                continue;
+            }
             $family = $entity->getFamily();
             foreach ($family->getAttributes() as $attribute) {
                 $this->appendRelatedEntities($relatedEntities, $attribute, $entity);
