@@ -177,7 +177,7 @@ class EAVFinder
                 $dqlHandlers[] = $eavQb->getOr(
                     [
                         $dqlHandler,
-                        $attributeQb->isNull(), // Handles default values not persisted to database
+                        (clone $attributeQb)->isNull(), // Handles default values not yet persisted to database
                     ]
                 );
             } else {

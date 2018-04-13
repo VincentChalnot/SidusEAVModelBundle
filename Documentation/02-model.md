@@ -7,7 +7,7 @@ configuration.
 Please read the example in the first chapter to familiar yourself with the key features of the configuration.
 
 If you want to test your configuration against an existing app, you can do it in the
-[Demo Symfony Project](https://github.com/VincentChalnot/SidusEAVDemo)
+[Clever Data Manager Starter Kit](https://github.com/cleverage/eav-manager-starter-kit/)
 
 #### Family configuration reference
 The families of your model are what would be your classes in a relational model, we call them families instead of

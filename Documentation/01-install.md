@@ -1,11 +1,5 @@
 ## Installation
-This bundle can be installed with a few easy steps. Note that it's highly encouraged to install the full
-[EAV-Toolkit](https://github.com/VincentChalnot/SidusEAVToolkit) for a better experience.
-(but you can install it in a second time if you want)
-
-| WARNING |
-| ------- |
-| The SidusEAVToolkit is absolutely not up-to-date. |
+This bundle can be installed with a few easy steps.
 
 ### Bundle installation
 The bundle installation covers four steps:

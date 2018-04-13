@@ -7,10 +7,10 @@ they return.
 
 In your config_dev.yml, add this line at the beginning:
 
-```yml
+````yml
 imports:
     - { resource: '@SidusEAVModelBundle/Resources/config/services/annotation_generator.yml' }
-```
+````
 
 The fake classes should be generated in /var/annotations/Sidus/EAV
 
@@ -24,10 +24,10 @@ manually exclude all directories inside /var without including /var/annotations.
 
 Use the __@var__ annotation :
 
-```php
+````php
 /** @var \Sidus\EAV\FamilyCode $var */
 $var->getTitle();
-```
+````
 
 ![Autocomplete Example](assets/autocomplete_example.png)
 

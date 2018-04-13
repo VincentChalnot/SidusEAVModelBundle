@@ -22,15 +22,15 @@ Also, this bundle is my intellectual property whereas the Clever Data Manager is
 See the [performances annex](300-performances.md)
 
 ### Cloning/duplicating entities
-EAV entities supports the ```clone``` expression. Embed data will be cloned and all other relations will keep their
+EAV entities supports the ````clone```` expression. Embed data will be cloned and all other relations will keep their
 pointers.
 
 ### PHP Classes
 Each family can have a specific PHP class for it's entities, but only through Doctrine's single table inheritance.
-Use the ```data_class``` option in the family configuration to specify it.
+Use the ````data_class```` option in the family configuration to specify it.
 
 ### Default values
-Easy, use the ```default``` option in the attribute configuration. It won't work for relations with other entities
+Easy, use the ````default```` option in the attribute configuration. It won't work for relations with other entities
 though. This can be achieved by overriding the family service and the createData method or by using Doctrine events on
 save.
 
