@@ -113,7 +113,9 @@ class IntegrityConstraintManager
             return;
         }
         foreach ($associationMapping['joinColumns'] as $joinColumn) {
-            if (isset($joinColumn['onDelete']) && 'cascade' === $joinColumn['onDelete']) {
+            if (isset($joinColumn['onDelete'])
+                && \in_array(strtolower($joinColumn['onDelete']), ['cascade', 'set null'], true)
+            ) {
                 return;
             }
         }
