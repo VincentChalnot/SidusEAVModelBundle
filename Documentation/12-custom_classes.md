@@ -1,3 +1,7 @@
+---
+currentMenu: custom_classes
+---
+
 ## Custom classes
 
 The default behavior for EAV Data entities hydration in Doctrine is to use a single class.

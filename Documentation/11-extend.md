@@ -1,3 +1,7 @@
+---
+currentMenu: extend
+---
+
 ## Extending the model
 
 The existing model allows you to store all the basic kinds of scalar (text, number, dates) and relations to other

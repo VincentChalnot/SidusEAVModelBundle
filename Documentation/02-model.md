@@ -1,3 +1,7 @@
+---
+currentMenu: model
+---
+
 ## Configuration
 
 At this point your application should run although you won't be able to do anything without defining first your model

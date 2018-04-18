@@ -1,3 +1,7 @@
+---
+currentMenu: validate
+---
+
 ## Validation
 
 The EAV model is 100% compatible with Symfony's validator component.

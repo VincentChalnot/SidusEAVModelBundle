@@ -1,3 +1,7 @@
+---
+currentMenu: translate
+---
+
 ## How to translate the model
 
 In order to translate the labels of the families and attributes, as well as some few other things, you only need to

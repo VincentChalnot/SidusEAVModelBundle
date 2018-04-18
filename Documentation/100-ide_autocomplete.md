@@ -1,3 +1,7 @@
+---
+currentMenu: ide_autocomplete
+---
+
 #### Intro
 
 You can optionally activate a code generator to create fake abstract classes for your IDE autocomplete.

@@ -1,0 +1,82 @@
+template:
+    url: https://github.com/pnowy/CouscousNativeTemplate
+
+exclude:
+    - UPDATE-1.2.md
+
+title: Sidus/EAVModelBundle
+subTitle: Blazing fast data modeling with Symfony
+
+fontAwesomeIcon: fa fa-database
+footerText: Copyright @VincentChalnot 2015-2018 with special thanks to Clever-Age
+
+branch: gh-pages
+
+baseUrl: https://vincentchalnot.github.io/SidusEAVModelBundle
+
+github:
+    user: VincentChalnot
+    repo: SidusEAVModelBundle
+
+menu:
+    sections:
+        home:
+            name: Home
+            items:
+                home:
+                    text: Introduction
+                    relativeUrl: index.html
+                example:
+                    text: Example
+                    relativeUrl: index.html#example
+        main:
+            name: Main documentation
+            items:
+                install:
+                    text: 01 - Installation
+                    relativeUrl: Documentation/01-install.html
+                model:
+                    text: 02 - Model configuration
+                    relativeUrl: Documentation/02-model.html
+                multiple:
+                    text: 03 - Multiple attributes & collections
+                    relativeUrl: Documentation/03-multiple.html
+                entities:
+                    text: 04 - Handling Entities
+                    relativeUrl: Documentation/04-entities.html
+                form:
+                    text: 05 - Forms
+                    relativeUrl: Documentation/05.1-form.html
+                validate:
+                    text: 06 - Validation
+                    relativeUrl: Documentation/06-validate.html
+                query:
+                    text: 07 - Query
+                    relativeUrl: Documentation/07.1-query.html
+                translate:
+                    text: 08 - Translating the model
+                    relativeUrl: Documentation/08-translate.html
+                context:
+                    text: 19 - EAV Contextualisation
+                    relativeUrl: Documentation/09-context.html
+                serialize:
+                    text: 10 - Serialization
+                    relativeUrl: Documentation/10-serialize.html
+                extend:
+                    text: 11 - Extending & customizing the model
+                    relativeUrl: Documentation/11-extend.html
+                custom_classes:
+                    text: 12 - Custom classes
+                    relativeUrl: Documentation/12-custom_classes.html
+        other:
+            name: Other documentation entries
+            items:
+                ide_autocomplete:
+                    text: IDE Autocomplete
+                    relativeUrl: Documentation/100-ide_autocomplete.html
+                questions:
+                    text: Questions & Answers
+                    relativeUrl: Documentation/200-questions.html
+                performances:
+                    text: Performances
+                    relativeUrl: Documentation/300-performances.html

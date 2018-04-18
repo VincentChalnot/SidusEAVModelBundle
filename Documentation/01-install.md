@@ -1,3 +1,7 @@
+---
+currentMenu: install
+---
+
 ## Installation
 
 This bundle can be installed with a few easy steps.

@@ -1,3 +1,7 @@
+---
+currentMenu: multiple
+---
+
 ## Multiple & collection option
 
 The "collection" option allows you to add multiple values for the same attribute and because of the way the EAV model

@@ -1,3 +1,7 @@
+---
+currentMenu: serialize
+---
+
 ## Serialization
 
 This bundle is compatible with Symfony's Serializer. To enable the normalization services, activate the serializer
