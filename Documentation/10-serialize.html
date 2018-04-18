@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>Sidus/EAVModelBundle</title>
+
+        <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Merriweather:400,900,700,300|Open+Sans:400,800,700|Titillium+Web:600,400' type='text/css'>
+        <link rel="stylesheet" href="/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/github.css">
+        <link rel="stylesheet" href="/css/main.css">
+    </head>
+    <body>
+
+        <header class="site-header">
+            <div class="site-branding">
+                <h1 class="site-name">
+                    <a href="" >Sidus/EAVModelBundle</a>&nbsp;&nbsp;<i class="fa fa-database"></i>
+                </h1>
+                <h2 class="site-description">Blazing fast data modeling with Symfony</h2>
+            </div>
+
+            <div class="button-line">
+                <a href="https://github.com/VincentChalnot/SidusEAVModelBundle" target="_blank" class="btn btn-default">View on GitHub</a>
+                <a href="https://github.com/VincentChalnot/SidusEAVModelBundle/zipball/master" class="btn btn-default hidden-xs">Download .zip</a>
+                <a href="https://github.com/VincentChalnot/SidusEAVModelBundle/tarball/master" class="btn btn-default hidden-xs">Download .tar.gz</a>
+            </div>
+
+                            <a href="https://github.com/VincentChalnot/SidusEAVModelBundle">
+                    <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png">
+                </a>
+            
+            <div class="text-left visible-xs-block" style="margin-left: 15px;">
+                <a href="#sidebar" data-toggle="collapse"><i class="fa fa-3x fa-bars" aria-hidden="true"></i></a>
+            </div>
+        </header>
+
+        <main class="container-fluid">
+            <div class="row">
+
+                                    <nav id="sidebar" class="col-sm-3 col-lg-2 collapse in" role="navigation">
+                                                    <p class="text-muted">
+                                Main documentation
+                            </p>
+
+                            <ul class="nav nav-pills nav-stacked">
+                                                                    <li class="">
+                                        <a href="/Documentation/01-install.html">
+                                            01 - Installation
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/02-model.html">
+                                            02 - Model configuration
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/03-multiple.html">
+                                            03 - Multiple attributes & collections
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/04-entities.html">
+                                            04 - Handling Entities
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/05.1-form.html">
+                                            05 - Forms
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/06-validate.html">
+                                            06 - Validation
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/07.1-query.html">
+                                            07 - Query
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/08-translate.html">
+                                            08 - Translating the model
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/09-context.html">
+                                            19 - EAV Contextualisation
+                                        </a>
+                                    </li>
+                                                                    <li class="active">
+                                        <a href="/Documentation/10-serialize.html">
+                                            10 - Serialization
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/11-extend.html">
+                                            11 - Extending & customizing the model
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/12-custom_classes.html">
+                                            12 - Custom classes
+                                        </a>
+                                    </li>
+                                                            </ul>
+                                                    <p class="text-muted">
+                                Other documentation entries
+                            </p>
+
+                            <ul class="nav nav-pills nav-stacked">
+                                                                    <li class="">
+                                        <a href="/Documentation/100-ide_autocomplete.html">
+                                            IDE Autocomplete
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/200-questions.html">
+                                            Questions & Answers
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/300-performances.html">
+                                            Performances
+                                        </a>
+                                    </li>
+                                                            </ul>
+                        
+                    </nav>
+
+                
+                <section class="col-sm-9 col-lg-10 content">
+                    <h2 id="serialization">Serialization</h2>
+<p>This bundle is compatible with Symfony's Serializer. To enable the normalization services, activate the serializer
+option in the configuration:</p>
+<pre><code class="language-yaml">sidus_eav_model:
+    serializer_enabled: true</code></pre>
+<p>Now the normalizer will add the EAV attributes to the normalized data and supports the denormalization of data
+containing the EAV attributes.</p>
+<p>You can also normalize families and attributes but obviously not denormalize them because they are not meant to be
+modified.</p>
+<h3 id="custom-options">Custom options</h3>
+<p>The behavior of the serializer can be controlled a little bit further than the standard Symfony Serializer, it allows
+you to describe the way you want your data serialized with options in the model and in the context during serialization.</p>
+<h4 id="model-options">Model options</h4>
+<p>You can use the <code>serializer</code> option in your attribute options to tweek the serialization output:</p>
+<pre><code class="language-yaml">sidus_eav_model:
+    families:
+        Post:
+            attributes:
+                # ... Other attributes
+                author:
+                    type: data_selector
+                    options:
+                        serializer:
+                            groups: [ ... ]
+                            exposer: true|false
+                            # For relations only:
+                            by_reference: true|false
+                            by_short_reference: true|false
+                        # ... Other options</code></pre>
+<ul>
+<li>
+<p>The <code>groups</code> option behave just like standard serialization groups in conjunction with the <code>groups</code>
+context option.</p>
+</li>
+<li>
+<p>The <code>expose</code> option, if set to false will always block the serialization of the attribute.</p>
+</li>
+<li>
+<p><code>by_reference</code> will only output a limited set of information, check the next paragraph.</p>
+</li>
+<li>
+<p><code>by_short_reference</code> will only output the identifier of the related entity.</p>
+</li>
+</ul>
+<h4 id="context-options">Context options</h4>
+<p>If you haven't read the dedicated chapter about the <a href="09-context.html">EAV context</a> you might get confused about the
+difference between the <em>EAV</em> context and the <em>Serializer</em> context, which are two completely separate things.</p>
+<p>This chapter concerns the <em>Serializer</em> context options but you can also pass the <em>EAV</em> <code>context</code> option inside
+your <em>Serializer</em> context options to declare the current EAV context used to normalize or denormalize the entity:</p>
+<pre><code class="language-php">&lt;?php
+/**
+ * @var \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer
+ * @var \Sidus\EAVModelBundle\Entity\DataInterface $data
+ * @var string $format
+ */
+$normalizedData = $normalizer-&gt;normalize(
+    $data,
+    $format,
+    [ // Context
+        'context' =&gt; [
+            'language' =&gt; 'en',
+            'channel' =&gt; 'web',
+            'publication' =&gt; 'published',
+        ],
+    ]
+);</code></pre>
+<p>This works the same way for denormalization.</p>
+<h5 id="normalization">Normalization</h5>
+<pre><code class="language-php">&lt;?php
+/**
+ * @var \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer
+ * @var \Sidus\EAVModelBundle\Entity\DataInterface $data
+ * @var string $format
+ */
+$normalizedData = $normalizer-&gt;normalize(
+    $data,
+    $format,
+    [ // Context
+        'by_reference' =&gt; true,
+    ]
+);</code></pre>
+<p>This will output a limited set of data controlled by this configuration parameter:
+<code>sidus_eav_model.normalizer.data.reference_attributes</code></p>
+<p>By default it will output the id, identifier, familyCode and label. These information allows any system or human being
+to identify the data in a unique way.</p>
+<p>You can also choose to extract the short reference, this will only output the identifier property.</p>
+<pre><code class="language-php">&lt;?php
+/**
+ * @var \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer
+ * @var \Sidus\EAVModelBundle\Entity\DataInterface $data
+ * @var string $format
+ */
+$identifier = $normalizer-&gt;normalize(
+    $data,
+    $format,
+    [ // Context
+        'by_short_reference' =&gt; true,
+    ]
+);</code></pre>
+<h5 id="denormalization">Denormalization</h5>
+<p>During denormalization, if the &quot;family&quot; information is not present in the data, you can pass it using the context:</p>
+<pre><code class="language-php">&lt;?php
+
+use Sidus\EAVModelBundle\Entity\DataInterface;
+
+/**
+ * @var \Symfony\Component\Serializer\Normalizer\DenormalizerInterface $normalizer
+ * @var string $format
+ * @var string|\Sidus\EAVModelBundle\Model\FamilyInterface $family
+ */
+$data1 = $normalizer-&gt;denormalize(
+    [
+        // Can be either of the following:
+        'family' =&gt; $family,
+        'familyCode' =&gt; $family,
+        'family_code' =&gt; $family,
+    ],
+    DataInterface::class, // Can also be your data class
+    $format,
+    [ // Context
+        // No need to pass the family in the context
+    ]
+);
+
+$data2 = $normalizer-&gt;denormalize(
+    [
+        // Data without family info
+    ],
+    DataInterface::class, // Can also be your data class
+    $format,
+    [ // Context
+        'family' =&gt; $family,
+    ]
+);</code></pre>
+<p>Finally, if you are using single table inheritance for your data class, and have a single family matching your data
+class, you can directly use your class and you don't need to provide any family information:</p>
+<pre><code class="language-php">&lt;?php
+
+/**
+ * @var \Symfony\Component\Serializer\Normalizer\DenormalizerInterface $normalizer
+ * @var string $format
+ */
+$data1 = $normalizer-&gt;denormalize(
+    [
+        // Data without family info
+    ],
+    \MyNamespace\EAVModelBundle\Entity\Book::class, // Only if you have a single family matching this data class
+    $format,
+    [ // Context
+        // No need to pass the family in the context
+    ]
+);</code></pre>
+<p>See next chapter for more information about this: <a href="12-custom_classes.html">Custom classes</a></p>
+<h3 id="internals">Internals</h3>
+<h4 id="specific-configuration">Specific configuration</h4>
+<p>The parameter <code>sidus_eav_model.denormalizer.data.ignored_attributes</code> lists a number of properties that will
+always be ignored when denormalizing data.</p>
+<p>For families: <code>sidus_eav_model.normalizer.family.ignored_attributes</code></p>
+<p>And for attributes: <code>sidus_eav_model.normalizer.attribute.ignored_attributes</code></p>
+<p>For ignored properties during normalization, this parameter is used:
+<code>sidus_eav_model.normalizer.data.ignored_attributes</code>.</p>
+<h4 id="entity-provider">Entity provider</h4>
+<p>During denormalization, the system often needs to resolve existing entities based on their family and identifier.</p>
+<p>This process is controlled by the <code>EntityProvider</code> service and always require a family.
+The data passed to the service can be:</p>
+<ul>
+<li>A scalar: The service will try to find the entity by identifier and fallback to the id.</li>
+<li>An array: The service will check for the id property and then for the identifier property.</li>
+</ul>
+<p>This service also keeps tracks of created entities before flush in order to allow associations with entities that have
+not been flushed yet.</p>
+                </section>
+
+            </div>
+        </main>
+
+        <footer class="site-footer">
+            <div class="top-bar-line"></div>
+            <div class="bottom-panel">
+                <div class="text-center">
+            <span>
+                                    
+                                                </span>
+                </div><!-- text-center -->
+            </div><!-- bottom-panel -->
+        </footer>
+
+
+        <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script src="/js/highlight.pack.js"></script>
+
+        <script>
+            hljs.initHighlighting();
+
+            function checkWidth($highlight) {
+                if ($(window).width() < 768) {
+                    $highlight.addClass('collapse');
+                } else {
+                    $highlight.removeClass('collapse');
+                }
+            }
+
+            $(document).ready(function () {
+                var $highlights = $('.hljs');
+                $highlights.each(function (index) {
+                    var $this = $(this).parent();
+                    var elementId = 'hljs' + index;
+                    $this.attr('id', elementId);
+                    $this.before('<a class="visible-xs-inline visible-sm-inline" href="#' + elementId + '" data-toggle="collapse"><i class="fa fa-expand"></i>&nbsp;Toggle source code ...</a>');
+
+                    checkWidth($this);
+                    $(window).resize(function () {
+                        checkWidth($this);
+                    });
+                });
+            });
+
+            
+        </script>
+
+    </body>
+</html>

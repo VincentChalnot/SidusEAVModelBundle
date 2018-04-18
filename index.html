@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>Sidus/EAVModelBundle</title>
+
+        <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Merriweather:400,900,700,300|Open+Sans:400,800,700|Titillium+Web:600,400' type='text/css'>
+        <link rel="stylesheet" href="/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/css/github.css">
+        <link rel="stylesheet" href="/css/main.css">
+    </head>
+    <body>
+
+        <header class="site-header">
+            <div class="site-branding">
+                <h1 class="site-name">
+                    <a href="" >Sidus/EAVModelBundle</a>&nbsp;&nbsp;<i class="fa fa-database"></i>
+                </h1>
+                <h2 class="site-description">Blazing fast data modeling with Symfony</h2>
+            </div>
+
+            <div class="button-line">
+                <a href="https://github.com/VincentChalnot/SidusEAVModelBundle" target="_blank" class="btn btn-default">View on GitHub</a>
+                <a href="https://github.com/VincentChalnot/SidusEAVModelBundle/zipball/master" class="btn btn-default hidden-xs">Download .zip</a>
+                <a href="https://github.com/VincentChalnot/SidusEAVModelBundle/tarball/master" class="btn btn-default hidden-xs">Download .tar.gz</a>
+            </div>
+
+                            <a href="https://github.com/VincentChalnot/SidusEAVModelBundle">
+                    <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png">
+                </a>
+            
+            <div class="text-left visible-xs-block" style="margin-left: 15px;">
+                <a href="#sidebar" data-toggle="collapse"><i class="fa fa-3x fa-bars" aria-hidden="true"></i></a>
+            </div>
+        </header>
+
+        <main class="container-fluid">
+            <div class="row">
+
+                                    <nav id="sidebar" class="col-sm-3 col-lg-2 collapse in" role="navigation">
+                                                    <p class="text-muted">
+                                Main documentation
+                            </p>
+
+                            <ul class="nav nav-pills nav-stacked">
+                                                                    <li class="">
+                                        <a href="/Documentation/01-install.html">
+                                            01 - Installation
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/02-model.html">
+                                            02 - Model configuration
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/03-multiple.html">
+                                            03 - Multiple attributes & collections
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/04-entities.html">
+                                            04 - Handling Entities
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/05.1-form.html">
+                                            05 - Forms
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/06-validate.html">
+                                            06 - Validation
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/07.1-query.html">
+                                            07 - Query
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/08-translate.html">
+                                            08 - Translating the model
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/09-context.html">
+                                            19 - EAV Contextualisation
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/10-serialize.html">
+                                            10 - Serialization
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/11-extend.html">
+                                            11 - Extending & customizing the model
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/12-custom_classes.html">
+                                            12 - Custom classes
+                                        </a>
+                                    </li>
+                                                            </ul>
+                                                    <p class="text-muted">
+                                Other documentation entries
+                            </p>
+
+                            <ul class="nav nav-pills nav-stacked">
+                                                                    <li class="">
+                                        <a href="/Documentation/100-ide_autocomplete.html">
+                                            IDE Autocomplete
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/200-questions.html">
+                                            Questions & Answers
+                                        </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="/Documentation/300-performances.html">
+                                            Performances
+                                        </a>
+                                    </li>
+                                                            </ul>
+                        
+                    </nav>
+
+                
+                <section class="col-sm-9 col-lg-10 content">
+                    <h1 id="siduseavmodelbundle-documentation">Sidus/EAVModelBundle Documentation</h1>
+<p><a href="https://insight.sensiolabs.com/projects/621ec123-268d-4a6b-a1d0-03a1e4e84b48"><img src="https://insight.sensiolabs.com/projects/621ec123-268d-4a6b-a1d0-03a1e4e84b48/big.png" alt="SensioLabsInsight" /></a></p>
+<h2 id="introduction">Introduction</h2>
+<p>This bundle allows you to quickly set up a dynamic model in a Symfony project using Doctrine.<br />
+Model configuration is done in Yaml and everything can be easily extended.</p>
+<h3 id="documentation-index">Documentation index</h3>
+<ul>
+<li><a href="Documentation/01-install.html">01 - Installation</a></li>
+<li><a href="Documentation/02-model.html">02 - Model configuration</a></li>
+<li><a href="Documentation/03-multiple.html">03 - Multiple attributes &amp; collections</a></li>
+<li><a href="Documentation/04-entities.html">04 - Handling Entities</a></li>
+<li><a href="Documentation/05.1-form.html">05 - Forms</a></li>
+<li><a href="Documentation/06-validate.html">06 - Validation</a></li>
+<li><a href="Documentation/07.1-query.html">07 - Query</a></li>
+<li><a href="Documentation/08-translate.html">08 - Translating the model</a></li>
+<li><a href="Documentation/09-context.html">19 - EAV Contextualisation</a></li>
+<li><a href="Documentation/10-serialize.html">10 - Serialization</a></li>
+<li><a href="Documentation/11-extend.html">11 - Extending &amp; customizing the model</a></li>
+<li><a href="Documentation/12-custom_classes.html">12 - Custom classes</a></li>
+</ul>
+<h3 id="other-documentation-entries">Other documentation entries</h3>
+<ul>
+<li><a href="Documentation/100-ide_autocomplete.html">IDE Autocomplete</a></li>
+<li><a href="Documentation/200-questions.html">Questions &amp; Answers</a></li>
+<li><a href="Documentation/300-performances.html">Performances</a></li>
+</ul>
+<h3 id="looking-for-something-">Looking for something ?</h3>
+<p>Check the  <a href="Documentation/200-questions.html">Q&amp;A section</a> and don't hesitate to ask questions in the issues.</p>
+<h3 id="whats-an-eav-model">What’s an EAV model</h3>
+<p>EAV stands for Entity-Attribute-Value</p>
+<p>The main feature consists in storing values in a different table than the entities.
+Check the confusing and not-so-accurate
+<a href="https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model">Wikipedia article</a></p>
+<p>This implementation is actually more an E(A)V model than a traditional EAV model because attributes are not stored in
+the database but in YAML files.</p>
+<p>If you're not familiar with the key concepts of the EAV model, please read the following.</p>
+<h3 id="why-using-it">Why using it</h3>
+<ul>
+<li>Allowing ultra-fast model design because it's super easy to bootstrap.</li>
+<li>Grouping in the same place the model and the metadata like: form configuration, validation, serialization options...</li>
+<li>Managing single-value attributes and multiple-values attributes the same way and being able to change your mind after
+without having to do data recovery.</li>
+<li>Storing contextual values per: locale, country, channel (web/print/mobile), versions.</li>
+<li>Grouping and ordering attributes.</li>
+<li>Easy CRUD: your forms are already configured !</li>
+</ul>
+<h3 id="why-not-using-it-">Why not using it ?</h3>
+<p>Performances ? Not a real issue because MySQL is not usable for searching in a vast amount of data anyway, be it an EAV
+model or a more standard relational model. Solution: Elastic Search: it’s currently optionally supported but you have
+to do a lots of manual configuration over your model, this will be an key feature in a near future.</p>
+<h4 id="relational-model">Relational model</h4>
+<p>If you a have a complex relational model and you plan to use a lots of joins to retrieve data, it might be best to keep
+your relational model outside of the EAV model but both can coexists without any problem. However, there is a technical
+limitation when using this implementation of the EAV model: There is only one table for the Data entry and one table for
+the Values.</p>
+<h3 id="the-implementation">The implementation</h3>
+<p>We are using Doctrine as it’s the most widely supported ORM by the Symfony community and we’re aiming at a MySQL/MariaDB
+implementation only for data storage.</p>
+<p>In any EAV model there are two sides</p>
+<ul>
+<li>The model itself: Families (data types), Attributes and Attribute Types.</li>
+<li>The data: The values and the class that contains the values, called here “Data”.</li>
+</ul>
+<p>In some implementation the model is stored in the database but here we chose to maintain the model in Symfony service
+configuration for several reasons:</p>
+<ul>
+<li>For performance reasons, you always needs to access a lots of components from your model and lazy loading will
+generate many unnecessary SQL requests. Symfony services are lazy loaded from PHP cache system which is very very
+fast compared to any other storage system.</li>
+<li>For complexity reason: with services, you can always define new services, use injections, extend existing services
+and have complex behaviors for your entities.</li>
+<li>A Symfony configuration is easy to write and to maintain and can be versioned, when your model is stored in your
+database along with your data you will have a very hard time to maintain the same model on your different environments.</li>
+<li>Because the final users <em>NEVER</em> edits the model directly in production, it’s always some expert or some developer
+that does it on a testing environment first and we prefer simple yaml configuration files over a complex administration
+system that can fail.</li>
+<li>It allows you to add layers of configuration for your special needs, for example you can configure directly some form
+options in the attribute declaration.</li>
+<li>Finally, you can split your configuration and organise it in different files if needed be and you can comment it,
+which is a powerful feature when your model starts to grow bigger and bigger with hundreds of different attributes.</li>
+</ul>
+<p>Families and attributes are services automatically generated from your configuration, attribute types are standard
+Symfony services.</p>
+<h3 id="example">Example</h3>
+<p>For a basic blog the configuration will look like this:</p>
+<pre><code class="language-yaml">sidus_eav_model:
+    families:
+        Post:
+            attributeAsLabel: title
+            attributes:
+                title: # Default type is string
+                    required: true
+
+                content:
+                    type: html # This type is available through the EAVBootstrapBundle
+
+                publicationDate:
+                    type: datetime
+
+                publicationStatus:
+                    type: choice
+                    form_options: # Symfony form options are passed directly
+                        choices:
+                            draft: Draft
+                            published: Published
+                            archived: Archived
+
+                author:
+                    type: data_selector # This type allows to select an other entity inside the EAV model
+                    options:
+                        autoload: true # Autoload author when loading Post
+                        allowed_families:
+                            - Author
+
+                tags:
+                    multiple: true
+                    form_options:
+                        collection_options:
+                            sortable: true
+
+                isFeatured:
+                    type: boolean
+
+        Author:
+            attributeAsLabel: name
+            attributes:
+                name:
+                    required: true
+
+                email:
+                    validation_rules: # Validation rules can be applied directly in the model
+                        - Email: ~</code></pre>
+<p>Note that by convention we declare the families in UpperCamelCase and the attributes as lowerCamelCase and we encourage
+you to do so.</p>
+                </section>
+
+            </div>
+        </main>
+
+        <footer class="site-footer">
+            <div class="top-bar-line"></div>
+            <div class="bottom-panel">
+                <div class="text-center">
+            <span>
+                                    
+                                                </span>
+                </div><!-- text-center -->
+            </div><!-- bottom-panel -->
+        </footer>
+
+
+        <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script src="/js/highlight.pack.js"></script>
+
+        <script>
+            hljs.initHighlighting();
+
+            function checkWidth($highlight) {
+                if ($(window).width() < 768) {
+                    $highlight.addClass('collapse');
+                } else {
+                    $highlight.removeClass('collapse');
+                }
+            }
+
+            $(document).ready(function () {
+                var $highlights = $('.hljs');
+                $highlights.each(function (index) {
+                    var $this = $(this).parent();
+                    var elementId = 'hljs' + index;
+                    $this.attr('id', elementId);
+                    $this.before('<a class="visible-xs-inline visible-sm-inline" href="#' + elementId + '" data-toggle="collapse"><i class="fa fa-expand"></i>&nbsp;Toggle source code ...</a>');
+
+                    checkWidth($this);
+                    $(window).resize(function () {
+                        checkWidth($this);
+                    });
+                });
+            });
+
+            
+        </script>
+
+    </body>
+</html>

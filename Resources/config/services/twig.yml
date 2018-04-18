@@ -1,7 +1,0 @@
-services:
-    sidus_eav_model.twig.extension:
-        class: Sidus\EAVModelBundle\Twig\SidusTwigExtension
-        arguments: ['@sidus_eav_model.family.registry', '@translator']
-        tags:
-            - { name: twig.extension }
-
