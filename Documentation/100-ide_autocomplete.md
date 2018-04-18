@@ -1,4 +1,5 @@
 #### Intro
+
 You can optionally activate a code generator to create fake abstract classes for your IDE autocomplete.
 This means that when coding you can instantly know what are the attributes present in your model and the type of data
 they return.

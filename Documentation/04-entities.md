@@ -1,4 +1,5 @@
 ## Creating entities
+
 To create a new entity you must first fetch the family you want from configuration.
 
 ````php

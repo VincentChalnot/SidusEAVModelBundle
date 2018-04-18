@@ -1,15 +1,17 @@
-
 ## Configuration
+
 At this point your application should run although you won't be able to do anything without defining first your model
 configuration.
 
 ### Model configuration
+
 Please read the example in the first chapter to familiar yourself with the key features of the configuration.
 
 If you want to test your configuration against an existing app, you can do it in the
 [Clever Data Manager Starter Kit](https://github.com/cleverage/eav-manager-starter-kit/)
 
 #### Family configuration reference
+
 The families of your model are what would be your classes in a relational model, we call them families instead of
 classes because they do not necessarily correspond to any PHP class in a strict sens. They are "data types" but such a
 denomination could lead to many mistakes so we prefer to call them "families".
@@ -43,6 +45,7 @@ sidus_eav_model:
 ````
 
 #### Attributes configuration reference
+
 The attributes (or properties) are defined independently from their families because they will often be reused in many
 families.
 
@@ -88,6 +91,7 @@ currentContext. If you use any of these words as attribute codes your applicatio
 to access the entities' data. Don't do that.
 
 ##### Attribute types
+
 Attribute types define a common way of editing and storing data, this bundle provides the following types:
 - string: Stored as varchar(255), edited as text input
 - text: Stored as text, edited as textarea
@@ -120,3 +124,7 @@ to unexpected behaviors: don't change the type of an attribute, create a new one
 be).
 The only safe thing you can do is switch between different attributes that stores their data the same way: For example:
 data, embed and autocomplete_data are safely interchangeable.
+
+If you want more information on the multiple option, check the next chapter:
+
+[Multiple attributes](03-multiple.md)

@@ -3,12 +3,17 @@
 In order to translate the labels of the families and attributes, as well as some few other things, you only need to
 create a standard Symfony translation file with the proper syntax.
 
+| WARNING |
+| ------- |
+| Data translation is done using [*EAV* context](09-context.md) |
+
 ### Translating Families
 
 The label of a family can be directly provided in the configuration of the family by setting the "label" configuration
 key. This is not recommended as it will not allow you to translate the attribute in multiple languages.
 
 The translation system will look for this keys in order to translate a family:
+
 ````yml
 eav:
     family:
@@ -22,6 +27,7 @@ The label of an attribute can be directly provided in the configuration of the a
 configuration key. This is not recommended as it will not allow you to translate the attribute in multiple languages.
 
 The translation system will first look for this keys in order to translate an attribute:
+
 ````yml
 eav:
     family:
@@ -32,6 +38,7 @@ eav:
 ````
 
 However, if your attribute exists in multiple families and has the same label, you can use this syntax instead:
+
 ````yml
 eav:
     attribute:
@@ -42,6 +49,7 @@ eav:
 ### Translating error messages
 
 The following keys will be tested:
+
 ````yml
 eav:
     family:

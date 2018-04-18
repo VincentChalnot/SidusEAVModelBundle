@@ -72,7 +72,9 @@ class EntityProvider
                 $entity = $repository->findByIdentifier($family, $data, true);
             } catch (\Exception $e) {
                 throw new UnexpectedValueException(
-                    "Unable to resolve id/identifier {$data} for family {$family->getCode()}", 0, $e
+                    "Unable to resolve id/identifier {$data} for family {$family->getCode()}",
+                    0,
+                    $e
                 );
             }
             if (!$entity) {
@@ -132,7 +134,12 @@ class EntityProvider
         $uow = $event->getEntityManager()->getUnitOfWork();
 
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
-            if ($entity instanceof DataInterface && $this->hasCreatedEntity($entity->getFamily(), $entity->getIdentifier())) {
+            if ($entity instanceof DataInterface
+                && $this->hasCreatedEntity(
+                    $entity->getFamily(),
+                    $entity->getIdentifier()
+                )
+            ) {
                 $this->removeCreatedEntity($entity->getFamily(), $entity->getIdentifier());
             }
         }
@@ -149,8 +156,7 @@ class EntityProvider
         array $data,
         FamilyInterface $family,
         NameConverterInterface $nameConverter = null
-    )
-    {
+    ) {
         if (!$family->getAttributeAsIdentifier()) {
             return null;
         }
@@ -203,7 +209,11 @@ class EntityProvider
      */
     protected function hasCreatedEntity(FamilyInterface $family, $reference)
     {
-        return array_key_exists($family->getCode(), $this->createdEntities) && array_key_exists($reference, $this->createdEntities[$family->getCode()]);
+        return array_key_exists($family->getCode(), $this->createdEntities)
+            && array_key_exists(
+                $reference,
+                $this->createdEntities[$family->getCode()]
+            );
     }
 
     /**

@@ -1,4 +1,5 @@
 ## Multiple & collection option
+
 The "collection" option allows you to add multiple values for the same attribute and because of the way the EAV model
 works, all attribute types are compatible with this option.
 

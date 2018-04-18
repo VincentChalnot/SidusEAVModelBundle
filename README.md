@@ -4,13 +4,38 @@ Sidus/EAVModelBundle Documentation
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/621ec123-268d-4a6b-a1d0-03a1e4e84b48/big.png)](https://insight.sensiolabs.com/projects/621ec123-268d-4a6b-a1d0-03a1e4e84b48)
 
 ## Introduction
+
 This bundle allows you to quickly set up a dynamic model in a Symfony project using Doctrine.  
 Model configuration is done in Yaml and everything can be easily extended.
 
+### Documentation index
+
+- [01 - Installation](Documentation/01-install.md)
+- [02 - Model configuration](Documentation/02-model.md)
+- [03 - Multiple attributes & collections](Documentation/03-multiple.md)
+- [04 - Handling Entities](Documentation/04-entities.md)
+- [05 - Forms](Documentation/05.1-form.md)
+- [06 - Validation](Documentation/06-validate.md)
+- [07 - Query](Documentation/07.1-query.md)
+- [08 - Translating the model](Documentation/08-translate.md)
+- [19 - EAV Contextualisation](Documentation/09-context.md)
+- [10 - Serialization](Documentation/10-serialize.md)
+- [11 - Extending & customizing the model](Documentation/11-extend.md)
+- [12 - Custom classes](Documentation/12-custom_classes.md)
+
+### Other documentation entries
+
+- [IDE Autocomplete](Documentation/100-ide_autocomplete.md)
+- [Questions & Answers](Documentation/200-questions.md)
+- [Performances](Documentation/300-performances.md)
+
+
 ### Looking for something ?
+
 Check the  [Q&A section](Documentation/200-questions.md) and don't hesitate to ask questions in the issues.
 
 ### What’s an EAV model
+
 EAV stands for Entity-Attribute-Value
 
 The main feature consists in storing values in a different table than the entities.
@@ -23,6 +48,7 @@ the database but in YAML files.
 If you're not familiar with the key concepts of the EAV model, please read the following.
 
 ### Why using it
+
 - Allowing ultra-fast model design because it's super easy to bootstrap.
 - Grouping in the same place the model and the metadata like: form configuration, validation, serialization options...
 - Managing single-value attributes and multiple-values attributes the same way and being able to change your mind after
@@ -32,6 +58,7 @@ without having to do data recovery.
 - Easy CRUD: your forms are already configured !
 
 ### Why not using it ?
+
 Performances ? Not a real issue because MySQL is not usable for searching in a vast amount of data anyway, be it an EAV
 model or a more standard relational model. Solution: Elastic Search: it’s currently optionally supported but you have
 to do a lots of manual configuration over your model, this will be an key feature in a near future.
@@ -44,6 +71,7 @@ limitation when using this implementation of the EAV model: There is only one ta
 the Values.
 
 ### The implementation
+
 We are using Doctrine as it’s the most widely supported ORM by the Symfony community and we’re aiming at a MySQL/MariaDB
 implementation only for data storage.
 
@@ -73,6 +101,7 @@ Families and attributes are services automatically generated from your configura
 Symfony services.
 
 ### Example
+
 For a basic blog the configuration will look like this:
 
 ````yaml
@@ -101,6 +130,7 @@ sidus_eav_model:
                 author:
                     type: data_selector # This type allows to select an other entity inside the EAV model
                     options:
+                        autoload: true # Autoload author when loading Post
                         allowed_families:
                             - Author
 
@@ -111,7 +141,7 @@ sidus_eav_model:
                             sortable: true
 
                 isFeatured:
-                    type: switch
+                    type: boolean
 
         Author:
             attributeAsLabel: name
@@ -126,23 +156,3 @@ sidus_eav_model:
 
 Note that by convention we declare the families in UpperCamelCase and the attributes as lowerCamelCase and we encourage
 you to do so.
-
-## Documentation index
-
-- [01 - Installation](Documentation/01-install.md)
-- [02 - Model configuration](Documentation/02-model.md)
-- [03 - Multiple attributes & collections](Documentation/03-multiple.md)
-- [04 - Handling Entities](Documentation/04-entities.md)
-- [05 - Form](Documentation/05-form.md)
-- [06 - Validation](Documentation/06-validate.md)
-- [07 - Query](Documentation/07-query.md)
-- [08 - Translate model](Documentation/08-translate.md)
-- [19 - Contextualisation](Documentation/09-context.md)
-- [10 - Extending & customizing the model](Documentation/10-extend.md)
-- [11 - Serialization](Documentation/11-serialize.md)
-- [12 - Custom classes](Documentation/12-custom_classes.md)
-
-### Other documentation entries
-- [IDE Autocomplete](Documentation/100-ide_autocomplete.md)
-- [Questions & Answers](Documentation/200-questions.md)
-- [Performances](Documentation/300-performances.md)

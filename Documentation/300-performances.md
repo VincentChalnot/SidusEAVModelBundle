@@ -13,3 +13,9 @@ engine, especially if you have only one family.
 The key concept here will be the amount of Data you will try to manipulate in a single query. For example if you have
 several millions of data in your database but only 200 000 data in a given family, any query on this data set will be
 really fast compared to a query on the whole set.
+
+### Data loading
+
+Check the chapter explaining how to optimize data loading when querying the model:
+
+[Query Optimization](07.2-query-optimization.md)

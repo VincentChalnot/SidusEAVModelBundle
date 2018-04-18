@@ -1,11 +1,11 @@
-
-
 ## Extending the model
+
 The existing model allows you to store all the basic kinds of scalar (text, number, dates) and relations to other
 families.
 However, you might need to store different kind of values in your model.
 
 ### Custom attribute types
+
 Attribute types are the link between the user interface and your model, there are many scenarios where you will need
 to override existing attribute types or create new ones.
 If you take a look at the base Value class, you will notice that it contains a lot of properties suffixed by "Value",
@@ -27,6 +27,7 @@ in the "data")
 These properties are storage properties and can be reused for multiple attribute types and attributes.
 
 #### Adding new attribute types using existing storage properties
+
 To create a new attribute type base on one of the properties described earlier, just create a new service.
 The first parameter is the attribute type code, the second one is the name of the property used to store the value in
 the Value class and the third parameter is the form type.
@@ -43,6 +44,7 @@ services:
 Don't forget to tag your service properly.
 
 #### Overriding existing attribute types
+
 If you need to override an existing attribute type, you can use the following method.
 Attribute types are standard tagged symfony services, you should'nt need to override the default class and you will see
 that all existing attribute types are based on the same class.
@@ -60,6 +62,7 @@ services:
 You have to re-declare the whole attribute's type services and you can override more parameters if need be.
 
 #### Custom relations
+
 This chapter covers how to add a new relation to an other Doctrine entity in the EAV model.
 
 First, add the relation in your Value class:
@@ -118,6 +121,7 @@ services:
 You can start using your new attribute type right away in your model configuration.
 
 #### Extra customizations
+
 Regarding the existing AttributeType class, there are a few more things you can do:
 
 The fourth parameter of the attribute's types services can be used to set default form options for the form types.

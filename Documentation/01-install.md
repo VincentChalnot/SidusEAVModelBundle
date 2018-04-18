@@ -1,7 +1,9 @@
 ## Installation
+
 This bundle can be installed with a few easy steps.
 
 ### Bundle installation
+
 The bundle installation covers four steps:
 - Requiring the library with composer
 - Enabling the bundle in your kernel,
