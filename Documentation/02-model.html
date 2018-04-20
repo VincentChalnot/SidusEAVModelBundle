@@ -200,17 +200,38 @@ family.</p>
 <pre><code class="language-yaml">sidus_eav_model:
     families:
         &lt;familyCode&gt;:
-            label: &lt;human-readable name of the family&gt; # Use the translator instead of this
-            attributeAsLabel: &lt;attributeCode&gt; # Required, except if the family is inherited
-            attributeAsIdentifier: &lt;attributeCode&gt; # Can be used to set a virtual primary key on your family
-            instantiable: &lt;boolean&gt; # Default true, can be used to define an "abstract" family
-            singleton: &lt;boolean&gt; # If true, the family will have only one instance accessible through DataRepository::getInstance
-            parent: &lt;familyCode&gt; # When specified, the family will inherits its configuration
-            data_class: &lt;PhpClass&gt; # Can be used with single table inheritance to declare specific business logic in a dedicated class
-            options: &lt;array&gt; # generic options that can be used by business logic/external libraries
-            attributes: # Required
-                &lt;attributeCode&gt;: ~ # When using a globally defined attribute
-                &lt;attributeCode&gt;: &lt;AttributeConfiguration&gt; # When declaring an attribute locally or overriding a globally defined one
+            # Use the translator instead of this
+            label: &lt;human-readable name of the family&gt;
+
+            # Required, except if the family is inherited
+            attributeAsLabel: &lt;attributeCode&gt;
+
+            # Can be used to set a virtual primary key on your family
+            attributeAsIdentifier: &lt;attributeCode&gt;
+
+            # Default true, can be used to define an "abstract" family
+            instantiable: &lt;boolean&gt;
+
+            # If true, the family will have only one instance accessible through DataRepository::getInstance
+            singleton: &lt;boolean&gt;
+
+            # When specified, the family will inherits its configuration
+            parent: &lt;familyCode&gt;
+
+            # Can be used with single table inheritance to declare specific business logic in a dedicated class
+            data_class: &lt;PhpClass&gt;
+
+            # Generic options that can be used by business logic/external libraries
+            options: &lt;array&gt; 
+
+            # Required
+            attributes: 
+                # When using a globally defined attribute
+                &lt;attributeCode&gt;: ~
+
+                # When declaring an attribute locally or overriding a globally defined one
+                &lt;attributeCode&gt;: &lt;AttributeConfiguration&gt;
+
                 # ...</code></pre>
 <h4 id="attributes-configuration-reference">Attributes configuration reference</h4>
 <p>The attributes (or properties) are defined independently from their families because they will often be reused in many
@@ -225,56 +246,109 @@ any effect on the way data is stored.</p>
 <pre><code class="language-yaml">sidus_eav_model:
     attributes:
         &lt;attributeCode&gt;:
-            type: &lt;attributeTypeCode&gt; # Default "string", see following chapter
-            group: &lt;groupCode&gt; # Default null
-            options: &lt;array&gt; # Some attribute types require specific options here, example:
-                allowed_families: &lt;familyCode[]&gt; # Only for relations/embed: selects the allowed targets families
-                hidden: &lt;boolean&gt; # If true attribute will never appear in auto-generated forms
+            # Default "string", see following chapter
+            type: &lt;attributeTypeCode&gt;
+
+            # Default null
+            group: &lt;groupCode&gt;
+
+            # Some attribute types require specific options here, example:
+            options: &lt;array&gt;
+                # Only for relations/embed: selects the allowed targets families
+                allowed_families: &lt;familyCode[]&gt;
+
+                # If true attribute will never appear in auto-generated forms
+                hidden: &lt;boolean&gt;
+
+                # Serializer options, will only work with the serializer option enabled in the global config
                 serializer:
-                    by_reference: &lt;boolean&gt; # Used with relations, serializer will output only the minimum fields
-                    by_short_reference: &lt;boolean&gt; # Used with relations, serializer will output only the identifier
-                global_unique: &lt;boolean&gt; # Use with unique attributes, will check the unicity accross all families
-                orphan_removal: &lt;boolean&gt; # Only for embed attributes, will remove embed data if true. Default: true
+                    # Used with relations, serializer will output only the minimum fields
+                    by_reference: &lt;boolean&gt;
+
+                    # Used with relations, serializer will output only the identifier
+                    by_short_reference: &lt;boolean&gt;
+
+                # Use with unique attributes, will check the unicity accross all families
+                global_unique: &lt;boolean&gt;
+
+                # Only for embed attributes, will remove embed data if true. Default: true
+                orphan_removal: &lt;boolean&gt;
+
                 # You can also use the options to pass any custom parameter to the attribute and use them in your code
-            form_options: &lt;array&gt; # Standard symfony form options
-            form_type: &lt;FormType&gt; # Overrides the form type of the attribute type
-            default: &lt;mixed&gt; # Default value, not supported for relations for the moment
-            validation_rules: &lt;array&gt; # Standard Symfony validation rules
-            required: &lt;boolean&gt; # Default false, empty() PHP function is used for validation
-            unique: &lt;boolean&gt; # Default false, check if attribute is unique globally
-            multiple: &lt;boolean&gt; # Default false, see following chapter
-            collection: &lt;boolean&gt; # Default null, see following chapter
-            context_mask: &lt;array&gt; # See dedicated chapter</code></pre>
-<p>Some codes are reserved like: id, parent, children, values, valueData, createdAt, updatedAt, currentVersion, family and
-currentContext. If you use any of these words as attribute codes your application behavior will depends of how you try
-to access the entities' data. Don't do that.</p>
+                &lt;customKey&gt;: &lt;customValue&gt;
+
+            # Standard symfony form options
+            form_options: &lt;array&gt;
+
+            # Overrides the form type of the attribute type
+            form_type: &lt;FormType&gt;
+
+            # Default value, not supported for relations for the moment
+            default: &lt;mixed&gt;
+
+            # Standard Symfony validation rules
+            validation_rules: &lt;array&gt;
+
+            # Default false, empty() PHP function is used for validation
+            required: &lt;boolean&gt;
+
+            # Default false, check if attribute is unique globally
+            unique: &lt;boolean&gt;
+
+            # Default false, see the multiple chapter
+            multiple: &lt;boolean&gt;
+
+            # Default null, see the multiple chapter
+            collection: &lt;boolean&gt;
+
+            # Default empty, see the context chapter
+            context_mask: &lt;array&gt;</code></pre>
+<blockquote>
+<p><strong>NOTE:</strong><br>
+Some attribute codes are reserved like:
+<strong>id</strong>,
+<strong>parent</strong>,
+<strong>children</strong>,
+<strong>values</strong>,
+<strong>valueData</strong>,
+<strong>createdAt</strong>,
+<strong>updatedAt</strong>,
+<strong>currentVersion</strong>,
+<strong>family</strong>
+and <strong>currentContext</strong>.
+If you use any of these words as attribute codes your application behavior will depends on how you  try to access the
+EAV data of the entities. <strong>Don't do that.</strong></p>
+</blockquote>
 <h5 id="attribute-types">Attribute types</h5>
 <p>Attribute types define a common way of editing and storing data, this bundle provides the following types:</p>
 <ul>
-<li>string: Stored as varchar(255), edited as text input</li>
-<li>text: Stored as text, edited as textarea</li>
-<li>integer: Stored as integer, edited as text input with validation</li>
-<li>decimal: Stored as float, edited as text input with validation</li>
-<li>boolean: Stored as boolean, edited as checkbox</li>
-<li>date: Stored as date, edited as Symfony date widget</li>
-<li>datetime: Stored as datetime, edited as Symfony datetime widget</li>
-<li>choice: Stored as varchar(255), edited as choice widget (required &quot;choices&quot; form_options)</li>
-<li>data_selector: Stored in a real Doctrine Many-To-One relationship with a related Data object, edited as a choice
+<li><strong>string</strong>: Stored as varchar(255), edited as text input</li>
+<li><strong>text</strong>: Stored as text, edited as textarea</li>
+<li><strong>integer</strong>: Stored as integer, edited as text input with validation</li>
+<li><strong>decimal</strong>: Stored as float, edited as text input with validation</li>
+<li><strong>boolean</strong>: Stored as boolean, edited as checkbox</li>
+<li><strong>date</strong>: Stored as date, edited as Symfony date widget</li>
+<li><strong>datetime</strong>: Stored as datetime, edited as Symfony datetime widget</li>
+<li><strong>choice</strong>: Stored as varchar(255), edited as choice widget (required &quot;choices&quot; form_options)</li>
+<li><strong>data_selector</strong>: Stored in a real Doctrine Many-To-One relationship with a related Data object, edited as a choice
 widget. Accepts a list of allowed families in the 'allowed_families' option.</li>
-<li>embed: Stored like data but embed the edition of the foreign entity directly into the form. Requires a single family
+<li><strong>embed</strong>: Stored like data but embed the edition of the foreign entity directly into the form. Requires a single family
 in the 'allowed_families' option.</li>
-<li>hidden: Stored as varchar(255), will be present in the form as a hidden input.</li>
-<li>string_identifier: Same as a string but unique and required, also automatically removes any context mask.</li>
-<li>integer_identifier: Same as an integer but unique and required, also automatically removes any context mask.</li>
+<li><strong>hidden</strong>: Stored as varchar(255), will be present in the form as a hidden input.</li>
+<li><strong>string_identifier</strong>: Same as a string but unique and required, also automatically removes any context mask.</li>
+<li><strong>integer_identifier</strong>: Same as an integer but unique and required, also automatically removes any context mask.</li>
 </ul>
-<p>Additional attribute types can be found in the sidus/eav-bootstrap-bundle:</p>
+<p>Additional attribute types can be found in the
+<a href="https://github.com/VincentChalnot/SidusEAVBootstrapBundle">sidus/eav-bootstrap-bundle</a>:</p>
 <ul>
-<li>html: Stored as text, edited as TinyMCE WYSIWYG editor, featuring full control over configuration</li>
-<li>switch: Stored as boolean, edited as a nice checkbox</li>
-<li>autocomplete_data_selector: Stored like data, edited as an auto-complete input, requires the &quot;allowed_families&quot; form_option.</li>
-<li>combo_data_selector: Allow selection of the family first, then autocomplete of the data, using &quot;autocomplete_data_selector&quot;.
-Date and datetime are also improved with bootstrap date/time picker.</li>
+<li><strong>html</strong>: Stored as text, edited as TinyMCE WYSIWYG editor, featuring full control over configuration</li>
+<li><strong>switch</strong>: Stored as boolean, edited as a nice checkbox</li>
+<li><strong>autocomplete_data_selector</strong>: Stored like data, edited as an auto-complete input, requires the &quot;allowed_families&quot;
+form_option.</li>
+<li><strong>combo_data_selector</strong>: Allow selection of the family first, then autocomplete of the data, using
+&quot;autocomplete_data_selector&quot;.</li>
 </ul>
+<p>Date and datetime are also improved with bootstrap date/time picker.</p>
 <p>The only current limitation of the embed type is that you cannot embed a family inside the same family, this creates an
 infinite loop during form building.</p>
 <p>If you change the type of an attribute, its values will probably be discarded during the next save but it can also leads

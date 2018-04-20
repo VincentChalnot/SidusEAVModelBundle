@@ -177,7 +177,181 @@
             </div>
 
                 <section class="col-sm-9">
-            <p>Work in progress</p>
+            <h2 id="data-contextualisation">Data Contextualisation</h2>
+<p>Sometimes the data you store for a given entity and a given attribute can vary based on various contexts.</p>
+<p>For internationalization for example, we have at least the <code>language</code> context axis and optionally the
+<code>region</code> context axis. Both combined they are used to define the locale of the user.</p>
+<p>In this example, a given locale <code>en_US</code> corresponds to the context value <code>en</code> for the context axis
+<code>language</code> and the context value <code>US</code> for the context axis <code>region</code>.</p>
+<blockquote>
+<p><strong>NOTE:</strong><br>
+We chose not to force any default context axis so you are free to define them yourself. This should allows you to
+really define your own custom context axis based on your business logic instead of being forced to adapt to an
+existent behavior.</p>
+</blockquote>
+<p>You need to define for each attribute the context axis mask that applies to their values, meaning the list of context
+axis that makes the attribute's values variable depending of their context values.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>A label attribute may vary depending on the language but maybe not the region: Does the <code>en_US</code> title and the
+<code>en_UK</code> title should always be the same?</li>
+<li>A description however might contains specific variations depending on both the <code>language</code> and the <code>region</code>
+axis.</li>
+<li>If you have an attribute corresponding to a publication date, it may depends upon the <code>region</code> axis but
+certainly not upon the <code>language</code> axis. It may also vary upon a different context axis like a <code>market</code>
+axis.</li>
+<li>You may have products with certain legal attributes that varies based on a <code>market</code> context axis (Europe,
+America, Asia, etc.)</li>
+<li>Certain attributes might have different values based on your <code>channel</code> (Web, mobile, print)</li>
+<li>You may need to store the <code>source</code> from which the value came from and then define later an specific fallback
+rule allowing the attributes contexualized by <code>source</code> to return different &quot;master&quot; values depending on all
+different source versions.</li>
+<li>You will probably need custom axis corresponding to your business logic that no one knows except you.</li>
+</ul>
+<blockquote>
+<p><strong>NOTE</strong><br>
+There is no system to limit the context axis values to certain values in this bundle, you will have to validate your
+context axis values yourself or just make sure the end user cannot set any value he wants.</p>
+</blockquote>
+<h3 id="setup">Setup</h3>
+<p>Like any powerful tool, this feature requires a certain amount of setup but we tried to make it as easy as possible.</p>
+<h4 id="base-configuration">Base configuration</h4>
+<p>You must declare a default context in the global config:</p>
+<pre><code class="language-yaml">sidus_eav_model:
+    # ...
+    default_context:
+        language: en
+        region: US</code></pre>
+<blockquote>
+<p><strong>NOTE:</strong><br>
+You <strong>must</strong> declare all your context axis in the <code>default_context</code> config and each context axis <strong>must</strong> have
+a default value.</p>
+</blockquote>
+<h4 id="declaring-contextual-attributes">Declaring contextual attributes.</h4>
+<p>By default all you attributes won't be contextualized, this means that they will always return and store the same values
+whatever your current context may be.</p>
+<pre><code class="language-yaml">sidus_eav_model:
+    families:
+        Product:
+            attributeAsLabel: title
+            attributeAsIdentifier: sku
+            attributes:
+                sku:
+                    type: string_identifier
+                    # Simply don't define any context_mask option if you don't want your attribute to be contextualized
+
+                title:
+                    # This means the values of this attribute will vary depending on the language
+                    context_mask: [language]
+
+                description:
+                    type: text
+                    # This means the values of this attribute will vary depending on the language AND the region
+                    context_mask: [language, region]
+
+                legal:
+                    type: text
+                    context_mask: [market]
+
+                # ... Other attributes</code></pre>
+<h4 id="entities-setup">Entities setup</h4>
+<p>Your <code>Value</code> class must be able to store you different context values. This is a simple example with only the
+<code>language</code> and the <code>region</code> context axis.</p>
+<pre><code class="language-php">&lt;?php
+
+namespace MyNamespace\EAVModelBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Sidus\EAVModelBundle\Entity\AbstractValue;
+
+/**
+ * @see install procedure for doctrine annotations
+ */
+class Value extends AbstractValue
+{
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=3 nullable=true)
+     */
+    protected $language;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=4, nullable=true)
+     */
+    protected $region;
+
+    /**
+     * @return array
+     */
+    public static function getContextKeys()
+    {
+        return ['language', 'region'];
+    }
+}</code></pre>
+<p>If the Value::getContextKeys() fails to return the same context axis than the ones in the default context, you will get
+an exception asking you to fix this.</p>
+<blockquote>
+<p><strong>NOTE:</strong><br>
+Each context axis must be nullable unless ALL your attributes are contextualized by this data axis.</p>
+</blockquote>
+<p>You will be able to access the data associated to this context in several ways:</p>
+<h4 id="setting-the-context-globally">Setting the context globally</h4>
+<p>This will set the context for the entire application, it will also try to store the context in the session.</p>
+<pre><code class="language-php">&lt;?php
+/** @var \Sidus\EAVModelBundle\Context\ContextManager $contextManager */
+$contextManager-&gt;setContext([
+    'language' =&gt; 'en',
+    'region' =&gt; 'US',
+]);</code></pre>
+<h4 id="setting-the-context-by-data">Setting the context by data</h4>
+<pre><code class="language-php">&lt;?php
+/** @var \Sidus\EAVModelBundle\Entity\ContextualDataInterface $data */
+$data-&gt;setCurrentContext([
+    'language' =&gt; 'en',
+    'region' =&gt; 'US',
+]);</code></pre>
+<h4 id="getting-a-value-for-a-specific-context">Getting a value for a specific context</h4>
+<pre><code class="language-php">&lt;?php
+/** @var \Sidus\EAVModelBundle\Entity\DataInterface $data */
+$data-&gt;get(
+    'title',
+    [
+        'language' =&gt; 'en',
+        'region' =&gt; 'US',
+    ]
+);
+// OR
+$data-&gt;getTitle([
+    'language' =&gt; 'en',
+    'region' =&gt; 'US',
+]);</code></pre>
+<h4 id="setting-a-value-for-a-specific-context">Setting a value for a specific context</h4>
+<pre><code class="language-php">&lt;?php
+/** @var \Sidus\EAVModelBundle\Entity\DataInterface $data */
+$data-&gt;set(
+    'title',
+    'My Little Tauntaun',
+    [
+        'language' =&gt; 'en',
+        'region' =&gt; 'US',
+    ]
+);
+// OR
+$data-&gt;setTitle(
+    'My Little Tauntaun',
+    [
+        'language' =&gt; 'en',
+        'region' =&gt; 'US',
+    ]
+);</code></pre>
+<blockquote>
+<p><strong>NOTE</strong>:<br>
+You don't need to pass the entire context all the time, it will simply be merged with your current context to make
+sure you have all your context axis set.</p>
+</blockquote>
         </section>
     </div>
 </main>

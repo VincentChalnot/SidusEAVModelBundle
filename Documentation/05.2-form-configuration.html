@@ -186,14 +186,29 @@ attribute that will be used to generate the form.</p>
 <p>So for each attribute in the family, the configuration reference is the following: (in yml for the example)</p>
 <pre><code class="language-yml">attributes_config:
     &lt;attributeCode&gt;:
-        label: &lt;string&gt; # defaults to the __toString of the attribute, see translation chapter for more information
-        form_type: &lt;string&gt; #defaults to the form_type of the attribute
-        hidden: &lt;bool&gt; # defaults to the hidden option of the attribute
-        form_options: &lt;array&gt; # Defaults to [], will be merged by default with the attribute form_options
-        merge_form_options: &lt;bool&gt; # defaults to true: if set to false the form_options of the attribute will be ignored
-        multiple: &lt;bool&gt; # default to attribute option, careful with this one!
-        validation_rules: &lt;array&gt; # Add new constraints to the generated form, default one will still be used!
-        collection_type: &lt;string&gt; # Default form type to use with collections</code></pre>
+        # Defaults to the __toString of the attribute, see translation chapter for more information
+        label: &lt;string&gt;
+
+        # Defaults to the form_type of the attribute
+        form_type: &lt;string&gt;
+
+        # Defaults to the hidden option of the attribute
+        hidden: &lt;bool&gt;
+
+        # Defaults to [], will be merged by default with the attribute form_options
+        form_options: &lt;array&gt;
+
+        # Defaults to true: if set to false the form_options of the attribute will be ignored
+        merge_form_options: &lt;bool&gt;
+
+        # Default to attribute option, careful with this one!
+        multiple: &lt;bool&gt;
+
+        # Add new constraints to the generated form, default one will still be used!
+        validation_rules: &lt;array&gt;
+
+        # Default form type to use with collections
+        collection_type: &lt;string&gt;</code></pre>
 <p>This configuration can be used in many ways to override the generation of the forms.
 Extending this behaviour can be done by extending the AttributeFormBuilder that holds all the logic.</p>
 <h4 id="switching-from-a">Switching from a <code>data_selector</code> type to an <code>embed</code> type</h4>
