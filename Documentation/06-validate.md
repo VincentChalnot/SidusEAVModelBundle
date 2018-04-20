@@ -1,7 +1,3 @@
----
-currentMenu: validate
----
-
 ## Validation
 
 The EAV model is 100% compatible with Symfony's validator component.
@@ -17,7 +13,8 @@ sidus_eav_model:
             attributeAsLabel: name
             attributes:
                 name:
-                    required: true # This is equivalent to using the NotBlank validator
+                    # This is equivalent to using the NotBlank validator
+                    required: true 
 
                 email:
                     validation_rules:

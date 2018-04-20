@@ -1,7 +1,3 @@
----
-currentMenu: install
----
-
 ## Installation
 
 This bundle can be installed with a few easy steps.
@@ -42,8 +38,7 @@ class AppKernel
 
 #### Create your Data and Value classes
 
-In a dedicated bundle or in one of your bundle (it's generally considered as a good practise to separate your model in
-a dedicated bundle), create two new Doctrine entities:
+In a dedicated bundle or in one of your bundle, create two new Doctrine entities:
 
 ````php
 <?php
@@ -93,7 +88,9 @@ class Value extends AbstractValue
 Note that you're in charge of defining the mysql indexes of theses two classes, the indexes provided in the example are
 not mandatory but strongly advised for performances.
 
-Single table inheritance can be configured to allow different classes for different families.
+Single table inheritance can be configured to allow different classes for different families, see this chapter for more
+information:
+[Custom classes](12-custom_classes.md)
 
 #### Base configuration
 

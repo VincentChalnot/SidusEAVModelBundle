@@ -1,5 +1,5 @@
 template:
-    url: https://github.com/pnowy/CouscousNativeTemplate
+    url: https://github.com/VincentChalnot/CouscousNativeTemplate
 
 exclude:
     - UPDATE-1.2.md
@@ -8,10 +8,10 @@ title: Sidus/EAVModelBundle
 subTitle: Blazing fast data modeling with Symfony
 
 fontAwesomeIcon: fa fa-database
-footerText: Copyright @VincentChalnot 2015-2018 with special thanks to Clever-Age
+footerText: Copyright <a href="https://twitter.com/VincentChalnot" target="_blank">@VincentChalnot</a> 2015-2018 with
+            special thanks to <a href="https://www.clever-age.com/" target="_blank">Clever-Age</a>
 
 branch: gh-pages
-
 baseUrl: https://vincentchalnot.github.io/SidusEAVModelBundle
 
 github:
@@ -23,60 +23,65 @@ menu:
         home:
             name: Home
             items:
-                home:
+                README.md:
                     text: Introduction
                     relativeUrl: index.html
                 example:
                     text: Example
                     relativeUrl: index.html#example
+
         main:
             name: Main documentation
             items:
-                install:
+                Documentation/01-install.md:
                     text: 01 - Installation
                     relativeUrl: Documentation/01-install.html
-                model:
+                Documentation/02-model.md:
                     text: 02 - Model configuration
                     relativeUrl: Documentation/02-model.html
-                multiple:
+                Documentation/03-multiple.md:
                     text: 03 - Multiple attributes & collections
                     relativeUrl: Documentation/03-multiple.html
-                entities:
+                Documentation/04-entities.md:
                     text: 04 - Handling Entities
                     relativeUrl: Documentation/04-entities.html
-                form:
+                Documentation/05.1-form.html:
                     text: 05 - Forms
                     relativeUrl: Documentation/05.1-form.html
-                validate:
+                Documentation/06-validate.html:
                     text: 06 - Validation
                     relativeUrl: Documentation/06-validate.html
-                query:
+                Documentation/07.1-query.html:
                     text: 07 - Query
                     relativeUrl: Documentation/07.1-query.html
-                translate:
+                Documentation/08-translate.html:
                     text: 08 - Translating the model
                     relativeUrl: Documentation/08-translate.html
-                context:
+                Documentation/09-context.html:
                     text: 19 - EAV Contextualisation
                     relativeUrl: Documentation/09-context.html
-                serialize:
+                Documentation/10-serialize.html:
                     text: 10 - Serialization
                     relativeUrl: Documentation/10-serialize.html
-                extend:
+                Documentation/11-extend.html:
                     text: 11 - Extending & customizing the model
                     relativeUrl: Documentation/11-extend.html
-                custom_classes:
+                Documentation/12-custom_classes.html:
                     text: 12 - Custom classes
                     relativeUrl: Documentation/12-custom_classes.html
+                Documentation/13-extensions.html:
+                    text: 13 - Extensions
+                    relativeUrl: Documentation/13-extensions.html
+
         other:
             name: Other documentation entries
             items:
-                ide_autocomplete:
+                Documentation/100-ide_autocomplete.html:
                     text: IDE Autocomplete
                     relativeUrl: Documentation/100-ide_autocomplete.html
-                questions:
+                Documentation/200-questions.html:
                     text: Questions & Answers
                     relativeUrl: Documentation/200-questions.html
-                performances:
+                Documentation/300-performances.html:
                     text: Performances
                     relativeUrl: Documentation/300-performances.html

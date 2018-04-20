@@ -1,7 +1,3 @@
----
-currentMenu: performances
----
-
 ## Performances
 
 The EAV model can store several millions of entities with hundreds of attributes before performances starts to degrades.

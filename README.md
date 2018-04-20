@@ -8,6 +8,18 @@ Sidus/EAVModelBundle Documentation
 This bundle allows you to quickly set up a dynamic model in a Symfony project using Doctrine.  
 Model configuration is done in Yaml and everything can be easily extended.
 
+**Main Features:**
+
+- [The model](Documentation/02-model.md) is defined in [Yaml configuration files](#example), it's easy, it's powerful
+  and it's versionned.
+- [Dynamic forms:](Documentation/05.1-form.md) no more time spent writting form types
+- [Data contextualisation](Documentation/09-context.md) with custom context axis (language, region, channel, version...)
+- Compatible with many native Symfony components:
+  [Form](Documentation/05.1-form.md),
+  [Validator](Documentation/06-validate.md),
+  [Translator](Documentation/08-translate.md),
+  [Serializer](Documentation/10-serialize.md)...
+
 ### Documentation index
 
 - [01 - Installation](Documentation/01-install.md)
@@ -22,6 +34,7 @@ Model configuration is done in Yaml and everything can be easily extended.
 - [10 - Serialization](Documentation/10-serialize.md)
 - [11 - Extending & customizing the model](Documentation/11-extend.md)
 - [12 - Custom classes](Documentation/12-custom_classes.md)
+- [13 - Extensions](Documentation/13-extensions.md)
 
 ### Other documentation entries
 
@@ -60,8 +73,9 @@ without having to do data recovery.
 ### Why not using it ?
 
 Performances ? Not a real issue because MySQL is not usable for searching in a vast amount of data anyway, be it an EAV
-model or a more standard relational model. Solution: Elastic Search: it’s currently optionally supported but you have
-to do a lots of manual configuration over your model, this will be an key feature in a near future.
+model or a more standard relational model. Solution: Elastic Search: it’s currently optionally supported through the
+[Sidus/FilterBundle](https://github.com/VincentChalnot/SidusFilterBundle) with the
+[Sidus/ElasticaFilterBundle](https://github.com/VincentChalnot/SidusElasticaFilterBundle)
 
 #### Relational model
 

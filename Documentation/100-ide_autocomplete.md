@@ -1,14 +1,12 @@
----
-currentMenu: ide_autocomplete
----
+## IDE autocomplete
 
-#### Intro
+### Intro
 
 You can optionally activate a code generator to create fake abstract classes for your IDE autocomplete.
 This means that when coding you can instantly know what are the attributes present in your model and the type of data
 they return.
 
-#### Install
+### Install
 
 In your config_dev.yml, add this line at the beginning:
 
@@ -25,7 +23,7 @@ PHP classes, they are only generated in your dev environement and you should not
 The annotations directory must not be ignored by your IDE, for example in PHPStorm you should only
 manually exclude all directories inside /var without including /var/annotations.
 
-#### Usage:
+### Usage:
 
 Use the __@var__ annotation :
 

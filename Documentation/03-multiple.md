@@ -1,7 +1,3 @@
----
-currentMenu: multiple
----
-
 ## Multiple & collection option
 
 The "collection" option allows you to add multiple values for the same attribute and because of the way the EAV model
@@ -32,18 +28,26 @@ array of values. For example the following configuration is perfectly correct:
 sidus_eav_model:
     attributes:
         checkboxesExample:
-            type: choice # Store data as a string
-            collection: true # This means the model is waiting for an array of values, so an array of strings
+            # Store data as a string
+            type: choice
+            
+            # This means the model is waiting for an array of values, so an array of strings
+            collection: true
+            
             form_options:
-                multiple: true # This trigger the ability of the ChoiceType to provide an array of values
-                expanded: true # Just to have checkboxes instead of an ugly multiselect in the rendering
+                # This trigger the ability of the ChoiceType to provide an array of values
+                multiple: true
+                
+                # Just to have checkboxes instead of an ugly multiselect in the rendering
+                expanded: true
+
                 choices:
                     bar: foo
                     42: life
 ````
 
-If you were to use the "multiple" option in the following example the form would not render as expected and saving data
-would result in an exception.
+If you were to use the ````multiple```` option in the following example the form would not render as expected and saving
+data would result in an exception.
 
 An attribute configured to be multiple but not a collection doesn't make any sense and will trigger an exception during
 the compilation of the model.

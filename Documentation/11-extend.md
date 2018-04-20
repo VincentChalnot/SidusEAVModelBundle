@@ -1,7 +1,3 @@
----
-currentMenu: extend
----
-
 ## Extending the model
 
 The existing model allows you to store all the basic kinds of scalar (text, number, dates) and relations to other
@@ -17,13 +13,13 @@ these properties are used to store all the different kind of PHP values and corr
 
 The scalar types:
 
-- string (type="string", length=255)
-- text (type="text")
-- bool (type="boolean")
-- integer (type="integer")
-- decimal (type="float")
-- date (type="date")
-- datetime (type="datetime")
+- **string** (type="string", length=255)
+- **text** (type="text")
+- **bool** (type="boolean")
+- **integer** (type="integer")
+- **decimal** (type="float")
+- **date** (type="date")
+- **datetime** (type="datetime")
 
 There is also a "dataValue" which correspond to a Doctrine's association to an other entity (the actual entity is stored
 in the "data")

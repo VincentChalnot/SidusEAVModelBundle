@@ -1,7 +1,3 @@
----
-currentMenu: questions
----
-
 ## Questions and Answers
 
 ### EAV Manager / Clever Data Manager
