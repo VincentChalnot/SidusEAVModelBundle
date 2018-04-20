@@ -177,20 +177,7 @@
             </div>
 
                 <section class="col-sm-9">
-            <h2 id="performances">Performances</h2>
-<p>The EAV model can store several millions of entities with hundreds of attributes before performances starts to degrades.
-The major limit will be on the values table that will potentially reach billions of entries:</p>
-<p>If you have 1 000 000 entities in your database, your Data table will have 1 000 000 entries.
-If each family (data type) has, let's say, 100 attributes in average and about 70% of them will be filled (30% left
-blank), the Value table will have around : 1 000 000 <em> 100 </em> 0.7 = 70 000 000 entries.</p>
-<p>With this amount of data, ordering data by one of their EAV attribute can potentially take a huge load on your MySQL
-engine, especially if you have only one family.</p>
-<p>The key concept here will be the amount of Data you will try to manipulate in a single query. For example if you have
-several millions of data in your database but only 200 000 data in a given family, any query on this data set will be
-really fast compared to a query on the whole set.</p>
-<h3 id="data-loading">Data loading</h3>
-<p>Check the chapter explaining how to optimize data loading when querying the model:</p>
-<p><a href="07.2-query-optimization.html">Query Optimization</a></p>
+            <h2 id="extensions">Extensions</h2>
         </section>
     </div>
 </main>
