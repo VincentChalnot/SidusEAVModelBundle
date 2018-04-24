@@ -11,7 +11,6 @@
 namespace Sidus\EAVModelBundle\Command;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\QueryBuilder;
 use Sidus\EAVModelBundle\Doctrine\EAVFinder;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
@@ -35,19 +34,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CleanDataCommand extends ContainerAwareCommand
 {
-    /** @var array */
-    protected static $comparisonMap = [
-        '=' => 'eq',
-        '!=' => 'neq',
-        '>' => 'gt',
-        '<' => 'lt',
-        '>=' => 'gte',
-        '<=' => 'lte',
-        'in' => 'in',
-        'not in' => 'notIn',
-        'like' => 'like',
-        'not like' => 'notLike',
-    ];
 
     /** @var EntityManager */
     protected $entityManager;
@@ -338,28 +324,6 @@ class CleanDataCommand extends ContainerAwareCommand
             }
         );
         $queryBuilder = $this->eavFinder->getFilterByQb($family, $filters);
-        $queryBuilderAlias = current($queryBuilder->getRootAliases());
-
-        /** @noinspection ForeachSourceInspection */
-        foreach ($idFilters as $filter) {
-            $comparison = $filter['comparison'];
-            $value = $filter['value'];
-
-            if ($value instanceof QueryBuilder) {
-                foreach ($value->getParameters() as $parameter) {
-                    $queryBuilder->setParameter($parameter->getName(), $parameter->getValue());
-                }
-                $value = $value->getQuery()->getDQL();
-            }
-
-            if (!array_key_exists($comparison, static::$comparisonMap)) {
-                throw new \InvalidArgumentException('Invalid comparison');
-            }
-            $method = static::$comparisonMap[$comparison];
-            $queryPart = $queryBuilder->expr()->$method($queryBuilderAlias, $value);
-
-            $queryBuilder->andWhere($queryPart);
-        }
 
         $queryBuilder
             ->distinct()
