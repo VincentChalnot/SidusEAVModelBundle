@@ -237,7 +237,7 @@ class CleanDataCommand extends ContainerAwareCommand
         $pattern = sprintf(
             '/(%s):(%s):(.+)/',
             implode('|', $validProperties),
-            implode('|', EAVFinder::FILTER_OPERATORS)
+            implode('|', array_keys(EAVFinder::FILTER_OPERATORS))
         );
         $match = preg_match($pattern, $input, $parts);
 
