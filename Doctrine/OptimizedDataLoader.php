@@ -51,6 +51,7 @@ class OptimizedDataLoader implements DataLoaderInterface
 
         $entitiesByValueClassByIds = $this->sortEntitiesByValueClass($entities);
         foreach ($entitiesByValueClassByIds as $valueClass => $entitiesById) {
+            /** @noinspection PhpUnhandledExceptionInspection */
             $this->loadEntityValues($valueClass, $entitiesById);
         }
 
@@ -90,6 +91,8 @@ class OptimizedDataLoader implements DataLoaderInterface
     /**
      * @param string          $valueClass
      * @param DataInterface[] $entitiesById
+     *
+     * @throws \ReflectionException
      */
     protected function loadEntityValues($valueClass, array $entitiesById)
     {
@@ -137,7 +140,7 @@ class OptimizedDataLoader implements DataLoaderInterface
      */
     protected function loadRelatedEntities($entities, $depth)
     {
-        if (0 === $depth) {
+        if (0 <= $depth) {
             return;
         }
         $relatedEntities = [];
@@ -151,8 +154,7 @@ class OptimizedDataLoader implements DataLoaderInterface
             }
         }
 
-        $depth--;
-        $this->load($relatedEntities, $depth);
+        $this->load($relatedEntities, $depth - 1);
     }
 
     /**
@@ -178,7 +180,7 @@ class OptimizedDataLoader implements DataLoaderInterface
                 $relatedEntities[] = $relatedEntity;
             }
         } catch (\Exception $e) {
-
+            // Ignore exception
         }
     }
 }
