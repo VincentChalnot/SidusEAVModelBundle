@@ -418,8 +418,9 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @return DataInterface
      * @throws \LogicException
+     *
+     * @return DataInterface
      */
     public function createData()
     {

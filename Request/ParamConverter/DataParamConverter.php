@@ -64,8 +64,6 @@ class DataParamConverter extends AbstractParamConverter
     /**
      * @param int|string $value
      *
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     *
      * @return null|DataInterface
      */
     protected function convertValue($value)

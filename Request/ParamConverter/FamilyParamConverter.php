@@ -65,8 +65,9 @@ class FamilyParamConverter extends AbstractParamConverter
     /**
      * @param string $value
      *
-     * @return FamilyInterface
      * @throws MissingFamilyException
+     *
+     * @return FamilyInterface
      */
     protected function convertValue($value)
     {

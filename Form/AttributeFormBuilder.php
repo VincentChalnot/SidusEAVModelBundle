@@ -13,7 +13,7 @@ namespace Sidus\EAVModelBundle\Form;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\BaseBundle\Translator\TranslatableTrait;
-use Sidus\EAVModelBundle\Validator\Mapping\Loader\BaseLoader;
+use Sidus\BaseBundle\Validator\Mapping\Loader\BaseLoader;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\Options;
@@ -107,7 +107,7 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
      * @param FormBuilderInterface $parentBuilder
      * @param AttributeInterface   $attribute
      * @param array                $groupPath
-     * @param                      $level
+     * @param int                  $level
      *
      * @throws \Symfony\Component\Form\Exception\InvalidArgumentException
      * @throws \InvalidArgumentException

@@ -106,8 +106,9 @@ class EAVFinder
      * @param array           $filterBy
      * @param array           $orderBy
      *
-     * @return mixed
      * @throws \InvalidArgumentException
+     *
+     * @return DataInterface[]
      */
     public function filterBy(FamilyInterface $family, array $filterBy, array $orderBy = [])
     {
@@ -163,7 +164,6 @@ class EAVFinder
                     $handleDefaultValues = false;
                     break;
                 case 'in':
-                    /** @noinspection PhpMissingBreakStatementInspection */
                 case 'not in':
                     $handleDefaultValues = false;
                 default:

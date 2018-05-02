@@ -12,7 +12,6 @@ namespace Sidus\EAVModelBundle\Doctrine;
 
 use Doctrine\ORM\Query\Expr\Join;
 use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
-use Sidus\EAVModelBundle\Entity\ValueInterface;
 use Sidus\EAVModelBundle\Exception\ContextException;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
@@ -315,9 +314,10 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      *
      * @param string $alias
      *
-     * @return EAVQueryBuilderInterface
      * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      * @throws \LogicException
+     *
+     * @return EAVQueryBuilderInterface
      */
     public function join($alias = null)
     {
@@ -439,6 +439,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * @param mixed  $parameter
      *
      * @throws \LogicException
+     *
      * @return AttributeQueryBuilderInterface
      */
     protected function simpleDQLStatement($operator, $parameter)

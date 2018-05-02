@@ -115,6 +115,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      * @throws \Sidus\EAVModelBundle\Exception\EAVExceptionInterface
      * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
      * @throws \Symfony\Component\Serializer\Exception\CircularReferenceException
+     * @throws \ReflectionException
      *
      * @return array
      */
@@ -287,6 +288,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      * @param array         $context
      *
      * @throws InvalidArgumentException
+     * @throws \ReflectionException
      *
      * @return array
      */
@@ -298,7 +300,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         // methods
         $reflClass = new \ReflectionClass($object);
         foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $reflMethod) {
-            if ($reflMethod->getNumberOfRequiredParameters() !== 0 ||
+            if (0 !== $reflMethod->getNumberOfRequiredParameters() ||
                 $reflMethod->isStatic() ||
                 $reflMethod->isConstructor() ||
                 $reflMethod->isDestructor()
@@ -312,7 +314,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
             if (0 === strpos($name, 'get') || 0 === strpos($name, 'has')) {
                 // getters and hassers
                 $attributeName = lcfirst(substr($name, 3));
-            } elseif (strpos($name, 'is') === 0) {
+            } elseif (0 === strpos($name, 'is')) {
                 // issers
                 $attributeName = lcfirst(substr($name, 2));
             }
@@ -379,11 +381,11 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
 
         // If normalizing by reference, we just check if it's among the allowed attributes
         if ($this->byReferenceHandler->isByReference($context)) {
-            return in_array($attribute->getCode(), $this->referenceAttributes, true);
+            return \in_array($attribute->getCode(), $this->referenceAttributes, true);
         }
 
         // Also check ignored attributes
-        if (in_array($attribute->getCode(), $this->ignoredAttributes, true)) {
+        if (\in_array($attribute->getCode(), $this->ignoredAttributes, true)) {
             return false;
         }
 
@@ -401,13 +403,12 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      *
      * @return bool
      */
-    protected function isEAVGroupAllowed(
-        /** @noinspection PhpUnusedParameterInspection */
+    protected function isEAVGroupAllowed(/** @noinspection PhpUnusedParameterInspection */
         DataInterface $object,
         AttributeInterface $attribute,
         array $context
     ) {
-        if (!isset($context[static::GROUPS]) || !is_array($context[static::GROUPS])) {
+        if (!isset($context[static::GROUPS]) || !\is_array($context[static::GROUPS])) {
             return true;
         }
 
@@ -417,13 +418,13 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         }
 
         $groups = $serializerOptions[static::GROUPS];
-        if (!is_array($groups)) {
+        if (!\is_array($groups)) {
             throw new InvalidArgumentException(
                 "Invalid 'serializer.groups' option for attribute {$attribute->getCode()} : should be an array"
             );
         }
 
-        return 0 < count(array_intersect($groups, $context[static::GROUPS]));
+        return 0 < \count(array_intersect($groups, $context[static::GROUPS]));
     }
 
     /**
@@ -447,11 +448,11 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
     ) {
         // If normalizing by reference, we just check if it's among the allowed attributes
         if ($this->byReferenceHandler->isByReference($context)) {
-            return in_array($attribute, $this->referenceAttributes, true);
+            return \in_array($attribute, $this->referenceAttributes, true);
         }
 
         // Check ignored attributes
-        if (in_array($attribute, $this->ignoredAttributes, true)) {
+        if (\in_array($attribute, $this->ignoredAttributes, true)) {
             return false;
         }
 
@@ -471,7 +472,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      */
     protected function isGroupAllowed(DataInterface $object, $attribute, array $context)
     {
-        if (!$this->classMetadataFactory || !isset($context[static::GROUPS]) || !is_array($context[static::GROUPS])) {
+        if (!$this->classMetadataFactory || !isset($context[static::GROUPS]) || !\is_array($context[static::GROUPS])) {
             return true;
         }
 
@@ -479,7 +480,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         foreach ($attributesMetadatas as $attributeMetadata) {
             // Alright, it's completely inefficient...
             if ($attributeMetadata->getName() === $attribute) {
-                return 0 < count(array_intersect($attributeMetadata->getGroups(), $context[static::GROUPS]));
+                return 0 < \count(array_intersect($attributeMetadata->getGroups(), $context[static::GROUPS]));
             }
         }
 

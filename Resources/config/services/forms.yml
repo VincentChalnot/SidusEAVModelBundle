@@ -27,9 +27,3 @@ services:
             - '%sidus_eav_model.entity.data.class%'
         tags:
             - { name: form.type }
-
-    # Choice extension to handle Doctrine collections
-    sidus_eav_model.form.extension.choice:
-        class: Sidus\EAVModelBundle\Form\Extension\ChoiceTypeExtension
-        tags:
-            - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\ChoiceType }

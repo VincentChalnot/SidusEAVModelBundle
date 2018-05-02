@@ -32,13 +32,13 @@ class WrongFamilyException extends \ErrorException implements EAVExceptionInterf
 
     /**
      * @param DataInterface $data
-     * @param array        $familyCodes
+     * @param array         $familyCodes
      *
      * @throws WrongFamilyException
      */
     public static function assertFamilies(DataInterface $data, array $familyCodes)
     {
-        if (in_array($data->getFamilyCode(), $familyCodes, true)) {
+        if (\in_array($data->getFamilyCode(), $familyCodes, true)) {
             return;
         }
 
@@ -48,7 +48,7 @@ class WrongFamilyException extends \ErrorException implements EAVExceptionInterf
         $m = "Argument 1 passed to {$function} must be of one of the following families: {$families}, '{$data->getFamilyCode()}' given";
 
         throw new self(
-            'WrongFamilyException: '.$m, // message
+            "WrongFamilyException: {$m}", // message
             0, // code
             E_RECOVERABLE_ERROR, // severity
             $backtrace[0]['file'], // filename

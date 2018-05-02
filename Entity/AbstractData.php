@@ -333,7 +333,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $valuesData = $this->getValuesData($attribute, $context);
 
-        return \count($valuesData) === 0 ? null : $valuesData->first();
+        return 0 === \count($valuesData) ? null : $valuesData->first();
     }
 
     /**
@@ -380,7 +380,7 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function setId($id)
     {
-        $this->id = (int)$id;
+        $this->id = (int) $id;
 
         return $this;
     }
@@ -601,7 +601,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $values = $this->getValues($attribute, $context);
 
-        return \count($values) === 0 ? null : $values->first();
+        return 0 === \count($values) ? null : $values->first();
     }
 
     /**
@@ -919,7 +919,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $default = $attribute->getDefault();
         if (!$attribute->isCollection()) {
-            $default = (array)$default;
+            $default = (array) $default;
         }
 
         return $this->setInternalValuesData($attribute, $default, $context);
@@ -1074,10 +1074,10 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $attributeAsLabel = $this->getFamily()->getAttributeAsLabel();
         if ($attributeAsLabel) {
-            return (string)$this->getValueData($attributeAsLabel, $context);
+            return (string) $this->getValueData($attributeAsLabel, $context);
         }
 
-        return (string)$this->getIdentifier();
+        return (string) $this->getIdentifier();
     }
 
     /**

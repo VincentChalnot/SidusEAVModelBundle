@@ -98,7 +98,7 @@ class CircularReferenceHandler
     public function handleCircularReference($object)
     {
         if ($this->circularReferenceHandler) {
-            return call_user_func($this->circularReferenceHandler, $object);
+            return \call_user_func($this->circularReferenceHandler, $object);
         }
 
         throw new CircularReferenceException(

@@ -29,8 +29,9 @@ class FamilyType extends StringType
      * @param mixed            $value
      * @param AbstractPlatform $platform
      *
-     * @return null|FamilyInterface
      * @throws MissingFamilyException
+     *
+     * @return null|FamilyInterface
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
@@ -49,8 +50,9 @@ class FamilyType extends StringType
      * @param mixed            $value
      * @param AbstractPlatform $platform
      *
-     * @return string
      * @throws \UnexpectedValueException
+     *
+     * @return string
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {

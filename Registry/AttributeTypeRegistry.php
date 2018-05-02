@@ -43,8 +43,9 @@ class AttributeTypeRegistry
     /**
      * @param string $code
      *
-     * @return AttributeTypeInterface
      * @throws UnexpectedValueException
+     *
+     * @return AttributeTypeInterface
      */
     public function getType($code)
     {

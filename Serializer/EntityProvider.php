@@ -86,7 +86,7 @@ class EntityProvider
             return $entity;
         }
 
-        if (!is_array($data) && !$data instanceof \ArrayAccess) {
+        if (!\is_array($data) && !$data instanceof \ArrayAccess) {
             throw new UnexpectedValueException('Unable to denormalize data from unknown format');
         }
 

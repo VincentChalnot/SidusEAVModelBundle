@@ -141,15 +141,11 @@ class SimpleDataSelectorType extends AbstractType
     protected function fixDoctrineQueryBuilderNormalizer(OptionsResolver $resolver)
     {
         $queryBuilderNormalizer = function (Options $options, $queryBuilder) {
-            if (is_callable($queryBuilder)) {
-                $queryBuilder = call_user_func(
-                    $queryBuilder,
-                    $options['em']->getRepository($options['class']),
-                    $options
-                );
+            if (\is_callable($queryBuilder)) {
+                $queryBuilder = $queryBuilder($options['em']->getRepository($options['class']), $options);
 
                 if (!$queryBuilder instanceof QueryBuilder) {
-                    throw new UnexpectedTypeException($queryBuilder, 'Doctrine\ORM\QueryBuilder');
+                    throw new UnexpectedTypeException($queryBuilder, QueryBuilder::class);
                 }
             }
 

@@ -20,32 +20,6 @@ use Sidus\EAVModelBundle\Model\FamilyInterface;
 class FamilyNormalizer extends AbstractGenericNormalizer
 {
     /**
-     * @param FamilyInterface $object
-     * @param string          $format
-     * @param array           $context
-     *
-     * @return string
-     */
-    protected function getReference($object, $format, array $context)
-    {
-        return $object->getCode();
-    }
-
-    /**
-     * @param FamilyInterface $object
-     * @param string          $format
-     * @param array           $context
-     *
-     * @return array
-     */
-    protected function getShortReference($object, $format, array $context)
-    {
-        return [
-            'code' => $object->getCode(),
-        ];
-    }
-
-    /**
      * Checks whether the given class is supported for denormalization by this normalizer.
      *
      * @param mixed  $data   Data to denormalize from
@@ -70,5 +44,31 @@ class FamilyNormalizer extends AbstractGenericNormalizer
     public function supportsNormalization($data, $format = null)
     {
         return $data instanceof FamilyInterface;
+    }
+
+    /**
+     * @param FamilyInterface $object
+     * @param string          $format
+     * @param array           $context
+     *
+     * @return string
+     */
+    protected function getReference($object, $format, array $context)
+    {
+        return $object->getCode();
+    }
+
+    /**
+     * @param FamilyInterface $object
+     * @param string          $format
+     * @param array           $context
+     *
+     * @return array
+     */
+    protected function getShortReference($object, $format, array $context)
+    {
+        return [
+            'code' => $object->getCode(),
+        ];
     }
 }

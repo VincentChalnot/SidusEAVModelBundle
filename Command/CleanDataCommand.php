@@ -126,7 +126,7 @@ class CleanDataCommand extends ContainerAwareCommand
                 $input->getOption('family-filter')
             );
         } catch (\InvalidArgumentException $e) {
-            throw new \InvalidArgumentException('Failed to parse value filters : '.$e->getMessage());
+            throw new \InvalidArgumentException("Failed to parse value filters: {$e->getMessage()}");
         }
         try {
             $attributeFilters = $this->extractAttributeFilterOptions(
@@ -134,7 +134,7 @@ class CleanDataCommand extends ContainerAwareCommand
                 $input->getOption('attribute-filters')
             );
         } catch (\InvalidArgumentException $e) {
-            throw new \InvalidArgumentException('Failed to parse attribute filters : '.$e->getMessage());
+            throw new \InvalidArgumentException("Failed to parse attribute filters: {$e->getMessage()}");
         }
 
         if ($familyFilter) {
@@ -163,9 +163,10 @@ class CleanDataCommand extends ContainerAwareCommand
     /**
      * @param string $input
      *
-     * @return FamilyInterface
      * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      * @throws \InvalidArgumentException
+     *
+     * @return FamilyInterface
      */
     protected function extractFamilyFilterOption($input)
     {
@@ -184,9 +185,10 @@ class CleanDataCommand extends ContainerAwareCommand
      * @param FamilyInterface $family
      * @param array           $input
      *
-     * @return array
      * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      * @throws \InvalidArgumentException
+     *
+     * @return array
      */
     protected function extractAttributeFilterOptions(FamilyInterface $family, array $input)
     {
@@ -215,8 +217,9 @@ class CleanDataCommand extends ContainerAwareCommand
      * @param string $input
      * @param array  $validProperties
      *
-     * @return array
      * @throws \InvalidArgumentException
+     *
+     * @return array
      */
     protected function parseFilter($input, array $validProperties)
     {
@@ -288,7 +291,6 @@ class CleanDataCommand extends ContainerAwareCommand
      * @param FamilyInterface $family
      * @param array[]         $filters
      *
-     * @return int
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \UnexpectedValueException
@@ -299,6 +301,8 @@ class CleanDataCommand extends ContainerAwareCommand
      * @throws \Doctrine\Common\Persistence\Mapping\MappingException
      * @throws \Doctrine\Common\Persistence\Mapping\MappingException
      * @throws \Doctrine\ORM\ORMException
+     *
+     * @return int
      */
     protected function cleanDataWithAttributeFilter(FamilyInterface $family, array $filters)
     {
@@ -336,7 +340,7 @@ class CleanDataCommand extends ContainerAwareCommand
             $this
                 ->entityManager
                 ->flush();
-            if (($i % 100) === 0) {
+            if (0 === ($i % 100)) {
                 $this
                     ->entityManager
                     ->clear();
@@ -376,7 +380,6 @@ class CleanDataCommand extends ContainerAwareCommand
             ->where($dataQueryBuilder->expr()->notIn('data', $valueSubQueryBuilder->getDQL()));
 
         return $dataQueryBuilder->getQuery()->execute();
-
     }
 
     /**

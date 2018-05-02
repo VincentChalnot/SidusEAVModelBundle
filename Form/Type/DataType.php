@@ -141,7 +141,7 @@ class DataType extends AbstractType
             'family',
             function (Options $options, $value) {
                 // If family option is not set, try to fetch the family from the attribute option
-                if ($value === null) {
+                if (null === $value) {
                     /** @var AttributeInterface $attribute */
                     $attribute = $options['attribute'];
                     if (!$attribute) {

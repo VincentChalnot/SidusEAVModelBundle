@@ -57,7 +57,7 @@ class FlatNormalizer implements NormalizerInterface, NormalizerAwareInterface, S
      */
     public function supportsNormalization($data, $format = null)
     {
-        return $this->baseNormalizer->supportsNormalization($data, $format) && in_array(
+        return $this->baseNormalizer->supportsNormalization($data, $format) && \in_array(
             $format,
             $this->supportedFormats,
             true

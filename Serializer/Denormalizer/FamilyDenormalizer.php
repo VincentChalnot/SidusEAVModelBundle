@@ -51,10 +51,10 @@ class FamilyDenormalizer implements DenormalizerInterface
         if ($data instanceof FamilyInterface) {
             return $data;
         }
-        if (is_string($data)) {
+        if (\is_string($data)) {
             return $this->resolveFamily($data);
         }
-        if (is_array($data)) {
+        if (\is_array($data)) {
             foreach (['family', 'familyCode', 'family_code', 'code'] as $property) {
                 if (array_key_exists($property, $data)) {
                     return $this->resolveFamily($data[$property]);

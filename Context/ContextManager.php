@@ -111,8 +111,9 @@ class ContextManager
     }
 
     /**
-     * @return FormInterface
      * @throws InvalidOptionsException
+     *
+     * @return FormInterface
      */
     public function getContextSelectorForm()
     {

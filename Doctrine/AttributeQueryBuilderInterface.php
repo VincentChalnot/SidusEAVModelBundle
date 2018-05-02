@@ -18,8 +18,9 @@ namespace Sidus\EAVModelBundle\Doctrine;
 interface AttributeQueryBuilderInterface extends DQLHandlerInterface
 {
     /**
-     * @return string
      * @throws \LogicException
+     *
+     * @return string
      */
     public function getDQL();
 

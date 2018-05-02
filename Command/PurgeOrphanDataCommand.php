@@ -12,8 +12,6 @@ namespace Sidus\EAVModelBundle\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\NativeQuery;
-use Doctrine\ORM\Query\ResultSetMapping;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -73,8 +71,9 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      *
-     * @return int|null|void
      * @throws \Doctrine\DBAL\DBALException
+     *
+     * @return int|null|void
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {

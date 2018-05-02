@@ -59,10 +59,10 @@ class AttributeRegistry
     ];
 
     /**
-     * @param string $attributeClass
-     * @param array $globalContextMask
+     * @param string                $attributeClass
+     * @param array                 $globalContextMask
      * @param AttributeTypeRegistry $attributeTypeRegistry
-     * @param TranslatorInterface $translator
+     * @param TranslatorInterface   $translator
      */
     public function __construct(
         $attributeClass,
@@ -155,7 +155,7 @@ class AttributeRegistry
      */
     protected function addAttribute(AttributeInterface $attribute)
     {
-        if (in_array($attribute->getCode(), static::$reservedCodes, true)) {
+        if (\in_array($attribute->getCode(), static::$reservedCodes, true)) {
             throw new AttributeConfigurationException("Attribute code '{$attribute->getCode()}' is a reserved code");
         }
         $this->attributes[$attribute->getCode()] = $attribute;

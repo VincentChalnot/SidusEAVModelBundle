@@ -270,7 +270,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      */
     protected function isAllowedAttributes(FamilyInterface $family, $attributeCode)
     {
-        if ($attributeCode === 'label' && $family->hasAttribute('label')) {
+        if ('label' === $attributeCode && $family->hasAttribute('label')) {
             return true;
         }
 
@@ -314,7 +314,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         if ($valueMetadata->hasField($storageField)) {
             $type = $valueMetadata->getTypeOfField($storageField);
 
-            if ($type === 'datetime' || $type === 'date') {
+            if ('datetime' === $type || 'date' === $type) {
                 return $this->denormalizeRelation($value, \DateTime::class, $format, $context);
             }
 
@@ -354,7 +354,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
 
         if ($classMetadata->hasField($attributeCode)) {
             $type = $classMetadata->getTypeOfField($attributeCode);
-            if ($type === 'datetime' || $type === 'date') {
+            if ('datetime' === $type || 'date' === $type) {
                 return $this->denormalizeRelation($value, \DateTime::class, $format, $context);
             }
         }

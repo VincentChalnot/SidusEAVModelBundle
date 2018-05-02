@@ -14,7 +14,6 @@ use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
@@ -74,10 +73,11 @@ class DataRepository extends EntityRepository
      * @param string|int         $reference
      * @param bool               $partialLoad
      *
-     * @return Proxy|mixed|DataInterface|null
      * @throws \LogicException
      * @throws \Doctrine\ORM\ORMException
      * @throws NonUniqueResultException
+     *
+     * @return DataInterface|null
      */
     public function findByUniqueAttribute(
         FamilyInterface $family,

@@ -68,6 +68,7 @@ class AnnotationGenerator implements CacheWarmerInterface
      * @param string $cacheDir The cache directory
      *
      * @throws \RuntimeException
+     * @throws \ReflectionException
      */
     public function warmUp($cacheDir)
     {
@@ -117,8 +118,9 @@ EOT;
      * @param FamilyInterface    $family
      * @param AttributeInterface $attribute
      *
-     * @return string
      * @throws \ReflectionException
+     *
+     * @return string
      */
     protected function getAttributeMethods(FamilyInterface $family, AttributeInterface $attribute)
     {
@@ -162,8 +164,8 @@ EOT;
     }
 
     /**
-     * @param $filename
-     * @param $content
+     * @param string $filename
+     * @param string $content
      *
      * @throws \RuntimeException
      */
@@ -228,8 +230,9 @@ EOT;
      * @param AttributeInterface $attribute
      * @param bool               $forceSingle
      *
-     * @return string
      * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
+     *
+     * @return string
      */
     protected function getPHPType(
         FamilyInterface $family,
@@ -254,6 +257,7 @@ EOT;
             return $type;
         }
         if (\in_array($type, ['date', 'datetime'], true)) {
+            /** @noinspection ClassConstantCanBeUsedInspection */
             $type = '\DateTime';
             if ($collection) {
                 $type .= '[]';

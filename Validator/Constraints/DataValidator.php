@@ -19,12 +19,11 @@ use Sidus\EAVModelBundle\Entity\ValueInterface;
 use Sidus\EAVModelBundle\Entity\ValueRepository;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\BaseBundle\Translator\TranslatableTrait;
-use Sidus\EAVModelBundle\Validator\Mapping\Loader\BaseLoader;
+use Sidus\BaseBundle\Validator\Mapping\Loader\BaseLoader;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\ConstraintViolationInterface;
-use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
@@ -80,7 +79,7 @@ class DataValidator extends ConstraintValidator
     public function validate($data, Constraint $constraint)
     {
         if (!$data instanceof $this->dataClass) {
-            $class = get_class($data);
+            $class = \get_class($data);
             throw new \UnexpectedValueException("Can't validate data of class {$class}");
         }
         $context = $this->context; // VERY IMPORTANT ! context will be lost otherwise
@@ -102,7 +101,7 @@ class DataValidator extends ConstraintValidator
                 $this->validateFamilies($context, $attribute, $data);
             }
 
-            if (count($attribute->getValidationRules())) {
+            if (\count($attribute->getValidationRules())) {
                 $this->validateRules($context, $attribute, $data);
             }
         }
@@ -179,7 +178,7 @@ class DataValidator extends ConstraintValidator
         $allowedFamilies = [];
         $allowedFamilyCodes = $attribute->getOption('allowed_families');
         if ($allowedFamilyCodes) {
-            if (!is_array($allowedFamilyCodes)) {
+            if (!\is_array($allowedFamilyCodes)) {
                 $allowedFamilyCodes = [$allowedFamilyCodes];
             }
             /** @var array $allowedFamilyCodes */
@@ -187,7 +186,7 @@ class DataValidator extends ConstraintValidator
                 $allowedFamilies[$familyCode] = $this->familyRegistry->getFamily($familyCode);
             }
         }
-        if (0 === count($allowedFamilies)) {
+        if (0 === \count($allowedFamilies)) {
             return;
         }
 
@@ -221,6 +220,7 @@ class DataValidator extends ConstraintValidator
      * @throws \Sidus\EAVModelBundle\Exception\ContextException
      * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
      * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
+     * @throws \ReflectionException
      */
     protected function validateRules(
         ExecutionContextInterface $context,
@@ -320,6 +320,8 @@ class DataValidator extends ConstraintValidator
      * @see https://stackoverflow.com/questions/19901850/how-do-i-get-an-objects-unqualified-short-class-name#19909556
      *
      * @param Constraint $constraint
+     *
+     * @throws \ReflectionException
      *
      * @return string
      */

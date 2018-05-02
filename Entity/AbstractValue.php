@@ -24,7 +24,7 @@ use Sidus\BaseBundle\Utilities\DateTimeUtility;
 abstract class AbstractValue implements ContextualValueInterface
 {
     /**
-     * @var integer
+     * @var int
      *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
@@ -76,21 +76,21 @@ abstract class AbstractValue implements ContextualValueInterface
     protected $familyCode;
 
     /**
-     * @var integer
+     * @var int
      *
      * @ORM\Column(name="position", type="integer", nullable=true)
      */
     protected $position;
 
     /**
-     * @var boolean
+     * @var bool
      *
      * @ORM\Column(name="bool_value", type="boolean", nullable=true)
      */
     protected $boolValue;
 
     /**
-     * @var integer
+     * @var int
      *
      * @ORM\Column(name="integer_value", type="integer", nullable=true)
      */

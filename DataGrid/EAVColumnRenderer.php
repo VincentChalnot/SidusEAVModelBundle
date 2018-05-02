@@ -48,6 +48,7 @@ class EAVColumnRenderer implements ColumnRendererInterface
 
         $queryHandler = $column->getDataGrid()->getQueryHandler();
         // EAVFilterBundle might not be installed
+        /** @noinspection ClassConstantCanBeUsedInspection */
         if (!is_a($queryHandler, 'Sidus\EAVFilterBundle\Query\Handler\EAVQueryHandlerInterface')) {
             return $this->baseRenderer->renderColumnLabel($column);
         }

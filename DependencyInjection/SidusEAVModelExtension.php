@@ -77,6 +77,8 @@ class SidusEAVModelExtension extends Extension
             $loader->load('denormalizer.yml');
         }
 
+        // The DatagridBundle might not be installed
+        /** @noinspection ClassConstantCanBeUsedInspection */
         if (interface_exists('Sidus\DataGridBundle\Renderer\RenderableInterface')) {
             $loader->load('datagrid.yml');
         }

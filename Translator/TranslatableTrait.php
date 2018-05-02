@@ -64,7 +64,7 @@ trait TranslatableTrait
             }
         }
 
-        if ($fallback === null) {
+        if (null === $fallback) {
             return null;
         }
         if (!$humanizeFallback) {

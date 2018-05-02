@@ -306,7 +306,7 @@ class Attribute implements AttributeInterface
      */
     public function isCollection()
     {
-        if ($this->collection === null) {
+        if (null === $this->collection) {
             return $this->isMultiple();
         }
 
@@ -497,7 +497,7 @@ class Attribute implements AttributeInterface
                     "Attribute {$this->getCode()} cannot be a collection and unique at the same time"
                 );
             }
-            if (null !== $default && !(is_array($default) || $default instanceof \Traversable)) {
+            if (null !== $default && !(\is_array($default) || $default instanceof \Traversable)) {
                 $e = "Attribute {$this->getCode()} is a collection and therefore should have an array of values for";
                 $e .= ' the default option';
                 throw new AttributeConfigurationException($e);
