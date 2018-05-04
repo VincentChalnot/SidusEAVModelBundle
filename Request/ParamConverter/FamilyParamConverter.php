@@ -63,13 +63,12 @@ class FamilyParamConverter extends AbstractParamConverter
     }
 
     /**
-     * @param string $value
-     *
-     * @throws MissingFamilyException
+     * @param string         $value
+     * @param ParamConverter $configuration
      *
      * @return FamilyInterface
      */
-    protected function convertValue($value)
+    protected function convertValue($value, ParamConverter $configuration)
     {
         return $this->familyRegistry->getFamily($value);
     }

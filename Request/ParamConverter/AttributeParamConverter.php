@@ -10,6 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sidus\BaseBundle\Request\ParamConverter\AbstractParamConverter;
 use Sidus\EAVModelBundle\Registry\AttributeRegistry;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
@@ -33,13 +34,14 @@ class AttributeParamConverter extends AbstractParamConverter
     }
 
     /**
-     * @param string $value
+     * @param string         $value
+     * @param ParamConverter $configuration
      *
      * @throws \UnexpectedValueException
      *
      * @return AttributeInterface
      */
-    protected function convertValue($value)
+    protected function convertValue($value, ParamConverter $configuration)
     {
         return $this->attributeRegistry->getAttribute($value);
     }

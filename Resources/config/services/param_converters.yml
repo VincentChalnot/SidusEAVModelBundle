@@ -5,6 +5,8 @@ services:
         arguments:
             - '%sidus_eav_model.entity.data.class%'
             - '@doctrine'
+            - '@sidus_eav_model.family.registry'
+            - '@sidus_eav_model.entity.data_loader'
         tags:
             - { name: request.param_converter }
 

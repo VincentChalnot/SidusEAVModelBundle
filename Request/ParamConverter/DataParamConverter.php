@@ -11,10 +11,13 @@
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\ORM\ORMException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sidus\BaseBundle\Request\ParamConverter\AbstractParamConverter;
+use Sidus\EAVModelBundle\Doctrine\DataLoaderInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
+use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -27,48 +30,48 @@ class DataParamConverter extends AbstractParamConverter
     /** @var DataRepository */
     protected $dataRepository;
 
+    /** @var FamilyRegistry */
+    protected $familyRegistry;
+
+    /** @var DataLoaderInterface */
+    protected $dataLoader;
+
     /**
-     * @param string   $dataClass
-     * @param Registry $doctrine
+     * @param string              $dataClass
+     * @param Registry            $doctrine
+     * @param FamilyRegistry      $familyRegistry
+     * @param DataLoaderInterface $dataLoader
      */
-    public function __construct($dataClass, Registry $doctrine)
-    {
+    public function __construct(
+        $dataClass,
+        Registry $doctrine,
+        FamilyRegistry $familyRegistry,
+        DataLoaderInterface $dataLoader
+    ) {
         $this->dataRepository = $doctrine->getRepository($dataClass);
+        $this->familyRegistry = $familyRegistry;
+        $this->dataLoader = $dataLoader;
     }
 
     /**
-     * Stores the object in the request.
+     * @param int|string     $value
+     * @param ParamConverter $configuration
      *
-     * @param Request        $request       The request
-     * @param ParamConverter $configuration Contains the name, class and options of the object
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
-     * @throws \InvalidArgumentException
-     *
-     * @return bool True if the object has been successfully set, else false
-     */
-    public function apply(Request $request, ParamConverter $configuration)
-    {
-        $originalName = parent::getRequestAttributeName($request, $configuration);
-        $fallbackName = $this->getRequestAttributeName($request, $configuration);
-        if (!parent::apply($request, $configuration)) {
-            return false;
-        }
-        if ($originalName !== $fallbackName) {
-            $request->attributes->set($originalName, $request->attributes->get($fallbackName));
-        }
-
-        return true;
-    }
-
-    /**
-     * @param int|string $value
+     * @throws ORMException
      *
      * @return null|DataInterface
      */
-    protected function convertValue($value)
+    protected function convertValue($value, ParamConverter $configuration)
     {
-        return $this->dataRepository->loadFullEntity($value);
+        if (array_key_exists('family', $configuration->getOptions())) {
+            $family = $this->familyRegistry->getFamily($configuration->getOptions()['family']);
+            $data = $this->dataRepository->findByIdentifier($family, $value, true);
+        } else {
+            $data = $this->dataRepository->find($value);
+        }
+        $this->dataLoader->loadSingle($data);
+
+        return $data;
     }
 
     /**
@@ -81,6 +84,8 @@ class DataParamConverter extends AbstractParamConverter
 
     /**
      * Allow fallback to "dataId" or "id" in case no attribute is found
+     *
+     * @deprecated This custom behavior will be deprecated in futur versions
      *
      * @param Request        $request
      * @param ParamConverter $configuration
