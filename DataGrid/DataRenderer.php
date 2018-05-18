@@ -47,9 +47,14 @@ class DataRenderer implements RenderableInterface
     {
         $object = isset($options['object']) ? $options['object'] : null;
         $column = isset($options['column']) ? $options['column'] : null;
-        if ($object instanceof DataInterface && $column instanceof Column) {
+        $attributeCode = isset($options['attribute']) ? $options['attribute'] : null;
+        if ($column instanceof Column && null === $attributeCode) {
+            $attributeCode = $column->getPropertyPath();
+        }
+
+        if ($object instanceof DataInterface && $attributeCode) {
             try {
-                $attribute = $object->getFamily()->getAttribute($column->getPropertyPath());
+                $attribute = $object->getFamily()->getAttribute($attributeCode);
             } catch (\Exception $e) {
                 // do nothing, it's okay
                 return $this->parent->renderValue($value, $options);
