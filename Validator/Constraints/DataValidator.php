@@ -10,7 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Validator\Constraints;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
@@ -41,7 +41,7 @@ class DataValidator extends ConstraintValidator
     /** @var string */
     protected $dataClass;
 
-    /** @var Registry */
+    /** @var ManagerRegistry */
     protected $doctrine;
 
     /** @var LoggerInterface */
@@ -51,14 +51,14 @@ class DataValidator extends ConstraintValidator
      * @param string              $dataClass
      * @param FamilyRegistry      $familyRegistry
      * @param TranslatorInterface $translator
-     * @param Registry            $doctrine
+     * @param ManagerRegistry     $doctrine
      * @param LoggerInterface     $logger
      */
     public function __construct(
         $dataClass,
         FamilyRegistry $familyRegistry,
         TranslatorInterface $translator,
-        Registry $doctrine,
+        ManagerRegistry $doctrine,
         LoggerInterface $logger
     ) {
         $this->dataClass = $dataClass;

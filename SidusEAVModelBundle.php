@@ -11,6 +11,9 @@
 namespace Sidus\EAVModelBundle;
 
 use Sidus\BaseBundle\DependencyInjection\Compiler\GenericCompilerPass;
+use Sidus\EAVModelBundle\Registry\AttributeRegistry;
+use Sidus\EAVModelBundle\Registry\AttributeTypeRegistry;
+use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -28,21 +31,21 @@ class SidusEAVModelBundle extends Bundle
     {
         $container->addCompilerPass(
             new GenericCompilerPass(
-                'sidus_eav_model.attribute_type.registry',
+                AttributeTypeRegistry::class,
                 'sidus.attribute_type',
                 'addType'
             )
         );
         $container->addCompilerPass(
             new GenericCompilerPass(
-                'sidus_eav_model.attribute.registry',
+                AttributeRegistry::class,
                 'sidus.attribute',
                 'addAttribute'
             )
         );
         $container->addCompilerPass(
             new GenericCompilerPass(
-                'sidus_eav_model.family.registry',
+                FamilyRegistry::class,
                 'sidus.family',
                 'addFamily'
             )

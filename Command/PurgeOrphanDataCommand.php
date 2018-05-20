@@ -10,7 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Command;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManager;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -27,7 +27,7 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var Registry */
+    /** @var ManagerRegistry */
     protected $doctrine;
 
     /** @var string */
@@ -58,8 +58,8 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $this->familyRegistry = $this->getContainer()->get('sidus_eav_model.family.registry');
-        $this->doctrine = $this->getContainer()->get('doctrine');
+        $this->familyRegistry = $this->getContainer()->get(FamilyRegistry::class);
+        $this->doctrine = $this->getContainer()->get(ManagerRegistry::class);
         $this->dataClass = $this->getContainer()->getParameter('sidus_eav_model.entity.data.class');
         $this->valueClass = $this->getContainer()->getParameter('sidus_eav_model.entity.value.class');
     }

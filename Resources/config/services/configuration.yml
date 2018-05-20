@@ -1,16 +1,16 @@
 services:
-    sidus_eav_model.attribute_type.registry:
+    Sidus\EAVModelBundle\Registry\AttributeTypeRegistry:
         class: Sidus\EAVModelBundle\Registry\AttributeTypeRegistry
 
-    sidus_eav_model.attribute.registry:
+    Sidus\EAVModelBundle\Registry\AttributeRegistry:
         class: Sidus\EAVModelBundle\Registry\AttributeRegistry
         arguments:
             - '%sidus_eav_model.attribute.class%'
             - '%sidus_eav_model.context.global_mask%'
-            - '@sidus_eav_model.attribute_type.registry'
+            - '@Sidus\EAVModelBundle\Registry\AttributeTypeRegistry'
             - '@translator'
 
-    sidus_eav_model.family.registry:
+    Sidus\EAVModelBundle\Registry\FamilyRegistry:
         class: Sidus\EAVModelBundle\Registry\FamilyRegistry
         tags:
             - { name: doctrine.event_listener, event: sidus_family_configuration }

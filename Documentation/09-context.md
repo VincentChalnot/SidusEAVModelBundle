@@ -143,7 +143,7 @@ You will be able to access the data associated to this context in several ways:
 This will set the context for the entire application, it will also try to store the context in the session.
 ````php
 <?php
-/** @var \Sidus\EAVModelBundle\Context\ContextManager $contextManager */
+/** @var \Sidus\EAVModelBundle\Context\ContextManagerInterface $contextManager */
 $contextManager->setContext([
     'language' => 'en',
     'region' => 'US',

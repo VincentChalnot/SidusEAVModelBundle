@@ -10,7 +10,10 @@
 
 namespace Sidus\EAVModelBundle\DependencyInjection;
 
+use Sidus\EAVModelBundle\Context\ContextManagerInterface;
 use Sidus\EAVModelBundle\Doctrine\Types\FamilyType;
+use Sidus\EAVModelBundle\Registry\AttributeRegistry;
+use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -61,6 +64,7 @@ class SidusEAVModelExtension extends Extension
         $loader->load('attribute_types.yml');
         $loader->load('configuration.yml');
         $loader->load('context.yml');
+        $loader->load('deprecated.yml');
         $loader->load('doctrine.yml');
         $loader->load('entities.yml');
         $loader->load('events.yml');
@@ -84,7 +88,7 @@ class SidusEAVModelExtension extends Extension
         }
 
         // Add global attribute configuration to handler
-        $attributeConfiguration = $container->getDefinition('sidus_eav_model.attribute.registry');
+        $attributeConfiguration = $container->getDefinition(AttributeRegistry::class);
         $attributeConfiguration->addMethodCall('parseGlobalConfig', [$config['attributes']]);
 
         $this->createFamilyServices($config, $container);
@@ -124,9 +128,9 @@ class SidusEAVModelExtension extends Extension
             $container->getParameter('sidus_eav_model.family.class'),
             [
                 $code,
-                new Reference('sidus_eav_model.attribute.registry'),
-                new Reference('sidus_eav_model.family.registry'),
-                new Reference('sidus_eav_model.context.manager'),
+                new Reference(AttributeRegistry::class),
+                new Reference(FamilyRegistry::class),
+                new Reference(ContextManagerInterface::class),
                 $familyConfiguration,
             ]
         );

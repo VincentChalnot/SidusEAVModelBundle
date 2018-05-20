@@ -23,7 +23,7 @@ use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class ContextManager
+class ContextManager implements ContextManagerInterface
 {
     const SESSION_KEY = 'sidus_data_context';
 

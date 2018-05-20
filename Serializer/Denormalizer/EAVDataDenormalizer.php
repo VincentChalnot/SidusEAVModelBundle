@@ -10,8 +10,8 @@
 
 namespace Sidus\EAVModelBundle\Serializer\Denormalizer;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Sidus\EAVModelBundle\Entity\ContextualDataInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
@@ -38,7 +38,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var Registry */
+    /** @var ManagerRegistry */
     protected $doctrine;
 
     /** @var EntityProvider */
@@ -62,7 +62,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param PropertyAccessorInterface      $accessor
      * @param PropertyTypeExtractorInterface $propertyTypeExtractor
      * @param FamilyRegistry                 $familyRegistry
-     * @param Registry                       $doctrine
+     * @param ManagerRegistry                $doctrine
      * @param EntityProvider                 $entityProvider
      * @param array                          $ignoredAttributes
      */
@@ -72,7 +72,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         PropertyAccessorInterface $accessor = null,
         PropertyTypeExtractorInterface $propertyTypeExtractor = null,
         FamilyRegistry $familyRegistry,
-        Registry $doctrine,
+        ManagerRegistry $doctrine,
         EntityProvider $entityProvider,
         array $ignoredAttributes
     ) {

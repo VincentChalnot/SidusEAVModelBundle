@@ -1,11 +1,12 @@
 services:
-    sidus_eav_model.validator.sidus_data:
+    Sidus\EAVModelBundle\Validator\Constraints\DataValidator:
         class: Sidus\EAVModelBundle\Validator\Constraints\DataValidator
+        public: false
         arguments:
             - '%sidus_eav_model.entity.data.class%'
-            - '@sidus_eav_model.family.registry'
-            - '@translator'
-            - '@doctrine'
-            - '@logger'
+            - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
+            - '@Symfony\Component\Translation\TranslatorInterface'
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '@Psr\Log\LoggerInterface'
         tags:
             - { name: validator.constraint_validator }

@@ -30,13 +30,13 @@ parameters:
         - family # Prevent circular reference
 
 services:
-    sidus_eav_model.normalizer.data:
-        parent: serializer.normalizer.object
+    Sidus\EAVModelBundle\Serializer\Normalizer\EAVDataNormalizer:
         class: Sidus\EAVModelBundle\Serializer\Normalizer\EAVDataNormalizer
+        parent: serializer.normalizer.object
         arguments:
-            - '@sidus_eav_model.serializer.handler.max_depth'
-            - '@sidus_eav_model.serializer.handler.circular_reference'
-            - '@sidus_eav_model.serializer.handler.by_reference'
+            - '@Sidus\EAVModelBundle\Serializer\MaxDepthHandler'
+            - '@Sidus\EAVModelBundle\Serializer\CircularReferenceHandler'
+            - '@Sidus\EAVModelBundle\Serializer\ByReferenceHandler'
         calls:
             - [setIgnoredAttributes, ['%sidus_eav_model.normalizer.data.ignored_attributes%']]
             - [setReferenceAttributes, ['%sidus_eav_model.normalizer.data.reference_attributes%']]
@@ -47,20 +47,20 @@ services:
         abstract: true
         parent: serializer.normalizer.object
         arguments:
-            - '@sidus_eav_model.serializer.handler.max_depth'
-            - '@sidus_eav_model.serializer.handler.by_reference'
+            - '@Sidus\EAVModelBundle\Serializer\MaxDepthHandler'
+            - '@Sidus\EAVModelBundle\Serializer\ByReferenceHandler'
 
-    sidus_eav_model.normalizer.family:
-        parent: sidus_eav_model.normalizer.generic
+    Sidus\EAVModelBundle\Serializer\Normalizer\FamilyNormalizer:
         class: Sidus\EAVModelBundle\Serializer\Normalizer\FamilyNormalizer
+        parent: sidus_eav_model.normalizer.generic
         calls:
             - [setIgnoredAttributes, ['%sidus_eav_model.normalizer.family.ignored_attributes%']]
         tags:
             - { name: serializer.normalizer }
 
-    sidus_eav_model.normalizer.attribute:
-        parent: sidus_eav_model.normalizer.generic
+    Sidus\EAVModelBundle\Serializer\Normalizer\AttributeNormalizer:
         class: Sidus\EAVModelBundle\Serializer\Normalizer\AttributeNormalizer
+        parent: sidus_eav_model.normalizer.generic
         calls:
             - [setIgnoredAttributes, ['%sidus_eav_model.normalizer.attribute.ignored_attributes%']]
         tags:
@@ -70,7 +70,7 @@ services:
     sidus_eav_model.normalizer.data.flat:
         class: Sidus\EAVModelBundle\Serializer\Normalizer\Flat\FlatNormalizer
         arguments:
-            - '@sidus_eav_model.normalizer.data'
+            - '@Sidus\EAVModelBundle\Serializer\Normalizer\EAVDataNormalizer'
             - [csv]
         tags:
             - { name: serializer.normalizer, priority: 1 }
@@ -78,7 +78,7 @@ services:
     sidus_eav_model.normalizer.family.flat:
         class: Sidus\EAVModelBundle\Serializer\Normalizer\Flat\FlatNormalizer
         arguments:
-            - '@sidus_eav_model.normalizer.family'
+            - '@Sidus\EAVModelBundle\Serializer\Normalizer\FamilyNormalizer'
             - [csv]
         tags:
             - { name: serializer.normalizer, priority: 1 }
@@ -86,7 +86,7 @@ services:
     sidus_eav_model.normalizer.attribute.flat:
         class: Sidus\EAVModelBundle\Serializer\Normalizer\Flat\FlatNormalizer
         arguments:
-            - '@sidus_eav_model.normalizer.attribute'
+            - '@Sidus\EAVModelBundle\Serializer\Normalizer\AttributeNormalizer'
             - [csv]
         tags:
             - { name: serializer.normalizer, priority: 1 }

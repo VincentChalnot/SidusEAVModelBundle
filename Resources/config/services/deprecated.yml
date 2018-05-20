@@ -1,0 +1,54 @@
+services:
+    sidus_eav_model.attribute_type.registry:
+        alias: Sidus\EAVModelBundle\Registry\AttributeTypeRegistry
+
+    sidus_eav_model.attribute.registry:
+        alias: Sidus\EAVModelBundle\Registry\AttributeRegistry
+
+    sidus_eav_model.family.registry:
+        alias: Sidus\EAVModelBundle\Registry\FamilyRegistry
+
+    sidus_eav_model.context.manager:
+        alias: Sidus\EAVModelBundle\Context\ContextManagerInterface
+
+    sidus_eav_model.denormalizer.data:
+        alias: Sidus\EAVModelBundle\Serializer\Denormalizer\EAVDataDenormalizer
+
+    sidus_eav_model.denormalizer.family:
+        alias: Sidus\EAVModelBundle\Serializer\Denormalizer\FamilyDenormalizer
+
+    sidus_eav_model.finder:
+        alias: Sidus\EAVModelBundle\Doctrine\EAVFinder
+
+    sidus_eav_model.entity.data_loader:
+        alias: Sidus\EAVModelBundle\Doctrine\DataLoaderInterface
+
+    sidus_eav_model.form.attribute_builder:
+        alias: Sidus\EAVModelBundle\Form\AttributeFormBuilderInterface
+
+    sidus_eav_model.form.type.data:
+        alias: Sidus\EAVModelBundle\Form\Type\DataType
+
+    sidus_eav_model.manager.data:
+        alias: Sidus\EAVModelBundle\Manager\DataManager
+
+    sidus_eav_model.normalizer.data:
+        alias: Sidus\EAVModelBundle\Serializer\Normalizer\EAVDataNormalizer
+
+    sidus_eav_model.normalizer.family:
+        alias: Sidus\EAVModelBundle\Serializer\Normalizer\FamilyNormalizer
+
+    sidus_eav_model.normalizer.attribute:
+        alias: Sidus\EAVModelBundle\Serializer\Normalizer\AttributeNormalizer
+
+    sidus_eav_model.serializer.handler.max_depth:
+        alias: Sidus\EAVModelBundle\Serializer\MaxDepthHandler
+
+    sidus_eav_model.serializer.handler.circular_reference:
+        alias: Sidus\EAVModelBundle\Serializer\CircularReferenceHandler
+
+    sidus_eav_model.serializer.handler.by_reference:
+        alias: Sidus\EAVModelBundle\Serializer\ByReferenceHandler
+
+    sidus_eav_model.serializer.entity_provider:
+        alias: Sidus\EAVModelBundle\Serializer\EntityProviderInterface

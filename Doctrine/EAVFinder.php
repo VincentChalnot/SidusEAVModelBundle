@@ -10,7 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Doctrine;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Sidus\EAVModelBundle\Entity\DataInterface;
@@ -41,17 +41,17 @@ class EAVFinder
         'is not null' => 'isNotNull',
     ];
 
-    /** @var Registry */
+    /** @var ManagerRegistry */
     protected $doctrine;
 
     /** @var DataLoaderInterface */
     protected $dataLoader;
 
     /**
-     * @param Registry            $doctrine
+     * @param ManagerRegistry     $doctrine
      * @param DataLoaderInterface $dataLoader
      */
-    public function __construct(Registry $doctrine, DataLoaderInterface $dataLoader)
+    public function __construct(ManagerRegistry $doctrine, DataLoaderInterface $dataLoader)
     {
         $this->doctrine = $doctrine;
         $this->dataLoader = $dataLoader;

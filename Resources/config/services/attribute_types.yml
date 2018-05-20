@@ -9,61 +9,101 @@ parameters:
 services:
     sidus_eav_model.attribute_type.string:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [string, stringValue, Symfony\Component\Form\Extension\Core\Type\TextType]
+        public: false
+        arguments:
+            - string
+            - stringValue
+            - Symfony\Component\Form\Extension\Core\Type\TextType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.text:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [text, textValue, Symfony\Component\Form\Extension\Core\Type\TextareaType]
+        public: false
+        arguments:
+            - text
+            - textValue
+            - Symfony\Component\Form\Extension\Core\Type\TextareaType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.integer:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [integer, integerValue, Symfony\Component\Form\Extension\Core\Type\NumberType]
+        public: false
+        arguments:
+            - integer
+            - integerValue
+            - Symfony\Component\Form\Extension\Core\Type\NumberType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.decimal:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [decimal, decimalValue, Symfony\Component\Form\Extension\Core\Type\NumberType]
+        public: false
+        arguments:
+            - decimal
+            - decimalValue
+            - Symfony\Component\Form\Extension\Core\Type\NumberType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.boolean:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [boolean, boolValue, Symfony\Component\Form\Extension\Core\Type\CheckboxType]
+        public: false
+        arguments:
+            - boolean
+            - boolValue
+            - Symfony\Component\Form\Extension\Core\Type\CheckboxType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.html:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [html, textValue, Symfony\Component\Form\Extension\Core\Type\TextareaType]
+        public: false
+        arguments:
+            - html
+            - textValue
+            - Symfony\Component\Form\Extension\Core\Type\TextareaType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.date:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [date, dateValue, Symfony\Component\Form\Extension\Core\Type\DateType]
+        public: false
+        arguments:
+            - date
+            - dateValue
+            - Symfony\Component\Form\Extension\Core\Type\DateType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.datetime:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [datetime, datetimeValue, Symfony\Component\Form\Extension\Core\Type\DateTimeType]
+        public: false
+        arguments:
+            - datetime
+            - datetimeValue
+            - Symfony\Component\Form\Extension\Core\Type\DateTimeType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.choice:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [choice, stringValue, Symfony\Component\Form\Extension\Core\Type\ChoiceType]
+        public: false
+        arguments:
+            - choice
+            - stringValue
+            - Symfony\Component\Form\Extension\Core\Type\ChoiceType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.hidden:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [hidden, stringValue, Symfony\Component\Form\Extension\Core\Type\HiddenType]
+        public: false
+        arguments:
+            - hidden
+            - stringValue
+            - Symfony\Component\Form\Extension\Core\Type\HiddenType
         tags:
             - { name: sidus.attribute_type }
 
@@ -71,24 +111,40 @@ services:
 
     sidus_eav_model.attribute_type.data_selector:
         class: '%sidus_eav_model.attribute_type.eav_relation.class%'
-        arguments: [data_selector, dataValue, Sidus\EAVModelBundle\Form\Type\SimpleDataSelectorType]
+        public: false
+        arguments:
+            - data_selector
+            - dataValue
+            - Sidus\EAVModelBundle\Form\Type\SimpleDataSelectorType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.embed:
         class: '%sidus_eav_model.attribute_type.eav_embed.class%'
-        arguments: [embed, dataValue, Sidus\EAVModelBundle\Form\Type\DataType]
+        public: false
+        arguments:
+            - embed
+            - dataValue
+            - Sidus\EAVModelBundle\Form\Type\DataType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.string_identifier:
         class: '%sidus_eav_model.attribute_type.identifier.class%'
-        arguments: [string_identifier, stringValue, Symfony\Component\Form\Extension\Core\Type\TextType]
+        public: false
+        arguments:
+            - string_identifier
+            - stringValue
+            - Symfony\Component\Form\Extension\Core\Type\TextType
         tags:
             - { name: sidus.attribute_type }
 
     sidus_eav_model.attribute_type.integer_identifier:
         class: '%sidus_eav_model.attribute_type.identifier.class%'
-        arguments: [integer_identifier, integerValue, Symfony\Component\Form\Extension\Core\Type\TextType]
+        public: false
+        arguments:
+            - integer_identifier
+            - integerValue
+            - Symfony\Component\Form\Extension\Core\Type\TextType
         tags:
             - { name: sidus.attribute_type }

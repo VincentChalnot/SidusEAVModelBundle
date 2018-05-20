@@ -10,6 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Command;
 
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManager;
 use Sidus\EAVModelBundle\Doctrine\EAVFinder;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -34,7 +35,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CleanDataCommand extends ContainerAwareCommand
 {
-
     /** @var EntityManager */
     protected $entityManager;
 
@@ -61,9 +61,9 @@ class CleanDataCommand extends ContainerAwareCommand
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $this->entityManager = $this->getContainer()->get('doctrine')->getManager();
-        $this->eavFinder = $this->getContainer()->get('sidus_eav_model.finder');
-        $this->familyRegistry = $this->getContainer()->get('sidus_eav_model.family.registry');
+        $this->entityManager = $this->getContainer()->get(ManagerRegistry::class)->getManager();
+        $this->eavFinder = $this->getContainer()->get(EAVFinder::class);
+        $this->familyRegistry = $this->getContainer()->get(FamilyRegistry::class);
         $this->dataClass = $this->getContainer()->getParameter('sidus_eav_model.entity.data.class');
         $this->valueClass = $this->getContainer()->getParameter('sidus_eav_model.entity.value.class');
     }

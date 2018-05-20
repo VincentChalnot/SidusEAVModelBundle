@@ -10,7 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Command;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\DBAL\Connection;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
@@ -28,7 +28,7 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var Registry */
+    /** @var ManagerRegistry */
     protected $doctrine;
 
     /**
@@ -53,8 +53,8 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $this->familyRegistry = $this->getContainer()->get('sidus_eav_model.family.registry');
-        $this->doctrine = $this->getContainer()->get('doctrine');
+        $this->familyRegistry = $this->getContainer()->get(FamilyRegistry::class);
+        $this->doctrine = $this->getContainer()->get(ManagerRegistry::class);
     }
 
     /**

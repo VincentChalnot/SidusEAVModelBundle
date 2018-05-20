@@ -195,6 +195,8 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
         $formOptions['label'] = false; // Removing label from entry_options
         $collectionOptions = [
             'label' => $label,
+            'translation_domain' => $formOptions['translation_domain'],
+            'translate_label' => $formOptions['translate_label'],
             'entry_type' => $options['form_type'],
             'entry_options' => $formOptions,
             'allow_add' => $disabled,
@@ -260,6 +262,8 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
 
                 $defaultOptions = [
                     'label' => $options['label'],
+                    'translation_domain' => null,
+                    'translate_label' => false,
                     'required' => $attribute->isRequired(),
                 ];
 

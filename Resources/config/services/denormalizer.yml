@@ -16,21 +16,20 @@ parameters:
         - values
 
 services:
-    sidus_eav_model.denormalizer.data:
-        parent: serializer.normalizer.object
+    Sidus\EAVModelBundle\Serializer\Denormalizer\EAVDataDenormalizer:
         class: Sidus\EAVModelBundle\Serializer\Denormalizer\EAVDataDenormalizer
+        parent: serializer.normalizer.object
         arguments:
-            - '@sidus_eav_model.family.registry'
-            - '@doctrine'
-            - '@sidus_eav_model.serializer.entity_provider'
+            - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '@Sidus\EAVModelBundle\Serializer\EntityProviderInterface'
             - '%sidus_eav_model.denormalizer.data.ignored_attributes%'
         tags:
             - { name: serializer.normalizer }
 
-    sidus_eav_model.denormalizer.family:
+    Sidus\EAVModelBundle\Serializer\Denormalizer\FamilyDenormalizer:
         class: Sidus\EAVModelBundle\Serializer\Denormalizer\FamilyDenormalizer
         arguments:
-            - '@sidus_eav_model.family.registry'
+            - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
         tags:
             - { name: serializer.normalizer, priority: 2 }
-

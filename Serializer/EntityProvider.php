@@ -10,7 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Serializer;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
@@ -23,9 +23,9 @@ use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class EntityProvider
+class EntityProvider implements EntityProviderInterface
 {
-    /** @var Registry */
+    /** @var ManagerRegistry */
     protected $doctrine;
 
     /**
@@ -37,9 +37,9 @@ class EntityProvider
     protected $createdEntities = [];
 
     /**
-     * @param Registry $doctrine
+     * @param ManagerRegistry $doctrine
      */
-    public function __construct(Registry $doctrine)
+    public function __construct(ManagerRegistry $doctrine)
     {
         $this->doctrine = $doctrine;
     }
@@ -51,7 +51,7 @@ class EntityProvider
      *
      * @throws UnexpectedValueException
      *
-     * @return DataInterface
+     * @return DataInterface|null
      */
     public function getEntity(FamilyInterface $family, $data, NameConverterInterface $nameConverter = null)
     {

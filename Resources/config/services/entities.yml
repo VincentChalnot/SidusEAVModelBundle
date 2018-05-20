@@ -3,7 +3,10 @@ parameters:
     sidus_eav_model.family.class: Sidus\EAVModelBundle\Model\Family
 
 services:
-    sidus_eav_model.entity.data_loader:
+    Sidus\EAVModelBundle\Doctrine\DataLoaderInterface:
+        alias: Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader
+
+    Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader:
         class: Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader
         arguments:
             - '@doctrine.orm.entity_manager'

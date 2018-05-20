@@ -1,5 +1,8 @@
 services:
-    sidus_eav_model.context.manager:
+    Sidus\EAVModelBundle\Context\ContextManagerInterface:
+        alias: Sidus\EAVModelBundle\Context\ContextManager
+
+    Sidus\EAVModelBundle\Context\ContextManager:
         class: Sidus\EAVModelBundle\Context\ContextManager
         arguments:
             - '@form.factory'

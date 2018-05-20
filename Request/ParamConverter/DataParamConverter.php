@@ -10,7 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\ORMException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sidus\BaseBundle\Request\ParamConverter\AbstractParamConverter;
@@ -38,13 +38,13 @@ class DataParamConverter extends AbstractParamConverter
 
     /**
      * @param string              $dataClass
-     * @param Registry            $doctrine
+     * @param ManagerRegistry     $doctrine
      * @param FamilyRegistry      $familyRegistry
      * @param DataLoaderInterface $dataLoader
      */
     public function __construct(
         $dataClass,
-        Registry $doctrine,
+        ManagerRegistry $doctrine,
         FamilyRegistry $familyRegistry,
         DataLoaderInterface $dataLoader
     ) {

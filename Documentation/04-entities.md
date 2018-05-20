@@ -4,8 +4,10 @@ To create a new entity you must first fetch the family you want from configurati
 
 ````php
 <?php
-/** @var \Sidus\EAVModelBundle\Registry\FamilyRegistry $familyRegistry */
-$familyRegistry = $container->get('sidus_eav_model.family.registry');
+use Sidus\EAVModelBundle\Registry\FamilyRegistry;
+
+/** @var FamilyRegistry $familyRegistry */
+$familyRegistry = $container->get(FamilyRegistry::class);
 $postFamily = $familyRegistry->getFamily('Post');
 
 $newPost = $postFamily->createData();

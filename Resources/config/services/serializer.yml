@@ -1,16 +1,22 @@
 services:
-    sidus_eav_model.serializer.handler.max_depth:
+    Sidus\EAVModelBundle\Serializer\MaxDepthHandler:
         class: Sidus\EAVModelBundle\Serializer\MaxDepthHandler
+        public: false
 
-    sidus_eav_model.serializer.handler.circular_reference:
+    Sidus\EAVModelBundle\Serializer\CircularReferenceHandler:
         class: Sidus\EAVModelBundle\Serializer\CircularReferenceHandler
+        public: false
 
-    sidus_eav_model.serializer.handler.by_reference:
+    Sidus\EAVModelBundle\Serializer\ByReferenceHandler:
         class: Sidus\EAVModelBundle\Serializer\ByReferenceHandler
+        public: false
 
-    sidus_eav_model.serializer.entity_provider:
+    Sidus\EAVModelBundle\Serializer\EntityProviderInterface:
+        alias: Sidus\EAVModelBundle\Serializer\EntityProvider
+
+    Sidus\EAVModelBundle\Serializer\EntityProvider:
         class: Sidus\EAVModelBundle\Serializer\EntityProvider
         arguments:
-            - '@doctrine'
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
         tags:
             - { name: doctrine.event_listener, event: postFlush }

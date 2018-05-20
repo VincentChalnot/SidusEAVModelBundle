@@ -1,25 +1,25 @@
 services:
-    sidus_eav_model.request.data.param_converter:
+    Sidus\EAVModelBundle\Request\ParamConverter\DataParamConverter:
         class: Sidus\EAVModelBundle\Request\ParamConverter\DataParamConverter
         public: false
         arguments:
             - '%sidus_eav_model.entity.data.class%'
-            - '@doctrine'
-            - '@sidus_eav_model.family.registry'
-            - '@sidus_eav_model.entity.data_loader'
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
+            - '@Sidus\EAVModelBundle\Doctrine\DataLoaderInterface'
         tags:
             - { name: request.param_converter }
 
-    sidus_eav_model.request.family.param_converter:
+    Sidus\EAVModelBundle\Request\ParamConverter\FamilyParamConverter:
         class: Sidus\EAVModelBundle\Request\ParamConverter\FamilyParamConverter
         public: false
-        arguments: ['@sidus_eav_model.family.registry']
+        arguments: ['@Sidus\EAVModelBundle\Registry\FamilyRegistry']
         tags:
             - { name: request.param_converter }
 
-    sidus_eav_model.request.attribute.param_converter:
+    Sidus\EAVModelBundle\Request\ParamConverter\AttributeParamConverter:
         class: Sidus\EAVModelBundle\Request\ParamConverter\AttributeParamConverter
         public: false
-        arguments: ['@sidus_eav_model.attribute.registry']
+        arguments: ['@Sidus\EAVModelBundle\Registry\AttributeRegistry']
         tags:
             - { name: request.param_converter }
