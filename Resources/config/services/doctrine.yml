@@ -7,6 +7,5 @@ services:
 
     Sidus\EAVModelBundle\Doctrine\IntegrityConstraintManager:
         class: Sidus\EAVModelBundle\Doctrine\IntegrityConstraintManager
-        public: false
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
