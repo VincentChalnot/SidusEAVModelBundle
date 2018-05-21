@@ -1166,7 +1166,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $m = 'AbstractData::parseArray is deprecated and will be removed in a future version, ';
         $m .= 'use ensureNativeArray instead';
-        trigger_error($m, E_DEPRECATED);
+        @trigger_error($m, E_USER_DEPRECATED);
 
         return $this->ensureNativeArray($dataValues);
     }

@@ -217,7 +217,7 @@ class DataRepository extends EntityRepository
     public function createOptimizedQueryBuilder($alias, $indexBy = null, QueryBuilder $qb = null, $associations = false)
     {
         $m = 'Do not use this function anymore, use the OptimizedDataLoader on your query results instead';
-        @trigger_error($m, E_DEPRECATED);
+        @trigger_error($m, E_USER_DEPRECATED);
 
         if (!$qb) {
             $qb = $this->createQueryBuilder($alias, $indexBy);
