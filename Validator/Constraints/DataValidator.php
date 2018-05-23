@@ -245,6 +245,7 @@ class DataValidator extends ConstraintValidator
                 }
                 if ($violation->getMessage()) {
                     $context->buildViolation($violation->getMessage())
+                        ->setTranslationDomain(false)
                         ->atPath($path)
                         ->setInvalidValue($valueData)
                         ->addViolation();
@@ -284,6 +285,7 @@ class DataValidator extends ConstraintValidator
             $path = $attribute->getCode();
         }
         $context->buildViolation($this->buildMessage($data, $attribute, $type))
+            ->setTranslationDomain(false)
             ->atPath($path)
             ->setInvalidValue($invalidValue)
             ->addViolation();
