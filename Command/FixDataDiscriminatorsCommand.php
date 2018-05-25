@@ -10,8 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Command;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
-use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -28,8 +27,8 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var ManagerRegistry */
-    protected $doctrine;
+    /** @var EntityManagerInterface */
+    protected $entityManager;
 
     /**
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
@@ -54,13 +53,14 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         $this->familyRegistry = $this->getContainer()->get(FamilyRegistry::class);
-        $this->doctrine = $this->getContainer()->get(ManagerRegistry::class);
+        $this->entityManager = $this->getContainer()->get('sidus_eav_model.entity_manager');
     }
 
     /**
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      * @throws \Doctrine\DBAL\DBALException
@@ -78,6 +78,7 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
      * @param FamilyInterface $family
      * @param OutputInterface $output
      *
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\DBAL\DBALException
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
@@ -87,9 +88,7 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
         if (!$family->isInstantiable()) {
             return;
         }
-        $em = $this->doctrine->getManager();
-        /** @var \Doctrine\ORM\Mapping\ClassMetadata $metadata */
-        $metadata = $em->getClassMetadata($family->getDataClass());
+        $metadata = $this->entityManager->getClassMetadata($family->getDataClass());
         if (!$metadata->discriminatorColumn) {
             return;
         }
@@ -131,15 +130,14 @@ EOS;
      * @param string $discriminatorValue
      * @param string $familyCode
      *
-     * @throws \Doctrine\DBAL\DBALException
      * @throws \RuntimeException
+     * @throws \Doctrine\DBAL\DBALException
      *
      * @return int
      */
     protected function updateTable($sql, $discriminatorValue, $familyCode)
     {
-        /** @var Connection $connection */
-        $connection = $this->doctrine->getConnection();
+        $connection = $this->entityManager->getConnection();
         $stmt = $connection->prepare($sql);
         $stmt->bindValue(':discrValue', $discriminatorValue);
         $stmt->bindValue(':familyCode', $familyCode);

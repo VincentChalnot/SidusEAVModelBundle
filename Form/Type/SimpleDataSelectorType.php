@@ -10,6 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Form\Type;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
@@ -31,16 +32,21 @@ class SimpleDataSelectorType extends AbstractType
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
+    /** @var EntityManagerInterface */
+    protected $entityManager;
+
     /** @var string */
     protected $dataClass;
 
     /**
-     * @param FamilyRegistry $familyRegistry
-     * @param string         $dataClass
+     * @param FamilyRegistry         $familyRegistry
+     * @param EntityManagerInterface $entityManager
+     * @param string                 $dataClass
      */
-    public function __construct(FamilyRegistry $familyRegistry, $dataClass)
+    public function __construct(FamilyRegistry $familyRegistry, EntityManagerInterface $entityManager, $dataClass)
     {
         $this->familyRegistry = $familyRegistry;
+        $this->entityManager = $entityManager;
         $this->dataClass = $dataClass;
     }
 
@@ -74,6 +80,7 @@ class SimpleDataSelectorType extends AbstractType
 
         $resolver->setDefaults(
             [
+                'em' => $this->entityManager,
                 'class' => $this->dataClass,
                 'query_builder' => $queryBuilder,
                 'max_results' => 100,
@@ -142,7 +149,7 @@ class SimpleDataSelectorType extends AbstractType
     {
         $queryBuilderNormalizer = function (Options $options, $queryBuilder) {
             if (\is_callable($queryBuilder)) {
-                $queryBuilder = $queryBuilder($options['em']->getRepository($options['class']), $options);
+                $queryBuilder = $queryBuilder($this->entityManager->getRepository($options['class']), $options);
 
                 if (!$queryBuilder instanceof QueryBuilder) {
                     throw new UnexpectedTypeException($queryBuilder, QueryBuilder::class);

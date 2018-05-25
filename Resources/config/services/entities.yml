@@ -9,4 +9,4 @@ services:
     Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader:
         class: Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader
         arguments:
-            - '@doctrine.orm.entity_manager'
+            - '@sidus_eav_model.entity_manager'

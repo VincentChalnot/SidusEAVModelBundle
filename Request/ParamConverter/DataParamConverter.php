@@ -10,7 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sidus\BaseBundle\Request\ParamConverter\AbstractParamConverter;
@@ -28,7 +28,7 @@ use Symfony\Component\HttpFoundation\Request;
 class DataParamConverter extends AbstractParamConverter
 {
     /** @var DataRepository */
-    protected $dataRepository;
+    protected $repository;
 
     /** @var FamilyRegistry */
     protected $familyRegistry;
@@ -37,26 +37,30 @@ class DataParamConverter extends AbstractParamConverter
     protected $dataLoader;
 
     /**
-     * @param string              $dataClass
-     * @param ManagerRegistry     $doctrine
-     * @param FamilyRegistry      $familyRegistry
-     * @param DataLoaderInterface $dataLoader
+     * @param FamilyRegistry         $familyRegistry
+     * @param DataLoaderInterface    $dataLoader
+     * @param EntityManagerInterface $entityManager
+     * @param string                 $dataClass
      */
     public function __construct(
-        $dataClass,
-        ManagerRegistry $doctrine,
         FamilyRegistry $familyRegistry,
-        DataLoaderInterface $dataLoader
+        DataLoaderInterface $dataLoader,
+        EntityManagerInterface $entityManager,
+        $dataClass
     ) {
-        $this->dataRepository = $doctrine->getRepository($dataClass);
         $this->familyRegistry = $familyRegistry;
         $this->dataLoader = $dataLoader;
+        $this->repository = $entityManager->getRepository($dataClass);
     }
 
     /**
      * @param int|string     $value
      * @param ParamConverter $configuration
      *
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
      * @throws ORMException
      *
      * @return null|DataInterface
@@ -65,9 +69,9 @@ class DataParamConverter extends AbstractParamConverter
     {
         if (array_key_exists('family', $configuration->getOptions())) {
             $family = $this->familyRegistry->getFamily($configuration->getOptions()['family']);
-            $data = $this->dataRepository->findByIdentifier($family, $value, true);
+            $data = $this->repository->findByIdentifier($family, $value, true);
         } else {
-            $data = $this->dataRepository->find($value);
+            $data = $this->repository->find($value);
         }
         $this->dataLoader->loadSingle($data);
 

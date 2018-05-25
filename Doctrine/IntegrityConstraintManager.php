@@ -38,19 +38,23 @@ class IntegrityConstraintManager
     /**
      * @param mixed $sourceEntity
      *
+     * @throws \UnexpectedValueException
+     *
      * @return array
      */
     public function getEntityConstraints($sourceEntity)
     {
         $className = ClassUtils::getClass($sourceEntity);
-        /** @var EntityManagerInterface $em */
-        $em = $this->doctrine->getManagerForClass($className);
+        $entityManager = $this->doctrine->getManagerForClass($className);
+        if (!$entityManager instanceof EntityManagerInterface) {
+            throw new \UnexpectedValueException("No manager found for class {$className}");
+        }
 
-        $associationsToCheck = $this->getConstrainedDataAssociations($em, $className);
+        $associationsToCheck = $this->getConstrainedDataAssociations($entityManager, $className);
 
         $constrainedEntities = [];
         foreach ($associationsToCheck as $associationMapping) {
-            $entityRepository = $em->getRepository($associationMapping['sourceEntity']);
+            $entityRepository = $entityManager->getRepository($associationMapping['sourceEntity']);
             $entities = $entityRepository->findBy(
                 [
                     $associationMapping['fieldName'] => $sourceEntity,
@@ -69,22 +73,22 @@ class IntegrityConstraintManager
     }
 
     /**
-     * @param EntityManagerInterface $em
+     * @param EntityManagerInterface $entityManager
      * @param string                 $className
      *
      * @return array
      */
-    protected function getConstrainedDataAssociations(EntityManagerInterface $em, $className)
+    protected function getConstrainedDataAssociations(EntityManagerInterface $entityManager, $className)
     {
         // We must ensure that we check all the different classes in case of inheritance mapping
         /** @var ClassMetadata $sourceMetadata */
-        $sourceMetadata = $em->getClassMetadata($className);
+        $sourceMetadata = $entityManager->getClassMetadata($className);
         $classes = $sourceMetadata->parentClasses;
         $classes[] = $className;
 
         /** @var ClassMetadata[] $metadatas */
         $associationsToCheck = [];
-        $metadatas = $em->getMetadataFactory()->getAllMetadata();
+        $metadatas = $entityManager->getMetadataFactory()->getAllMetadata();
         foreach ($metadatas as $metadata) {
             foreach ($metadata->getAssociationMappings() as $associationMapping) {
                 foreach ($classes as $class) {

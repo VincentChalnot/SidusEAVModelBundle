@@ -11,8 +11,7 @@
 namespace Sidus\EAVModelBundle\Serializer\Denormalizer;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Persistence\ManagerRegistry;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\EntityManagerInterface;
 use Sidus\EAVModelBundle\Entity\ContextualDataInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
@@ -22,6 +21,7 @@ use Sidus\EAVModelBundle\Serializer\EntityProvider;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
+use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
@@ -38,8 +38,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var ManagerRegistry */
-    protected $doctrine;
+    /** @var EntityManagerInterface */
+    protected $entityManager;
 
     /** @var EntityProvider */
     protected $entityProvider;
@@ -62,7 +62,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param PropertyAccessorInterface      $accessor
      * @param PropertyTypeExtractorInterface $propertyTypeExtractor
      * @param FamilyRegistry                 $familyRegistry
-     * @param ManagerRegistry                $doctrine
+     * @param EntityManagerInterface         $entityManager
      * @param EntityProvider                 $entityProvider
      * @param array                          $ignoredAttributes
      */
@@ -72,14 +72,14 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         PropertyAccessorInterface $accessor = null,
         PropertyTypeExtractorInterface $propertyTypeExtractor = null,
         FamilyRegistry $familyRegistry,
-        ManagerRegistry $doctrine,
+        EntityManagerInterface $entityManager,
         EntityProvider $entityProvider,
         array $ignoredAttributes
     ) {
         $this->nameConverter = $nameConverter;
         $this->accessor = $accessor ?: PropertyAccess::createPropertyAccessor();
         $this->familyRegistry = $familyRegistry;
-        $this->doctrine = $doctrine;
+        $this->entityManager = $entityManager;
         $this->entityProvider = $entityProvider;
         $this->ignoredAttributes = $ignoredAttributes;
     }
@@ -102,10 +102,9 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param string $format  format the given data was extracted from
      * @param array  $context options available to the denormalizer
      *
-     * @throws UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     * @throws SerializerExceptionInterface
      *
      * @return DataInterface
      */
@@ -167,7 +166,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param string          $format
      * @param array           $context
      *
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     * @throws SerializerExceptionInterface
      * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      * @throws \InvalidArgumentException
      */
@@ -185,6 +184,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             $attribute = $family->getAttribute($attributeCode);
             if ($attribute->isCollection()) {
                 if (!\is_array($normalizedValue) && !$normalizedValue instanceof \Traversable) {
+                    /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
                     throw new UnexpectedValueException(
                         "Given data should be an array of values for attribute {$attributeCode}"
                     );
@@ -227,15 +227,17 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param string $class
      * @param array  $context
      *
-     * @throws UnexpectedValueException
+     * @throws SerializerExceptionInterface
      *
-     * @return \Sidus\EAVModelBundle\Model\FamilyInterface
+     * @return FamilyInterface
      */
     protected function getFamily($data, $class, array $context)
     {
         if (\is_array($data) || $data instanceof \ArrayAccess) {
             foreach (['familyCode', 'family_code', 'family'] as $property) {
                 if (array_key_exists($property, $data) && $data[$property]) {
+                    /** @noinspection PhpIncompatibleReturnTypeInspection */
+
                     return $this->denormalizer->denormalize($data[$property], FamilyInterface::class, $context);
                 }
             }
@@ -243,6 +245,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
 
         // Check if family information is present in the context
         if (array_key_exists('family', $context)) {
+            /** @noinspection PhpIncompatibleReturnTypeInspection */
+
             return $this->denormalizer->denormalize($context['family'], FamilyInterface::class, $context);
         }
 
@@ -285,7 +289,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param array              $context
      *
      * @throws \InvalidArgumentException
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     * @throws SerializerExceptionInterface
      *
      * @return mixed
      */
@@ -297,8 +301,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         array $context
     ) {
         $attributeType = $attribute->getType();
-        /** @var ClassMetadataInfo $valueMetadata */
-        $valueMetadata = $this->doctrine->getManager()->getClassMetadata($family->getValueClass());
+        $valueMetadata = $this->entityManager->getClassMetadata($family->getValueClass());
         $storageField = $attributeType->getDatabaseType();
         if ($valueMetadata->hasAssociation($storageField)) {
             $targetClass = $valueMetadata->getAssociationTargetClass($attributeType->getDatabaseType());
@@ -321,6 +324,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             return $value;
         }
 
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         throw new UnexpectedValueException("Unknown database type {$storageField} for family {$family->getCode()}");
     }
 
@@ -332,7 +336,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param array           $context
      *
      * @throws \InvalidArgumentException
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     * @throws SerializerExceptionInterface
      *
      * @return mixed
      */
@@ -344,8 +348,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         array $context
     ) {
         // @T0D0 handles standard serializer annotations ?
-        /** @var ClassMetadataInfo $classMetadata */
-        $classMetadata = $this->doctrine->getManager()->getClassMetadata($family->getDataClass());
+        $classMetadata = $this->entityManager->getClassMetadata($family->getDataClass());
         if ($classMetadata->hasAssociation($attributeCode)) {
             $targetClass = $classMetadata->getAssociationTargetClass($attributeCode);
 
@@ -369,7 +372,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param string $format
      * @param array  $context
      *
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     * @throws SerializerExceptionInterface
      *
      * @return mixed
      */

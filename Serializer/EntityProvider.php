@@ -11,10 +11,12 @@
 namespace Sidus\EAVModelBundle\Serializer;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
+use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
@@ -49,14 +51,18 @@ class EntityProvider implements EntityProviderInterface
      * @param mixed                  $data
      * @param NameConverterInterface $nameConverter
      *
-     * @throws UnexpectedValueException
+     * @throws SerializerExceptionInterface
      *
      * @return DataInterface|null
      */
     public function getEntity(FamilyInterface $family, $data, NameConverterInterface $nameConverter = null)
     {
         /** @var DataRepository $repository */
-        $repository = $this->doctrine->getRepository($family->getDataClass());
+        $entityManager = $this->doctrine->getManagerForClass($family->getDataClass());
+        if (!$entityManager instanceof EntityManagerInterface) {
+            throw new UnexpectedValueException("No manager found for class {$family->getDataClass()}");
+        }
+        $repository = $entityManager->getRepository($family->getDataClass());
 
         if ($family->isSingleton()) {
             try {
@@ -92,6 +98,8 @@ class EntityProvider implements EntityProviderInterface
 
         // If the id is set (and not null), don't even look for the identifier
         if (isset($data['id'])) {
+            /** @noinspection PhpIncompatibleReturnTypeInspection */
+
             return $repository->find($data['id']);
         }
 
@@ -128,6 +136,8 @@ class EntityProvider implements EntityProviderInterface
      * When an entity is created, we don't need to keep the reference anymore
      *
      * @param PostFlushEventArgs $event
+     *
+     * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
      */
     public function postFlush(PostFlushEventArgs $event)
     {

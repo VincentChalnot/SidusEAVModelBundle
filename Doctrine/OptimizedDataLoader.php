@@ -42,6 +42,9 @@ class OptimizedDataLoader implements DataLoaderInterface
     /**
      * @param DataInterface[] $entities
      * @param int             $depth
+     *
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
     public function load($entities, $depth = 1)
     {
@@ -51,7 +54,6 @@ class OptimizedDataLoader implements DataLoaderInterface
 
         $entitiesByValueClassByIds = $this->sortEntitiesByValueClass($entities);
         foreach ($entitiesByValueClassByIds as $valueClass => $entitiesById) {
-            /** @noinspection PhpUnhandledExceptionInspection */
             $this->loadEntityValues($valueClass, $entitiesById);
         }
 
@@ -61,6 +63,9 @@ class OptimizedDataLoader implements DataLoaderInterface
     /**
      * @param DataInterface|null $entity
      * @param int                $depth
+     *
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
     public function loadSingle(DataInterface $entity = null, $depth = 2)
     {
@@ -69,6 +74,8 @@ class OptimizedDataLoader implements DataLoaderInterface
 
     /**
      * @param DataInterface[] $entities
+     *
+     * @throws \InvalidArgumentException
      *
      * @return DataInterface[][]
      */
@@ -88,17 +95,19 @@ class OptimizedDataLoader implements DataLoaderInterface
         return $entitiesByValueClassByIds;
     }
 
+    /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * @param string          $valueClass
      * @param DataInterface[] $entitiesById
      *
-     * @throws \ReflectionException
+     * @throws \UnexpectedValueException
      */
     protected function loadEntityValues($valueClass, array $entitiesById)
     {
         foreach ($this->getValues($valueClass, $entitiesById) as $valueEntity) {
             $data = $valueEntity->getData();
 
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             /** @noinspection PhpUnhandledExceptionInspection */
             $refl = new \ReflectionClass($data);
             $valuesProperty = $refl->getProperty('values');
@@ -137,6 +146,9 @@ class OptimizedDataLoader implements DataLoaderInterface
     /**
      * @param DataInterface[] $entities
      * @param int             $depth
+     *
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
     protected function loadRelatedEntities($entities, $depth)
     {

@@ -10,7 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Validator\Constraints;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
@@ -41,30 +41,30 @@ class DataValidator extends ConstraintValidator
     /** @var string */
     protected $dataClass;
 
-    /** @var ManagerRegistry */
-    protected $doctrine;
+    /** @var EntityManagerInterface */
+    protected $entityManager;
 
     /** @var LoggerInterface */
     protected $logger;
 
     /**
-     * @param string              $dataClass
-     * @param FamilyRegistry      $familyRegistry
-     * @param TranslatorInterface $translator
-     * @param ManagerRegistry     $doctrine
-     * @param LoggerInterface     $logger
+     * @param string                 $dataClass
+     * @param FamilyRegistry         $familyRegistry
+     * @param TranslatorInterface    $translator
+     * @param EntityManagerInterface $entityManager
+     * @param LoggerInterface        $logger
      */
     public function __construct(
         $dataClass,
         FamilyRegistry $familyRegistry,
         TranslatorInterface $translator,
-        ManagerRegistry $doctrine,
+        EntityManagerInterface $entityManager,
         LoggerInterface $logger
     ) {
         $this->dataClass = $dataClass;
         $this->familyRegistry = $familyRegistry;
         $this->translator = $translator;
-        $this->doctrine = $doctrine;
+        $this->entityManager = $entityManager;
         $this->logger = $logger;
     }
 
@@ -139,7 +139,7 @@ class DataValidator extends ConstraintValidator
         }
 
         /** @var ValueRepository $repo */
-        $repo = $this->doctrine->getRepository($family->getValueClass());
+        $repo = $this->entityManager->getRepository($family->getValueClass());
         $values = $repo->findBy($query);
 
         /** @var ValueInterface $value */

@@ -10,7 +10,6 @@
 
 namespace Sidus\EAVModelBundle\Command;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManager;
 use Sidus\EAVModelBundle\Doctrine\EAVFinder;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -54,6 +53,7 @@ class CleanDataCommand extends ContainerAwareCommand
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
+     * @throws \UnexpectedValueException
      * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
      * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
      * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
@@ -61,11 +61,11 @@ class CleanDataCommand extends ContainerAwareCommand
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $this->entityManager = $this->getContainer()->get(ManagerRegistry::class)->getManager();
-        $this->eavFinder = $this->getContainer()->get(EAVFinder::class);
-        $this->familyRegistry = $this->getContainer()->get(FamilyRegistry::class);
         $this->dataClass = $this->getContainer()->getParameter('sidus_eav_model.entity.data.class');
         $this->valueClass = $this->getContainer()->getParameter('sidus_eav_model.entity.value.class');
+        $this->eavFinder = $this->getContainer()->get(EAVFinder::class);
+        $this->familyRegistry = $this->getContainer()->get(FamilyRegistry::class);
+        $this->entityManager = $this->getContainer()->get('sidus_eav_model.entity_manager');
     }
 
     /**
@@ -118,8 +118,6 @@ class CleanDataCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->getFormatter()->setStyle('fire', new OutputFormatterStyle('red'));
-
-        $this->entityManager = $this->getContainer()->get('doctrine')->getManager();
 
         try {
             $familyFilter = $this->extractFamilyFilterOption(

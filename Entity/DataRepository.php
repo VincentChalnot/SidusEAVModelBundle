@@ -187,7 +187,6 @@ class DataRepository extends EntityRepository
         }
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.family = :familyCode')
-            ->addSelect('values')
             ->join('e.values', 'values')
             ->setParameters(
                 [

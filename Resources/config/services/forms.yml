@@ -37,6 +37,7 @@ services:
         public: false
         arguments:
             - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
+            - '@sidus_eav_model.entity_manager'
             - '%sidus_eav_model.entity.data.class%'
         tags:
             - { name: form.type }

@@ -1,8 +1,21 @@
 services:
+    sidus_eav_model.entity_manager:
+        class: Doctrine\ORM\EntityManagerInterface
+        factory: 'Doctrine\Common\Persistence\ManagerRegistry:getManagerForClass'
+        arguments:
+            - '%sidus_eav_model.entity.data.class%'
+
+    # Warning, only use this service when you need the access to the entire EAV set
+    Sidus\EAVModelBundle\Entity\DataRepository:
+        class: Sidus\EAVModelBundle\Entity\DataRepository
+        factory: 'sidus_eav_model.entity_manager:getRepository'
+        arguments:
+            - '%sidus_eav_model.entity.data.class%'
+
     Sidus\EAVModelBundle\Doctrine\EAVFinder:
         class: Sidus\EAVModelBundle\Doctrine\EAVFinder
         arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '@sidus_eav_model.entity_manager'
             - '@Sidus\EAVModelBundle\Doctrine\DataLoaderInterface'
 
     Sidus\EAVModelBundle\Doctrine\IntegrityConstraintManager:

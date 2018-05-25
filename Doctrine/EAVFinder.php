@@ -10,7 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Doctrine;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Sidus\EAVModelBundle\Entity\DataInterface;
@@ -41,19 +41,19 @@ class EAVFinder
         'is not null' => 'isNotNull',
     ];
 
-    /** @var ManagerRegistry */
-    protected $doctrine;
+    /** @var EntityManagerInterface */
+    protected $entityManager;
 
     /** @var DataLoaderInterface */
     protected $dataLoader;
 
     /**
-     * @param ManagerRegistry     $doctrine
-     * @param DataLoaderInterface $dataLoader
+     * @param EntityManagerInterface $entityManager
+     * @param DataLoaderInterface    $dataLoader
      */
-    public function __construct(ManagerRegistry $doctrine, DataLoaderInterface $dataLoader)
+    public function __construct(EntityManagerInterface $entityManager, DataLoaderInterface $dataLoader)
     {
-        $this->doctrine = $doctrine;
+        $this->entityManager = $entityManager;
         $this->dataLoader = $dataLoader;
     }
 
@@ -106,6 +106,9 @@ class EAVFinder
      * @param array           $filterBy
      * @param array           $orderBy
      *
+     * @throws \UnexpectedValueException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      *
      * @return DataInterface[]
@@ -136,7 +139,13 @@ class EAVFinder
      */
     public function getFilterByQb(FamilyInterface $family, array $filterBy, array $orderBy = [], $alias = 'e')
     {
-        $eavQb = $this->getRepository($family)->createFamilyQueryBuilder($family, $alias);
+        $repository = $this->entityManager->getRepository($family->getDataClass());
+        if (!$repository instanceof DataRepository) {
+            throw new \UnexpectedValueException(
+                "Repository for class {$family->getDataClass()} must be a DataRepository"
+            );
+        }
+        $eavQb = $repository->createFamilyQueryBuilder($family, $alias);
 
         // Add order by
         foreach ($orderBy as $attributeCode => $direction) {
@@ -213,15 +222,5 @@ class EAVFinder
         }
 
         return $this->getFilterByQb($family, $fixedFilterBy, $orderBy, $alias);
-    }
-
-    /**
-     * @param FamilyInterface $family
-     *
-     * @return DataRepository
-     */
-    public function getRepository(FamilyInterface $family)
-    {
-        return $this->doctrine->getRepository($family->getDataClass());
     }
 }

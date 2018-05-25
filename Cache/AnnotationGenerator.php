@@ -10,7 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Cache;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
@@ -29,18 +29,18 @@ class AnnotationGenerator implements CacheWarmerInterface
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var EntityManager */
+    /** @var EntityManagerInterface */
     protected $manager;
 
     /** @var string */
     protected $annotationDir;
 
     /**
-     * @param FamilyRegistry $familyRegistry
-     * @param EntityManager  $manager
-     * @param string         $varDir
+     * @param FamilyRegistry         $familyRegistry
+     * @param EntityManagerInterface $manager
+     * @param string                 $varDir
      */
-    public function __construct(FamilyRegistry $familyRegistry, EntityManager $manager, $varDir)
+    public function __construct(FamilyRegistry $familyRegistry, EntityManagerInterface $manager, $varDir)
     {
         $this->familyRegistry = $familyRegistry;
         $this->manager = $manager;
@@ -67,6 +67,8 @@ class AnnotationGenerator implements CacheWarmerInterface
      *
      * @param string $cacheDir The cache directory
      *
+     * @throws \UnexpectedValueException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      * @throws \RuntimeException
      * @throws \ReflectionException
      */
@@ -118,6 +120,8 @@ EOT;
      * @param FamilyInterface    $family
      * @param AttributeInterface $attribute
      *
+     * @throws \UnexpectedValueException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      * @throws \ReflectionException
      *
      * @return string
@@ -181,6 +185,9 @@ EOT;
      * @param AttributeInterface $attribute
      * @param bool               $forceSingle
      *
+     * @throws \UnexpectedValueException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
+     *
      * @return string
      */
     protected function generateGetAnnotation(
@@ -204,6 +211,9 @@ EOT;
      * @param FamilyInterface    $family
      * @param AttributeInterface $attribute
      * @param bool               $forceSingle
+     *
+     * @throws \UnexpectedValueException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      *
      * @return string
      */
@@ -230,6 +240,7 @@ EOT;
      * @param AttributeInterface $attribute
      * @param bool               $forceSingle
      *
+     * @throws \UnexpectedValueException
      * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      *
      * @return string
@@ -310,6 +321,8 @@ EOT;
      * @param AttributeInterface $attribute
      * @param bool               $forceSingle
      *
+     * @throws \UnexpectedValueException
+     *
      * @return string
      */
     protected function getTargetClass(
@@ -317,7 +330,6 @@ EOT;
         AttributeInterface $attribute,
         $forceSingle = false
     ) {
-        /** @var \Doctrine\ORM\Mapping\ClassMetadata $classMetadata */
         $classMetadata = $this->manager->getClassMetadata($parentFamily->getValueClass());
         try {
             $mapping = $classMetadata->getAssociationMapping($attribute->getType()->getDatabaseType());

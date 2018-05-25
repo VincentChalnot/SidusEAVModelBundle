@@ -4,7 +4,7 @@ services:
         public: false
         arguments:
             - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
-            - '@doctrine.orm.entity_manager'
+            - '@sidus_eav_model.entity_manager'
             - '%kernel.root_dir%/../var'
         tags:
             - { name: kernel.cache_warmer, priority: 0 }

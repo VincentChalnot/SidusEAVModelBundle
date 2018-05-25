@@ -70,10 +70,10 @@ are stored separately from the entity.
 
 ````php
 <?php
-/** @var \Doctrine\Bundle\DoctrineBundle\Registry $doctrine */
-$em = $doctrine->getManager();
-
-/** @var \Sidus\EAVModelBundle\Entity\DataInterface $data */
-$em->persist($data);
-$em->flush();
+/**
+ * @var \Doctrine\ORM\EntityManagerInterface $entityManager 
+ * @var \Sidus\EAVModelBundle\Entity\DataInterface $data
+ */
+$entityManager->persist($data);
+$entityManager->flush();
 ````
