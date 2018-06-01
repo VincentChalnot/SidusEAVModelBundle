@@ -312,6 +312,9 @@ abstract class AbstractValue implements ContextualValueInterface
      */
     public function setStringValue($stringValue)
     {
+        if (null !== $stringValue && 255 < \strlen($stringValue)) {
+            $stringValue = substr($stringValue, 0, 255);
+        }
         $this->stringValue = null === $stringValue ? null : (string) $stringValue;
 
         return $this;
