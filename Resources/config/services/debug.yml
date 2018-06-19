@@ -1,0 +1,7 @@
+services:
+    Sidus\EAVModelBundle\Profiler\ModelConfigurationDataCollector:
+        arguments:
+            - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
+            - '@Sidus\EAVModelBundle\Registry\AttributeTypeRegistry'
+        tags:
+            - { name: data_collector, id: sidus_eav_model, template: "@SidusEAVModel/Profiler/sidus_eav_model.html.twig" }

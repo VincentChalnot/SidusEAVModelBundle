@@ -80,6 +80,9 @@ class Attribute implements AttributeInterface
     /** @var mixed */
     protected $default;
 
+    /** @var string */
+    protected $fallbackLabel;
+
     /**
      * @param string                $code
      * @param AttributeTypeRegistry $attributeTypeRegistry
@@ -347,6 +350,10 @@ class Attribute implements AttributeInterface
         if ($this->label) {
             return $this->label;
         }
+        if (null === $this->translator) {
+            return $this->fallbackLabel; // Use fallback after serialization
+        }
+
         $tIds = [];
         if ($this->getFamily()) {
             $tIds[] = "eav.family.{$this->getFamily()->getCode()}.attribute.{$this->getCode()}.label";
@@ -483,6 +490,28 @@ class Attribute implements AttributeInterface
         $this->type->setAttributeDefaults($this); // Allow attribute type service to configure attribute
 
         $this->checkConflicts();
+    }
+
+    /**
+     * Remove service references before serializing
+     *
+     * @throws \ReflectionException
+     *
+     * @return array
+     */
+    public function __sleep()
+    {
+        $this->fallbackLabel = $this->getLabel();
+        $propertyNames = [];
+        $refl = new \ReflectionClass(__CLASS__);
+        foreach ($refl->getProperties() as $property) {
+            if (\in_array($property->getName(), ['translator', 'attributeTypeRegistry'], true)) {
+                continue;
+            }
+            $propertyNames[] = $property->getName();
+        }
+
+        return $propertyNames;
     }
 
     /**

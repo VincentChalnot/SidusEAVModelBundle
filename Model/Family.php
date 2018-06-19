@@ -80,6 +80,16 @@ class Family implements FamilyInterface
     /** @var ContextManagerInterface */
     protected $contextManager;
 
+    /*
+     * Both following properties are used just before serializing a family in order to store dynamic data that would
+     * otherwise be lost during serialization
+     */
+    /** @var array */
+    protected $fallbackContext;
+
+    /** @var string */
+    protected $fallbackLabel;
+
     /**
      * @param string                  $code
      * @param AttributeRegistry       $attributeRegistry
@@ -316,6 +326,9 @@ class Family implements FamilyInterface
         if ($this->label) {
             return $this->label;
         }
+        if (null === $this->translator) {
+            return $this->fallbackLabel;
+        }
 
         return $this->tryTranslate("eav.family.{$this->getCode()}.label", [], $this->getCode());
     }
@@ -458,6 +471,10 @@ class Family implements FamilyInterface
      */
     public function getContext()
     {
+        if (null === $this->contextManager) {
+            return $this->fallbackContext;
+        }
+
         return $this->contextManager->getContext();
     }
 
@@ -475,6 +492,34 @@ class Family implements FamilyInterface
     public function setOptions(array $options)
     {
         $this->options = $options;
+    }
+
+    /**
+     * Remove service references before serializing
+     *
+     * @throws \ReflectionException
+     *
+     * @return array
+     */
+    public function __sleep()
+    {
+        if ($this->contextManager) {
+            $this->fallbackContext = $this->contextManager->getContext();
+        }
+        if ($this->translator) {
+            $this->fallbackLabel = $this->getLabel();
+        }
+        $this->getChildren(); // Trigger the storage of children families before discarding the familyRegistry
+        $propertyNames = [];
+        $refl = new \ReflectionClass(__CLASS__);
+        foreach ($refl->getProperties() as $property) {
+            if (\in_array($property->getName(), ['translator', 'familyRegistry', 'contextManager'], true)) {
+                continue;
+            }
+            $propertyNames[] = $property->getName();
+        }
+
+        return $propertyNames;
     }
 
     /**

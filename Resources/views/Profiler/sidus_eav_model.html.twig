@@ -1,0 +1,243 @@
+{# @var collector \Sidus\EAVModelBundle\Profiler\ModelConfigurationDataCollector #}
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set icon %}
+        {{ include('@SidusEAVModel/Profiler/icon.svg') }}
+        <span class="sf-toolbar-value">EAV</span>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>Attribute types</b>
+            <span class="sf-toolbar-status">{{ collector.attributeTypeRegistry.types|length }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Families</b>
+            <span class="sf-toolbar-status">{{ collector.familyRegistry.familyCodes|length }}</span>
+        </div>
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { 'link': true }) }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label">
+        <span class="icon">{{ include('@SidusEAVModel/Profiler/icon.svg') }}</span>
+        <strong>EAV Model</strong>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>EAV Model Configuration</h2>
+    <p>
+        Full documentation:
+        <a href="https://vincentchalnot.github.io/SidusEAVModelBundle" target="_blank">
+            https://vincentchalnot.github.io/SidusEAVModelBundle
+        </a>
+    </p>
+    <style type="text/css">
+        .attribute-details {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        .sidus-properties {
+            margin: 0;
+        }
+
+        .sidus-properties dt {
+            font-weight: bold;
+            margin-top: 0.3rem;
+        }
+
+        .sidus-properties dd {
+            margin: 0;
+            padding: 0.2rem 0 0.2rem 2rem;
+        }
+    </style>
+
+    <div class="sf-tabs">
+        <div class="tab">
+            <h3 class="tab-title">
+                Families
+                <span class="badge">{{ collector.familyRegistry.familyCodes|length }}</span>
+            </h3>
+            <div class="tab-content">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Code / Label</th>
+                        <th>Parent</th>
+                        <th>Properties</th>
+                        <th>Classes</th>
+                        <th class="full-width">Attributes</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for family in collector.familyRegistry.families %}
+                        {# @var family \Sidus\EAVModelBundle\Model\FamilyInterface #}
+                        <tr class="{{ not family.instantiable ? 'text-muted' }}">
+                            <td class="font-normal text-bold">
+                                <span class="colored text-bold">{{ family.code }}</span>
+                                <span class="text-muted newline">{{ family }}</span>
+                            </td>
+                            <td class="font-normal text-small" nowrap="">
+                                {% if family.parent %}
+                                    <span class="colored text-bold">{{ family.parent.code }}</span>
+                                    <span class="text-muted newline">{{ family.parent }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="font-normal text-small" nowrap="">
+                                <dl class="sidus-properties">
+                                    <dt>Instantiable:</dt>
+                                    <dd class="{{ not family.instantiable ? 'status-warning' }}">{{ family.instantiable ? 'true' : 'false' }}</dd>
+                                    <dt>Singleton:</dt>
+                                    <dd class="{{ family.singleton ? 'status-warning' }}">{{ family.singleton ? 'true' : 'false' }}</dd>
+                                </dl>
+                            </td>
+                            <td class="font-normal text-small" nowrap="">
+                                <dl class="sidus-properties">
+                                    <dt>Data Class:</dt>
+                                    <dd>{{ family.dataClass|abbr_class }}</dd>
+                                    <dt>Value Class:</dt>
+                                    <dd>{{ family.valueClass|abbr_class }}</dd>
+                                </dl>
+                            </td>
+                            <td class="font-normal">
+                                <span class="newline">
+                                    {% if family.attributeAsIdentifier %}
+                                        Identifier:
+                                        <b>{{ family.attributeAsIdentifier.code }}</b>{{ family.attributeAsLabel ? ',' }}
+                                    {% endif %}
+                                    {% if family.attributeAsLabel %}
+                                        Label: <b>{{ family.attributeAsLabel.code }}</b>
+                                    {% endif %}
+                                </span>
+                                <div class="text-small">
+                                    {% for attribute in family.attributes %}
+                                        {{ attribute.code }}{{ not loop.last ? ',' }}
+                                    {% endfor %}
+                                </div>
+                                <div class="text-small font-normal">
+                                    {% set family_id = 'family-' ~ family.code %}
+                                    <a class="btn btn-link text-small sf-toggle" data-toggle-selector="#{{ family_id }}"
+                                       data-toggle-alt-content="Hide attributes">
+                                        Show attributes details
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" class="attribute-details">
+                                <div id="{{ family_id }}" class="sf-toggle-content sf-toggle-hidden">
+                                    <table>
+                                        <thead>
+                                        <tr>
+                                            <th>Code / Label</th>
+                                            <th>Group</th>
+                                            <th>Type</th>
+                                            <th>Properties</th>
+                                            <th>Options</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for attribute in family.attributes %}
+                                            {# @var attribute \Sidus\EAVModelBundle\Model\AttributeInterface #}
+                                            <tr>
+                                                <td class="font-normal text-bold">
+                                                    <span class="colored text-bold">{{ attribute.code }}</span>
+                                                    <span class="text-muted newline">{{ attribute }}</span>
+                                                </td>
+                                                <td class="font-normal text-small" nowrap="">
+                                                    {{ attribute.group }}
+                                                </td>
+                                                <td class="font-normal text-small">
+                                                    <dl class="sidus-properties">
+                                                        <dt>Code:</dt>
+                                                        <dd>{{ attribute.type.code }}</dd>
+                                                        <dt>Relation:</dt>
+                                                        <dd class="{{ attribute.type.relation ? 'status-success' }}">{{ attribute.type.relation ? 'true' : 'false' }}</dd>
+                                                        <dt>Embedded:</dt>
+                                                        <dd class="{{ attribute.type.embedded ? 'status-success' }}">{{ attribute.type.embedded ? 'true' : 'false' }}</dd>
+                                                    </dl>
+                                                </td>
+                                                <td class="font-normal text-small">
+                                                    <dl class="sidus-properties">
+                                                        <dt>Required:</dt>
+                                                        <dd class="{{ attribute.required ? 'status-success' }}">{{ attribute.required ? 'true' : 'false' }}</dd>
+                                                        <dt>Unique:</dt>
+                                                        <dd class="{{ attribute.unique ? 'status-success' }}">{{ attribute.unique ? 'true' : 'false' }}</dd>
+                                                        <dt>Multiple:</dt>
+                                                        <dd class="{{ attribute.multiple ? 'status-success' }}">{{ attribute.multiple ? 'true' : 'false' }}</dd>
+                                                        <dt>Collection:</dt>
+                                                        <dd class="{{ attribute.collection ? 'status-success' }}">{{ attribute.collection ? 'true' : 'false' }}</dd>
+                                                        <dt>Context Mask:</dt>
+                                                        <dd>{{ attribute.contextMask|join(', ') }}</dd>
+                                                        <dt>Validation Rules:</dt>
+                                                        <dd>
+                                                            {% for validationRule in attribute.validationRules %}
+                                                                {{ profiler_dump(collector.wrapData(validationRule), maxDepth=1) }}
+                                                            {% endfor %}
+                                                        </dd>
+                                                    </dl>
+                                                </td>
+                                                <td class="font-normal text-small">
+                                                    <dl class="sidus-properties">
+                                                        <dt>Options:</dt>
+                                                        <dd>{{ profiler_dump(collector.wrapData(attribute.options), maxDepth=1) }}</dd>
+                                                        <dt>Form options:</dt>
+                                                        <dd>{{ profiler_dump(collector.wrapData(attribute.formOptions), maxDepth=1) }}</dd>
+                                                    </dl>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab">
+            <h3 class="tab-title">
+                Attribute Types
+                <span class="badge">{{ collector.attributeTypeRegistry.types|length }}</span>
+            </h3>
+            <div class="tab-content">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Properties</th>
+                        <th class="full-width">Form Type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for attributeType in collector.attributeTypeRegistry.types %}
+                        <tr>
+                            <td>{{ attributeType.code }}</td>
+                            <td nowrap="">
+                                <span class="text-small newline">
+                                    Storage column: <b>{{ attributeType.databaseType }}</b>
+                                </span>
+                                <span class="text-small newline">
+                                    Relation: <b>{{ attributeType.relation ? 'true' : 'false' }}</b>
+                                </span>
+                                <span class="text-small newline">
+                                    Embedded: <b>{{ attributeType.embedded ? 'true' : 'false' }}</b>
+                                </span>
+                            </td>
+                            <td>{{ attributeType.formType }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

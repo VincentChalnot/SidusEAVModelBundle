@@ -64,6 +64,7 @@ class SidusEAVModelExtension extends Extension
         $loader->load('attribute_types.yml');
         $loader->load('configuration.yml');
         $loader->load('context.yml');
+        $loader->load('debug.yml');
         $loader->load('deprecated.yml');
         $loader->load('doctrine.yml');
         $loader->load('entities.yml');
