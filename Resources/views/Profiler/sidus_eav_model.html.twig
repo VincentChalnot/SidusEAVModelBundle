@@ -213,6 +213,7 @@
                     <thead>
                     <tr>
                         <th>Code</th>
+                        <th>Column</th>
                         <th>Properties</th>
                         <th class="full-width">Form Type</th>
                     </tr>
@@ -221,18 +222,16 @@
                     {% for attributeType in collector.attributeTypeRegistry.types %}
                         <tr>
                             <td>{{ attributeType.code }}</td>
+                            <td>{{ attributeType.databaseType }}</td>
                             <td nowrap="">
-                                <span class="text-small newline">
-                                    Storage column: <b>{{ attributeType.databaseType }}</b>
-                                </span>
-                                <span class="text-small newline">
-                                    Relation: <b>{{ attributeType.relation ? 'true' : 'false' }}</b>
-                                </span>
-                                <span class="text-small newline">
-                                    Embedded: <b>{{ attributeType.embedded ? 'true' : 'false' }}</b>
-                                </span>
+                                <dl class="sidus-properties">
+                                    <dt>Relation:</dt>
+                                    <dd class="{{ attributeType.relation ? 'status-success' }}">{{ attributeType.relation ? 'true' : 'false' }}</dd>
+                                    <dt>Embedded:</dt>
+                                    <dd class="{{ attributeType.embedded ? 'status-success' }}">{{ attributeType.embedded ? 'true' : 'false' }}</dd>
+                                </dl>
                             </td>
-                            <td>{{ attributeType.formType }}</td>
+                            <td>{{ attributeType.formType|abbr_class }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
