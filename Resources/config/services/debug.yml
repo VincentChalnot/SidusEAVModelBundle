@@ -5,3 +5,7 @@ services:
             - '@Sidus\EAVModelBundle\Registry\AttributeTypeRegistry'
         tags:
             - { name: data_collector, id: sidus_eav_model, template: "@SidusEAVModel/Profiler/sidus_eav_model.html.twig" }
+
+    Sidus\EAVModelBundle\Debug\EAVDataCaster:
+        class: Sidus\EAVModelBundle\Debug\EAVDataCaster
+        autowire: true

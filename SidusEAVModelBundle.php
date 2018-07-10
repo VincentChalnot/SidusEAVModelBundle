@@ -11,6 +11,7 @@
 namespace Sidus\EAVModelBundle;
 
 use Sidus\BaseBundle\DependencyInjection\Compiler\GenericCompilerPass;
+use Sidus\EAVModelBundle\DependencyInjection\DebugCompilerPass;
 use Sidus\EAVModelBundle\Registry\AttributeRegistry;
 use Sidus\EAVModelBundle\Registry\AttributeTypeRegistry;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
@@ -50,5 +51,7 @@ class SidusEAVModelBundle extends Bundle
                 'addFamily'
             )
         );
+
+        $container->addCompilerPass(new DebugCompilerPass());
     }
 }
