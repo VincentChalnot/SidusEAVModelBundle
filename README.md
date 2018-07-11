@@ -33,7 +33,7 @@ Model configuration is done in Yaml and everything can be easily extended.
 - [06 - Validation](Documentation/06-validate.md)
 - [07 - Query](Documentation/07.1-query.md)
 - [08 - Translating the model](Documentation/08-translate.md)
-- [19 - EAV Contextualisation](Documentation/09-context.md)
+- [09 - EAV Contextualisation](Documentation/09-context.md)
 - [10 - Serialization](Documentation/10-serialize.md)
 - [11 - Extending & customizing the model](Documentation/11-extend.md)
 - [12 - Custom classes](Documentation/12-custom_classes.md)

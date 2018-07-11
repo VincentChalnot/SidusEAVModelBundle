@@ -10,6 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Context;
 
+use Sidus\BaseBundle\Utilities\DebugInfoUtility;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -17,6 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
+use Symfony\Component\VarDumper\Caster\Caster;
 
 /**
  * Manager for setting, saving and getting the current context when using ContextualData & ContextualValue
@@ -163,6 +165,33 @@ class ContextManager implements ContextManagerInterface
             $redirectResponse = new RedirectResponse($event->getRequest()->getRequestUri());
             $event->setResponse($redirectResponse);
         }
+    }
+
+    /**
+     * Destroys the request because we won't need it anymore
+     */
+    public function __sleep()
+    {
+        $this->request = null;
+        $this->formFactory = null;
+        $this->contextSelectorForm = null;
+    }
+
+    /**
+     * Custom debugInfo to prevent profiler from crashing
+     *
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return DebugInfoUtility::debugInfo(
+            $this,
+            [
+                Caster::PREFIX_PROTECTED.'formFactory',
+                Caster::PREFIX_PROTECTED.'request',
+                Caster::PREFIX_PROTECTED.'contextSelectorForm',
+            ]
+        );
     }
 
     /**

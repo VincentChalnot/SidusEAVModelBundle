@@ -10,9 +10,11 @@
 
 namespace Sidus\EAVModelBundle\Registry;
 
+use Sidus\BaseBundle\Utilities\DebugInfoUtility;
 use Sidus\EAVModelBundle\Exception\AttributeConfigurationException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\VarDumper\Caster\Caster;
 use UnexpectedValueException;
 
 /**
@@ -146,6 +148,22 @@ class AttributeRegistry
     public function hasAttribute($code)
     {
         return array_key_exists($code, $this->attributes);
+    }
+
+    /**
+     * Custom debugInfo to prevent profiler from crashing
+     *
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return DebugInfoUtility::debugInfo(
+            $this,
+            [
+                Caster::PREFIX_PROTECTED.'attributeTypeRegistry',
+                Caster::PREFIX_PROTECTED.'translator',
+            ]
+        );
     }
 
     /**

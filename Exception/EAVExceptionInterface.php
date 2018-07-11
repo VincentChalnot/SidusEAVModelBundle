@@ -15,6 +15,6 @@ namespace Sidus\EAVModelBundle\Exception;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-interface EAVExceptionInterface
+interface EAVExceptionInterface extends \Throwable
 {
 }

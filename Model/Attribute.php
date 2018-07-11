@@ -10,12 +10,14 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
+use Sidus\BaseBundle\Utilities\DebugInfoUtility;
 use Sidus\EAVModelBundle\Registry\AttributeTypeRegistry;
 use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
 use Sidus\EAVModelBundle\Exception\AttributeConfigurationException;
 use Sidus\EAVModelBundle\Exception\ContextException;
 use Sidus\BaseBundle\Translator\TranslatableTrait;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\VarDumper\Caster\Caster;
 
 /**
  * Defines an attribute in the EAV model
@@ -512,6 +514,23 @@ class Attribute implements AttributeInterface
         }
 
         return $propertyNames;
+    }
+
+    /**
+     * Custom debug info
+     *
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return DebugInfoUtility::debugInfo(
+            $this,
+            [
+                Caster::PREFIX_PROTECTED.'translator',
+                Caster::PREFIX_PROTECTED.'attributeTypeRegistry',
+                Caster::PREFIX_PROTECTED.'fallbackLabel',
+            ]
+        );
     }
 
     /**
