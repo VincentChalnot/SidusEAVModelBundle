@@ -13,6 +13,7 @@ namespace Sidus\EAVModelBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Sidus\BaseBundle\Utilities\DebugInfoUtility;
 use Sidus\EAVModelBundle\Exception\ContextException;
 use Sidus\EAVModelBundle\Exception\InvalidValueDataException;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
@@ -23,6 +24,8 @@ use Sidus\EAVModelBundle\Validator\Constraints\Data as DataConstraint;
 use Symfony\Component\PropertyAccess\Exception\ExceptionInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+use Symfony\Component\VarDumper\Caster\Caster;
+use Symfony\Component\VarDumper\Caster\CutStub;
 
 /**
  * Base logic to handle the EAV data
@@ -891,6 +894,54 @@ abstract class AbstractData implements ContextualDataInterface
             $this->values->add($newValue);
             $newValue->setData($this);
         }
+    }
+
+    /**
+     * Cleaning object before serialization
+     */
+    public function __sleep()
+    {
+        $this->accessor = null;
+        $this->valuesByAttributes = null;
+    }
+
+    /**
+     * Custom debugInfo to prevent profiler from crashing
+     *
+     * @throws \Sidus\EAVModelBundle\Exception\EAVExceptionInterface
+     *
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        $a = DebugInfoUtility::debugInfo(
+            $this,
+            [
+                Caster::PREFIX_PROTECTED.'children',
+                Caster::PREFIX_PROTECTED.'values',
+                Caster::PREFIX_PROTECTED.'refererValues',
+                Caster::PREFIX_PROTECTED.'valuesByAttributes',
+                Caster::PREFIX_PROTECTED.'family',
+                Caster::PREFIX_PROTECTED.'accessor',
+            ]
+        );
+
+        $a['identifier'] = $this->getIdentifier();
+        $a['label'] = $this->getLabel();
+        $a['family'] = $this->getFamilyCode();
+
+        $family = $this->getFamily();
+        foreach ($family->getAttributes() as $attribute) {
+            $attributeType = $attribute->getType();
+            $attributeCode = $attribute->getCode();
+            if ($attributeType->isRelation() && !$attribute->getOption('autoload', false)) {
+                $a[$attributeCode] = new CutStub($this->get($attributeCode));
+            } else {
+                $a[$attributeCode] = $this->get($attributeCode);
+            }
+        }
+
+        return $a;
     }
 
     /**

@@ -51,7 +51,5 @@ class SidusEAVModelBundle extends Bundle
                 'addFamily'
             )
         );
-
-        $container->addCompilerPass(new DebugCompilerPass());
     }
 }

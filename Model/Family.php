@@ -10,6 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Model;
 
+use Sidus\BaseBundle\Utilities\DebugInfoUtility;
 use Sidus\EAVModelBundle\Entity\ContextualDataInterface;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
 use Sidus\EAVModelBundle\Registry\AttributeRegistry;
@@ -24,6 +25,7 @@ use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\VarDumper\Caster\Caster;
 use UnexpectedValueException;
 
 /**
@@ -520,6 +522,25 @@ class Family implements FamilyInterface
         }
 
         return $propertyNames;
+    }
+
+    /**
+     * Custom debug info
+     *
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return DebugInfoUtility::debugInfo(
+            $this,
+            [
+                Caster::PREFIX_PROTECTED.'translator',
+                Caster::PREFIX_PROTECTED.'familyRegistry',
+                Caster::PREFIX_PROTECTED.'contextManager',
+                Caster::PREFIX_PROTECTED.'fallbackContext',
+                Caster::PREFIX_PROTECTED.'fallbackLabel',
+            ]
+        );
     }
 
     /**
