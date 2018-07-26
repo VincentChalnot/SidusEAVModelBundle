@@ -58,7 +58,7 @@ menu:
                     text: 08 - Translating the model
                     relativeUrl: Documentation/08-translate.html
                 Documentation/09-context.html:
-                    text: 19 - EAV Contextualisation
+                    text: 09 - EAV Contextualisation
                     relativeUrl: Documentation/09-context.html
                 Documentation/10-serialize.html:
                     text: 10 - Serialization
