@@ -120,4 +120,12 @@ interface FamilyInterface
      * @return array
      */
     public function getOptions();
+
+    /**
+     * @param string $code
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    public function getOption($code, $default = null);
 }

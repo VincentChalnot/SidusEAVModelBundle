@@ -489,6 +489,21 @@ class Family implements FamilyInterface
     }
 
     /**
+     * @param string $code
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    public function getOption($code, $default = null)
+    {
+        if (!array_key_exists($code, $this->options)) {
+            return $default;
+        }
+
+        return $this->options[$code];
+    }
+
+    /**
      * @param array $options
      */
     public function setOptions(array $options)
