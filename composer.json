@@ -24,7 +24,9 @@
     },
     "require": {
         "php": ">=7.2",
-        "symfony/symfony": "^3.4|^4.0",
+        "symfony/framework-bundle": "^4.1",
+        "symfony/form": "^4.1",
+        "symfony/validator": "^4.1",
         "doctrine/doctrine-bundle": "^1.9",
         "sidus/base-bundle": "~1.0"
     },
