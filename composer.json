@@ -24,13 +24,17 @@
     },
     "require": {
         "php": ">=7.2",
-        "symfony/framework-bundle": "^4.1",
-        "symfony/form": "^4.1",
+        "symfony/dependency-injection": "^4.1",
+        "symfony/config": "~4.1",
         "symfony/validator": "^4.1",
+        "symfony/yaml": "^4.1",
+        "symfony/property-access": "^4.1",
+        "doctrine/orm": "^2.6",
         "doctrine/doctrine-bundle": "^1.9",
         "sidus/base-bundle": "~1.0"
     },
     "suggest": {
+        "sidus/eav-form-bundle": "Symfony form support",
         "sidus/eav-bootstrap-bundle": "Easy Twitter Bootstrap integration"
     }
 }
