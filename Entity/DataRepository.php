@@ -204,39 +204,6 @@ class DataRepository extends EntityRepository
     }
 
     /**
-     * @deprecated Do not use this function anymore, use the OptimizedDataLoader on your query results instead
-     *
-     * @param string            $alias
-     * @param string            $indexBy
-     * @param QueryBuilder|null $qb
-     * @param bool              $associations
-     *
-     * @return QueryBuilder
-     */
-    public function createOptimizedQueryBuilder($alias, $indexBy = null, QueryBuilder $qb = null, $associations = false)
-    {
-        $m = 'Do not use this function anymore, use the OptimizedDataLoader on your query results instead';
-        @trigger_error($m, E_USER_DEPRECATED);
-
-        if (!$qb) {
-            $qb = $this->createQueryBuilder($alias, $indexBy);
-        }
-        $qb
-            ->leftJoin($alias.'.values', 'values')
-            ->addSelect('values');
-
-        if ($associations) {
-            $qb
-                ->leftJoin('values.dataValue', 'associations')
-                ->addSelect('associations')
-                ->leftJoin('associations.values', 'associationValues')
-                ->addSelect('associationValues');
-        }
-
-        return $qb;
-    }
-
-    /**
      * Returns a EAVQueryBuilder to allow you to build a complex query to search your database
      *
      * @param FamilyInterface $family
@@ -257,18 +224,6 @@ class DataRepository extends EntityRepository
     public function createEAVQueryBuilder($alias = 'e')
     {
         return new EAVQueryBuilder($this->createQueryBuilder($alias), $alias);
-    }
-
-    /**
-     * @deprecated Use DataManager::getQbForFamiliesAndLabel instead
-     *
-     * @see        DataManager::getQbForFamiliesAndLabel
-     *
-     * @throws \RuntimeException
-     */
-    public function getQbForFamiliesAndLabel()
-    {
-        throw new \RuntimeException('This method is deprecated, use DataManager::getQbForFamiliesAndLabel instead');
     }
 
     /**

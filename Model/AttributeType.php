@@ -23,26 +23,14 @@ class AttributeType implements AttributeTypeInterface
     /** @var string */
     protected $databaseType;
 
-    /** @var string */
-    protected $formType;
-
-    /** @var array */
-    protected $formOptions = [];
-
     /**
-     * AttributeType constructor.
-     *
      * @param string $code
      * @param string $databaseType
-     * @param string $formType
-     * @param array  $formOptions
      */
-    public function __construct($code, $databaseType, $formType, array $formOptions = [])
+    public function __construct(string $code, string $databaseType)
     {
         $this->code = $code;
         $this->databaseType = $databaseType;
-        $this->formType = $formType;
-        $this->formOptions = $formOptions;
     }
 
     /**
@@ -62,36 +50,10 @@ class AttributeType implements AttributeTypeInterface
     }
 
     /**
-     * @return string
-     */
-    public function getFormType()
-    {
-        return $this->formType;
-    }
-
-    /**
      * @param AttributeInterface $attribute
      */
     public function setAttributeDefaults(AttributeInterface $attribute)
     {
-    }
-
-    /**
-     * @param AttributeInterface $attribute
-     *
-     * @return array
-     */
-    public function getFormOptions(AttributeInterface $attribute)
-    {
-        return $this->formOptions;
-    }
-
-    /**
-     * @param array $formOptions
-     */
-    public function setFormOptions($formOptions)
-    {
-        $this->formOptions = $formOptions;
     }
 
     /**

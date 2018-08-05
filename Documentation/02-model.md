@@ -17,8 +17,7 @@ classes because they do not necessarily correspond to any PHP class in a strict 
 denomination could lead to many mistakes so we prefer to call them "families".
 
 Each family must define at least an attribute and an attribute as label:
-- The list of attribute is a simple array of attribute codes and the order in which you declare them will define the
-order in which they appear in their edition form.
+- The list of attribute is a simple array of attribute codes.
 - The attribute as label defines which attribute should be used to display the object when calling __toString on it.
 
 Just like a standard relational model you can define an inheritance between your families and add attributes to a child

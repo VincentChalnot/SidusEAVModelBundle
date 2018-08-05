@@ -46,7 +46,7 @@ class OrphanEmbedRemovalListener
      * @throws \Sidus\EAVModelBundle\Exception\MissingFamilyException
      * @throws \Doctrine\ORM\ORMException
      */
-    public function preRemove(LifecycleEventArgs $args)
+    public function preRemove(LifecycleEventArgs $args): void
     {
         $value = $args->getEntity();
         if (!$value instanceof ValueInterface) {

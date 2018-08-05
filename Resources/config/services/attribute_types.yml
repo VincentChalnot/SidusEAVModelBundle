@@ -13,7 +13,6 @@ services:
         arguments:
             - string
             - stringValue
-            - Symfony\Component\Form\Extension\Core\Type\TextType
         tags:
             - { name: sidus.attribute_type }
 
@@ -23,7 +22,6 @@ services:
         arguments:
             - text
             - textValue
-            - Symfony\Component\Form\Extension\Core\Type\TextareaType
         tags:
             - { name: sidus.attribute_type }
 
@@ -33,7 +31,6 @@ services:
         arguments:
             - integer
             - integerValue
-            - Symfony\Component\Form\Extension\Core\Type\NumberType
         tags:
             - { name: sidus.attribute_type }
 
@@ -43,7 +40,6 @@ services:
         arguments:
             - decimal
             - decimalValue
-            - Symfony\Component\Form\Extension\Core\Type\NumberType
         tags:
             - { name: sidus.attribute_type }
 
@@ -53,7 +49,6 @@ services:
         arguments:
             - boolean
             - boolValue
-            - Symfony\Component\Form\Extension\Core\Type\CheckboxType
         tags:
             - { name: sidus.attribute_type }
 
@@ -63,7 +58,6 @@ services:
         arguments:
             - html
             - textValue
-            - Symfony\Component\Form\Extension\Core\Type\TextareaType
         tags:
             - { name: sidus.attribute_type }
 
@@ -73,7 +67,6 @@ services:
         arguments:
             - date
             - dateValue
-            - Symfony\Component\Form\Extension\Core\Type\DateType
         tags:
             - { name: sidus.attribute_type }
 
@@ -83,7 +76,6 @@ services:
         arguments:
             - datetime
             - datetimeValue
-            - Symfony\Component\Form\Extension\Core\Type\DateTimeType
         tags:
             - { name: sidus.attribute_type }
 
@@ -93,7 +85,6 @@ services:
         arguments:
             - choice
             - stringValue
-            - Symfony\Component\Form\Extension\Core\Type\ChoiceType
         tags:
             - { name: sidus.attribute_type }
 
@@ -103,7 +94,6 @@ services:
         arguments:
             - hidden
             - stringValue
-            - Symfony\Component\Form\Extension\Core\Type\HiddenType
         tags:
             - { name: sidus.attribute_type }
 
@@ -115,7 +105,6 @@ services:
         arguments:
             - data_selector
             - dataValue
-            - Sidus\EAVModelBundle\Form\Type\SimpleDataSelectorType
         tags:
             - { name: sidus.attribute_type }
 
@@ -125,7 +114,6 @@ services:
         arguments:
             - embed
             - dataValue
-            - Sidus\EAVModelBundle\Form\Type\DataType
         tags:
             - { name: sidus.attribute_type }
 
@@ -135,7 +123,6 @@ services:
         arguments:
             - string_identifier
             - stringValue
-            - Symfony\Component\Form\Extension\Core\Type\TextType
         tags:
             - { name: sidus.attribute_type }
 
@@ -145,6 +132,5 @@ services:
         arguments:
             - integer_identifier
             - integerValue
-            - Symfony\Component\Form\Extension\Core\Type\TextType
         tags:
             - { name: sidus.attribute_type }

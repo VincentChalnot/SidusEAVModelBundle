@@ -57,7 +57,7 @@ class AnnotationGenerator implements CacheWarmerInterface
      *
      * @return bool true if the warmer is optional, false otherwise
      */
-    public function isOptional()
+    public function isOptional(): bool
     {
         return false;
     }
@@ -72,7 +72,7 @@ class AnnotationGenerator implements CacheWarmerInterface
      * @throws \RuntimeException
      * @throws \ReflectionException
      */
-    public function warmUp($cacheDir)
+    public function warmUp($cacheDir): void
     {
         $baseDir = $this->annotationDir.DIRECTORY_SEPARATOR.'Sidus'.DIRECTORY_SEPARATOR.'EAV'.DIRECTORY_SEPARATOR;
         if (!@mkdir($baseDir, 0777, true) && !is_dir($baseDir)) {
@@ -97,7 +97,7 @@ class AnnotationGenerator implements CacheWarmerInterface
      *
      * @return string
      */
-    protected function getFileHeader(FamilyInterface $family)
+    protected function getFileHeader(FamilyInterface $family): string
     {
         $content = <<<EOT
 <?php
@@ -126,7 +126,7 @@ EOT;
      *
      * @return string
      */
-    protected function getAttributeMethods(FamilyInterface $family, AttributeInterface $attribute)
+    protected function getAttributeMethods(FamilyInterface $family, AttributeInterface $attribute): string
     {
         if ($this->isAttributeInherited($family, $attribute)) {
             return '';
@@ -173,7 +173,7 @@ EOT;
      *
      * @throws \RuntimeException
      */
-    protected function writeFile($filename, $content)
+    protected function writeFile($filename, $content): void
     {
         if (!@file_put_contents($filename, $content)) {
             throw new \RuntimeException("Unable to write annotation file: {$filename}");
@@ -194,7 +194,7 @@ EOT;
         FamilyInterface $family,
         AttributeInterface $attribute,
         $forceSingle = false
-    ) {
+    ): string {
         $content = <<<EOT
 /**
  * @param array|null \$context
@@ -221,7 +221,7 @@ EOT;
         FamilyInterface $family,
         AttributeInterface $attribute,
         $forceSingle = false
-    ) {
+    ): string {
         $content = <<<EOT
 /**
  * @param {$this->getPHPType($family, $attribute, $forceSingle)} \$value
@@ -249,7 +249,7 @@ EOT;
         FamilyInterface $family,
         AttributeInterface $attribute,
         $forceSingle = false
-    ) {
+    ): string {
         $type = substr($attribute->getType()->getDatabaseType(), 0, -\strlen('Value'));
         $collection = $attribute->isCollection() && !$forceSingle;
 
@@ -329,7 +329,7 @@ EOT;
         FamilyInterface $parentFamily,
         AttributeInterface $attribute,
         $forceSingle = false
-    ) {
+    ): string {
         $classMetadata = $this->manager->getClassMetadata($parentFamily->getValueClass());
         try {
             $mapping = $classMetadata->getAssociationMapping($attribute->getType()->getDatabaseType());
@@ -354,7 +354,7 @@ EOT;
      *
      * @return bool
      */
-    protected function isAttributeInherited(FamilyInterface $family, AttributeInterface $attribute)
+    protected function isAttributeInherited(FamilyInterface $family, AttributeInterface $attribute): bool
     {
         if (!$family->getParent()) {
             return false;

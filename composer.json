@@ -29,6 +29,7 @@
         "symfony/validator": "^4.1",
         "symfony/yaml": "^4.1",
         "symfony/property-access": "^4.1",
+        "symfony/translation": "^4.1",
         "doctrine/orm": "^2.6",
         "doctrine/doctrine-bundle": "^1.9",
         "sidus/base-bundle": "~1.0"

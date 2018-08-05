@@ -10,6 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Command;
 
+use Doctrine\DBAL\Driver\Statement;
 use Doctrine\ORM\EntityManagerInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -36,31 +37,34 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
     protected $valueClass;
 
     /**
+     * @param FamilyRegistry         $familyRegistry
+     * @param EntityManagerInterface $entityManager
+     * @param string                 $dataClass
+     * @param string                 $valueClass
+     */
+    public function __construct(
+        FamilyRegistry $familyRegistry,
+        EntityManagerInterface $entityManager,
+        string $dataClass,
+        string $valueClass
+    ) {
+        $this->familyRegistry = $familyRegistry;
+        $this->entityManager = $entityManager;
+        $this->dataClass = $dataClass;
+        $this->valueClass = $valueClass;
+        parent::__construct();
+    }
+
+
+    /**
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
      */
-    protected function configure()
+    protected function configure(): void
     {
         $description = 'Purges all the data with a missing families and all the values with missing attributes';
         $this
             ->setName('sidus:data:purge-orphan-data')
             ->setDescription($description);
-    }
-
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
-     * @throws \LogicException
-     */
-    protected function initialize(InputInterface $input, OutputInterface $output)
-    {
-        $this->familyRegistry = $this->getContainer()->get(FamilyRegistry::class);
-        $this->entityManager = $this->getContainer()->get('sidus_eav_model.entity_manager');
-        $this->dataClass = $this->getContainer()->getParameter('sidus_eav_model.entity.data.class');
-        $this->valueClass = $this->getContainer()->getParameter('sidus_eav_model.entity.value.class');
     }
 
     /**
@@ -85,7 +89,7 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
-    protected function purgeMissingFamilies(OutputInterface $output)
+    protected function purgeMissingFamilies(OutputInterface $output): void
     {
         $metadata = $this->entityManager->getClassMetadata($this->dataClass);
         $table = $metadata->getTableName();
@@ -111,7 +115,7 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
-    protected function purgeMissingAttributes(OutputInterface $output)
+    protected function purgeMissingAttributes(OutputInterface $output): void
     {
         $metadata = $this->entityManager->getClassMetadata($this->valueClass);
         $table = $metadata->getTableName();
@@ -147,10 +151,11 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
      *
      * @return int
      */
-    protected function executeWithPaging($sql)
+    protected function executeWithPaging($sql): int
     {
         $count = 0;
         do {
+            /** @var Statement $stmt */
             $stmt = $this->entityManager->getConnection()->executeQuery($sql);
             $stmt->execute();
             $lastCount = $stmt->rowCount();
@@ -167,7 +172,7 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
      *
      * @return string
      */
-    protected function quoteArray(array $array)
+    protected function quoteArray(array $array): string
     {
         array_walk(
             $array,

@@ -82,42 +82,6 @@ interface AttributeInterface
     public function addOption($code, $value);
 
     /**
-     * The identifier of the Symfony form type
-     *
-     * @return string
-     */
-    public function getFormType();
-
-    /**
-     * The options passed to the form
-     *
-     * @return array
-     */
-    public function getFormOptions();
-
-    /**
-     * Passed as form options to the form widget
-     *
-     * @param string $code
-     * @param mixed  $value
-     */
-    public function addFormOption($code, $value);
-
-    /**
-     * This option defines if an attribute is meant to be edited with multiple form widgets in forms
-     * A multiple attribute will automatically be a collection but a collection can be edited as a single widget and
-     * therefore NOT be "multiple".
-     *
-     * @return boolean
-     */
-    public function isMultiple();
-
-    /**
-     * @param boolean $value
-     */
-    public function setMultiple($value);
-
-    /**
      * @return boolean
      */
     public function isCollection();

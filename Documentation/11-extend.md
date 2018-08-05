@@ -30,13 +30,13 @@ These properties are storage properties and can be reused for multiple attribute
 
 To create a new attribute type base on one of the properties described earlier, just create a new service.
 The first parameter is the attribute type code, the second one is the name of the property used to store the value in
-the Value class and the third parameter is the form type.
+the Value class.
 
 ````yaml
 services:
     my_namespace.attribute_type.my_attribute:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [<my_attribute_code>, <storage_property>, <my_namespace_form_type>]
+        arguments: [<my_attribute_code>, <storage_property>]
         tags:
             - { name: sidus.attribute_type }
 ````
@@ -54,7 +54,7 @@ For example if you need to override the form_type of the "html" type:
 services:
     sidus_eav_model.attribute_type.html:
         class: '%sidus_eav_model.attribute_type.default.class%'
-        arguments: [html, textValue, <mynamespace_form_type>]
+        arguments: [html, textValue]
         tags:
             - { name: sidus.attribute_type }
 ````
@@ -113,7 +113,7 @@ Then declare at least an attribute type using a custom form type:
 services:
     my_namespace.attribute_type.document:
         class: '%sidus_eav_model.attribute_type.relation.class%'
-        arguments: [document, documentValue, <my_namespace_form_type>]
+        arguments: [document, documentValue]
         tags:
             - { name: sidus.attribute_type }
 ````

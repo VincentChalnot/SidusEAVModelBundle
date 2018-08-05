@@ -1,0 +1,9 @@
+services:
+    Sidus\EAVModelBundle\Command\:
+        resource: '../../../Command/*'
+        autowire: true
+        autoconfigure: true
+        public: false
+        bind:
+            $dataClass: '%sidus_eav_model.entity.data.class%'
+            $valueClass: '%sidus_eav_model.entity.value.class%'

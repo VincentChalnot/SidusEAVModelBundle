@@ -13,7 +13,7 @@ namespace Sidus\EAVModelBundle\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -22,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class FixDataDiscriminatorsCommand extends ContainerAwareCommand
+class FixDataDiscriminatorsCommand extends Command
 {
     /** @var FamilyRegistry */
     protected $familyRegistry;
@@ -31,29 +31,26 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
     protected $entityManager;
 
     /**
+     * @param FamilyRegistry         $familyRegistry
+     * @param EntityManagerInterface $entityManager
+     */
+    public function __construct(FamilyRegistry $familyRegistry, EntityManagerInterface $entityManager)
+    {
+        $this->familyRegistry = $familyRegistry;
+        $this->entityManager = $entityManager;
+        parent::__construct();
+    }
+
+    /**
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
      */
-    protected function configure()
+    protected function configure(): void
     {
         $description = 'Updates the database ensuring each data in the database has the proper Doctrine disciminator';
         $description .= 'corresponding to the data_class of the family in the model';
         $this
             ->setName('sidus:data:fix-discriminator')
             ->setDescription($description);
-    }
-
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-     * @throws \LogicException
-     */
-    protected function initialize(InputInterface $input, OutputInterface $output)
-    {
-        $this->familyRegistry = $this->getContainer()->get(FamilyRegistry::class);
-        $this->entityManager = $this->getContainer()->get('sidus_eav_model.entity_manager');
     }
 
     /**
@@ -83,7 +80,7 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
-    protected function updateFamilyData(FamilyInterface $family, OutputInterface $output)
+    protected function updateFamilyData(FamilyInterface $family, OutputInterface $output): void
     {
         if (!$family->isInstantiable()) {
             return;
@@ -113,7 +110,7 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
      *
      * @return string
      */
-    protected function generateSql($table, $discriminatorColumn, $familyColumn)
+    protected function generateSql($table, $discriminatorColumn, $familyColumn): string
     {
         $sql = <<<EOS
 UPDATE `{$table}`
@@ -135,7 +132,7 @@ EOS;
      *
      * @return int
      */
-    protected function updateTable($sql, $discriminatorValue, $familyCode)
+    protected function updateTable($sql, $discriminatorValue, $familyCode): int
     {
         $connection = $this->entityManager->getConnection();
         $stmt = $connection->prepare($sql);

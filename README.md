@@ -15,13 +15,10 @@ Model configuration is done in Yaml and everything can be easily extended.
 
 - [The model](Documentation/02-model.md) is defined in [Yaml configuration files](#example), it's easy, it's powerful
   and it's versionned.
-- [Dynamic forms:](Documentation/05.1-form.md) no more time spent writting form types
 - [Data contextualisation](Documentation/09-context.md) with custom context axis (language, region, channel, version...)
 - Compatible with many native Symfony components:
-  [Form](Documentation/05.1-form.md),
   [Validator](Documentation/06-validate.md),
   [Translator](Documentation/08-translate.md),
-  [Serializer](Documentation/10-serialize.md)...
 
 ### Documentation index
 
@@ -29,12 +26,10 @@ Model configuration is done in Yaml and everything can be easily extended.
 - [02 - Model configuration](Documentation/02-model.md)
 - [03 - Multiple attributes & collections](Documentation/03-multiple.md)
 - [04 - Handling Entities](Documentation/04-entities.md)
-- [05 - Forms](Documentation/05.1-form.md)
 - [06 - Validation](Documentation/06-validate.md)
 - [07 - Query](Documentation/07.1-query.md)
 - [08 - Translating the model](Documentation/08-translate.md)
 - [09 - EAV Contextualisation](Documentation/09-context.md)
-- [10 - Serialization](Documentation/10-serialize.md)
 - [11 - Extending & customizing the model](Documentation/11-extend.md)
 - [12 - Custom classes](Documentation/12-custom_classes.md)
 - [13 - Extensions](Documentation/13-extensions.md)

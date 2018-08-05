@@ -49,8 +49,6 @@ class SidusEAVModelExtension extends Extension
 
         $container->setParameter('sidus_eav_model.entity.data.class', $config['data_class']);
         $container->setParameter('sidus_eav_model.entity.value.class', $config['value_class']);
-        $container->setParameter('sidus_eav_model.form.collection_type', $config['collection_type']);
-        $container->setParameter('sidus_eav_model.context.form_type', $config['context_form_type']);
         $container->setParameter('sidus_eav_model.context.default_context', $config['default_context']);
         $container->setParameter('sidus_eav_model.context.global_mask', $config['global_context_mask']);
 
@@ -64,30 +62,13 @@ class SidusEAVModelExtension extends Extension
         $loader->load('attribute_types.yml');
         $loader->load('configuration.yml');
         $loader->load('context.yml');
-        $loader->load('debug.yml');
-        $loader->load('deprecated.yml');
         $loader->load('doctrine.yml');
         $loader->load('entities.yml');
         $loader->load('events.yml');
         $loader->load('forms.yml');
         $loader->load('manager.yml');
         $loader->load('param_converters.yml');
-        $loader->load('twig.yml');
         $loader->load('validators.yml');
-
-        if ($config['serializer_enabled']) {
-            // Only load normalizers if symfony serializer is loaded
-            $loader->load('serializer.yml');
-            $loader->load('normalizer.yml');
-            $loader->load('denormalizer.yml');
-            $loader->load('deprecated_serializer.yml');
-        }
-
-        // The DatagridBundle might not be installed
-        /** @noinspection ClassConstantCanBeUsedInspection */
-        if (interface_exists('Sidus\DataGridBundle\Renderer\RenderableInterface')) {
-            $loader->load('datagrid.yml');
-        }
 
         // Add global attribute configuration to handler
         $attributeConfiguration = $container->getDefinition(AttributeRegistry::class);

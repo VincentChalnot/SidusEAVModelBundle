@@ -13,7 +13,6 @@ namespace Sidus\EAVModelBundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 
 /**
  * Build extendable configuration tree
@@ -22,22 +21,30 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
  */
 class Configuration implements ConfigurationInterface
 {
+    /** @var string */
+    protected $root;
+
+    /**
+     * @param string $root
+     */
+    public function __construct(string $root = 'sidus_eav_model')
+    {
+        $this->root = $root;
+    }
+
     /**
      * {@inheritdoc}
      * @throws \RuntimeException
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('sidus_eav_model');
+        $rootNode = $treeBuilder->root($this->root);
         /** @var NodeBuilder $attributeDefinition */
         $attributeDefinition = $rootNode
             ->children()
                 ->scalarNode('data_class')->isRequired()->end()
                 ->scalarNode('value_class')->isRequired()->end()
-                ->booleanNode('serializer_enabled')->defaultFalse()->end()
-                ->scalarNode('collection_type')->defaultValue(CollectionType::class)->end()
-                ->scalarNode('context_form_type')->defaultNull()->end()
                 ->variableNode('default_context')->defaultValue([])->end()
                 ->arrayNode('global_context_mask')
                     ->prototype('scalar')->defaultValue([])->end()
@@ -74,42 +81,21 @@ class Configuration implements ConfigurationInterface
         return $treeBuilder;
     }
 
-
-    /**
-     * @param NodeBuilder $attributeDefinition
-     */
-    protected function appendAttributeDefinition(NodeBuilder $attributeDefinition)
-    {
-        $attributeDefinition
-            ->scalarNode('type')->end()
-            ->scalarNode('group')->end()
-            ->scalarNode('form_type')->end()
-            ->variableNode('form_options')->end()
-            ->variableNode('options')->end()
-            ->variableNode('validation_rules')->end()
-            ->variableNode('default')->end()
-            ->booleanNode('required')->end()
-            ->booleanNode('unique')->end()
-            ->booleanNode('multiple')->end()
-            ->booleanNode('collection')->end()
-            ->variableNode('context_mask')->end();
-    }
-
-
     /**
      * @param NodeBuilder $familyDefinition
      */
-    protected function appendFamilyDefinition(NodeBuilder $familyDefinition)
+    protected function appendFamilyDefinition(NodeBuilder $familyDefinition): void
     {
         /** @var NodeBuilder $attributeDefinition */
         $attributeDefinition = $familyDefinition
             ->scalarNode('data_class')->end()
             ->scalarNode('value_class')->end()
-            ->scalarNode('label')->end()
             ->variableNode('options')->end()
             ->scalarNode('attributeAsLabel')->end()
             ->scalarNode('attributeAsIdentifier')->end()
             ->scalarNode('parent')->end()
+            ->variableNode('behaviors')->end()
+            ->variableNode('events')->end()
             ->booleanNode('singleton')->end()
             ->booleanNode('instantiable')->end()
             ->arrayNode('attributes')
@@ -125,5 +111,23 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->end()
             ->end();
+    }
+
+    /**
+     * @param NodeBuilder $attributeDefinition
+     */
+    protected function appendAttributeDefinition(NodeBuilder $attributeDefinition): void
+    {
+        $attributeDefinition
+            ->scalarNode('type')->end()
+            ->scalarNode('group')->end()
+            ->variableNode('options')->end()
+            ->variableNode('validation_rules')->end()
+            ->variableNode('default')->end()
+            ->variableNode('values')->end()
+            ->booleanNode('required')->end()
+            ->booleanNode('unique')->end()
+            ->booleanNode('collection')->end()
+            ->variableNode('context_mask')->end();
     }
 }

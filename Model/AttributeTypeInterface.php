@@ -28,11 +28,6 @@ interface AttributeTypeInterface
     public function getDatabaseType();
 
     /**
-     * @return string
-     */
-    public function getFormType();
-
-    /**
      * @return bool
      */
     public function isEmbedded();
@@ -46,11 +41,4 @@ interface AttributeTypeInterface
      * @param AttributeInterface $attribute
      */
     public function setAttributeDefaults(AttributeInterface $attribute);
-
-    /**
-     * @param AttributeInterface $attribute
-     *
-     * @return array
-     */
-    public function getFormOptions(AttributeInterface $attribute);
 }

@@ -22,8 +22,8 @@ use Sidus\EAVModelBundle\Entity\ValueInterface;
  */
 class DoctrineMetadataListener
 {
-    const BASE_DATA_CLASS = DataInterface::class;
-    const BASE_VALUE_CLASS = ValueInterface::class;
+    protected const BASE_DATA_CLASS = DataInterface::class;
+    protected const BASE_VALUE_CLASS = ValueInterface::class;
 
     /** @var array */
     protected $mapping;
