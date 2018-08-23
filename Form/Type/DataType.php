@@ -98,9 +98,11 @@ class DataType extends AbstractType
 
         $attributes = $family->getAttributes();
         if ($options['attributes_config']) {
-            $attributes = [];
+            if (!$options['merge_attributes_config']) {
+                $attributes = [];
+            }
             foreach (array_keys($options['attributes_config']) as $attributeCode) {
-                $attributes[] = $family->getAttribute($attributeCode);
+                $attributes[$attributeCode] = $family->getAttribute($attributeCode);
             }
         }
 
@@ -129,11 +131,13 @@ class DataType extends AbstractType
                 'empty_data' => null,
                 'data_class' => null,
                 'attributes_config' => null,
+                'merge_attributes_config' => false,
                 'attribute' => null,
                 'family' => null,
             ]
         );
         $resolver->setAllowedTypes('attributes_config', ['NULL', 'array']);
+        $resolver->setAllowedTypes('merge_attributes_config', ['bool']);
         $resolver->setAllowedTypes('attribute', ['NULL', AttributeInterface::class]);
         $resolver->setAllowedTypes('family', ['NULL', 'string', FamilyInterface::class]);
 
