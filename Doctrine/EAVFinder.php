@@ -125,6 +125,31 @@ class EAVFinder
 
     /**
      * @param FamilyInterface $family
+     * @param array           $filterBy
+     * @param array           $orderBy
+     *
+     * @throws \UnexpectedValueException
+     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     *
+     * @return DataInterface[]
+     */
+    public function filterOneBy(FamilyInterface $family, array $filterBy, array $orderBy = [])
+    {
+        $qb = $this->getFilterByQb($family, $filterBy, $orderBy);
+
+        $pager = new Paginator($qb);
+        $pager->getQuery()->setMaxResults(1);
+
+        $result = $pager->getIterator()->current();
+        $this->dataLoader->loadSingle($result);
+
+        return $result;
+    }
+
+    /**
+     * @param FamilyInterface $family
      * @param array           $filterBy Filters with format [['attribute1','operator1','value1'],
      *                                  ['attribute2','operator2','value2'], etc.]
      * @param array           $orderBy
