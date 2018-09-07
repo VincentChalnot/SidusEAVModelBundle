@@ -1,0 +1,22 @@
+parameters:
+    sidus_eav_model.datagrid.renderer.choice_types:
+        - choice
+
+services:
+    # Datagrid bundle v2.*
+    Sidus\EAVModelBundle\DataGrid\EAVColumnValueRenderer:
+        class: Sidus\EAVModelBundle\DataGrid\EAVColumnValueRenderer
+        decorates: Sidus\DataGridBundle\Renderer\ColumnValueRendererInterface
+        public: false
+        arguments:
+            - '@Sidus\EAVModelBundle\DataGrid\EAVColumnValueRenderer.inner'
+            - '@translator'
+            - '%sidus_eav_model.datagrid.renderer.choice_types%'
+
+    Sidus\EAVModelBundle\DataGrid\EAVColumnLabelRenderer:
+        class: Sidus\EAVModelBundle\DataGrid\EAVColumnLabelRenderer
+        decorates: Sidus\DataGridBundle\Renderer\ColumnLabelRendererInterface
+        public: false
+        arguments:
+            - '@Sidus\EAVModelBundle\DataGrid\EAVColumnLabelRenderer.inner'
+            - '@translator'

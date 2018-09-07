@@ -3,6 +3,7 @@ parameters:
         - choice
 
 services:
+    # Datagrid bundle v1.*
     Sidus\EAVModelBundle\DataGrid\DataRenderer:
         class: Sidus\EAVModelBundle\DataGrid\DataRenderer
         decorates: Sidus\DataGridBundle\Renderer\RenderableInterface

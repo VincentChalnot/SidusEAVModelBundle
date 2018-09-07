@@ -22,6 +22,8 @@ use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Sidus\DataGridBundle\Renderer\RenderableInterface;
+use Sidus\DataGridBundle\Renderer\ColumnValueRendererInterface;
 
 /**
  * Parse configuration and creates attributes and families' services
@@ -83,10 +85,14 @@ class SidusEAVModelExtension extends Extension
             $loader->load('deprecated_serializer.yml');
         }
 
-        // The DatagridBundle might not be installed
-        /** @noinspection ClassConstantCanBeUsedInspection */
-        if (interface_exists('Sidus\DataGridBundle\Renderer\RenderableInterface')) {
+        // The DatagridBundle might be installed
+        /** @noinspection PhpUndefinedClassInspection */
+        if (interface_exists(RenderableInterface::class)) {
             $loader->load('datagrid.yml');
+        }
+        /** @noinspection PhpUndefinedClassInspection */
+        if (interface_exists(ColumnValueRendererInterface::class)) {
+            $loader->load('datagrid-v2.yml');
         }
 
         // Add global attribute configuration to handler
