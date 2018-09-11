@@ -465,8 +465,6 @@ abstract class AbstractValue implements ContextualValueInterface
     }
 
     /**
-     * Context constructor.
-     *
      * @param array $context
      *
      * @throws ContextException

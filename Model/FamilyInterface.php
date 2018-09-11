@@ -120,4 +120,9 @@ interface FamilyInterface
      * @return array
      */
     public function getOptions();
+
+    /**
+     * @return array
+     */
+    public function getFormOptions();
 }

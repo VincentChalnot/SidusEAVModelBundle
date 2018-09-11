@@ -29,8 +29,6 @@ class DoctrineMetadataListener
     protected $mapping;
 
     /**
-     * DoctrineMetadataListener constructor.
-     *
      * @param string $dataClass
      * @param string $valueClass
      */

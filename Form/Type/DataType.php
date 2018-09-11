@@ -134,12 +134,14 @@ class DataType extends AbstractType
                 'merge_attributes_config' => false,
                 'attribute' => null,
                 'family' => null,
+                'fieldset_options' => [],
             ]
         );
         $resolver->setAllowedTypes('attributes_config', ['NULL', 'array']);
         $resolver->setAllowedTypes('merge_attributes_config', ['bool']);
         $resolver->setAllowedTypes('attribute', ['NULL', AttributeInterface::class]);
         $resolver->setAllowedTypes('family', ['NULL', 'string', FamilyInterface::class]);
+        $resolver->setAllowedTypes('fieldset_options', ['array']);
 
         $resolver->setNormalizer(
             'family',
@@ -214,14 +216,14 @@ class DataType extends AbstractType
      */
     protected function resolveAttributeConfig(AttributeInterface $attribute, array $options)
     {
-        if (isset($options['attributes_config'][$attribute->getCode()])) {
-            return $options['attributes_config'][$attribute->getCode()];
+        $attributeConfig = [];
+        if (array_key_exists('fieldset_options', $options)) {
+            $attributeConfig['fieldset_options'] = $options['fieldset_options']; // Copy all fieldset options
         }
-        $attributeConfig = $attribute->getOption('attribute_config');
-        if (null !== $attributeConfig) {
-            return $attributeConfig;
+        if (isset($options['attributes_config'][$attribute->getCode()])) {
+            return array_merge($attributeConfig, $options['attributes_config'][$attribute->getCode()]);
         }
 
-        return [];
+        return array_merge($attributeConfig, $attribute->getOption('attribute_config', []));
     }
 }

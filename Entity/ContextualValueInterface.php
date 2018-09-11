@@ -42,8 +42,6 @@ interface ContextualValueInterface extends ValueInterface
     public function setContextValue($key, $value);
 
     /**
-     * Context constructor.
-     *
      * @param array $context
      *
      * @throws ContextException

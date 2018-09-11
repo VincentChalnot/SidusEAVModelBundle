@@ -106,6 +106,7 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('data_class')->end()
             ->scalarNode('value_class')->end()
             ->scalarNode('label')->end()
+            ->variableNode('form_options')->end()
             ->variableNode('options')->end()
             ->scalarNode('attributeAsLabel')->end()
             ->scalarNode('attributeAsIdentifier')->end()

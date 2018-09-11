@@ -30,8 +30,6 @@ class AttributeType implements AttributeTypeInterface
     protected $formOptions = [];
 
     /**
-     * AttributeType constructor.
-     *
      * @param string $code
      * @param string $databaseType
      * @param string $formType

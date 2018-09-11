@@ -70,6 +70,9 @@ class Family implements FamilyInterface
     /** @var array */
     protected $options = [];
 
+    /** @var array */
+    protected $formOptions = [];
+
     /** @var Family[] */
     protected $children;
 
@@ -494,6 +497,22 @@ class Family implements FamilyInterface
     public function setOptions(array $options)
     {
         $this->options = $options;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFormOptions()
+    {
+        return $this->formOptions;
+    }
+
+    /**
+     * @param array $formOptions
+     */
+    public function setFormOptions(array $formOptions)
+    {
+        $this->formOptions = $formOptions;
     }
 
     /**

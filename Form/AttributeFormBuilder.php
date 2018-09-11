@@ -97,7 +97,7 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
 
         $subBuilder = $builder;
         foreach ($groupPath as $level => $groupCode) {
-            $subBuilder = $this->buildFieldset($subBuilder, $attribute, $groupPath, $level);
+            $subBuilder = $this->buildFieldset($subBuilder, $attribute, $groupPath, $level, $options);
         }
 
         return $subBuilder;
@@ -108,6 +108,7 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
      * @param AttributeInterface   $attribute
      * @param array                $groupPath
      * @param int                  $level
+     * @param array                $options
      *
      * @throws \Symfony\Component\Form\Exception\InvalidArgumentException
      * @throws \InvalidArgumentException
@@ -118,7 +119,8 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
         FormBuilderInterface $parentBuilder,
         AttributeInterface $attribute,
         array $groupPath,
-        $level
+        $level,
+        array $options = []
     ) {
         $fieldsetCode = '__'.$groupPath[$level];
         if ($parentBuilder->has($fieldsetCode)) {
@@ -129,6 +131,11 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
             'label' => $this->getGroupLabel($attribute->getFamily(), $groupPath, $level),
             'inherit_data' => true,
         ];
+
+        $fieldsetPath = $this->getFieldsetPath($groupPath, $level);
+        if (isset($options['fieldset_options'][$fieldsetPath])) {
+            $fieldsetOptions = array_merge($fieldsetOptions, $options['fieldset_options'][$fieldsetPath]);
+        }
 
         $parentBuilder->add($fieldsetCode, FormType::class, $fieldsetOptions);
 
@@ -149,7 +156,7 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
     protected function getGroupLabel(FamilyInterface $family, array $groupPath, $level)
     {
         $fallBack = isset($groupPath[$level]) ? $groupPath[$level] : null;
-        $fieldsetPath = implode('.', array_splice($groupPath, 0, $level + 1));
+        $fieldsetPath = $this->getFieldsetPath($groupPath, $level);
         $transKeys = [
             "eav.family.{$family->getCode()}.group.{$fieldsetPath}.label",
             "eav.group.{$fieldsetPath}.label",
@@ -235,6 +242,7 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
                 'validation_rules' => null,
                 'collection_type' => $this->collectionType,
                 'ignore_group' => false,
+                'fieldset_options' => [],
             ]
         );
         $resolver->setAllowedTypes('label', ['string']);
@@ -246,6 +254,7 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
         $resolver->setAllowedTypes('validation_rules', ['NULL', 'array']);
         $resolver->setAllowedTypes('collection_type', ['string']);
         $resolver->setAllowedTypes('ignore_group', ['boolean']);
+        $resolver->setAllowedTypes('fieldset_options', ['array']);
 
         $resolver->setNormalizer(
             'form_options',
@@ -285,5 +294,16 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
         $loader = new BaseLoader();
 
         return $loader->loadCustomConstraints($validationRules);
+    }
+
+    /**
+     * @param array $groupPath
+     * @param int   $level
+     *
+     * @return string
+     */
+    protected function getFieldsetPath(array $groupPath, int $level)
+    {
+        return implode('.', array_splice($groupPath, 0, $level + 1));
     }
 }
