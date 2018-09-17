@@ -133,7 +133,7 @@ class EAVFinder
      * @throws \LogicException
      * @throws \InvalidArgumentException
      *
-     * @return DataInterface[]
+     * @return DataInterface|null
      */
     public function filterOneBy(FamilyInterface $family, array $filterBy, array $orderBy = [])
     {
