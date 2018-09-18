@@ -104,6 +104,8 @@ class AnnotationGenerator implements CacheWarmerInterface
 
 namespace Sidus\EAV;
 
+use Doctrine\Common\Collections\Collection;
+
 abstract class {$family->getCode()} extends 
 EOT;
         if ($family->getParent()) {
@@ -255,14 +257,14 @@ EOT;
 
         // Scalar types
         if (\in_array($type, ['bool', 'integer', 'decimal', 'string', 'text'], true)) {
-            if ($collection) {
-                return 'array';
-            }
             if ('text' === $type) {
                 return 'string';
             }
             if ('decimal' === $type) {
                 return 'double';
+            }
+            if ($collection) {
+                return $type.'[]|Collection';
             }
 
             return $type;
@@ -271,7 +273,7 @@ EOT;
             /** @noinspection ClassConstantCanBeUsedInspection */
             $type = '\DateTime';
             if ($collection) {
-                $type .= '[]';
+                $type .= '[]|Collection';
             }
 
             return $type;
@@ -290,13 +292,16 @@ EOT;
                         $types[] = '\\'.ltrim($family->getDataClass(), '\\').($collection ? '[]' : '');
                     }
                 }
+                if ($collection) {
+                    $types[] = 'Collection';
+                }
 
                 return implode('|', $types);
             }
 
             // Couldn't find any family (rare case)
             if ($collection) {
-                return 'array';
+                return 'Collection';
             }
 
             return 'mixed';
@@ -310,7 +315,7 @@ EOT;
 
         // Fallback in any other case
         if ($collection) {
-            return 'array';
+            return 'Collection';
         }
 
         return 'mixed';
@@ -342,7 +347,7 @@ EOT;
 
         $type = $mapping['targetEntity'];
         if (!$forceSingle && $attribute->isCollection()) {
-            $type .= '[]';
+            $type .= '[]|Collection';
         }
 
         return '\\'.$type;
