@@ -27,10 +27,11 @@ interface EAVQueryBuilderInterface
 
     /**
      * @param AttributeInterface $attribute
+     * @param bool               $enforceFamilyCondition
      *
      * @return AttributeQueryBuilderInterface
      */
-    public function attribute(AttributeInterface $attribute);
+    public function attribute(AttributeInterface $attribute, $enforceFamilyCondition = true);
 
     /**
      * @param array $eavQueryBuilders

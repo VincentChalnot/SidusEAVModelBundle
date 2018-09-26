@@ -15,6 +15,12 @@ services:
         calls:
             - [setTranslator, ['@translator']]
 
+    Sidus\EAVModelBundle\Form\AllowedFamiliesOptionsConfigurator:
+        class: Sidus\EAVModelBundle\Form\AllowedFamiliesOptionsConfigurator
+        public: false
+        arguments:
+            - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
+
     Sidus\EAVModelBundle\Form\Type\DataType:
         class: Sidus\EAVModelBundle\Form\Type\DataType
         public: false
@@ -36,7 +42,7 @@ services:
         class: Sidus\EAVModelBundle\Form\Type\SimpleDataSelectorType
         public: false
         arguments:
-            - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
+            - '@Sidus\EAVModelBundle\Form\AllowedFamiliesOptionsConfigurator'
             - '@sidus_eav_model.entity_manager'
             - '%sidus_eav_model.entity.data.class%'
         tags:

@@ -209,7 +209,6 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
             'allow_add' => $disabled,
             'allow_delete' => $disabled,
             'required' => $formOptions['required'],
-            'sortable' => false,
             'prototype_name' => '__'.$attribute->getCode().'__',
         ];
         if (!empty($formOptions['collection_options'])) {

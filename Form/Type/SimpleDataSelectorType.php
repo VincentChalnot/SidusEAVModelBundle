@@ -13,8 +13,7 @@ namespace Sidus\EAVModelBundle\Form\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
-use Sidus\EAVModelBundle\Model\AttributeInterface;
-use Sidus\EAVModelBundle\Registry\FamilyRegistry;
+use Sidus\EAVModelBundle\Form\AllowedFamiliesOptionsConfigurator;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -29,8 +28,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class SimpleDataSelectorType extends AbstractType
 {
-    /** @var FamilyRegistry */
-    protected $familyRegistry;
+    /** @var AllowedFamiliesOptionsConfigurator */
+    protected $allowedFamiliesOptionConfigurator;
 
     /** @var EntityManagerInterface */
     protected $entityManager;
@@ -39,13 +38,16 @@ class SimpleDataSelectorType extends AbstractType
     protected $dataClass;
 
     /**
-     * @param FamilyRegistry         $familyRegistry
-     * @param EntityManagerInterface $entityManager
-     * @param string                 $dataClass
+     * @param AllowedFamiliesOptionsConfigurator $allowedFamiliesOptionConfigurator
+     * @param EntityManagerInterface             $entityManager
+     * @param string                             $dataClass
      */
-    public function __construct(FamilyRegistry $familyRegistry, EntityManagerInterface $entityManager, $dataClass)
-    {
-        $this->familyRegistry = $familyRegistry;
+    public function __construct(
+        AllowedFamiliesOptionsConfigurator $allowedFamiliesOptionConfigurator,
+        EntityManagerInterface $entityManager,
+        $dataClass
+    ) {
+        $this->allowedFamiliesOptionConfigurator = $allowedFamiliesOptionConfigurator;
         $this->entityManager = $entityManager;
         $this->dataClass = $dataClass;
     }
@@ -84,41 +86,10 @@ class SimpleDataSelectorType extends AbstractType
                 'class' => $this->dataClass,
                 'query_builder' => $queryBuilder,
                 'max_results' => 100,
-                'attribute' => null,
-                'allowed_families' => null,
             ]
         );
 
-        $resolver->setAllowedTypes('attribute', [AttributeInterface::class, 'NULL']);
-        $resolver->setAllowedTypes('allowed_families', ['array', 'NULL']);
-        /** @noinspection PhpUnusedParameterInspection */
-        $resolver->setNormalizer(
-            'allowed_families',
-            function (Options $options, $values) {
-                if (null === $values) {
-                    /** @var AttributeInterface $attribute */
-                    $attribute = $options['attribute'];
-                    if ($attribute) {
-                        /** @var array $values */
-                        $values = $attribute->getOption('allowed_families');
-                    }
-                    if (!$values) {
-                        $values = $this->familyRegistry->getFamilies();
-                    }
-                }
-                $families = [];
-                foreach ($values as $value) {
-                    if (!$value instanceof FamilyInterface) {
-                        $value = $this->familyRegistry->getFamily($value);
-                    }
-                    if ($value->isInstantiable()) {
-                        $families[$value->getCode()] = $value;
-                    }
-                }
-
-                return $families;
-            }
-        );
+        $this->allowedFamiliesOptionConfigurator->configureOptions($resolver);
     }
 
     /**
