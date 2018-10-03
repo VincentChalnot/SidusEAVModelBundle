@@ -118,7 +118,7 @@
                                                             <li class="nav-item">
                                     <a class="nav-link"
                                        href="https://vincentchalnot.github.io/SidusEAVModelBundle/Documentation/09-context.html">
-                                        19 - EAV Contextualisation
+                                        09 - EAV Contextualisation
                                     </a>
                                 </li>
                                                             <li class="nav-item">
@@ -141,8 +141,14 @@
                                 </li>
                                                             <li class="nav-item">
                                     <a class="nav-link"
-                                       href="https://vincentchalnot.github.io/SidusEAVModelBundle/Documentation/13-extensions.html">
-                                        13 - Extensions
+                                       href="https://vincentchalnot.github.io/SidusEAVModelBundle/Documentation/13-events.html">
+                                        13 - Events
+                                    </a>
+                                </li>
+                                                            <li class="nav-item">
+                                    <a class="nav-link"
+                                       href="https://vincentchalnot.github.io/SidusEAVModelBundle/Documentation/14-extensions.html">
+                                        14 - Extensions
                                     </a>
                                 </li>
                                                     </ul>
@@ -237,11 +243,11 @@ $results = $qb-&gt;getQuery()-&gt;getResult();</code></pre>
 <pre><code class="language-php">&lt;?php
 /**
  * @var \Sidus\EAVModelBundle\Model\FamilyInterface $family
- * @var \Doctrine\Bundle\DoctrineBundle\Registry $doctrine
+ * @var \Doctrine\ORM\EntityManagerInterface $entityManager
  * @var \CleverAge\EAVManager\EAVModelBundle\Entity\DataRepository $dataRepository
  * @var integer $id
 */
-$dataRepository = $doctrine-&gt;getRepository($family-&gt;getDataClass());
+$dataRepository = $entityManager-&gt;getRepository($family-&gt;getDataClass());
 
 $dataRepository-&gt;find($id);</code></pre>
 <h2 id="eavquerybuilder">EAVQueryBuilder</h2>
@@ -373,6 +379,31 @@ $qb = $eavQb-&gt;apply(
 
 // Fetching result, the traditional Doctrine's way
 $categories = $qb-&gt;getQuery()-&gt;getResult();</code></pre>
+<h3 id="using-an-eav-attribute-in-custom-dql">Using an EAV attribute in custom DQL</h3>
+<p>Sometimes you need the raw column reference of a EAV attribute to use it in a custom DQL query.</p>
+<pre><code class="language-php">&lt;?php
+/** @var $eavQb \Sidus\EAVModelBundle\Doctrine\SingleFamilyQueryBuilder */
+$eavQb-&gt;a('publicationDate')-&gt;applyJoin()-&gt;getColumn();</code></pre>
+<p>You need to call the <code>AttributeQueryBuilderInterface::applyJoin</code> method if you are not using the attribute
+reference somewhere else inside the <code>$eavQb-&gt;apply()</code> method.</p>
+<p>If you want to use the an attribute both for generic filtering purposes and for something custom you can simply keep the
+reference to the attribute and simply call <code>getColumn</code> without the need to call ```applyJoin````.</p>
+<pre><code class="language-php">&lt;?php
+/** @var $eavQb \Sidus\EAVModelBundle\Doctrine\SingleFamilyQueryBuilder */
+
+// We need the attribute query builder to call fetch the column
+$publicationDateAttributeQb = $eavQb-&gt;a('publicationDate');
+
+// Apply dql to main query builder
+$qb = $eavQb-&gt;apply(
+    $publicationDateAttributeQb-&gt;between(new DateTime('last monday'), new DateTime())
+);
+
+// Use the column for some custom purpose, here an orderBy
+$qb-&gt;orderBy($publicationDateAttributeQb-&gt;getColumn(), 'DESC');
+
+// Fetching result, the traditional Doctrine's way
+$categories = $qb-&gt;getQuery()-&gt;getResult();</code></pre>
         </section>
     </div>
 </main>
@@ -382,6 +413,7 @@ $categories = $qb-&gt;getQuery()-&gt;getResult();</code></pre>
         <div class="col-12 text-center border-top pt-4 pb-4">
             <span>
                                     Copyright <a href="https://twitter.com/VincentChalnot" target="_blank">@VincentChalnot</a> 2015-2018 with special thanks to <a href="https://www.clever-age.com/" target="_blank">Clever-Age</a>
+
                             </span>
         </div>
     </div>

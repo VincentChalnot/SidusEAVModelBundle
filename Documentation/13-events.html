@@ -86,7 +86,7 @@
                                     </a>
                                 </li>
                                                             <li class="nav-item">
-                                    <a class="nav-link active"
+                                    <a class="nav-link"
                                        href="https://vincentchalnot.github.io/SidusEAVModelBundle/Documentation/04-entities.html">
                                         04 - Handling Entities
                                     </a>
@@ -182,57 +182,83 @@
             </div>
 
                 <section class="col-sm-9">
-            <h2 id="creating-entities">Creating entities</h2>
-<p>To create a new entity you must first fetch the family you want from configuration.</p>
+            <h2 id="events">Events</h2>
+<table>
+<thead>
+<tr>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>This feature is only available since v1.2.21</td>
+</tr>
+</tbody>
+</table>
+<p>Doctrine events can sometimes be fastidious to work with, especially with an EAV model where changes can occur on both
+the Data and the Values entities.</p>
+<p>In order to ease the creation of custom rules and dynamic attributes, you can use the <code>EAVEvent</code> system which
+works during the <code>onFlush</code> Doctrine event.</p>
+<h3 id="register-a-listener">Register a listener</h3>
+<p>This feature utilizes the standard Symfony event system:</p>
+<pre><code class="language-yaml">services:
+    App\Event\MyListener:
+        autowire: true
+        autoconfigure: true
+        public: false
+        tags:
+            - { name: kernel.event_listener, event: sidus.eav_data }</code></pre>
+<p>This also works with subscribers, obviously.</p>
+<h3 id="create-the-listener">Create the listener</h3>
 <pre><code class="language-php">&lt;?php
-use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 
-/** @var FamilyRegistry $familyRegistry */
-$familyRegistry = $container-&gt;get(FamilyRegistry::class);
-$postFamily = $familyRegistry-&gt;getFamily('Post');
+namespace App\Event;
 
-$newPost = $postFamily-&gt;createData();</code></pre>
-<h3 id="editing-an-entity-and-accessing-its-values">Editing an entity and accessing its values</h3>
-<p>You can simply set or get values of an entity manually in PHP like this:</p>
+use Sidus\EAVModelBundle\Event\EAVEvent;
+
+class MyListener
+{
+    /**
+     * @param EAVEvent $event
+     */
+    public function onSidusEavData(EAVEvent $event)
+    {
+        $data = $event-&gt;getData();
+
+        // Do stuff with $data
+
+        if (EAVEvent::STATE_CREATED === $event-&gt;getState()) {
+            // Check the state of the entity to add custom state-base logic
+        }
+
+        // If you need to update the $data entity, don't flush the EntityManager, use this method:
+        $event-&gt;recomputeChangeset($data);
+    }
+}</code></pre>
+<p>Keep in mind that this event is called inside the Doctrine's onFlush loop which does not tolerate recursive flush really
+well, hence the existence of the <code>EAVEvent::recomputeChangeset</code> method to allow you to force Doctrine to take your
+changes into account.</p>
+<h3 id="computing-changesets">Computing changesets</h3>
+<p>The <code>EAVEvent</code> class has built-in methods to compute the changeset of the EAV entity.</p>
+<p>If you need the changeset of non-EAV properties for the Data entity, use this method:</p>
 <pre><code class="language-php">&lt;?php
-$newPost-&gt;setTitle('I LOVE SYMFONY');
-echo $newPost-&gt;getTitle();</code></pre>
-<p>Yes, this relies on magic methods to work but magic methods are not evil (while code generation definitely is). You can
-read sometimes that they are bad in terms of performances but this is less and less true with recent versions of PHP.
-The only drawback of using them is the lack of annotations that makes them appearing as errors in your IDE which is not
-cool. There is no simple solution for this but we might explore the benefits of automatically generating annotations in
-Symfony's cache to allow you to identify them with @var.</p>
-<p>UPDATE : You can now generate automatically fake classes from your EAV Model by adding this configuration in
-config_dev.yml:</p>
-<pre><code class="language-yml">imports:
-    - { resource: '@SidusEAVModelBundle/Resources/config/annotation_generator.yml' }</code></pre>
-<p>It is VERY important to never actually use the generated classes apart from annotations because they wont work.
-All classes will be in the namespace \Sidus\EAV and will be named after your families.
-Now you can do this and get autocomplete working in your IDE:</p>
+/** @var \Sidus\EAVModelBundle\Event\EAVEvent $event */
+$changeset = $event-&gt;getDataChangeset();</code></pre>
+<p>This will give you a simple Doctrine changeset in the form of an array.</p>
+<p>More often, you need the changeset for the EAV values related to the data:</p>
 <pre><code class="language-php">&lt;?php
-/** @var \Sidus\EAV\Post $newPost */
-$newPost-&gt;setTitle('I LOVE SYMFONY');
-echo $newPost-&gt;getTitle();</code></pre>
-<p>Or you can also use the alternative syntax:</p>
-<pre><code class="language-php">&lt;?php
-/** @var \Sidus\EAVModelBundle\Entity\DataInterface $newPost */
-$newPost-&gt;set('title', 'I LOVE SYMFONY');
-echo $newPost-&gt;get('title');</code></pre>
-<p>Which is exactly what the magic method will do in the background.</p>
-<p>We do not implements the magic getters and setters for properties (__get, __set) because they do not allow you to
-easily override the business logic in a child class.</p>
-<p>Note: In order for the forms to be able to PropertyAccessor (used in forms) to read from magic calls, we enable the
-&quot;enableMagicCall&quot; option globally.</p>
-<h4 id="persisting-or-deleting-an-entity">Persisting or deleting an entity</h4>
-<p>To persist or delete an entity, you can't flush just the Data entity but you need to do a global flush because values
-are stored separately from the entity.</p>
+/** @var \Sidus\EAVModelBundle\Event\EAVEvent $event */
+$changeset = $event-&gt;getValuesChangeset();</code></pre>
+<p>This will gives you an array of array of <code>ValueChangeset</code> indexed first by their attribute code and then by the
+Spl object id of the value used internally by Doctrine.</p>
+<p>Finally, you can also get the changeset for a specific attribute:</p>
 <pre><code class="language-php">&lt;?php
 /**
- * @var \Doctrine\ORM\EntityManagerInterface $entityManager 
- * @var \Sidus\EAVModelBundle\Entity\DataInterface $data
+ * @var \Sidus\EAVModelBundle\Event\EAVEvent $event
+ * @var \Sidus\EAVModelBundle\Model\AttributeInterface $attribute
  */
-$entityManager-&gt;persist($data);
-$entityManager-&gt;flush();</code></pre>
+$changeset = $event-&gt;getAttributeChangeset($attribute);</code></pre>
+<p>Which will gives you an array of <code>ValueChangeset</code>.</p>
         </section>
     </div>
 </main>

@@ -118,7 +118,7 @@
                                                             <li class="nav-item">
                                     <a class="nav-link"
                                        href="https://vincentchalnot.github.io/SidusEAVModelBundle/Documentation/09-context.html">
-                                        19 - EAV Contextualisation
+                                        09 - EAV Contextualisation
                                     </a>
                                 </li>
                                                             <li class="nav-item">
@@ -141,8 +141,14 @@
                                 </li>
                                                             <li class="nav-item">
                                     <a class="nav-link"
-                                       href="https://vincentchalnot.github.io/SidusEAVModelBundle/Documentation/13-extensions.html">
-                                        13 - Extensions
+                                       href="https://vincentchalnot.github.io/SidusEAVModelBundle/Documentation/13-events.html">
+                                        13 - Events
+                                    </a>
+                                </li>
+                                                            <li class="nav-item">
+                                    <a class="nav-link"
+                                       href="https://vincentchalnot.github.io/SidusEAVModelBundle/Documentation/14-extensions.html">
+                                        14 - Extensions
                                     </a>
                                 </li>
                                                     </ul>
@@ -182,6 +188,8 @@
 each one (except the one with the <code>hidden</code> option).</p>
 <p>You can completely &quot;escape&quot; this behavior by setting the <code>attributes_config</code>, this allows you to configure each
 attribute that will be used to generate the form.</p>
+<p>You can also use the <code>merge_attributes_config</code> option if you want to keep the default attributes config and just
+override some of them.</p>
 <p>So for each attribute in the family, the configuration reference is the following: (in yml for the example)</p>
 <pre><code class="language-yml">attributes_config:
     &lt;attributeCode&gt;:
@@ -267,6 +275,7 @@ parent form.</li>
         <div class="col-12 text-center border-top pt-4 pb-4">
             <span>
                                     Copyright <a href="https://twitter.com/VincentChalnot" target="_blank">@VincentChalnot</a> 2015-2018 with special thanks to <a href="https://www.clever-age.com/" target="_blank">Clever-Age</a>
+
                             </span>
         </div>
     </div>
