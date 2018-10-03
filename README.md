@@ -37,7 +37,8 @@ Model configuration is done in Yaml and everything can be easily extended.
 - [10 - Serialization](Documentation/10-serialize.md)
 - [11 - Extending & customizing the model](Documentation/11-extend.md)
 - [12 - Custom classes](Documentation/12-custom_classes.md)
-- [13 - Extensions](Documentation/13-extensions.md)
+- [13 - Events](Documentation/13-events.md)
+- [14 - Extensions](Documentation/14-extensions.md)
 
 ### Other documentation entries
 

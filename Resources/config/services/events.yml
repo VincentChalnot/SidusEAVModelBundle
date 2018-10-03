@@ -15,3 +15,11 @@ services:
             - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
         tags:
             - { name: doctrine.event_listener, event: preRemove }
+
+    Sidus\EAVModelBundle\Event\DoctrineToEAVEventConverter:
+        class: Sidus\EAVModelBundle\Event\DoctrineToEAVEventConverter
+        public: false
+        arguments:
+            - '@event_dispatcher'
+        tags:
+            - { name: doctrine.event_subscriber }

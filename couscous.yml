@@ -69,9 +69,12 @@ menu:
                 Documentation/12-custom_classes.html:
                     text: 12 - Custom classes
                     relativeUrl: Documentation/12-custom_classes.html
-                Documentation/13-extensions.html:
-                    text: 13 - Extensions
-                    relativeUrl: Documentation/13-extensions.html
+                Documentation/13-events.html:
+                    text: 13 - Events
+                    relativeUrl: Documentation/13-events.html
+                Documentation/14-extensions.html:
+                    text: 14 - Extensions
+                    relativeUrl: Documentation/14-extensions.html
 
         other:
             name: Other documentation entries
