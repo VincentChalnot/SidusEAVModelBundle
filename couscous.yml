@@ -8,8 +8,9 @@ title: Sidus/EAVModelBundle
 subTitle: Blazing fast data modeling with Symfony
 
 fontAwesomeIcon: fa fa-database
-footerText: Copyright <a href="https://twitter.com/VincentChalnot" target="_blank">@VincentChalnot</a> 2015-2018 with
-            special thanks to <a href="https://www.clever-age.com/" target="_blank">Clever-Age</a>
+footerText: >
+    Copyright <a href="https://twitter.com/VincentChalnot" target="_blank">@VincentChalnot</a> 2015-2018 with
+    special thanks to <a href="https://www.clever-age.com/" target="_blank">Clever-Age</a>
 
 branch: gh-pages
 baseUrl: https://vincentchalnot.github.io/SidusEAVModelBundle
