@@ -81,7 +81,12 @@ class DoctrineToEAVEventConverter implements EventSubscriber
 
         foreach ($this->changedValues as $state => $changedValues) {
             foreach ($changedValues as $changedValue) {
-                $data = $changedValue->getData();
+                if (EAVEvent::STATE_REMOVED === $state) {
+                    $originalEntityValues = $uow->getOriginalEntityData($changedValue);
+                    $data = $originalEntityValues['data'];
+                } else {
+                    $data = $changedValue->getData();
+                }
                 if ($this->eavEvents->offsetExists($data)) {
                     $eavEvent = $this->eavEvents->offsetGet($data);
                 } else {
