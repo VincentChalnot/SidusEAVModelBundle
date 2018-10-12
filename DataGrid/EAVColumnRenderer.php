@@ -11,6 +11,8 @@ use Symfony\Component\Translation\TranslatorInterface;
  * Overriding base column label rendering
  *
  * This code is written for PHP7 because it can only work with the Sidus/DataGridBundle that supports PHP7+ only
+ *
+ * @deprecated Please migrate to the sidus/datagrid-bundle v2.0
  */
 class EAVColumnRenderer implements ColumnRendererInterface
 {

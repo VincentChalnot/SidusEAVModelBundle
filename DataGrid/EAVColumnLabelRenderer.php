@@ -42,7 +42,9 @@ class EAVColumnLabelRenderer implements ColumnLabelRendererInterface
     {
         // If already defined in translations, ignore
         $key = "datagrid.{$column->getDataGrid()->getCode()}.{$column->getCode()}"; // Same as base logic
-        if ($this->translator instanceof TranslatorBagInterface && $this->translator->getCatalogue()->has($key)) {
+        if ($column->getLabel()
+            || ($this->translator instanceof TranslatorBagInterface && $this->translator->getCatalogue()->has($key))
+        ) {
             return $this->baseRenderer->renderColumnLabel($column);
         }
 

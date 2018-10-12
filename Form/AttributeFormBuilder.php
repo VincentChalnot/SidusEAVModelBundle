@@ -232,7 +232,7 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
     {
         $resolver->setDefaults(
             [
-                'label' => ucfirst($attribute),
+                'label' => null,
                 'form_type' => $attribute->getFormType(),
                 'hidden' => $attribute->getOption('hidden', false),
                 'merge_form_options' => true,
@@ -244,7 +244,7 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
                 'fieldset_options' => [],
             ]
         );
-        $resolver->setAllowedTypes('label', ['string']);
+        $resolver->setAllowedTypes('label', ['NULL', 'string']);
         $resolver->setAllowedTypes('form_type', ['string']);
         $resolver->setAllowedTypes('hidden', ['boolean']);
         $resolver->setAllowedTypes('merge_form_options', ['boolean']);
@@ -268,14 +268,25 @@ class AttributeFormBuilder implements AttributeFormBuilderInterface
                     $formOptions['constraints'] = $this->parseValidationRules($options['validation_rules']);
                 }
 
+                $label = array_key_exists('label', $formOptions) ? $formOptions['label'] : null;
                 $defaultOptions = [
-                    'label' => $options['label'],
+                    'label' => $label ?: ucfirst($attribute),
                     'translation_domain' => null,
-                    'translate_label' => false,
+                    'translate_label' => null !== $label,
                     'required' => $attribute->isRequired(),
                 ];
 
                 return array_merge($defaultOptions, $formOptions);
+            }
+        );
+        $resolver->setNormalizer(
+            'label',
+            function (Options $options, $value) use ($attribute) {
+                if (null === $value) {
+                    return ucfirst($attribute);
+                }
+
+                return $value;
             }
         );
     }
