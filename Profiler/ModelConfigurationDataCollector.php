@@ -52,7 +52,7 @@ class ModelConfigurationDataCollector extends DataCollector
     /**
      * @return FamilyRegistry
      */
-    public function getFamilyRegistry(): FamilyRegistry
+    public function getFamilyRegistry()
     {
         return $this->data['familyRegistry'];
     }
@@ -60,7 +60,7 @@ class ModelConfigurationDataCollector extends DataCollector
     /**
      * @return AttributeTypeRegistry
      */
-    public function getAttributeTypeRegistry(): AttributeTypeRegistry
+    public function getAttributeTypeRegistry()
     {
         return $this->data['attributeTypeRegistry'];
     }

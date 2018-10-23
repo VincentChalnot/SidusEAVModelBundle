@@ -25,9 +25,9 @@ use Symfony\Component\EventDispatcher\Event;
  */
 class EAVEvent extends Event
 {
-    public const STATE_CREATED = 1;
-    public const STATE_UPDATED = 2;
-    public const STATE_REMOVED = 3;
+    const STATE_CREATED = 1;
+    const STATE_UPDATED = 2;
+    const STATE_REMOVED = 3;
 
     /** @var DataInterface */
     protected $data;
@@ -78,7 +78,7 @@ class EAVEvent extends Event
     /**
      * @return int
      */
-    public function getState(): int
+    public function getState()
     {
         return $this->state;
     }
@@ -102,7 +102,7 @@ class EAVEvent extends Event
      *
      * @return ValueChangeset[]
      */
-    public function getValuesChangeset($forceRecompute = false): array
+    public function getValuesChangeset($forceRecompute = false)
     {
         if (null === $this->valuesChangeset || $forceRecompute) {
             $this->computeValuesChangeset();
@@ -195,7 +195,7 @@ class EAVEvent extends Event
                     $changeset[$databaseType][0],
                     $state
                 );
-                $uid = spl_object_id($changedValue);
+                $uid = spl_object_hash($changedValue);
                 $this->valuesChangeset[$changedValue->getAttributeCode()][$uid] = $valueChangeset;
             }
         }

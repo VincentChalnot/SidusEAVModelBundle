@@ -26,7 +26,7 @@ use Sidus\EAVModelBundle\Model\AttributeInterface;
  */
 class OptimizedDataLoader implements DataLoaderInterface
 {
-    protected const E_MSG = '$entities argument must be an array of DataInterface';
+    const E_MSG = '$entities argument must be an array of DataInterface';
 
     /** @var EntityManagerInterface */
     protected $entityManager;
