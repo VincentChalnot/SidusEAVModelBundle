@@ -159,7 +159,7 @@ class EAVEvent extends Event
      */
     protected function doRecomputeChangeset(UnitOfWork $uow, ClassMetadata $classMetadata, $entity)
     {
-        $uow->clearEntityChangeSet(spl_object_id($entity));
+        $uow->clearEntityChangeSet(spl_object_hash($entity));
         $uow->persist($entity);
         $uow->computeChangeSet($classMetadata, $entity);
     }
