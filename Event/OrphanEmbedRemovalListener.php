@@ -65,17 +65,10 @@ class OrphanEmbedRemovalListener
         }
         $attribute = $family->getAttribute($value->getAttributeCode());
 
-        // Ignore non-embedded attributes
-        if (!$attribute->getType()->isEmbedded()) {
-            return;
+        // Trigger for attributes marked for orphan_removal, default true for embedded
+        if ($attribute->getOption('orphan_removal', $attribute->getType()->isEmbedded())) {
+            $dataValue = $this->accessor->getValue($value, $attribute->getType()->getDatabaseType());
+            $args->getEntityManager()->remove($dataValue);
         }
-
-        // Ignore attributes marked for non orphan_removal
-        if (!$attribute->getOption('orphan_removal', true)) {
-            return;
-        }
-
-        $dataValue = $this->accessor->getValue($value, $attribute->getType()->getDatabaseType());
-        $args->getEntityManager()->remove($dataValue);
     }
 }

@@ -110,7 +110,7 @@ sidus_eav_model:
                 # Use with unique attributes, will check the unicity accross all families
                 global_unique: <boolean>
                 
-                # Only for embed attributes, will remove embed data if true. Default: true
+                # Will remove any related data on value removal if true. Default: true for embed, false otherwise
                 orphan_removal: <boolean>
 
                 # You can also use the options to pass any custom parameter to the attribute and use them in your code
