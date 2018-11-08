@@ -1,0 +1,6 @@
+eav:
+    validation:
+        invalid_data: Donnée non-valide
+        invalid_family: Famille non-valide
+        unique: Cette valeur existe déjà
+        required: Ce champs est requis
