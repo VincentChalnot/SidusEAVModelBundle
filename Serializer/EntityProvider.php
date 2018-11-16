@@ -12,7 +12,7 @@ namespace Sidus\EAVModelBundle\Serializer;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Event\PostFlushEventArgs;
+use Doctrine\ORM\Event\OnFlushEventArgs;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -135,11 +135,11 @@ class EntityProvider implements EntityProviderInterface
     /**
      * When an entity is created, we don't need to keep the reference anymore
      *
-     * @param PostFlushEventArgs $event
+     * @param OnFlushEventArgs $event
      *
      * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
      */
-    public function postFlush(PostFlushEventArgs $event)
+    public function onFlush(OnFlushEventArgs $event)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
 

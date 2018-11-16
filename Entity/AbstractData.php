@@ -1039,7 +1039,7 @@ abstract class AbstractData implements ContextualDataInterface
     protected function setInternalValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
     {
         $this->checkAttribute($attribute);
-        $dataValues = $this->ensureNativeArray($dataValues);
+        $dataValues = $this->ensureNativeArray($dataValues, $this->getFamilyCode().'.'.$attribute->getCode());
         $values = new ArrayCollection();
         $position = 0; // Reset position to zero
 
@@ -1219,17 +1219,18 @@ abstract class AbstractData implements ContextualDataInterface
         $m .= 'use ensureNativeArray instead';
         @trigger_error($m, E_USER_DEPRECATED);
 
-        return $this->ensureNativeArray($dataValues);
+        return $this->ensureNativeArray($dataValues, $this->getFamilyCode().'.'.$attribute->getCode());
     }
 
     /**
      * @param array|\Traversable $dataValues
+     * @param string             $path
      *
      * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
      *
      * @return array
      */
-    protected function ensureNativeArray($dataValues)
+    protected function ensureNativeArray($dataValues, $path)
     {
         if (\is_array($dataValues)) {
             return $dataValues;
@@ -1247,7 +1248,7 @@ abstract class AbstractData implements ContextualDataInterface
 
         $type = \is_object($dataValues) ? \get_class($dataValues) : \gettype($dataValues);
         throw new InvalidValueDataException(
-            "Value for collection must be an array, '{$type}' given"
+            "Value for collection for path '{$path}' must be an array, '{$type}' given"
         );
     }
 }

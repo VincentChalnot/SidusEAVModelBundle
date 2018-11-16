@@ -19,4 +19,4 @@ services:
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
         tags:
-            - { name: doctrine.event_listener, event: postFlush }
+            - { name: doctrine.event_listener, event: onFlush }

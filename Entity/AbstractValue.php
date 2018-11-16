@@ -132,7 +132,7 @@ abstract class AbstractValue implements ContextualValueInterface
     protected $textValue;
 
     /**
-     * @param DataInterface      $data
+     * @param DataInterface $data
      * @param AttributeInterface $attribute
      *
      * @throws \LogicException
@@ -202,12 +202,17 @@ abstract class AbstractValue implements ContextualValueInterface
     }
 
     /**
-     * @param boolean $boolValue
+     * @param boolean|mixed $boolValue
      *
      * @return AbstractValue
      */
     public function setBoolValue($boolValue)
     {
+        if (\is_array($boolValue) || \is_object($boolValue)) {
+            $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}, ";
+            $m .= 'expecting boolean, got'.gettype($boolValue);
+            throw new \UnexpectedValueException($m);
+        }
         $this->boolValue = null === $boolValue ? null : (bool) $boolValue;
 
         return $this;
@@ -222,12 +227,17 @@ abstract class AbstractValue implements ContextualValueInterface
     }
 
     /**
-     * @param integer $integerValue
+     * @param integer|mixed $integerValue
      *
      * @return AbstractValue
      */
     public function setIntegerValue($integerValue)
     {
+        if (\is_array($integerValue) || \is_object($integerValue)) {
+            $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}, ";
+            $m .= 'expecting integer, got '.gettype($integerValue);
+            throw new \UnexpectedValueException($m);
+        }
         $this->integerValue = null === $integerValue ? null : (int) $integerValue;
 
         return $this;
@@ -242,12 +252,17 @@ abstract class AbstractValue implements ContextualValueInterface
     }
 
     /**
-     * @param float $decimalValue
+     * @param float|mixed $decimalValue
      *
      * @return AbstractValue
      */
     public function setDecimalValue($decimalValue)
     {
+        if (\is_array($decimalValue) || \is_object($decimalValue)) {
+            $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}, ";
+            $m .= 'expecting float, got '.gettype($decimalValue);
+            throw new \UnexpectedValueException($m);
+        }
         $this->decimalValue = null === $decimalValue ? null : (float) $decimalValue;
 
         return $this;
@@ -306,12 +321,17 @@ abstract class AbstractValue implements ContextualValueInterface
     }
 
     /**
-     * @param string $stringValue
+     * @param string|mixed $stringValue
      *
      * @return AbstractValue
      */
     public function setStringValue($stringValue)
     {
+        if (\is_array($stringValue) || \is_object($stringValue)) {
+            $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}, ";
+            $m .= 'expecting string, got '.gettype($stringValue);
+            throw new \UnexpectedValueException($m);
+        }
         if (null !== $stringValue && 255 < \strlen($stringValue)) {
             $stringValue = substr($stringValue, 0, 255);
         }
@@ -329,12 +349,17 @@ abstract class AbstractValue implements ContextualValueInterface
     }
 
     /**
-     * @param string $textValue
+     * @param string|mixed $textValue
      *
      * @return AbstractValue
      */
     public function setTextValue($textValue)
     {
+        if (\is_array($textValue) || \is_object($textValue)) {
+            $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}, ";
+            $m .= 'expecting string, got '.gettype($textValue);
+            throw new \UnexpectedValueException($m);
+        }
         $this->textValue = null === $textValue ? null : (string) $textValue;
 
         return $this;
