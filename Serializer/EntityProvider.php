@@ -13,6 +13,7 @@ namespace Sidus\EAVModelBundle\Serializer;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
+use Doctrine\ORM\NonUniqueResultException;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -112,8 +113,18 @@ class EntityProvider implements EntityProviderInterface
                 if ($entity) {
                     return $entity;
                 }
+            } catch (NonUniqueResultException $e) {
+                throw new UnexpectedValueException(
+                    "Non unique result for identifier {$reference} for family {$family->getCode()}",
+                    0,
+                    $e
+                );
             } catch (\Exception $e) {
-                throw new UnexpectedValueException("Unable to resolve identifier {$reference}", 0, $e);
+                throw new UnexpectedValueException(
+                    "Unable to resolve identifier {$reference} for family {$family->getCode()}",
+                    0,
+                    $e
+                );
             }
         }
 

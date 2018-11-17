@@ -332,8 +332,8 @@ abstract class AbstractValue implements ContextualValueInterface
             $m .= 'expecting string, got '.gettype($stringValue);
             throw new \UnexpectedValueException($m);
         }
-        if (null !== $stringValue && 255 < \strlen($stringValue)) {
-            $stringValue = substr($stringValue, 0, 255);
+        if (null !== $stringValue && 255 < \mb_strlen($stringValue)) {
+            $stringValue = mb_substr($stringValue, 0, 255);
         }
         $this->stringValue = null === $stringValue ? null : (string) $stringValue;
 
