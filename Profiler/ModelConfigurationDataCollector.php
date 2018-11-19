@@ -21,8 +21,6 @@ use Symfony\Component\VarDumper\Cloner\Data;
  * Display model configuration in the debug toolbar
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
- *
- * @method reset()
  */
 class ModelConfigurationDataCollector extends DataCollector
 {
@@ -46,6 +44,13 @@ class ModelConfigurationDataCollector extends DataCollector
      * @param \Exception|null $exception
      */
     public function collect(Request $request, Response $response, \Exception $exception = null)
+    {
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reset()
     {
     }
 
