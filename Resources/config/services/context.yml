@@ -6,6 +6,7 @@ services:
         class: Sidus\EAVModelBundle\Context\ContextManager
         arguments:
             - '@form.factory'
+            - '@logger'
             - '%sidus_eav_model.context.form_type%'
             - '%sidus_eav_model.context.default_context%'
         tags:

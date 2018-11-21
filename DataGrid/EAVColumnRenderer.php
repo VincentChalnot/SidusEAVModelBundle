@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of the Sidus/EAVModelBundle package.
+ *
+ * Copyright (c) 2015-2018 Vincent Chalnot
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Sidus\EAVModelBundle\DataGrid;
 
@@ -8,11 +16,13 @@ use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
 /**
- * Overriding base column label rendering
+ * Overriding base column label rendering for Sidus/DataGridBundle v1.3
  *
  * This code is written for PHP7 because it can only work with the Sidus/DataGridBundle that supports PHP7+ only
  *
  * @deprecated Please migrate to the sidus/datagrid-bundle v2.0
+ *
+ * @author Vincent Chalnot <vincent@sidus.fr>
  */
 class EAVColumnRenderer implements ColumnRendererInterface
 {

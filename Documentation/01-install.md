@@ -91,6 +91,19 @@ not mandatory but strongly advised for performances.
 Single table inheritance can be configured to allow different classes for different families, see this chapter for more
 information:
 [Custom classes](12-custom_classes.md)
+You can immediately add these lines if you plan to do it someday:
+
+````phpdoc
+@ORM\InheritanceType("SINGLE_TABLE")
+@ORM\DiscriminatorColumn(name="discr", type="string")
+````
+
+It is strongly advised to also setup the tracking policy of these entities to _deferred explicit_ which is more suited
+for performances than the default one.
+
+````phpdoc
+@ORM\ChangeTrackingPolicy("DEFERRED_EXPLICIT")
+````
 
 #### Base configuration
 

@@ -6,7 +6,7 @@ This is the "Data" class you need to create and configure at the installation of
 However, there is an alternative behavior you can setup by using Doctrine's single table inheritance,
 using this feature you can actually have a different class for each Family in the EAV model.
 
-> **NOTE**:\
+> **NOTE**:<br>
 > This feature is mandatory when using certain external bundles that requires a different class for each different
 > model, like SonataAdmin, ApiPlatform, etc.
 

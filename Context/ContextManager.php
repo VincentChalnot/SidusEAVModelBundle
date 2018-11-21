@@ -10,6 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Context;
 
+use Psr\Log\LoggerInterface;
 use Sidus\BaseBundle\Utilities\DebugInfoUtility;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
@@ -32,6 +33,9 @@ class ContextManager implements ContextManagerInterface
     /** @var FormFactoryInterface */
     protected $formFactory;
 
+    /** @var LoggerInterface */
+    protected $logger;
+
     /** @var array */
     protected $defaultContext;
 
@@ -49,12 +53,18 @@ class ContextManager implements ContextManagerInterface
 
     /**
      * @param FormFactoryInterface $formFactory
+     * @param LoggerInterface      $logger
      * @param string               $contextSelectorType
      * @param array                $defaultContext
      */
-    public function __construct(FormFactoryInterface $formFactory, $contextSelectorType, array $defaultContext)
-    {
+    public function __construct(
+        FormFactoryInterface $formFactory,
+        LoggerInterface $logger,
+        $contextSelectorType,
+        array $defaultContext
+    ) {
         $this->formFactory = $formFactory;
+        $this->logger = $logger;
         $this->contextSelectorType = $contextSelectorType;
         $this->defaultContext = $defaultContext;
     }
@@ -71,7 +81,7 @@ class ContextManager implements ContextManagerInterface
                 return $session->get(static::SESSION_KEY);
             }
         } catch (\Exception $e) {
-            // @todo log exception
+            $this->logger->error("Unable to save context to session: {$e->getMessage()}");
         }
 
         // If context was saved in the service, this means we are probably in command-line or no session was started
@@ -92,12 +102,12 @@ class ContextManager implements ContextManagerInterface
     public function setContext(array $context)
     {
         $context = array_merge($this->getDefaultContext(), $context);
-        $session = $this->getSession();
 
         // Always save to property in service for fallback
         $this->context = $context;
 
         // Try to save the context in session,
+        $session = $this->getSession();
         if ($session) {
             $session->set(static::SESSION_KEY, $context);
             $session->save();
@@ -203,7 +213,8 @@ class ContextManager implements ContextManagerInterface
             try {
                 return $this->request->getSession();
             } catch (\Exception $e) {
-                // @todo log exception
+                $this->logger->error("Unable to access session: {$e->getMessage()}");
+
                 return null;
             }
         }

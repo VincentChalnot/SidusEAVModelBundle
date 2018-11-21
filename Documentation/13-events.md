@@ -1,8 +1,7 @@
 ## Events
 
-| Note |
-| ---- |
-| This feature is only available since v1.2.21 |
+> **NOTE**:<br>
+> This feature is only available since v1.2.21 |
 
 Doctrine events can sometimes be fastidious to work with, especially with an EAV model where changes can occur on both
 the Data and the Values entities.
