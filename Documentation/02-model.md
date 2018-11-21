@@ -60,7 +60,7 @@ sidus_eav_model:
                 <attributeCode>: ~
                 
                 # When declaring an attribute locally or overriding a globally defined one
-                <attributeCode>: <AttributeConfiguration>
+                <attributeCode2>: <AttributeConfiguration>
 
                 # ...
 ````
@@ -145,18 +145,19 @@ sidus_eav_model:
 ````
 
 > **NOTE:**<br>
-> Some attribute codes are reserved like:
+> Some attribute codes are forbidden like:
 > **id**,
-> **parent**,
-> **children**,
 > **values**,
 > **valueData**,
-> **createdAt**,
-> **updatedAt**,
-> **currentVersion**,
 > **family**
 > and **currentContext**.
-> If you use any of these words as attribute codes your application behavior will depends on how you  try to access the
+>
+> Other attributes are reserved but are not explicitly forbidden but it's strongly discouraged to use them:
+> **parent**,
+> **children**,
+> **createdAt**,
+> **updatedAt**
+> If you use any of these words as attribute codes your application behavior will depends on how you try to access the
 > EAV data of the entities. **Don't do that.**
 
 ##### Attribute types

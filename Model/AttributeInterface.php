@@ -21,6 +21,15 @@ use Sidus\EAVModelBundle\Exception\ContextException;
  */
 interface AttributeInterface
 {
+    const FORBIDDEN_ATTRIBUTE_CODES = [
+        'id',
+        'value',
+        'values',
+        'valueData',
+        'family',
+        'currentContext',
+    ];
+
     /**
      * @return string
      */

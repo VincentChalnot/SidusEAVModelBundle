@@ -539,6 +539,11 @@ class Attribute implements AttributeInterface
     protected function checkConflicts()
     {
         $default = $this->getDefault();
+        if (\in_array($this->getCode(), AttributeInterface::FORBIDDEN_ATTRIBUTE_CODES, true)) {
+            throw new \UnexpectedValueException(
+                "Attribute code '{$this->getCode()}' is not allowed"
+            );
+        }
         if ($this->isCollection()) {
             if ($this->isUnique()) {
                 throw new AttributeConfigurationException(
