@@ -255,7 +255,13 @@ class Value extends AbstractValue
 not mandatory but strongly advised for performances.</p>
 <p>Single table inheritance can be configured to allow different classes for different families, see this chapter for more
 information:
-<a href="12-custom_classes.html">Custom classes</a></p>
+<a href="12-custom_classes.html">Custom classes</a>
+You can immediately add these lines if you plan to do it someday:</p>
+<pre><code class="language-phpdoc">@ORM\InheritanceType("SINGLE_TABLE")
+@ORM\DiscriminatorColumn(name="discr", type="string")</code></pre>
+<p>It is strongly advised to also setup the tracking policy of these entities to <em>deferred explicit</em> which is more suited
+for performances than the default one.</p>
+<pre><code class="language-phpdoc">@ORM\ChangeTrackingPolicy("DEFERRED_EXPLICIT")</code></pre>
 <h4 id="base-configuration">Base configuration</h4>
 <p>You will need at least the following configuration:</p>
 <pre><code class="language-yaml">sidus_eav_model:

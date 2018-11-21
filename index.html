@@ -189,6 +189,14 @@
 <h2 id="introduction">Introduction</h2>
 <p>This bundle allows you to quickly set up a dynamic model in a Symfony project using Doctrine.<br />
 Model configuration is done in Yaml and everything can be easily extended.</p>
+<blockquote>
+<p>The main feature of this model that exists nowhere else to my knowledge is the possibility to
+<a href="Documentation/09-context.html">contextualize data</a> based on <strong>as many contextualization axis you need</strong>.</p>
+</blockquote>
+<p>All EAV model allows you to contextualize data based on the language or the country (yes: internationalization is a
+subset of data contextualization), some models allows you to contextualize your data based on some channels or scopes
+but this particular implementation allows you to manage contextualization axis to conform with your business logic, not
+the other way around.</p>
 <p><strong>Main Features:</strong></p>
 <ul>
 <li><a href="Documentation/02-model.html">The model</a> is defined in <a href="#example">Yaml configuration files</a>, it's easy, it's powerful
