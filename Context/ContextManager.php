@@ -15,9 +15,9 @@ use Sidus\BaseBundle\Utilities\DebugInfoUtility;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\VarDumper\Caster\Caster;
 
@@ -39,8 +39,11 @@ class ContextManager implements ContextManagerInterface
     /** @var array */
     protected $defaultContext;
 
-    /** @var Request */
-    protected $request;
+    /** @var SessionInterface */
+    protected $session;
+
+    /** @var string */
+    protected $requestUri;
 
     /** @var string */
     protected $contextSelectorType;
@@ -74,16 +77,6 @@ class ContextManager implements ContextManagerInterface
      */
     public function getContext()
     {
-        $session = $this->getSession();
-        try {
-            // If context exists in the session, use this information
-            if ($session && $session->has(static::SESSION_KEY)) {
-                return $session->get(static::SESSION_KEY);
-            }
-        } catch (\Exception $e) {
-            $this->logger->error("Unable to save context to session: {$e->getMessage()}");
-        }
-
         // If context was saved in the service, this means we are probably in command-line or no session was started
         if ($this->context) {
             return $this->context;
@@ -107,10 +100,9 @@ class ContextManager implements ContextManagerInterface
         $this->context = $context;
 
         // Try to save the context in session,
-        $session = $this->getSession();
-        if ($session) {
-            $session->set(static::SESSION_KEY, $context);
-            $session->save();
+        if ($this->session) {
+            $this->session->set(static::SESSION_KEY, $context);
+            $this->session->save();
         }
     }
 
@@ -130,12 +122,12 @@ class ContextManager implements ContextManagerInterface
     public function getContextSelectorForm()
     {
         if (!$this->contextSelectorForm) {
-            if (!$this->contextSelectorType) {
+            if (!$this->contextSelectorType || !$this->formFactory) {
                 return null;
             }
 
             $formOptions = [
-                'action' => $this->request->getRequestUri(),
+                'action' => $this->requestUri,
                 'attr' => [
                     'novalidate' => 'novalidate',
                     'class' => 'form-inline',
@@ -161,30 +153,66 @@ class ContextManager implements ContextManagerInterface
      */
     public function onKernelRequest(GetResponseEvent $event)
     {
-        $this->request = $event->getRequest();
+        $request = $event->getRequest();
+        $this->requestUri = $request->getRequestUri();
+
+        try {
+            $this->session = $request->getSession();
+        } catch (\Exception $e) {
+            $this->logger->error("Unable to access session: {$e->getMessage()}");
+        }
+        if ($this->session) {
+            try {
+                // If context exists in the session, use this information
+                if ($this->session->has(static::SESSION_KEY)) {
+                    $this->context = $this->session->get(static::SESSION_KEY);
+                }
+            } catch (\Exception $e) {
+                $this->logger->error("Unable to get context from session: {$e->getMessage()}");
+            }
+        }
 
         $form = $this->getContextSelectorForm();
         if (!$form) {
             return;
         }
-
-        $form->handleRequest($this->request);
+        $form->handleRequest($request);
         // Check if form is submitted and redirect to same url in GET
         if ($form->isSubmitted() && $form->isValid()) {
             $this->setContext($form->getData());
-            $redirectResponse = new RedirectResponse($event->getRequest()->getRequestUri());
+            $redirectResponse = new RedirectResponse($this->requestUri);
             $event->setResponse($redirectResponse);
         }
     }
 
     /**
-     * Destroys the request because we won't need it anymore
+     * Removes the session as it's dangerous to change the session after the response was sent
+     *
+     * @param KernelEvent $event
+     */
+    public function onKernelTerminate(KernelEvent $event)
+    {
+        $this->session = null;
+    }
+
+    /**
+     * Destroys everything because we won't need it anymore
+     *
+     * @return array
      */
     public function __sleep()
     {
-        $this->request = null;
         $this->formFactory = null;
         $this->contextSelectorForm = null;
+        $this->session = null;
+        $this->logger = null;
+
+        return [
+            'context',
+            'defaultContext',
+            'contextSelectorType',
+            'requestUri',
+        ];
     }
 
     /**
@@ -198,27 +226,10 @@ class ContextManager implements ContextManagerInterface
             $this,
             [
                 Caster::PREFIX_PROTECTED.'formFactory',
-                Caster::PREFIX_PROTECTED.'request',
                 Caster::PREFIX_PROTECTED.'contextSelectorForm',
+                Caster::PREFIX_PROTECTED.'session',
+                Caster::PREFIX_PROTECTED.'logger',
             ]
         );
-    }
-
-    /**
-     * @return null|SessionInterface
-     */
-    protected function getSession()
-    {
-        if ($this->request) {
-            try {
-                return $this->request->getSession();
-            } catch (\Exception $e) {
-                $this->logger->error("Unable to access session: {$e->getMessage()}");
-
-                return null;
-            }
-        }
-
-        return null;
     }
 }
