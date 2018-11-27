@@ -10,6 +10,8 @@
 
 namespace Sidus\EAVModelBundle\Form\Type;
 
+use Sidus\BaseBundle\Doctrine\RepositoryFinder;
+use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Form\AttributeFormBuilderInterface;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
@@ -39,16 +41,22 @@ class DataType extends AbstractType
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
+    /** @var RepositoryFinder */
+    protected $repositoryFinder;
+
     /**
      * @param AttributeFormBuilderInterface $attributeFormBuilder
      * @param FamilyRegistry                $familyRegistry
+     * @param RepositoryFinder              $repositoryFinder
      */
     public function __construct(
         AttributeFormBuilderInterface $attributeFormBuilder,
-        FamilyRegistry $familyRegistry
+        FamilyRegistry $familyRegistry,
+        RepositoryFinder $repositoryFinder
     ) {
         $this->attributeFormBuilder = $attributeFormBuilder;
         $this->familyRegistry = $familyRegistry;
+        $this->repositoryFinder = $repositoryFinder;
     }
 
     /**
@@ -180,6 +188,13 @@ class DataType extends AbstractType
                 }
                 /** @var FamilyInterface $family */
                 $family = $options['family'];
+
+                if ($family->isSingleton()) {
+                    /** @var DataRepository $repository */
+                    $repository = $this->repositoryFinder->getRepository($family->getDataClass());
+
+                    return $repository->getInstance($family);
+                }
 
                 return $family->createData();
             }

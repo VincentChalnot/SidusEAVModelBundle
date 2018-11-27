@@ -69,7 +69,11 @@ class DataParamConverter extends AbstractParamConverter
     {
         if (array_key_exists('family', $configuration->getOptions())) {
             $family = $this->familyRegistry->getFamily($configuration->getOptions()['family']);
-            $data = $this->repository->findByIdentifier($family, $value, true);
+            if ($family->isSingleton()) {
+                $data = $this->repository->getInstance($family);
+            } else {
+                $data = $this->repository->findByIdentifier($family, $value, true);
+            }
         } else {
             $data = $this->repository->find($value);
         }
