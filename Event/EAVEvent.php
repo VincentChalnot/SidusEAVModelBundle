@@ -142,6 +142,9 @@ class EAVEvent extends Event
     public function recomputeChangeset(DataInterface $data)
     {
         $uow = $this->entityManager->getUnitOfWork();
+        if ($uow->isScheduledForDelete($data)) {
+            return;
+        }
 
         $dataClassMetadata = $this->entityManager->getClassMetadata($data->getFamily()->getDataClass());
         $this->doRecomputeChangeset($uow, $dataClassMetadata, $data);
@@ -159,7 +162,6 @@ class EAVEvent extends Event
      */
     protected function doRecomputeChangeset(UnitOfWork $uow, ClassMetadata $classMetadata, $entity)
     {
-        $uow->clearEntityChangeSet(spl_object_hash($entity));
         $uow->persist($entity);
         $uow->computeChangeSet($classMetadata, $entity);
     }
