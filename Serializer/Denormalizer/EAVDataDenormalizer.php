@@ -124,11 +124,13 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         if (is_scalar($data)) {
             return $entity; // In case we are trying to resolve a simple reference
         }
-        if ($entity instanceof ContextualDataInterface
-            && isset($context['context'])
-            && \is_array($context['context'])
-        ) {
-            $entity->setCurrentContext($context['context']);
+        if ($entity instanceof ContextualDataInterface) {
+            if (isset($data['currentContext']) && \is_array($data['currentContext'])) {
+                $entity->setCurrentContext($data['currentContext']);
+            }
+            if (isset($context['context']) && \is_array($context['context'])) {
+                $entity->setCurrentContext($context['context']);
+            }
         }
         /** @var array $data At this point we know for sure data is a \ArrayAccess or a PHP array */
         foreach ($data as $attributeCode => $value) {
@@ -184,9 +186,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             $attribute = $family->getAttribute($attributeCode);
             if ($attribute->isCollection()) {
                 if (!\is_array($normalizedValue) && !$normalizedValue instanceof \Traversable) {
-                    /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
                     throw new UnexpectedValueException(
-                        "Given data should be an array of values for attribute {$attributeCode}"
+                        "Given data should be an array of values for attribute '{$attributeCode}'"
                     );
                 }
                 $value = new ArrayCollection();
