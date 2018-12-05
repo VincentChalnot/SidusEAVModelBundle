@@ -132,7 +132,7 @@ abstract class AbstractValue implements ContextualValueInterface
     protected $textValue;
 
     /**
-     * @param DataInterface $data
+     * @param DataInterface      $data
      * @param AttributeInterface $attribute
      *
      * @throws \LogicException

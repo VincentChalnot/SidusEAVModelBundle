@@ -14,6 +14,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Sidus\BaseBundle\Utilities\DebugInfoUtility;
+use Sidus\BaseBundle\Utilities\SleepUtility;
 use Sidus\EAVModelBundle\Exception\ContextException;
 use Sidus\EAVModelBundle\Exception\InvalidValueDataException;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
@@ -898,11 +899,12 @@ abstract class AbstractData implements ContextualDataInterface
 
     /**
      * Cleaning object before serialization
+     *
+     * @return array
      */
     public function __sleep()
     {
-        $this->accessor = null;
-        $this->valuesByAttributes = null;
+        return SleepUtility::sleep(__CLASS__, ['accessor', 'valuesByAttributes']);
     }
 
     /**

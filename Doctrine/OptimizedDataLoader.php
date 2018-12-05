@@ -95,7 +95,6 @@ class OptimizedDataLoader implements DataLoaderInterface
         return $entitiesByValueClassByIds;
     }
 
-    /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * @param string          $valueClass
      * @param DataInterface[] $entitiesById
@@ -107,8 +106,6 @@ class OptimizedDataLoader implements DataLoaderInterface
         foreach ($this->getValues($valueClass, $entitiesById) as $valueEntity) {
             $data = $valueEntity->getData();
 
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            /** @noinspection PhpUnhandledExceptionInspection */
             $refl = new \ReflectionClass($data);
             $valuesProperty = $refl->getProperty('values');
             $valuesProperty->setAccessible(true);

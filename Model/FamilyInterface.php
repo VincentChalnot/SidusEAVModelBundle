@@ -122,6 +122,14 @@ interface FamilyInterface
     public function getOptions();
 
     /**
+     * @param string $code
+     * @param mixed  $fallback
+     *
+     * @return mixed
+     */
+    public function getOption($code, $fallback = null);
+
+    /**
      * @return array
      */
     public function getFormOptions();

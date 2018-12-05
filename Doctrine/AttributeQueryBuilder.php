@@ -390,8 +390,13 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
                     continue;
                 }
                 $axisValueParameter = $this->generateUniqueId($axis.'Axis');
-                $qb->setParameter($axisValueParameter, (array) $axisValues);
-                $joinDql .= " AND {$this->joinAlias}.{$axis} IN (:{$axisValueParameter})";
+                $joinDql .= " AND {$this->joinAlias}.{$axis}";
+                if (is_array($axisValues)) {
+                    $joinDql .= " IN (:{$axisValueParameter})";
+                } else {
+                    $joinDql .= " = :{$axisValueParameter}";
+                }
+                $qb->setParameter($axisValueParameter, $axisValues);
             }
         }
 

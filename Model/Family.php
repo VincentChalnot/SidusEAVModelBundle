@@ -11,6 +11,7 @@
 namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\BaseBundle\Utilities\DebugInfoUtility;
+use Sidus\BaseBundle\Utilities\SleepUtility;
 use Sidus\EAVModelBundle\Entity\ContextualDataInterface;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
 use Sidus\EAVModelBundle\Registry\AttributeRegistry;
@@ -492,6 +493,21 @@ class Family implements FamilyInterface
     }
 
     /**
+     * @param string $code
+     * @param mixed  $fallback
+     *
+     * @return mixed
+     */
+    public function getOption($code, $fallback = null)
+    {
+        if (!array_key_exists($code, $this->options)) {
+            return $fallback;
+        }
+
+        return $this->options[$code];
+    }
+
+    /**
      * @param array $options
      */
     public function setOptions(array $options)
@@ -531,16 +547,8 @@ class Family implements FamilyInterface
             $this->fallbackLabel = $this->getLabel();
         }
         $this->getChildren(); // Trigger the storage of children families before discarding the familyRegistry
-        $propertyNames = [];
-        $refl = new \ReflectionClass(__CLASS__);
-        foreach ($refl->getProperties() as $property) {
-            if (\in_array($property->getName(), ['translator', 'familyRegistry', 'contextManager'], true)) {
-                continue;
-            }
-            $propertyNames[] = $property->getName();
-        }
 
-        return $propertyNames;
+        return SleepUtility::sleep(__CLASS__, ['translator', 'familyRegistry', 'contextManager']);
     }
 
     /**

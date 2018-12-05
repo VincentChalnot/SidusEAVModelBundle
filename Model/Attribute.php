@@ -11,6 +11,7 @@
 namespace Sidus\EAVModelBundle\Model;
 
 use Sidus\BaseBundle\Utilities\DebugInfoUtility;
+use Sidus\BaseBundle\Utilities\SleepUtility;
 use Sidus\EAVModelBundle\Registry\AttributeTypeRegistry;
 use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
 use Sidus\EAVModelBundle\Exception\AttributeConfigurationException;
@@ -504,16 +505,8 @@ class Attribute implements AttributeInterface
     public function __sleep()
     {
         $this->fallbackLabel = $this->getLabel();
-        $propertyNames = [];
-        $refl = new \ReflectionClass(__CLASS__);
-        foreach ($refl->getProperties() as $property) {
-            if (\in_array($property->getName(), ['translator', 'attributeTypeRegistry'], true)) {
-                continue;
-            }
-            $propertyNames[] = $property->getName();
-        }
 
-        return $propertyNames;
+        return SleepUtility::sleep(__CLASS__, ['translator', 'attributeTypeRegistry']);
     }
 
     /**

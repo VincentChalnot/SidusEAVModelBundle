@@ -12,6 +12,7 @@ namespace Sidus\EAVModelBundle\Context;
 
 use Psr\Log\LoggerInterface;
 use Sidus\BaseBundle\Utilities\DebugInfoUtility;
+use Sidus\BaseBundle\Utilities\SleepUtility;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -187,10 +188,8 @@ class ContextManager implements ContextManagerInterface
 
     /**
      * Removes the session as it's dangerous to change the session after the response was sent
-     *
-     * @param KernelEvent $event
      */
-    public function onKernelTerminate(KernelEvent $event)
+    public function onKernelTerminate()
     {
         $this->session = null;
     }
@@ -202,17 +201,7 @@ class ContextManager implements ContextManagerInterface
      */
     public function __sleep()
     {
-        $this->formFactory = null;
-        $this->contextSelectorForm = null;
-        $this->session = null;
-        $this->logger = null;
-
-        return [
-            'context',
-            'defaultContext',
-            'contextSelectorType',
-            'requestUri',
-        ];
+        return SleepUtility::sleep(__CLASS__, ['formFactory', 'contextSelectorForm', 'session', 'logger']);
     }
 
     /**

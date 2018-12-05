@@ -8,7 +8,7 @@ services:
             - '@sidus_eav_model.entity_manager'
             - '%sidus_eav_model.entity.data.class%'
         tags:
-            - { name: request.param_converter }
+            - { name: request.param_converter, priority: 100 }
 
     Sidus\EAVModelBundle\Request\ParamConverter\FamilyParamConverter:
         class: Sidus\EAVModelBundle\Request\ParamConverter\FamilyParamConverter
