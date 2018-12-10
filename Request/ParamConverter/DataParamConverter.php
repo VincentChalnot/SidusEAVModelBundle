@@ -77,7 +77,9 @@ class DataParamConverter extends AbstractParamConverter
         } else {
             $data = $this->repository->find($value);
         }
-        $this->dataLoader->loadSingle($data, $data->getFamily()->getOption('loader_depth', 2));
+        if ($data) {
+            $this->dataLoader->loadSingle($data, $data->getFamily()->getOption('loader_depth', 2));
+        }
 
         return $data;
     }
