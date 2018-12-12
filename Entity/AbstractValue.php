@@ -422,6 +422,28 @@ abstract class AbstractValue implements ContextualValueInterface
     }
 
     /**
+     * @return mixed
+     */
+    public function getValueData()
+    {
+        $method = 'get'.ucfirst($this->getAttribute()->getType()->getDatabaseType());
+
+        return $this->$method();
+    }
+
+    /**
+     * @param mixed $valueData
+     *
+     * @return mixed
+     */
+    public function setValueData($valueData)
+    {
+        $method = 'set'.ucfirst($this->getAttribute()->getType()->getDatabaseType());
+
+        return $this->$method($valueData);
+    }
+
+    /**
      * @return int
      */
     public function getPosition()

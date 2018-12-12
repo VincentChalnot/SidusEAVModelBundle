@@ -60,6 +60,20 @@ interface ValueInterface
     public function setData(DataInterface $data = null);
 
     /**
+     * Must return the actual scalar/relation hold by this value
+     *
+     * @return mixed
+     */
+    public function getValueData();
+
+    /**
+     * @param mixed $valueData
+     *
+     * @return mixed
+     */
+    public function setValueData($valueData);
+
+    /**
      * Position of the value when used in a collection
      *
      * @return int

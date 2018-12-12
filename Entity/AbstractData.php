@@ -283,7 +283,7 @@ abstract class AbstractData implements ContextualDataInterface
         }
         foreach ($this->getValues($attribute, $context) as $value) {
             try {
-                if ($this->getAccessor()->getValue($value, $attribute->getType()->getDatabaseType()) === $valueData) {
+                if ($value->getValueData() === $valueData) {
                     $this->removeValue($value);
                     break;
                 }
@@ -356,10 +356,9 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $this->checkAttribute($attribute);
         $valuesData = new ArrayCollection();
-        $attributeType = $attribute->getType();
         try {
             foreach ($this->getValues($attribute, $context) as $value) {
-                $valuesData->add($this->getAccessor()->getValue($value, $attributeType->getDatabaseType()));
+                $valuesData->add($value->getValueData());
             }
         } catch (ExceptionInterface $e) {
             throw new InvalidValueDataException("Unable to access data for attribute {$attribute->getCode()}", 0, $e);
@@ -1084,15 +1083,7 @@ abstract class AbstractData implements ContextualDataInterface
         ValueInterface $value,
         $dataValue
     ) {
-        try {
-            $this->getAccessor()->setValue($value, $attribute->getType()->getDatabaseType(), $dataValue);
-        } catch (ExceptionInterface $e) {
-            $m = "Invalid data for attribute {$attribute->getCode()} at position {$value->getPosition()}";
-            throw new InvalidValueDataException($m, 0, $e);
-        } catch (\TypeError $e) {
-            $m = "Invalid data type for attribute {$attribute->getCode()} at position {$value->getPosition()}";
-            throw new InvalidValueDataException($m, 0, $e);
-        }
+        $value->setValueData($dataValue);
     }
 
     /**
