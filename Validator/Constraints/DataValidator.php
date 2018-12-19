@@ -10,9 +10,9 @@
 
 namespace Sidus\EAVModelBundle\Validator\Constraints;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Sidus\BaseBundle\Doctrine\RepositoryFinder;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\ValueInterface;
@@ -41,30 +41,30 @@ class DataValidator extends ConstraintValidator
     /** @var string */
     protected $dataClass;
 
-    /** @var EntityManagerInterface */
-    protected $entityManager;
+    /** @var RepositoryFinder */
+    protected $repositoryFinder;
 
     /** @var LoggerInterface */
     protected $logger;
 
     /**
-     * @param string                 $dataClass
-     * @param FamilyRegistry         $familyRegistry
-     * @param TranslatorInterface    $translator
-     * @param EntityManagerInterface $entityManager
-     * @param LoggerInterface        $logger
+     * @param string              $dataClass
+     * @param FamilyRegistry      $familyRegistry
+     * @param TranslatorInterface $translator
+     * @param RepositoryFinder    $repositoryFinder
+     * @param LoggerInterface     $logger
      */
     public function __construct(
         $dataClass,
         FamilyRegistry $familyRegistry,
         TranslatorInterface $translator,
-        EntityManagerInterface $entityManager,
+        RepositoryFinder $repositoryFinder,
         LoggerInterface $logger
     ) {
         $this->dataClass = $dataClass;
         $this->familyRegistry = $familyRegistry;
         $this->translator = $translator;
-        $this->entityManager = $entityManager;
+        $this->repositoryFinder = $repositoryFinder;
         $this->logger = $logger;
     }
 
@@ -139,7 +139,7 @@ class DataValidator extends ConstraintValidator
         }
 
         /** @var ValueRepository $repo */
-        $repo = $this->entityManager->getRepository($family->getValueClass());
+        $repo = $this->repositoryFinder->getRepository($family->getValueClass());
         $values = $repo->findBy($query);
 
         /** @var ValueInterface $value */

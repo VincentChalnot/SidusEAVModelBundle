@@ -5,7 +5,7 @@ services:
         arguments:
             - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
             - '@Sidus\EAVModelBundle\Doctrine\DataLoaderInterface'
-            - '@sidus_eav_model.entity_manager'
+            - '@Sidus\BaseBundle\Doctrine\RepositoryFinder'
             - '%sidus_eav_model.entity.data.class%'
         tags:
             - { name: request.param_converter, priority: 100 }

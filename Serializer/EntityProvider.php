@@ -12,6 +12,7 @@ namespace Sidus\EAVModelBundle\Serializer;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\NonUniqueResultException;
 use Sidus\EAVModelBundle\Entity\DataInterface;
@@ -64,6 +65,9 @@ class EntityProvider implements EntityProviderInterface
             throw new UnexpectedValueException("No manager found for class {$family->getDataClass()}");
         }
         $repository = $entityManager->getRepository($family->getDataClass());
+        if (!$repository instanceof EntityRepository) {
+            throw new \UnexpectedValueException("No repository for class {$family->getDataClass()}");
+        }
 
         if ($family->isSingleton()) {
             try {

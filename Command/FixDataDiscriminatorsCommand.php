@@ -10,25 +10,41 @@
 
 namespace Sidus\EAVModelBundle\Command;
 
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * See command description
  *
+ * WARNING, this commands uses raw SQL queries to fix Doctrine's discriminator column based on the family code, never
+ * use this in production if you have changed the base relational model configuration like the column names
+ *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class FixDataDiscriminatorsCommand extends ContainerAwareCommand
+class FixDataDiscriminatorsCommand extends Command
 {
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var EntityManagerInterface */
-    protected $entityManager;
+    /** @var ManagerRegistry */
+    protected $doctrine;
+
+    /**
+     * @param FamilyRegistry  $familyRegistry
+     * @param ManagerRegistry $doctrine
+     */
+    public function __construct(FamilyRegistry $familyRegistry, ManagerRegistry $doctrine)
+    {
+        parent::__construct();
+        $this->familyRegistry = $familyRegistry;
+        $this->doctrine = $doctrine;
+    }
+
 
     /**
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
@@ -40,20 +56,6 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
         $this
             ->setName('sidus:data:fix-discriminator')
             ->setDescription($description);
-    }
-
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-     * @throws \LogicException
-     */
-    protected function initialize(InputInterface $input, OutputInterface $output)
-    {
-        $this->familyRegistry = $this->getContainer()->get(FamilyRegistry::class);
-        $this->entityManager = $this->getContainer()->get('sidus_eav_model.entity_manager');
     }
 
     /**
@@ -88,7 +90,11 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
         if (!$family->isInstantiable()) {
             return;
         }
-        $metadata = $this->entityManager->getClassMetadata($family->getDataClass());
+        $entityManager = $this->doctrine->getManagerForClass($family->getDataClass());
+        if (!$entityManager instanceof EntityManagerInterface) {
+            throw new \UnexpectedValueException("No manager found for class {$family->getDataClass()}");
+        }
+        $metadata = $entityManager->getClassMetadata($family->getDataClass());
         if (!$metadata->discriminatorColumn) {
             return;
         }
@@ -98,7 +104,7 @@ class FixDataDiscriminatorsCommand extends ContainerAwareCommand
             $metadata->getColumnName('family')
         );
 
-        $count = $this->updateTable($sql, $metadata->discriminatorValue, $family->getCode());
+        $count = $this->updateTable($entityManager, $sql, $metadata->discriminatorValue, $family->getCode());
         if ($count) {
             $output->writeln("<comment>{$count} data updated for family {$family->getCode()}</comment>");
         } else {
@@ -126,18 +132,16 @@ EOS;
     }
 
     /**
-     * @param string $sql
-     * @param string $discriminatorValue
-     * @param string $familyCode
-     *
-     * @throws \RuntimeException
-     * @throws \Doctrine\DBAL\DBALException
+     * @param EntityManagerInterface $entityManager
+     * @param string                 $sql
+     * @param string                 $discriminatorValue
+     * @param string                 $familyCode
      *
      * @return int
      */
-    protected function updateTable($sql, $discriminatorValue, $familyCode)
+    protected function updateTable(EntityManagerInterface $entityManager, $sql, $discriminatorValue, $familyCode)
     {
-        $connection = $this->entityManager->getConnection();
+        $connection = $entityManager->getConnection();
         $stmt = $connection->prepare($sql);
         $stmt->bindValue(':discrValue', $discriminatorValue);
         $stmt->bindValue(':familyCode', $familyCode);

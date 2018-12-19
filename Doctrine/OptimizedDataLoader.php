@@ -10,9 +10,8 @@
 
 namespace Sidus\EAVModelBundle\Doctrine;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\PersistentCollection;
+use Sidus\BaseBundle\Doctrine\RepositoryFinder;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\ValueInterface;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
@@ -28,15 +27,15 @@ class OptimizedDataLoader implements DataLoaderInterface
 {
     const E_MSG = '$entities argument must be an array of DataInterface';
 
-    /** @var EntityManagerInterface */
-    protected $entityManager;
+    /** @var RepositoryFinder */
+    protected $repositoryFinder;
 
     /**
-     * @param EntityManagerInterface $entityManager
+     * @param RepositoryFinder $repositoryFinder
      */
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(RepositoryFinder $repositoryFinder)
     {
-        $this->entityManager = $entityManager;
+        $this->repositoryFinder = $repositoryFinder;
     }
 
     /**
@@ -127,8 +126,7 @@ class OptimizedDataLoader implements DataLoaderInterface
      */
     protected function getValues($valueClass, array $entitiesById)
     {
-        /** @var EntityRepository $valueRepository */
-        $valueRepository = $this->entityManager->getRepository($valueClass);
+        $valueRepository = $this->repositoryFinder->getRepository($valueClass);
         $qb = $valueRepository->createQueryBuilder('e');
         $qb
             ->addSelect('d', 'dv')

@@ -9,7 +9,7 @@ services:
     Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader:
         class: Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader
         arguments:
-            - '@sidus_eav_model.entity_manager'
+            - '@Sidus\BaseBundle\Doctrine\RepositoryFinder'
 
     Sidus\EAVModelBundle\Doctrine\ContextualizedDataLoaderInterface:
         alias: Sidus\EAVModelBundle\Doctrine\ContextualizedOptimizedDataLoader

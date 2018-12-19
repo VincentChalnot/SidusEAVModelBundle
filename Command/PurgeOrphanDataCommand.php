@@ -10,30 +10,55 @@
 
 namespace Sidus\EAVModelBundle\Command;
 
+use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * See command description
  *
+ * WARNING, this commands uses raw SQL queries to purge the orphan data from the database, never use this in production
+ * if you have changed the base relational model configuration like the column names
+ *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class PurgeOrphanDataCommand extends ContainerAwareCommand
+class PurgeOrphanDataCommand extends Command
 {
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var EntityManagerInterface */
-    protected $entityManager;
+    /** @var ManagerRegistry */
+    protected $doctrine;
 
     /** @var string */
     protected $dataClass;
 
     /** @var string */
     protected $valueClass;
+
+    /**
+     * @param FamilyRegistry  $familyRegistry
+     * @param ManagerRegistry $doctrine
+     * @param string          $dataClass
+     * @param string          $valueClass
+     */
+    public function __construct(
+        FamilyRegistry $familyRegistry,
+        ManagerRegistry $doctrine,
+        string $dataClass,
+        string $valueClass
+    ) {
+        parent::__construct();
+        $this->familyRegistry = $familyRegistry;
+        $this->doctrine = $doctrine;
+        $this->dataClass = $dataClass;
+        $this->valueClass = $valueClass;
+    }
+
 
     /**
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
@@ -50,51 +75,34 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
-     * @throws \LogicException
-     */
-    protected function initialize(InputInterface $input, OutputInterface $output)
-    {
-        $this->familyRegistry = $this->getContainer()->get(FamilyRegistry::class);
-        $this->entityManager = $this->getContainer()->get('sidus_eav_model.entity_manager');
-        $this->dataClass = $this->getContainer()->getParameter('sidus_eav_model.entity.data.class');
-        $this->valueClass = $this->getContainer()->getParameter('sidus_eav_model.entity.value.class');
-    }
-
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     *
      * @throws \Exception
      *
      * @return int|null|void
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->purgeMissingFamilies($output);
-        $this->purgeMissingAttributes($output);
+        $entityManager = $this->doctrine->getManagerForClass($this->dataClass);
+        if (!$entityManager instanceof EntityManagerInterface) {
+            throw new \UnexpectedValueException("No manager found for class {$this->dataClass}");
+        }
+        $this->purgeMissingFamilies($entityManager, $output);
+        $this->purgeMissingAttributes($entityManager, $output);
     }
 
     /**
-     * @param OutputInterface $output
-     *
-     * @throws \UnexpectedValueException
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\DBAL\DBALException
+     * @param EntityManagerInterface $entityManager
+     * @param OutputInterface        $output
      */
-    protected function purgeMissingFamilies(OutputInterface $output)
+    protected function purgeMissingFamilies(EntityManagerInterface $entityManager, OutputInterface $output)
     {
-        $metadata = $this->entityManager->getClassMetadata($this->dataClass);
+        $metadata = $entityManager->getClassMetadata($this->dataClass);
         $table = $metadata->getTableName();
-        $flattenedFamilyCodes = $this->quoteArray($this->familyRegistry->getFamilyCodes());
+        $flattenedFamilyCodes = $this->quoteArray($entityManager, $this->familyRegistry->getFamilyCodes());
 
         // LIMIT is not natively supported for delete statements in Doctrine
         $sql = "DELETE FROM `{$table}` WHERE family_code NOT IN ({$flattenedFamilyCodes}) LIMIT 1000";
 
-        $count = $this->executeWithPaging($sql);
+        $count = $this->executeWithPaging($entityManager, $sql);
 
         if ($count) {
             $output->writeln("<comment>{$count} data purged with missing family</comment>");
@@ -104,16 +112,12 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
     }
 
     /**
-     * @param OutputInterface $output
-     *
-     * @throws \UnexpectedValueException
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\DBAL\DBALException
+     * @param EntityManagerInterface $entityManager
+     * @param OutputInterface        $output
      */
-    protected function purgeMissingAttributes(OutputInterface $output)
+    protected function purgeMissingAttributes(EntityManagerInterface $entityManager, OutputInterface $output)
     {
-        $metadata = $this->entityManager->getClassMetadata($this->valueClass);
+        $metadata = $entityManager->getClassMetadata($this->valueClass);
         $table = $metadata->getTableName();
 
         foreach ($this->familyRegistry->getFamilies() as $family) {
@@ -122,13 +126,13 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
                 $attributeCodes[] = $attribute->getCode();
             }
 
-            $quotedFamilyCode = $this->entityManager->getConnection()->quote($family->getCode());
-            $flattenedAttributeCodes = $this->quoteArray($attributeCodes);
+            $quotedFamilyCode = $entityManager->getConnection()->quote($family->getCode());
+            $flattenedAttributeCodes = $this->quoteArray($entityManager, $attributeCodes);
 
             // LIMIT is not natively supported for delete statements in Doctrine
             $sql = "DELETE FROM `{$table}` WHERE family_code = {$quotedFamilyCode} AND attribute_code NOT IN ({$flattenedAttributeCodes}) LIMIT 1000";
 
-            $count = $this->executeWithPaging($sql);
+            $count = $this->executeWithPaging($entityManager, $sql);
 
             if ($count) {
                 $output->writeln(
@@ -141,17 +145,17 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
     }
 
     /**
-     * @param string $sql
-     *
-     * @throws \Doctrine\DBAL\DBALException
+     * @param EntityManagerInterface $entityManager
+     * @param string                 $sql
      *
      * @return int
      */
-    protected function executeWithPaging($sql)
+    protected function executeWithPaging(EntityManagerInterface $entityManager, $sql)
     {
         $count = 0;
         do {
-            $stmt = $this->entityManager->getConnection()->executeQuery($sql);
+            /** @var Statement $stmt */
+            $stmt = $entityManager->getConnection()->executeQuery($sql);
             $stmt->execute();
             $lastCount = $stmt->rowCount();
             $count += $lastCount;
@@ -163,16 +167,17 @@ class PurgeOrphanDataCommand extends ContainerAwareCommand
     /**
      * Quote a PHP array to allow using it in native SQL query
      *
-     * @param array $array
+     * @param EntityManagerInterface $entityManager
+     * @param array                  $array
      *
      * @return string
      */
-    protected function quoteArray(array $array)
+    protected function quoteArray(EntityManagerInterface $entityManager, array $array)
     {
         array_walk(
             $array,
-            function (&$value) {
-                $value = $this->entityManager->getConnection()->quote($value);
+            function (&$value) use ($entityManager) {
+                $value = $entityManager->getConnection()->quote($value);
             }
         );
 

@@ -10,6 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Cache;
 
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
@@ -29,21 +30,21 @@ class AnnotationGenerator implements CacheWarmerInterface
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var EntityManagerInterface */
-    protected $manager;
+    /** @var ManagerRegistry */
+    protected $doctrine;
 
     /** @var string */
     protected $annotationDir;
 
     /**
-     * @param FamilyRegistry         $familyRegistry
-     * @param EntityManagerInterface $manager
-     * @param string                 $varDir
+     * @param FamilyRegistry  $familyRegistry
+     * @param ManagerRegistry $doctrine
+     * @param string          $varDir
      */
-    public function __construct(FamilyRegistry $familyRegistry, EntityManagerInterface $manager, $varDir)
+    public function __construct(FamilyRegistry $familyRegistry, ManagerRegistry $doctrine, $varDir)
     {
         $this->familyRegistry = $familyRegistry;
-        $this->manager = $manager;
+        $this->doctrine = $doctrine;
         $this->annotationDir = $varDir.DIRECTORY_SEPARATOR.'annotations';
     }
 
@@ -335,7 +336,11 @@ EOT;
         AttributeInterface $attribute,
         $forceSingle = false
     ) {
-        $classMetadata = $this->manager->getClassMetadata($parentFamily->getValueClass());
+        $entityManager = $this->doctrine->getManagerForClass($parentFamily->getValueClass());
+        if (!$entityManager instanceof EntityManagerInterface) {
+            throw new \UnexpectedValueException("Missing manager for class {$parentFamily->getValueClass()}");
+        }
+        $classMetadata = $entityManager->getClassMetadata($parentFamily->getValueClass());
         try {
             $mapping = $classMetadata->getAssociationMapping($attribute->getType()->getDatabaseType());
         } catch (MappingException $e) {

@@ -64,6 +64,7 @@ class SidusEAVModelExtension extends Extension
         // Load services config
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config/services'));
         $loader->load('attribute_types.yml');
+        $loader->load('command.yml');
         $loader->load('configuration.yml');
         $loader->load('context.yml');
         $loader->load('debug.yml');

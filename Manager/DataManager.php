@@ -10,8 +10,8 @@
 
 namespace Sidus\EAVModelBundle\Manager;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use Sidus\BaseBundle\Doctrine\RepositoryFinder;
 use Sidus\EAVModelBundle\Doctrine\AttributeQueryBuilderInterface;
 use Sidus\EAVModelBundle\Doctrine\EAVQueryBuilderInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
@@ -34,17 +34,17 @@ class DataManager
     protected $familyRegistry;
 
     /**
-     * @param FamilyRegistry         $familyRegistry
-     * @param EntityManagerInterface $entityManager
-     * @param string                 $dataClass
+     * @param FamilyRegistry   $familyRegistry
+     * @param RepositoryFinder $repositoryFinder
+     * @param string           $dataClass
      */
     public function __construct(
         FamilyRegistry $familyRegistry,
-        EntityManagerInterface $entityManager,
+        RepositoryFinder $repositoryFinder,
         $dataClass
     ) {
         $this->familyRegistry = $familyRegistry;
-        $this->repository = $entityManager->getRepository($dataClass);
+        $this->repository = $repositoryFinder->getRepository($dataClass);
     }
 
     /**

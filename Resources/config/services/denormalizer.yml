@@ -21,7 +21,7 @@ services:
         parent: serializer.normalizer.object
         arguments:
             - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
-            - '@sidus_eav_model.entity_manager'
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '@Sidus\EAVModelBundle\Serializer\EntityProviderInterface'
             - '%sidus_eav_model.denormalizer.data.ignored_attributes%'
         tags:

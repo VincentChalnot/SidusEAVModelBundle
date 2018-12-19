@@ -1,5 +1,7 @@
 services:
+    # Warning, do not use this directly, use the ManagerRegistry (doctrine) instead to prevent dependencies loops
     sidus_eav_model.entity_manager:
+        deprecated: '%service_id% is deprecated, use the ManagerRegistry or the RepositoryFinder instead'
         class: Doctrine\ORM\EntityManagerInterface
         factory: 'Doctrine\Common\Persistence\ManagerRegistry:getManagerForClass'
         arguments:
@@ -7,6 +9,7 @@ services:
 
     # Warning, only use this service when you need the access to the entire EAV set
     Sidus\EAVModelBundle\Entity\DataRepository:
+        deprecated: '%service_id% is deprecated, use the RepositoryFinder instead'
         class: Sidus\EAVModelBundle\Entity\DataRepository
         factory: 'sidus_eav_model.entity_manager:getRepository'
         arguments:
@@ -15,7 +18,7 @@ services:
     Sidus\EAVModelBundle\Doctrine\EAVFinder:
         class: Sidus\EAVModelBundle\Doctrine\EAVFinder
         arguments:
-            - '@sidus_eav_model.entity_manager'
+            - '@Sidus\BaseBundle\Doctrine\RepositoryFinder'
             - '@Sidus\EAVModelBundle\Doctrine\DataLoaderInterface'
 
     Sidus\EAVModelBundle\Doctrine\IntegrityConstraintManager:

@@ -1,0 +1,18 @@
+services:
+    Sidus\EAVModelBundle\Command\FixDataDiscriminatorsCommand:
+        class: Sidus\EAVModelBundle\Command\FixDataDiscriminatorsCommand
+        arguments:
+            - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+        tags:
+            - { name: console.command }
+
+    Sidus\EAVModelBundle\Command\PurgeOrphanDataCommand:
+        class: Sidus\EAVModelBundle\Command\PurgeOrphanDataCommand
+        arguments:
+            - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%sidus_eav_model.entity.data.class%'
+            - '%sidus_eav_model.entity.value.class%'
+        tags:
+            - { name: console.command }

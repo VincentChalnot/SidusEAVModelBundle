@@ -44,7 +44,7 @@ services:
         public: false
         arguments:
             - '@Sidus\EAVModelBundle\Form\AllowedFamiliesOptionsConfigurator'
-            - '@sidus_eav_model.entity_manager'
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%sidus_eav_model.entity.data.class%'
         tags:
             - { name: form.type }

@@ -3,5 +3,5 @@ services:
         class: Sidus\EAVModelBundle\Manager\DataManager
         arguments:
             - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
-            - '@sidus_eav_model.entity_manager'
+            - '@Sidus\BaseBundle\Doctrine\RepositoryFinder'
             - '%sidus_eav_model.entity.data.class%'

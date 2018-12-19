@@ -10,9 +10,9 @@
 
 namespace Sidus\EAVModelBundle\Request\ParamConverter;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Sidus\BaseBundle\Doctrine\RepositoryFinder;
 use Sidus\BaseBundle\Request\ParamConverter\AbstractParamConverter;
 use Sidus\EAVModelBundle\Doctrine\DataLoaderInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
@@ -37,20 +37,20 @@ class DataParamConverter extends AbstractParamConverter
     protected $dataLoader;
 
     /**
-     * @param FamilyRegistry         $familyRegistry
-     * @param DataLoaderInterface    $dataLoader
-     * @param EntityManagerInterface $entityManager
-     * @param string                 $dataClass
+     * @param FamilyRegistry      $familyRegistry
+     * @param DataLoaderInterface $dataLoader
+     * @param RepositoryFinder    $repositoryFinder
+     * @param string              $dataClass
      */
     public function __construct(
         FamilyRegistry $familyRegistry,
         DataLoaderInterface $dataLoader,
-        EntityManagerInterface $entityManager,
+        RepositoryFinder $repositoryFinder,
         $dataClass
     ) {
         $this->familyRegistry = $familyRegistry;
         $this->dataLoader = $dataLoader;
-        $this->repository = $entityManager->getRepository($dataClass);
+        $this->repository = $repositoryFinder->getRepository($dataClass);
     }
 
     /**

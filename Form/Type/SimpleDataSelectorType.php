@@ -10,7 +10,7 @@
 
 namespace Sidus\EAVModelBundle\Form\Type;
 
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Sidus\EAVModelBundle\Form\AllowedFamiliesOptionsConfigurator;
@@ -31,24 +31,24 @@ class SimpleDataSelectorType extends AbstractType
     /** @var AllowedFamiliesOptionsConfigurator */
     protected $allowedFamiliesOptionConfigurator;
 
-    /** @var EntityManagerInterface */
-    protected $entityManager;
+    /** @var ManagerRegistry */
+    protected $doctrine;
 
     /** @var string */
     protected $dataClass;
 
     /**
      * @param AllowedFamiliesOptionsConfigurator $allowedFamiliesOptionConfigurator
-     * @param EntityManagerInterface             $entityManager
+     * @param ManagerRegistry                    $managerRegistry
      * @param string                             $dataClass
      */
     public function __construct(
         AllowedFamiliesOptionsConfigurator $allowedFamiliesOptionConfigurator,
-        EntityManagerInterface $entityManager,
+        ManagerRegistry $managerRegistry,
         $dataClass
     ) {
         $this->allowedFamiliesOptionConfigurator = $allowedFamiliesOptionConfigurator;
-        $this->entityManager = $entityManager;
+        $this->doctrine = $managerRegistry;
         $this->dataClass = $dataClass;
     }
 
@@ -82,7 +82,7 @@ class SimpleDataSelectorType extends AbstractType
 
         $resolver->setDefaults(
             [
-                'em' => $this->entityManager,
+                'em' => $this->doctrine->getManagerForClass($this->dataClass),
                 'class' => $this->dataClass,
                 'query_builder' => $queryBuilder,
                 'max_results' => 100,
@@ -120,7 +120,7 @@ class SimpleDataSelectorType extends AbstractType
     {
         $queryBuilderNormalizer = function (Options $options, $queryBuilder) {
             if (\is_callable($queryBuilder)) {
-                $queryBuilder = $queryBuilder($this->entityManager->getRepository($options['class']), $options);
+                $queryBuilder = $queryBuilder($options['em']->getRepository($options['class']), $options);
 
                 if (!$queryBuilder instanceof QueryBuilder) {
                     throw new UnexpectedTypeException($queryBuilder, QueryBuilder::class);

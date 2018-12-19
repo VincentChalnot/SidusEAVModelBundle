@@ -11,13 +11,14 @@
 namespace Sidus\EAVModelBundle\Serializer\Denormalizer;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use Sidus\EAVModelBundle\Entity\ContextualDataInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
-use Sidus\EAVModelBundle\Serializer\EntityProvider;
+use Sidus\EAVModelBundle\Serializer\EntityProviderInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
@@ -38,10 +39,10 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var EntityManagerInterface */
-    protected $entityManager;
+    /** @var ManagerRegistry */
+    protected $doctrine;
 
-    /** @var EntityProvider */
+    /** @var EntityProviderInterface */
     protected $entityProvider;
 
     /** @var NameConverterInterface */
@@ -62,8 +63,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param PropertyAccessorInterface      $accessor
      * @param PropertyTypeExtractorInterface $propertyTypeExtractor
      * @param FamilyRegistry                 $familyRegistry
-     * @param EntityManagerInterface         $entityManager
-     * @param EntityProvider                 $entityProvider
+     * @param ManagerRegistry                $doctrine
+     * @param EntityProviderInterface        $entityProvider
      * @param array                          $ignoredAttributes
      */
     public function __construct(
@@ -72,14 +73,14 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         PropertyAccessorInterface $accessor = null,
         PropertyTypeExtractorInterface $propertyTypeExtractor = null,
         FamilyRegistry $familyRegistry,
-        EntityManagerInterface $entityManager,
-        EntityProvider $entityProvider,
+        ManagerRegistry $doctrine,
+        EntityProviderInterface $entityProvider,
         array $ignoredAttributes
     ) {
         $this->nameConverter = $nameConverter;
         $this->accessor = $accessor ?: PropertyAccess::createPropertyAccessor();
         $this->familyRegistry = $familyRegistry;
-        $this->entityManager = $entityManager;
+        $this->doctrine = $doctrine;
         $this->entityProvider = $entityProvider;
         $this->ignoredAttributes = $ignoredAttributes;
     }
@@ -301,8 +302,12 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         $format,
         array $context
     ) {
+        $entityManager = $this->doctrine->getManagerForClass($family->getValueClass());
+        if (!$entityManager instanceof EntityManagerInterface) {
+            throw new \UnexpectedValueException("Missing entity manager for class {$family->getValueClass()}");
+        }
         $attributeType = $attribute->getType();
-        $valueMetadata = $this->entityManager->getClassMetadata($family->getValueClass());
+        $valueMetadata = $entityManager->getClassMetadata($family->getValueClass());
         $storageField = $attributeType->getDatabaseType();
         if ($valueMetadata->hasAssociation($storageField)) {
             $targetClass = $valueMetadata->getAssociationTargetClass($attributeType->getDatabaseType());
@@ -348,8 +353,12 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         $format,
         array $context
     ) {
+        $entityManager = $this->doctrine->getManagerForClass($family->getDataClass());
+        if (!$entityManager instanceof EntityManagerInterface) {
+            throw new \UnexpectedValueException("Missing entity manager for class {$family->getDataClass()}");
+        }
         // @T0D0 handles standard serializer annotations ?
-        $classMetadata = $this->entityManager->getClassMetadata($family->getDataClass());
+        $classMetadata = $entityManager->getClassMetadata($family->getDataClass());
         if ($classMetadata->hasAssociation($attributeCode)) {
             $targetClass = $classMetadata->getAssociationTargetClass($attributeCode);
 

@@ -10,9 +10,9 @@
 
 namespace Sidus\EAVModelBundle\Doctrine;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Sidus\BaseBundle\Doctrine\RepositoryFinder;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
@@ -41,19 +41,19 @@ class EAVFinder
         'is not null' => 'isNotNull',
     ];
 
-    /** @var EntityManagerInterface */
-    protected $entityManager;
+    /** @var RepositoryFinder */
+    protected $repositoryFinder;
 
     /** @var DataLoaderInterface */
     protected $dataLoader;
 
     /**
-     * @param EntityManagerInterface $entityManager
-     * @param DataLoaderInterface    $dataLoader
+     * @param RepositoryFinder    $repositoryFinder
+     * @param DataLoaderInterface $dataLoader
      */
-    public function __construct(EntityManagerInterface $entityManager, DataLoaderInterface $dataLoader)
+    public function __construct(RepositoryFinder $repositoryFinder, DataLoaderInterface $dataLoader)
     {
-        $this->entityManager = $entityManager;
+        $this->repositoryFinder = $repositoryFinder;
         $this->dataLoader = $dataLoader;
     }
 
@@ -164,7 +164,7 @@ class EAVFinder
      */
     public function getFilterByQb(FamilyInterface $family, array $filterBy, array $orderBy = [], $alias = 'e')
     {
-        $repository = $this->entityManager->getRepository($family->getDataClass());
+        $repository = $this->repositoryFinder->getRepository($family->getDataClass());
         if (!$repository instanceof DataRepository) {
             throw new \UnexpectedValueException(
                 "Repository for class {$family->getDataClass()} must be a DataRepository"
