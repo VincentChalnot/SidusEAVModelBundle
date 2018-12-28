@@ -12,6 +12,7 @@ namespace Sidus\EAVModelBundle\DependencyInjection;
 
 use Sidus\EAVModelBundle\Context\ContextManagerInterface;
 use Sidus\EAVModelBundle\Doctrine\Types\FamilyType;
+use Sidus\EAVModelBundle\Model\Family;
 use Sidus\EAVModelBundle\Registry\AttributeRegistry;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Component\Config\FileLocator;
@@ -119,6 +120,9 @@ class SidusEAVModelExtension extends Extension
             if (empty($familyConfiguration['value_class'])) {
                 $familyConfiguration['value_class'] = $config['value_class'];
             }
+            if (empty($familyConfiguration['family_class'])) {
+                $familyConfiguration['family_class'] = $config['family_class'];
+            }
             $this->addFamilyServiceDefinition($code, $familyConfiguration, $container);
         }
     }
@@ -133,8 +137,10 @@ class SidusEAVModelExtension extends Extension
      */
     protected function addFamilyServiceDefinition($code, $familyConfiguration, ContainerBuilder $container)
     {
+        $class = $familyConfiguration['family_class'];
+        unset($familyConfiguration['family_class']);
         $definition = new Definition(
-            $container->getParameter('sidus_eav_model.family.class'),
+            $class,
             [
                 $code,
                 new Reference(AttributeRegistry::class),
@@ -143,7 +149,9 @@ class SidusEAVModelExtension extends Extension
                 $familyConfiguration,
             ]
         );
-        $definition->addMethodCall('setTranslator', [new Reference('translator')]);
+        if (is_a($class, Family::class, true)) {
+            $definition->addMethodCall('setTranslator', [new Reference('translator')]);
+        }
         $definition->addTag('sidus.family');
         $container->setDefinition('sidus_eav_model.family.'.$code, $definition);
     }

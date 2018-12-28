@@ -10,6 +10,7 @@
 
 namespace Sidus\EAVModelBundle\DependencyInjection;
 
+use Sidus\EAVModelBundle\Model\Family;
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -35,6 +36,7 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('data_class')->isRequired()->end()
                 ->scalarNode('value_class')->isRequired()->end()
+                ->scalarNode('family_class')->defaultValue(Family::class)->end()
                 ->booleanNode('serializer_enabled')->defaultFalse()->end()
                 ->scalarNode('collection_type')->defaultValue(CollectionType::class)->end()
                 ->scalarNode('context_form_type')->defaultNull()->end()
@@ -105,6 +107,7 @@ class Configuration implements ConfigurationInterface
         $attributeDefinition = $familyDefinition
             ->scalarNode('data_class')->end()
             ->scalarNode('value_class')->end()
+            ->scalarNode('family_class')->defaultNull()->end()
             ->scalarNode('label')->end()
             ->variableNode('form_options')->end()
             ->variableNode('options')->end()

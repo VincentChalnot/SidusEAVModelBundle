@@ -50,13 +50,13 @@ class Family implements FamilyInterface
     /** @var string */
     protected $label;
 
-    /** @var Attribute */
+    /** @var AttributeInterface */
     protected $attributeAsLabel;
 
-    /** @var Attribute */
+    /** @var AttributeInterface */
     protected $attributeAsIdentifier;
 
-    /** @var Attribute[] */
+    /** @var AttributeInterface[] */
     protected $attributes = [];
 
     /** @var Family */
@@ -179,7 +179,7 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @return Attribute
+     * @return AttributeInterface
      */
     public function getAttributeAsLabel()
     {
@@ -187,15 +187,15 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @param Attribute $attributeAsLabel
+     * @param AttributeInterface $attributeAsLabel
      */
-    public function setAttributeAsLabel(Attribute $attributeAsLabel)
+    public function setAttributeAsLabel(AttributeInterface $attributeAsLabel)
     {
         $this->attributeAsLabel = $attributeAsLabel;
     }
 
     /**
-     * @return Attribute|null
+     * @return AttributeInterface|null
      */
     public function getAttributeAsIdentifier()
     {
@@ -203,15 +203,15 @@ class Family implements FamilyInterface
     }
 
     /**
-     * @param Attribute $attributeAsIdentifier
+     * @param AttributeInterface $attributeAsIdentifier
      */
-    public function setAttributeAsIdentifier(Attribute $attributeAsIdentifier)
+    public function setAttributeAsIdentifier(AttributeInterface $attributeAsIdentifier)
     {
         $this->attributeAsIdentifier = $attributeAsIdentifier;
     }
 
     /**
-     * @return Attribute[]
+     * @return AttributeInterface[]
      */
     public function getAttributes()
     {

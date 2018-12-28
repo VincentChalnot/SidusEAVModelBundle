@@ -19,6 +19,8 @@ use Sidus\EAVModelBundle\Model\AttributeInterface;
  * Convert request parameters in attributes
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
+ *
+ * @deprecated Do not access attribute directly without a family
  */
 class AttributeParamConverter extends AbstractParamConverter
 {
