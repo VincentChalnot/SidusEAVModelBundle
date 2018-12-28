@@ -21,6 +21,7 @@ services:
         public: false
         arguments:
             - '@event_dispatcher'
+            - '@logger'
         tags:
             - { name: doctrine.event_subscriber }
 

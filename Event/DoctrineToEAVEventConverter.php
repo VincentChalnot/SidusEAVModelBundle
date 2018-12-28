@@ -14,6 +14,7 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
+use Psr\Log\LoggerInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\ValueInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -34,12 +35,17 @@ class DoctrineToEAVEventConverter implements EventSubscriber
     /** @var EventDispatcherInterface */
     protected $eventDispatcher;
 
+    /** @var LoggerInterface */
+    protected $logger;
+
     /**
      * @param EventDispatcherInterface $eventDispatcher
+     * @param LoggerInterface          $logger
      */
-    public function __construct(EventDispatcherInterface $eventDispatcher)
+    public function __construct(EventDispatcherInterface $eventDispatcher, LoggerInterface $logger)
     {
         $this->eventDispatcher = $eventDispatcher;
+        $this->logger = $logger;
         $this->eavEvents = new \SplObjectStorage();
     }
 
@@ -86,6 +92,19 @@ class DoctrineToEAVEventConverter implements EventSubscriber
                     $data = $originalEntityValues['data'];
                 } else {
                     $data = $changedValue->getData();
+                }
+                // Last chance, if no data was found, maybe we need to look at the current changeset
+                if (null === $data) {
+                    $valueChangeset = $uow->getEntityChangeSet($changedValue);
+                    if (isset($valueChangeset['data'][0])) {
+                        $data = $valueChangeset['data'][0];
+                    }
+                }
+                if (null === $data) {
+                    $this->logger->error(
+                        "Unable to find any previous data associated to Value: {$changedValue->getIdentifier()}"
+                    );
+                    continue; // There is nothing we can do, fail silently
                 }
                 if ($this->eavEvents->offsetExists($data)) {
                     $eavEvent = $this->eavEvents->offsetGet($data);
