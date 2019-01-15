@@ -151,6 +151,8 @@ interface AttributeQueryBuilderInterface extends DQLHandlerInterface
      * @param array|null $context
      *
      * @throws \Sidus\EAVModelBundle\Exception\ContextException
+     *
+     * @return AttributeQueryBuilderInterface
      */
     public function setContext(array $context = null);
 }

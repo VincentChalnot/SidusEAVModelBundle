@@ -424,10 +424,14 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
      * It's completely fine to skip some axis if you don't want to search in those but beware of this behavior
      *
      * @param array|null $context
+     *
+     * @return AttributeQueryBuilderInterface
      */
     public function setContext(array $context = null)
     {
         $this->context = $context;
+
+        return $this;
     }
 
     /**
