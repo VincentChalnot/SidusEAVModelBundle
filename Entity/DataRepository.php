@@ -19,7 +19,6 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 use Sidus\EAVModelBundle\Doctrine\EAVQueryBuilder;
-use Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader;
 use Sidus\EAVModelBundle\Doctrine\SingleFamilyQueryBuilder;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
@@ -320,36 +319,41 @@ class DataRepository extends EntityRepository
     }
 
     /**
+     * @deprecated This method does not work as expected anymore, please use the DataLoader service instead
+     *
      * @param int $id
      *
      * @return DataInterface
      */
     public function loadFullEntity($id)
     {
+        $m = 'Do not use this function anymore, use the OptimizedDataLoader on your query results instead';
+        @trigger_error($m, E_USER_DEPRECATED);
+
         /** @var DataInterface $data */
         $data = $this->find($id);
-        $loader = new OptimizedDataLoader($this->getEntityManager());
-        $loader->loadSingle($data);
 
         return $data;
     }
 
     /**
+     * @deprecated This method does not work as expected anymore, please use the DataLoader service instead
+     *
      * @param DataInterface $data
      *
      * @return DataInterface[]
      */
     public function fetchEAVAssociations(DataInterface $data)
     {
+        $m = 'Do not use this function anymore, use the OptimizedDataLoader on your query results instead';
+        @trigger_error($m, E_USER_DEPRECATED);
+
         $qb = $this->createQueryBuilder('e');
         $qb
             ->join('e.refererValues', 'refererValues', Join::WITH, 'refererValues.data = :id')
             ->setParameter('id', $data->getId());
-        $results = $qb->getQuery()->getResult();
-        $loader = new OptimizedDataLoader($this->getEntityManager());
-        $loader->load($results);
 
-        return $results;
+        return $qb->getQuery()->getResult();
     }
 
     /**
