@@ -48,27 +48,29 @@ class SingleFamilyQueryBuilder extends EAVQueryBuilder
 
     /**
      * @param string $attributeCode
+     * @param bool   $enforceFamilyCondition
      *
      * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      *
      * @return AttributeQueryBuilderInterface
      */
-    public function attributeByCode($attributeCode)
+    public function attributeByCode($attributeCode, $enforceFamilyCondition = true)
     {
         $attribute = $this->getFamily()->getAttribute($attributeCode);
 
-        return $this->attribute($attribute);
+        return $this->attribute($attribute, $enforceFamilyCondition);
     }
 
     /**
      * @param string $attributeCode
+     * @param bool   $enforceFamilyCondition
      *
      * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
      *
      * @return AttributeQueryBuilderInterface
      */
-    public function a($attributeCode)
+    public function a($attributeCode, $enforceFamilyCondition = true)
     {
-        return $this->attributeByCode($attributeCode);
+        return $this->attributeByCode($attributeCode, $enforceFamilyCondition);
     }
 }

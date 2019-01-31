@@ -12,6 +12,9 @@ services:
         public: false
 
     Sidus\EAVModelBundle\Serializer\EntityProviderInterface:
+        alias: Sidus\EAVModelBundle\Serializer\PurgeableEntityProviderInterface
+
+    Sidus\EAVModelBundle\Serializer\PurgeableEntityProviderInterface:
         alias: Sidus\EAVModelBundle\Serializer\EntityProvider
 
     Sidus\EAVModelBundle\Serializer\EntityProvider:

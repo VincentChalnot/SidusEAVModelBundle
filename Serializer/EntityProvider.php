@@ -27,7 +27,7 @@ use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class EntityProvider implements EntityProviderInterface
+class EntityProvider implements PurgeableEntityProviderInterface
 {
     /** @var ManagerRegistry */
     protected $doctrine;
@@ -145,6 +145,15 @@ class EntityProvider implements EntityProviderInterface
         }
 
         return $entity;
+    }
+
+    /**
+     * Purge internal cache for created entities
+     */
+    public function purgeCreatedEntities()
+    {
+        $this->createdEntities = [];
+        gc_collect_cycles();
     }
 
     /**
