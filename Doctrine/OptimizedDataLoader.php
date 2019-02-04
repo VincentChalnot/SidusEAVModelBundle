@@ -147,7 +147,7 @@ class OptimizedDataLoader implements DataLoaderInterface
      */
     protected function loadRelatedEntities($entities, $depth)
     {
-        if (0 <= $depth) {
+        if (0 >= $depth) {
             return;
         }
         $relatedEntities = [];
@@ -181,9 +181,11 @@ class OptimizedDataLoader implements DataLoaderInterface
             $relatedEntity = $entity->get($attribute->getCode());
             if (\is_array($relatedEntity) || $relatedEntity instanceof \Traversable) {
                 foreach ($relatedEntity as $item) {
-                    $relatedEntities[] = $item;
+                    if ($item instanceof DataInterface) {
+                        $relatedEntities[] = $item;
+                    }
                 }
-            } else {
+            } elseif ($relatedEntity instanceof DataInterface) {
                 $relatedEntities[] = $relatedEntity;
             }
         } catch (\Exception $e) {

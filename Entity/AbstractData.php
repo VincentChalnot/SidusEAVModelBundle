@@ -245,7 +245,6 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function addValueData(AttributeInterface $attribute, $valueData, array $context = null)
     {
-        $this->checkAttribute($attribute);
         if (!$attribute->isCollection()) {
             $m = "Cannot append data to a non-collection attribute '{$attribute->getCode()}'";
             throw new InvalidValueDataException($m);
@@ -276,7 +275,6 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function removeValueData(AttributeInterface $attribute, $valueData, array $context = null)
     {
-        $this->checkAttribute($attribute);
         if (!$attribute->isCollection()) {
             $m = "Cannot remove data from a non-collection attribute '{$attribute->getCode()}'";
             throw new InvalidValueDataException($m);
@@ -354,7 +352,6 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function getValuesData(AttributeInterface $attribute, array $context = null)
     {
-        $this->checkAttribute($attribute);
         $valuesData = new ArrayCollection();
         try {
             foreach ($this->getValues($attribute, $context) as $value) {
@@ -996,19 +993,7 @@ abstract class AbstractData implements ContextualDataInterface
         }
 
         if (null === $attribute) {
-            $values = new ArrayCollection();
-            foreach ($this->values as $value) {
-                if (!$this->getFamily()->hasAttribute($value->getAttributeCode())) {
-                    $this->removeValue($value);
-                    continue;
-                }
-                $attribute = $this->getFamily()->getAttribute($value->getAttributeCode());
-                if ($attribute->isContextMatching($value, $context)) {
-                    $values->add($value);
-                }
-            }
-
-            return $values;
+            return $this->getAllInternalValues($context);
         }
         $this->checkAttribute($attribute);
 
@@ -1019,6 +1004,28 @@ abstract class AbstractData implements ContextualDataInterface
                     $values->add($value);
                 }
             } else {
+                $values->add($value);
+            }
+        }
+
+        return $values;
+    }
+
+    /**
+     * @param array|null $context
+     *
+     * @return Collection|ValueInterface[]
+     */
+    protected function getAllInternalValues(array $context = null)
+    {
+        $values = new ArrayCollection();
+        foreach ($this->values as $value) {
+            if (!$this->getFamily()->hasAttribute($value->getAttributeCode())) {
+                $this->removeValue($value);
+                continue;
+            }
+            $attribute = $this->getFamily()->getAttribute($value->getAttributeCode());
+            if ($attribute->isContextMatching($value, $context)) {
                 $values->add($value);
             }
         }
@@ -1039,7 +1046,6 @@ abstract class AbstractData implements ContextualDataInterface
      */
     protected function setInternalValuesData(AttributeInterface $attribute, $dataValues, array $context = null)
     {
-        $this->checkAttribute($attribute);
         $dataValues = $this->ensureNativeArray($dataValues, $this->getFamilyCode().'.'.$attribute->getCode());
         $values = new ArrayCollection();
         $position = 0; // Reset position to zero
@@ -1133,20 +1139,26 @@ abstract class AbstractData implements ContextualDataInterface
      */
     protected function getValuesByAttribute(AttributeInterface $attribute)
     {
-        if (null === $this->valuesByAttributes) {
-            $this->valuesByAttributes = [];
-        }
-
+        $this->initializeValuesByAttribute();
         if (!array_key_exists($attribute->getCode(), $this->valuesByAttributes)) {
-            $this->valuesByAttributes[$attribute->getCode()] = [];
-            foreach ($this->values as $value) {
-                if ($value->getAttributeCode() === $attribute->getCode()) {
-                    $this->addValueByAttribute($value);
-                }
-            }
+            return [];
         }
 
         return $this->valuesByAttributes[$attribute->getCode()];
+    }
+
+    /**
+     * Initialize the internal cache of values indexed by attributes for faster search
+     */
+    protected function initializeValuesByAttribute()
+    {
+        if (null === $this->valuesByAttributes) {
+            $this->valuesByAttributes = [];
+            // Build internal values by attribute cache
+            foreach ($this->values as $value) {
+                $this->addValueByAttribute($value);
+            }
+        }
     }
 
     /**
@@ -1154,13 +1166,7 @@ abstract class AbstractData implements ContextualDataInterface
      */
     protected function addValueByAttribute(ValueInterface $value)
     {
-        if (null === $this->valuesByAttributes) {
-            $this->valuesByAttributes = [];
-        }
-
-        if (!array_key_exists($value->getAttributeCode(), $this->valuesByAttributes)) {
-            return; // No cache so no need to update anything
-        }
+        $this->initializeValuesByAttribute();
 
         $key = spl_object_hash($value);
         $this->valuesByAttributes[$value->getAttributeCode()][$key] = $value;
@@ -1171,11 +1177,8 @@ abstract class AbstractData implements ContextualDataInterface
      */
     protected function removeValueByAttribute(ValueInterface $value)
     {
-        if (null === $this->valuesByAttributes) {
-            $this->valuesByAttributes = [];
-        }
-
-        if (!array_key_exists($value->getAttributeCode(), $this->valuesByAttributes)) {
+        if (null === $this->valuesByAttributes
+            || !array_key_exists($value->getAttributeCode(), $this->valuesByAttributes)) {
             return; // No cache so no need to do anything
         }
 
