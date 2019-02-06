@@ -111,7 +111,9 @@ class OptimizedDataLoader implements DataLoaderInterface
             $dataValues = $valuesProperty->getValue($data);
             if ($dataValues instanceof PersistentCollection) {
                 $dataValues->setInitialized(true);
-                $dataValues->add($valueEntity);
+                if (!$dataValues->contains($valueEntity)) {
+                    $dataValues->add($valueEntity);
+                }
             } else {
                 throw new \UnexpectedValueException('Data.values is not an instance of PersistentCollection');
             }

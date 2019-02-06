@@ -100,7 +100,7 @@ class EAVEvent extends Event
     /**
      * @param bool $forceRecompute
      *
-     * @return ValueChangeset[]
+     * @return ValueChangeset[][]
      */
     public function getValuesChangeset($forceRecompute = false)
     {

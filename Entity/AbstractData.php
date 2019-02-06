@@ -788,10 +788,9 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function removeValue(ValueInterface $value)
     {
-        $this->values->removeElement($value);
-        $value->setData(null);
-
         $this->removeValueByAttribute($value);
+        $value->setData(null);
+        $this->values->removeElement($value);
 
         return $this;
     }
