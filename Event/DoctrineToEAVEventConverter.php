@@ -100,7 +100,7 @@ class DoctrineToEAVEventConverter implements EventSubscriber
                         $data = $valueChangeset['data'][0];
                     }
                 }
-                if (null === $data) {
+                if (!$data instanceof DataInterface) {
                     $this->logger->error(
                         "Unable to find any previous data associated to Value: {$changedValue->getIdentifier()}"
                     );
