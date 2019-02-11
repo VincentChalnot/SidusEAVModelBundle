@@ -202,16 +202,19 @@ class RelationalAttributesUpdaterListener
     {
         /** @var DataRepository $repository */
         $repository = $event->getEntityManager()->getRepository($this->dataClass);
-        $eavQb = $repository->createEAVQueryBuilder();
-        $orConditions = [];
+        $results = [];
         foreach ($targetFamilies as $targetFamilyCode => $targetAttributeCode) {
+            $eavQb = $repository->createEAVQueryBuilder();
             $targetFamily = $this->familyRegistry->getFamily($targetFamilyCode);
-            $orConditions[] = $eavQb
-                ->attribute($targetFamily->getAttribute($targetAttributeCode))
-                ->equals($parentData);
-        }
-        $qb = $eavQb->apply($eavQb->getOr($orConditions));
 
-        return $qb->getQuery()->getResult();
+            $qb = $eavQb->apply(
+                $eavQb
+                    ->attribute($targetFamily->getAttribute($targetAttributeCode))
+                    ->equals($parentData)
+            );
+            $results[] = $qb->getQuery()->getResult();
+        }
+
+        return array_merge(...$results);
     }
 }
