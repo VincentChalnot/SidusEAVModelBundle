@@ -23,7 +23,7 @@ use Sidus\BaseBundle\Validator\Mapping\Loader\BaseLoader;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use Symfony\Component\Validator\ConstraintViolationInterface;
+use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
@@ -232,7 +232,7 @@ class DataValidator extends ConstraintValidator
 
         foreach ($loader->loadCustomConstraints($attribute->getValidationRules()) as $constraint) {
             $violations = $context->getValidator()->validate($valueData, $constraint, $context->getGroup());
-            /** @var ConstraintViolationInterface $violation */
+            /** @var ConstraintViolation $violation */
             foreach ($violations as $violation) {
                 /** @noinspection DisconnectedForeachInstructionInspection */
                 $path = $attribute->getCode();
@@ -248,6 +248,8 @@ class DataValidator extends ConstraintValidator
                         ->setTranslationDomain(false)
                         ->atPath($path)
                         ->setInvalidValue($valueData)
+                        ->setCode($violation->getCode())
+                        ->setCause($violation->getConstraint())
                         ->addViolation();
                 } else {
                     $this->buildAttributeViolation(
