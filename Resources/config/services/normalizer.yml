@@ -11,6 +11,7 @@ parameters:
         - value
         - familyCode
         - empty
+        - valuesCollection
 
     sidus_eav_model.normalizer.data.reference_attributes:
         - id

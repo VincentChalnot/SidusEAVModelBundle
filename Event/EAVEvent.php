@@ -150,7 +150,7 @@ class EAVEvent extends Event
         $this->doRecomputeChangeset($uow, $dataClassMetadata, $data);
 
         $valueClassMetadata = $this->entityManager->getClassMetadata($data->getFamily()->getValueClass());
-        foreach ($data->getValues() as $value) {
+        foreach ($data->getValuesCollection() as $value) {
             $this->doRecomputeChangeset($uow, $valueClassMetadata, $value);
         }
     }
@@ -163,7 +163,11 @@ class EAVEvent extends Event
     protected function doRecomputeChangeset(UnitOfWork $uow, ClassMetadata $classMetadata, $entity)
     {
         $uow->persist($entity);
-        $uow->computeChangeSet($classMetadata, $entity);
+        if ($uow->getOriginalEntityData($entity)) {
+            $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);
+        } else {
+            $uow->computeChangeSet($classMetadata, $entity);
+        }
     }
 
     /**

@@ -858,6 +858,17 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
+     * @internal Be careful when using this method in your code, it will return the raw values collection without any
+     *           filter on attributes or context.
+     *
+     * @return Collection|ValueInterface[]
+     */
+    public function getValuesCollection()
+    {
+        return $this->values;
+    }
+
+    /**
      * Remove id on clone and clean values
      *
      * @throws InvalidValueDataException

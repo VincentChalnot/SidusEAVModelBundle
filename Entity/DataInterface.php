@@ -327,4 +327,12 @@ interface DataInterface
      * @return bool
      */
     public function isEmpty(AttributeInterface $attribute, array $context = null);
+
+    /**
+     * @internal Be careful when using this method in your code, it will return the raw values collection without any
+     *           filter on attributes or context.
+     *
+     * @return Collection|ValueInterface[]
+     */
+    public function getValuesCollection();
 }
