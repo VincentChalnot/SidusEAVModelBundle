@@ -107,16 +107,21 @@ namespace Sidus\EAV;
 
 use Doctrine\Common\Collections\Collection;
 
-abstract class {$family->getCode()} extends 
+abstract class {$family->getCode()} extends {$this->getExtendsClass($family)} {
+
 EOT;
-        if ($family->getParent()) {
-            $content .= $family->getParent()->getCode();
-        } else {
-            $content .= '\\'.$family->getDataClass();
-        }
-        $content .= "\n{\n";
 
         return $content;
+    }
+
+    /**
+     * @param FamilyInterface $family
+     *
+     * @return string
+     */
+    protected function getExtendsClass(FamilyInterface $family)
+    {
+        return '\\'.$family->getDataClass();
     }
 
     /**
@@ -131,9 +136,6 @@ EOT;
      */
     protected function getAttributeMethods(FamilyInterface $family, AttributeInterface $attribute)
     {
-        if ($this->isAttributeInherited($family, $attribute)) {
-            return '';
-        }
         $content = '';
         $dataClass = new \ReflectionClass($family->getDataClass());
 
@@ -356,23 +358,5 @@ EOT;
         }
 
         return '\\'.$type;
-    }
-
-    /**
-     * @param FamilyInterface    $family
-     * @param AttributeInterface $attribute
-     *
-     * @return bool
-     */
-    protected function isAttributeInherited(FamilyInterface $family, AttributeInterface $attribute)
-    {
-        if (!$family->getParent()) {
-            return false;
-        }
-        if ($family->getParent()->hasAttribute($attribute->getCode())) {
-            return true;
-        }
-
-        return $this->isAttributeInherited($family->getParent(), $attribute);
     }
 }
