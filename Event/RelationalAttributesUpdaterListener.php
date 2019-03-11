@@ -199,8 +199,9 @@ class RelationalAttributesUpdaterListener
      */
     protected function fetchTargetEntities(EAVEvent $event, DataInterface $parentData, array $targetFamilies)
     {
+        $entityManager = $event->getEntityManager();
         /** @var DataRepository $repository */
-        $repository = $event->getEntityManager()->getRepository($this->dataClass);
+        $repository = $entityManager->getRepository($this->dataClass);
         $results = [];
         foreach ($targetFamilies as $targetFamilyCode => $targetAttributeCode) {
             $eavQb = $repository->createEAVQueryBuilder();
@@ -211,9 +212,12 @@ class RelationalAttributesUpdaterListener
                     ->attribute($targetFamily->getAttribute($targetAttributeCode))
                     ->equals($parentData)
             );
-            $results[] = $qb->getQuery()->getResult();
+            $qb->select("{$eavQb->getAlias()}.id");
+            foreach ($qb->getQuery()->getResult() as $item) {
+                $results[] = $entityManager->getReference($targetFamily->getDataClass(), $item['id']);
+            }
         }
 
-        return array_merge(...$results);
+        return $results;
     }
 }
