@@ -101,7 +101,7 @@ class RelationalAttributesUpdaterListener
             $parentData->add($parentAttribute->getCode(), $currentData);
         }
 
-        $event->recomputeChangeset($parentData);
+        $event->recomputeAttributeChangeset($parentData, $parentAttribute);
     }
 
     /**
@@ -122,7 +122,6 @@ class RelationalAttributesUpdaterListener
 
         foreach ($targetEntities as $targetEntity) {
             $event->getEntityManager()->remove($targetEntity);
-            $event->recomputeChangeset($targetEntity);
         }
     }
 

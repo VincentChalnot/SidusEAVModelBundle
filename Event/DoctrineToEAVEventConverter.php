@@ -12,6 +12,7 @@ namespace Sidus\EAVModelBundle\Event;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 use Psr\Log\LoggerInterface;
@@ -124,6 +125,8 @@ class DoctrineToEAVEventConverter implements EventSubscriber
             $this->eavEvents->offsetUnset($data);
             $this->eventDispatcher->dispatch('sidus.eav_data', $eavEvent);
         }
+
+        $this->fixMissingEntityInsertionChangeSets($args->getEntityManager());
     }
 
     /**
@@ -146,5 +149,27 @@ class DoctrineToEAVEventConverter implements EventSubscriber
     protected function processValue(ValueInterface $value, $state)
     {
         $this->changedValues[$state][] = $value;
+    }
+
+    /**
+     * Fixes a weird Doctrine bug where entity insertion can have no changeset computed during query execution
+     *
+     * @param EntityManagerInterface $entityManager
+     */
+    protected function fixMissingEntityInsertionChangeSets(EntityManagerInterface $entityManager)
+    {
+        $uow = $entityManager->getUnitOfWork();
+        $refl = new \ReflectionObject($uow);
+        $prop = $refl->getProperty('entityChangeSets');
+        $prop->setAccessible(true);
+        $entityChangeSets = $prop->getValue($uow);
+
+        foreach ($uow->getScheduledEntityInsertions() as $oid => $entity) {
+            if (array_key_exists($oid, $entityChangeSets)) {
+                continue;
+            }
+            $class = $entityManager->getClassMetadata(get_class($entity));
+            $uow->computeChangeSet($class, $entity);
+        }
     }
 }

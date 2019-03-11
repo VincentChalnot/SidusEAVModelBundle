@@ -52,6 +52,10 @@ class MyListener
 
         // If you need to update the $data entity, don't flush the EntityManager, use this method:
         $event->recomputeChangeset($data);
+        
+        // Or if you need to update only one attribute, it's more efficient to to this instead:
+        $attribute = $data->getFamily()->getAttribute('myAttribute');
+        $event->recomputeAttributeChangeset($data, $attribute);
     }
 }
 ````

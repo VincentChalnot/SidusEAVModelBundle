@@ -146,12 +146,31 @@ class EAVEvent extends Event
             return;
         }
 
-        $dataClassMetadata = $this->entityManager->getClassMetadata($data->getFamily()->getDataClass());
-        $this->doRecomputeChangeset($uow, $dataClassMetadata, $data);
-
         $valueClassMetadata = $this->entityManager->getClassMetadata($data->getFamily()->getValueClass());
         foreach ($data->getValuesCollection() as $value) {
             $this->doRecomputeChangeset($uow, $valueClassMetadata, $value);
+        }
+
+        $dataClassMetadata = $this->entityManager->getClassMetadata($data->getFamily()->getDataClass());
+        $this->doRecomputeChangeset($uow, $dataClassMetadata, $data);
+    }
+
+    /**
+     * @param DataInterface      $data
+     * @param AttributeInterface $attribute
+     */
+    public function recomputeAttributeChangeset(DataInterface $data, AttributeInterface $attribute)
+    {
+        $uow = $this->entityManager->getUnitOfWork();
+        if ($uow->isScheduledForDelete($data)) {
+            return;
+        }
+
+        $valueClassMetadata = $this->entityManager->getClassMetadata($data->getFamily()->getValueClass());
+        foreach ($data->getValuesCollection() as $value) {
+            if ($value->getAttributeCode() === $attribute->getCode()) {
+                $this->doRecomputeChangeset($uow, $valueClassMetadata, $value);
+            }
         }
     }
 
@@ -162,6 +181,17 @@ class EAVEvent extends Event
      */
     protected function doRecomputeChangeset(UnitOfWork $uow, ClassMetadata $classMetadata, $entity)
     {
+        if ($uow->isScheduledForDelete($entity)) {
+            if ($entity instanceof ValueInterface && $entity->getData()) {
+                $valuesCollection = $entity->getData()->getValuesCollection();
+                if ($valuesCollection->contains($entity)) {
+                    // Ensures the Data doesn't keep a reference to the value if the value was removed improperly
+                    $entity->getData()->removeValue($entity);
+                }
+            }
+
+            return;
+        }
         $uow->persist($entity);
         if ($uow->getOriginalEntityData($entity)) {
             $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);

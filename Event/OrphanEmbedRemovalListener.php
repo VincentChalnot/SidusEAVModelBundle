@@ -69,6 +69,7 @@ class OrphanEmbedRemovalListener
         if ($attribute->getOption('orphan_removal', $attribute->getType()->isEmbedded())) {
             $method = 'get'.ucfirst($attribute->getType()->getDatabaseType());
 
+            // We can't call $value->getValueData() because the value can't access the attribute object anymore
             $args->getEntityManager()->remove($value->$method());
         }
     }
