@@ -477,10 +477,10 @@ class Attribute implements AttributeInterface
             unset($configuration['type']);
         }
 
-        $accessor = PropertyAccess::createPropertyAccessor();
         foreach ($configuration as $key => $value) {
             try {
-                $accessor->setValue($this, $key, $value);
+                /** @noinspection PhpVariableVariableInspection */
+                $this->$key = $value;
             } catch (\Exception $e) {
                 throw new AttributeConfigurationException(
                     "The attribute {$this->code} has an invalid configuration for option '{$key}'",

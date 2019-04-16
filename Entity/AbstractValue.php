@@ -485,12 +485,13 @@ abstract class AbstractValue implements ContextualValueInterface
      */
     public static function checkContext(array $context)
     {
-        $missingKeys = array_diff(static::getContextKeys(), array_keys($context));
+        $keys = array_keys($context);
+        $missingKeys = array_diff(static::getContextKeys(), $keys);
         if (0 !== \count($missingKeys)) {
             $flattenedContext = implode(', ', $missingKeys);
             throw new ContextException("Missing key(s) in context: {$flattenedContext}");
         }
-        $extraKeys = array_diff(array_keys($context), static::getContextKeys());
+        $extraKeys = array_diff($keys, static::getContextKeys());
         if (0 !== \count($extraKeys)) {
             $flattenedContext = implode(', ', $extraKeys);
             throw new ContextException("Extra key(s) in context: {$flattenedContext}");
