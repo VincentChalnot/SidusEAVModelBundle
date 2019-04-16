@@ -17,7 +17,6 @@ use Sidus\EAVModelBundle\Entity\ContextualValueInterface;
 use Sidus\EAVModelBundle\Exception\AttributeConfigurationException;
 use Sidus\EAVModelBundle\Exception\ContextException;
 use Sidus\BaseBundle\Translator\TranslatableTrait;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\VarDumper\Caster\Caster;
 
 /**
@@ -477,17 +476,16 @@ class Attribute implements AttributeInterface
             unset($configuration['type']);
         }
 
+        $refl = new \ReflectionClass($this);
         foreach ($configuration as $key => $value) {
-            try {
-                /** @noinspection PhpVariableVariableInspection */
-                $this->$key = $value;
-            } catch (\Exception $e) {
+            $key = \lcfirst(\str_replace(' ', '', \ucwords(\str_replace('_', ' ', $key))));
+            if (!$refl->hasProperty($key)) {
                 throw new AttributeConfigurationException(
-                    "The attribute {$this->code} has an invalid configuration for option '{$key}'",
-                    0,
-                    $e
+                    "The attribute {$this->code} has an invalid configuration for option '{$key}'"
                 );
             }
+            /** @noinspection PhpVariableVariableInspection */
+            $this->$key = $value;
         }
 
         $this->type->setAttributeDefaults($this); // Allow attribute type service to configure attribute
