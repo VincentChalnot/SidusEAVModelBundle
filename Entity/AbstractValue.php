@@ -333,7 +333,7 @@ abstract class AbstractValue implements ContextualValueInterface
             throw new \UnexpectedValueException($m);
         }
         if (null !== $stringValue && 255 < \mb_strlen($stringValue)) {
-            $stringValue = mb_substr($stringValue, 0, 255);
+            $stringValue = \mb_substr($stringValue, 0, 255);
         }
         $this->stringValue = null === $stringValue ? null : (string) $stringValue;
 
@@ -359,6 +359,10 @@ abstract class AbstractValue implements ContextualValueInterface
             $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}, ";
             $m .= 'expecting string, got '.gettype($textValue);
             throw new \UnexpectedValueException($m);
+        }
+        $limit = 2**16-1; // Default limit for TEXT types
+        if (null !== $textValue && $limit < \mb_strlen($textValue)) {
+            $textValue = \mb_substr($textValue, 0, $limit);
         }
         $this->textValue = null === $textValue ? null : (string) $textValue;
 
