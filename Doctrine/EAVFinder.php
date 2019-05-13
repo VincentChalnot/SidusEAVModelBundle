@@ -164,12 +164,7 @@ class EAVFinder
      */
     public function getFilterByQb(FamilyInterface $family, array $filterBy, array $orderBy = [], $alias = 'e')
     {
-        $repository = $this->repositoryFinder->getRepository($family->getDataClass());
-        if (!$repository instanceof DataRepository) {
-            throw new \UnexpectedValueException(
-                "Repository for class {$family->getDataClass()} must be a DataRepository"
-            );
-        }
+        $repository = $this->getRepository($family);
         $eavQb = $repository->createFamilyQueryBuilder($family, $alias);
 
         // Add order by
@@ -247,5 +242,44 @@ class EAVFinder
         }
 
         return $this->getFilterByQb($family, $fixedFilterBy, $orderBy, $alias);
+    }
+
+    /**
+     * @param FamilyInterface $family
+     *
+     * @return DataInterface
+     */
+    public function getInstance(FamilyInterface $family)
+    {
+        return $this->getRepository($family)->getInstance($family);
+    }
+
+    /**
+     * @param FamilyInterface $family
+     * @param string|int      $identifier
+     * @param bool            $idFallback
+     *
+     * @return DataInterface|null
+     */
+    public function findByIdentifier(FamilyInterface $family, $identifier, $idFallback = false)
+    {
+        return $this->getRepository($family)->findByIdentifier($family, $identifier, $idFallback);
+    }
+
+    /**
+     * @param FamilyInterface $family
+     *
+     * @return DataRepository
+     */
+    protected function getRepository(FamilyInterface $family)
+    {
+        $repository = $this->repositoryFinder->getRepository($family->getDataClass());
+        if (!$repository instanceof DataRepository) {
+            throw new \UnexpectedValueException(
+                "Repository for class {$family->getDataClass()} must be a DataRepository"
+            );
+        }
+
+        return $repository;
     }
 }
