@@ -2,21 +2,13 @@
 /*
  * This file is part of the Sidus/EAVModelBundle package.
  *
- * Copyright (c) 2015-2018 Vincent Chalnot
+ * Copyright (c) 2015-2019 Vincent Chalnot
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
 namespace Sidus\EAVModelBundle\Context;
-
-use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
 /**
  * Manager for setting, saving and getting the current context when using ContextualData & ContextualValue

@@ -2,7 +2,7 @@
 /*
  * This file is part of the Sidus/EAVModelBundle package.
  *
- * Copyright (c) 2015-2018 Vincent Chalnot
+ * Copyright (c) 2015-2019 Vincent Chalnot
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -59,7 +59,7 @@ class SidusEAVModelExtension extends Extension
 
         // Injecting custom doctrine type
         $doctrineTypes = $container->getParameter('doctrine.dbal.connection_factory.types');
-        $doctrineTypes['sidus_family'] = ['class' => FamilyType::class, 'commented' => true];
+        $doctrineTypes['sidus_family'] = ['class' => FamilyType::class, 'commented' => false];
         $container->setParameter('doctrine.dbal.connection_factory.types', $doctrineTypes);
 
         // Load services config
@@ -76,6 +76,7 @@ class SidusEAVModelExtension extends Extension
         $loader->load('forms.yml');
         $loader->load('manager.yml');
         $loader->load('param_converters.yml');
+        $loader->load('property_info.yml');
         $loader->load('twig.yml');
         $loader->load('validators.yml');
 

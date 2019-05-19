@@ -1,0 +1,12 @@
+services:
+    Sidus\EAVModelBundle\PropertyInfo\EAVExtractor:
+        class: Sidus\EAVModelBundle\PropertyInfo\EAVExtractor
+        arguments:
+            - '@doctrine'
+            - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
+            - '@annotations.reader'
+            - '%sidus_eav_model.entity.data.class%'
+        tags:
+            - { name: property_info.list_extractor, priority: -500 }
+            - { name: property_info.type_extractor, priority: -400 }
+            - { name: property_info.access_extractor, priority: -400 }

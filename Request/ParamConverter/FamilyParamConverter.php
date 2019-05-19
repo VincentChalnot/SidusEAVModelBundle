@@ -2,7 +2,7 @@
 /*
  * This file is part of the Sidus/EAVModelBundle package.
  *
- * Copyright (c) 2015-2018 Vincent Chalnot
+ * Copyright (c) 2015-2019 Vincent Chalnot
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,7 +13,6 @@ namespace Sidus\EAVModelBundle\Request\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sidus\BaseBundle\Request\ParamConverter\AbstractParamConverter;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
-use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\HttpFoundation\Request;
 
