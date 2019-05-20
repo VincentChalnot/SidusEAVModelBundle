@@ -23,11 +23,18 @@ interface AttributeInterface
 {
     const FORBIDDEN_ATTRIBUTE_CODES = [
         'id',
+        'identifier',
         'value',
         'values',
+        'valuesCollection',
         'valueData',
+        'valuesData',
+        'refererValues',
+        'refererDatas',
         'family',
+        'familyCode',
         'currentContext',
+//        'label', // @todo check if really forbidden
     ];
 
     /**
