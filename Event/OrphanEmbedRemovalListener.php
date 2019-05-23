@@ -68,9 +68,12 @@ class OrphanEmbedRemovalListener
         // Trigger for attributes marked for orphan_removal, default true for embedded
         if ($attribute->getOption('orphan_removal', $attribute->getType()->isEmbedded())) {
             $method = 'get'.ucfirst($attribute->getType()->getDatabaseType());
+            $valueData = $value->$method();
 
             // We can't call $value->getValueData() because the value can't access the attribute object anymore
-            $args->getEntityManager()->remove($value->$method());
+            if ($valueData) {
+                $args->getEntityManager()->remove($valueData);
+            }
         }
     }
 }
