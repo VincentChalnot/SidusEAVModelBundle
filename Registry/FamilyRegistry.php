@@ -21,7 +21,7 @@ use Sidus\EAVModelBundle\Model\FamilyInterface;
 class FamilyRegistry
 {
     /** @var FamilyInterface[] */
-    protected $families;
+    protected $families = [];
 
     /**
      * @param FamilyInterface $family
