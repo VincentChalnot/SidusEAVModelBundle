@@ -79,15 +79,7 @@ class EntityProvider implements PurgeableEntityProviderInterface
 
         // In case we are trying to resolve a simple reference
         if (is_scalar($data)) {
-            try {
-                $entity = $repository->findByIdentifier($family, $data, true);
-            } catch (\Exception $e) {
-                throw new UnexpectedValueException(
-                    "Unable to resolve id/identifier {$data} for family {$family->getCode()}",
-                    0,
-                    $e
-                );
-            }
+            $entity = $repository->findByIdentifier($family, $data, true);
             if (!$entity) {
                 throw new UnexpectedValueException(
                     "No entity found for {$family->getCode()} with identifier '{$data}'"
