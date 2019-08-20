@@ -52,8 +52,7 @@ class WrongFamilyException extends \ErrorException implements EAVExceptionInterf
             0, // code
             E_RECOVERABLE_ERROR, // severity
             $backtrace[0]['file'], // filename
-            $backtrace[0]['line'], // line number
-            [] // context
+            $backtrace[0]['line'] // line number
         );
     }
 }
