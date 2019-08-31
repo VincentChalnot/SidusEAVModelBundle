@@ -10,8 +10,10 @@
 
 namespace Sidus\EAVModelBundle\PropertyInfo;
 
+use function array_key_exists;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use function in_array;
 use function is_a;
 use Sidus\EAVModelBundle\Annotation\Family as FamilyAnnotation;
 use Sidus\EAVModelBundle\Entity\DataInterface;
@@ -75,7 +77,7 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
         }
 
         $properties = parent::getProperties($class, $context);
-        $family = $this->getFamily($class);
+        $family = $this->getFamily($class, $context);
         if ($family) {
             foreach ($family->getAttributes() as $attribute) {
                 if ($attribute->getOption('expose', true)) {
@@ -102,7 +104,7 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
         if (null !== $types) {
             return $types;
         }
-        $family = $this->getFamily($class);
+        $family = $this->getFamily($class, $context);
         if (!$family || !$family->hasAttribute($property)) {
             return null;
         }
@@ -115,7 +117,7 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
                     $type->getBuiltinType(),
                     false, // Replace nullable for required attributes
                     $type->getClassName(),
-                    $type->isCollection(),
+                    $type->isCollection(), // @todo handle multiple attributes
                     $type->getCollectionKeyType(),
                     $type->getCollectionValueType()
                 );
@@ -136,7 +138,7 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
         if (!is_a($class, DataInterface::class, true)) {
             return null;
         }
-        $family = $this->getFamily($class);
+        $family = $this->getFamily($class, $context);
         if (!$family || !$family->hasAttribute($property)) {
             return null;
         }
@@ -155,10 +157,10 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
         if (!is_a($class, DataInterface::class, true)) {
             return null;
         }
-        if ('id' === $property) {
+        if (in_array($property, ['id', 'updatedAt', 'updatedBy', 'createdAt', 'createdBy', 'parent'], true)) {
             return false;
         }
-        $family = $this->getFamily($class);
+        $family = $this->getFamily($class, $context);
         if (!$family || !$family->hasAttribute($property)) {
             return null;
         }
@@ -174,8 +176,11 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
      *
      * @return FamilyInterface|null
      */
-    protected function getFamily($class)
+    protected function getFamily($class, array $context = [])
     {
+        if (array_key_exists('family', $context)) {
+            return $this->familyRegistry->getFamily($context['family']);
+        }
         $annotation = $this->annotationReader->getClassAnnotation(
             new \ReflectionClass($class),
             FamilyAnnotation::class
