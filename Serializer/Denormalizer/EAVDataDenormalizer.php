@@ -122,17 +122,24 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         unset($context['family'], $context['family_code'], $context['familyCode']); // Removing family info from context
 
         $entity = $this->entityProvider->getEntity($family, $data, $this->nameConverter);
+
+        if ($entity instanceof ContextualDataInterface
+            && isset($context['context'])
+            && \is_array($context['context'])
+        ) {
+            $entity->setCurrentContext($context['context']);
+        }
         if (is_scalar($data)) {
             return $entity; // In case we are trying to resolve a simple reference
         }
-        if ($entity instanceof ContextualDataInterface) {
-            if (isset($data['currentContext']) && \is_array($data['currentContext'])) {
-                $entity->setCurrentContext($data['currentContext']);
-            }
-            if (isset($context['context']) && \is_array($context['context'])) {
-                $entity->setCurrentContext($context['context']);
-            }
+
+        if ($entity instanceof ContextualDataInterface
+            && isset($data['currentContext'])
+            && \is_array($data['currentContext'])
+        ) {
+            $entity->setCurrentContext($data['currentContext']);
         }
+
         /** @var array $data At this point we know for sure data is a \ArrayAccess or a PHP array */
         foreach ($data as $attributeCode => $value) {
             if ($this->nameConverter) {
