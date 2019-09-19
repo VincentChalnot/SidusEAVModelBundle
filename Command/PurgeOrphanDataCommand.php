@@ -128,6 +128,9 @@ class PurgeOrphanDataCommand extends Command
 
             $quotedFamilyCode = $entityManager->getConnection()->quote($family->getCode());
             $flattenedAttributeCodes = $this->quoteArray($entityManager, $attributeCodes);
+            if (empty($flattenedAttributeCodes)) {
+                continue;
+            }
 
             // LIMIT is not natively supported for delete statements in Doctrine
             $sql = "DELETE FROM `{$table}` WHERE family_code = {$quotedFamilyCode} AND attribute_code NOT IN ({$flattenedAttributeCodes}) LIMIT 1000";

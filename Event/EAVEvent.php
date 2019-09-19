@@ -221,7 +221,11 @@ class EAVEvent extends Event
         foreach ($this->changedValues as $state => $changedValues) {
             foreach ($changedValues as $changedValue) {
                 $changeset = $uow->getEntityChangeSet($changedValue);
-                $databaseType = $changedValue->getAttribute()->getType()->getDatabaseType();
+                $attribute = $changedValue->getAttribute();
+                if (!$attribute) {
+                    continue; // Removed attribute
+                }
+                $databaseType = $attribute->getType()->getDatabaseType();
                 if (!array_key_exists($databaseType, $changeset)) {
                     throw new \LogicException('Change in value without change to value data');
                 }
