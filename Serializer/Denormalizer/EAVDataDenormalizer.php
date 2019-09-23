@@ -23,6 +23,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
+use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
@@ -316,6 +317,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         $attributeType = $attribute->getType();
         $valueMetadata = $entityManager->getClassMetadata($family->getValueClass());
         $storageField = $attributeType->getDatabaseType();
+        $attributeReference = "{$family->getCode()}.{$attribute->getCode()}";
         if ($valueMetadata->hasAssociation($storageField)) {
             $targetClass = $valueMetadata->getAssociationTargetClass($attributeType->getDatabaseType());
             $context['relatedAttribute'] = $attribute; // Add attribute info
@@ -324,14 +326,14 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
                 $context['family'] = array_pop($allowedFamilies);
             }
 
-            return $this->denormalizeRelation($value, $targetClass, $format, $context);
+            return $this->denormalizeRelation($value, $targetClass, $format, $context, $attributeReference);
         }
 
         if ($valueMetadata->hasField($storageField)) {
             $type = $valueMetadata->getTypeOfField($storageField);
 
             if ('datetime' === $type || 'date' === $type) {
-                return $this->denormalizeRelation($value, \DateTime::class, $format, $context);
+                return $this->denormalizeRelation($value, \DateTime::class, $format, $context, $attributeReference);
             }
 
             return $value;
@@ -364,18 +366,19 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         if (!$entityManager instanceof EntityManagerInterface) {
             throw new \UnexpectedValueException("Missing entity manager for class {$family->getDataClass()}");
         }
+        $attributeReference = "{$family->getDataClass()}:{$attributeCode}";
         // @T0D0 handles standard serializer annotations ?
         $classMetadata = $entityManager->getClassMetadata($family->getDataClass());
         if ($classMetadata->hasAssociation($attributeCode)) {
             $targetClass = $classMetadata->getAssociationTargetClass($attributeCode);
 
-            return $this->denormalizeRelation($value, $targetClass, $format, $context);
+            return $this->denormalizeRelation($value, $targetClass, $format, $context, $attributeReference);
         }
 
         if ($classMetadata->hasField($attributeCode)) {
             $type = $classMetadata->getTypeOfField($attributeCode);
             if ('datetime' === $type || 'date' === $type) {
-                return $this->denormalizeRelation($value, \DateTime::class, $format, $context);
+                return $this->denormalizeRelation($value, \DateTime::class, $format, $context, $attributeReference);
             }
         }
 
@@ -384,21 +387,35 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
 
 
     /**
-     * @param string $value
-     * @param string $targetClass
-     * @param string $format
-     * @param array  $context
-     *
-     * @throws SerializerExceptionInterface
+     * @param string      $value
+     * @param string      $targetClass
+     * @param string      $format
+     * @param array       $context
+     * @param string|null $attributeReference
      *
      * @return mixed
      */
-    protected function denormalizeRelation($value, $targetClass, $format, array $context)
-    {
+    protected function denormalizeRelation(
+        $value,
+        $targetClass,
+        $format,
+        array $context,
+        $attributeReference = null
+    ) {
         if (null === $value || '' === $value) {
             return null;
         }
-
-        return $this->denormalizer->denormalize($value, $targetClass, $format, $context);
+        try {
+            return $this->denormalizer->denormalize($value, $targetClass, $format, $context);
+        } catch (\Exception $e) {
+            if (!is_scalar($value)) {
+                $value = '['.gettype($value).']';
+            }
+            $m = "Unable to denormalize value '{$value}'";
+            if ($attributeReference) {
+                $m .= " for attribute {$attributeReference}";
+            }
+            throw new NotNormalizableValueException($m, 0, $e);
+        }
     }
 }
