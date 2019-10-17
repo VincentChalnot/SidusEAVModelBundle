@@ -10,8 +10,14 @@
 
 namespace Sidus\EAVModelBundle\Registry;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use ReflectionClass;
+use ReflectionException;
+use RuntimeException;
 use Sidus\EAVModelBundle\Exception\MissingFamilyException;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
+use Sidus\EAVModelBundle\Annotation\Family as FamilyAnnotation;
+use function count;
 
 /**
  * Container for families
@@ -20,8 +26,19 @@ use Sidus\EAVModelBundle\Model\FamilyInterface;
  */
 class FamilyRegistry
 {
+    /** @var AnnotationReader */
+    protected $annotationReader;
+
     /** @var FamilyInterface[] */
     protected $families = [];
+
+    /**
+     * @param AnnotationReader $annotationReader
+     */
+    public function __construct(AnnotationReader $annotationReader)
+    {
+        $this->annotationReader = $annotationReader;
+    }
 
     /**
      * @param FamilyInterface $family
@@ -108,5 +125,42 @@ class FamilyRegistry
         }
 
         return $families;
+    }
+
+    /**
+     * @param string $class
+     *
+     * @throws RuntimeException
+     *
+     * @return FamilyInterface
+     */
+    public function getFamilyByDataClass($class)
+    {
+        try {
+            $annotation = $this->annotationReader->getClassAnnotation(
+                new ReflectionClass($class),
+                FamilyAnnotation::class
+            );
+        } catch (ReflectionException $e) {
+            throw new RuntimeException("Error reading annotations from class {$class}", 0, $e);
+        }
+
+        if ($annotation instanceof FamilyAnnotation) {
+            return $this->getFamily($annotation->familyCode);
+        }
+
+        $matching = [];
+        foreach ($this->getFamilies() as $family) {
+            if ($family->getDataClass() === $class) {
+                $matching[] = $family;
+            }
+        }
+        if (1 === count($matching)) {
+            return reset($matching);
+        }
+
+        $m = "Unable to resolve family from data class '{$class}', ";
+        $m .= 'please use the @Family annotation on a dedicated data class';
+        throw new RuntimeException($m);
     }
 }

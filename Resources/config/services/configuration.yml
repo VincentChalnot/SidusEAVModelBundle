@@ -12,5 +12,7 @@ services:
 
     Sidus\EAVModelBundle\Registry\FamilyRegistry:
         class: Sidus\EAVModelBundle\Registry\FamilyRegistry
+        arguments:
+            - '@annotations.reader'
         tags:
             - { name: doctrine.event_listener, event: sidus_family_configuration }

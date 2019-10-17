@@ -10,22 +10,32 @@
 
 namespace Sidus\EAVModelBundle\Serializer\Normalizer;
 
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Exception\EAVExceptionInterface;
+use Sidus\EAVModelBundle\Exception\InvalidValueDataException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Serializer\AttributesHandlerTrait;
 use Sidus\EAVModelBundle\Serializer\ByReferenceHandler;
 use Sidus\EAVModelBundle\Serializer\CircularReferenceHandler;
 use Sidus\EAVModelBundle\Serializer\MaxDepthHandler;
+use Symfony\Component\PropertyAccess\Exception\ExceptionInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
+use Symfony\Component\Serializer\Exception\CircularReferenceException;
+use Symfony\Component\Serializer\Exception\RuntimeException;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
+use function count;
+use function in_array;
+use function is_array;
 
 /**
  * Standard normalizer for EAV Data
@@ -40,6 +50,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
     const GROUPS = 'groups';
     const SERIALIZER_OPTIONS = 'serializer';
     const EXPOSE_KEY = 'expose';
+    const MINIMAL_KEY = 'minimal';
 
     /** @var ClassMetadataFactoryInterface */
     protected $classMetadataFactory;
@@ -110,12 +121,12 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      * @param array         $context Context options for the normalizer
      *
      * @throws InvalidArgumentException
-     * @throws \Symfony\Component\Serializer\Exception\RuntimeException
-     * @throws \Symfony\Component\PropertyAccess\Exception\ExceptionInterface
+     * @throws RuntimeException
+     * @throws ExceptionInterface
      * @throws \Sidus\EAVModelBundle\Exception\EAVExceptionInterface
-     * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
-     * @throws \Symfony\Component\Serializer\Exception\CircularReferenceException
-     * @throws \ReflectionException
+     * @throws InvalidValueDataException
+     * @throws CircularReferenceException
+     * @throws ReflectionException
      *
      * @return array
      */
@@ -134,11 +145,17 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
 
         $data = [];
 
-        foreach ($this->extractStandardAttributes($object, $format, $context) as $attribute) {
-            $subContext = $context; // Copy context and force by reference
-            $subContext[ByReferenceHandler::BY_REFERENCE_KEY] = true; // Keep in mind that the normalizer might not support it
-            $attributeValue = $this->getAttributeValue($object, $attribute, $format, $subContext);
-            $data = $this->updateData($data, $attribute, $attributeValue);
+        $familyOptions = $object->getFamily()->getOption(self::SERIALIZER_OPTIONS, []);
+        if (array_key_exists(self::MINIMAL_KEY, $familyOptions) && $familyOptions[self::MINIMAL_KEY]) {
+            $attributeValue = $this->getAttributeValue($object, 'identifier', $format, $context);
+            $data = $this->updateData($data, 'identifier', $attributeValue);
+        } else {
+            foreach ($this->extractStandardAttributes($object, $format, $context) as $attribute) {
+                $subContext = $context; // Copy context and force by reference
+                $subContext[ByReferenceHandler::BY_REFERENCE_KEY] = true; // Keep in mind that the normalizer might not support it
+                $attributeValue = $this->getAttributeValue($object, $attribute, $format, $subContext);
+                $data = $this->updateData($data, $attribute, $attributeValue);
+            }
         }
 
         foreach ($this->extractEAVAttributes($object, $format, $context) as $attribute) {
@@ -175,7 +192,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      * @param string        $format
      * @param array         $context
      *
-     * @throws \Symfony\Component\PropertyAccess\Exception\ExceptionInterface
+     * @throws ExceptionInterface
      *
      * @return mixed
      */
@@ -288,7 +305,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      * @param array         $context
      *
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      *
      * @return array
      */
@@ -298,8 +315,8 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         $attributes = [];
 
         // methods
-        $reflClass = new \ReflectionClass($object);
-        foreach ($reflClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $reflMethod) {
+        $reflClass = new ReflectionClass($object);
+        foreach ($reflClass->getMethods(ReflectionMethod::IS_PUBLIC) as $reflMethod) {
             if (0 !== $reflMethod->getNumberOfRequiredParameters() ||
                 $reflMethod->isStatic() ||
                 $reflMethod->isConstructor() ||
@@ -381,11 +398,11 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
 
         // If normalizing by reference, we just check if it's among the allowed attributes
         if ($this->byReferenceHandler->isByReference($context)) {
-            return \in_array($attribute->getCode(), $this->referenceAttributes, true);
+            return in_array($attribute->getCode(), $this->referenceAttributes, true);
         }
 
         // Also check ignored attributes
-        if (\in_array($attribute->getCode(), $this->ignoredAttributes, true)) {
+        if (in_array($attribute->getCode(), $this->ignoredAttributes, true)) {
             return false;
         }
 
@@ -408,7 +425,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         AttributeInterface $attribute,
         array $context
     ) {
-        if (!isset($context[static::GROUPS]) || !\is_array($context[static::GROUPS])) {
+        if (!isset($context[static::GROUPS]) || !is_array($context[static::GROUPS])) {
             return true;
         }
 
@@ -418,13 +435,13 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         }
 
         $groups = $serializerOptions[static::GROUPS];
-        if (!\is_array($groups)) {
+        if (!is_array($groups)) {
             throw new InvalidArgumentException(
                 "Invalid 'serializer.groups' option for attribute {$attribute->getCode()} : should be an array"
             );
         }
 
-        return 0 < \count(array_intersect($groups, $context[static::GROUPS]));
+        return 0 < count(array_intersect($groups, $context[static::GROUPS]));
     }
 
     /**
@@ -448,11 +465,11 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
     ) {
         // If normalizing by reference, we just check if it's among the allowed attributes
         if ($this->byReferenceHandler->isByReference($context)) {
-            return \in_array($attribute, $this->referenceAttributes, true);
+            return in_array($attribute, $this->referenceAttributes, true);
         }
 
         // Check ignored attributes
-        if (\in_array($attribute, $this->ignoredAttributes, true)) {
+        if (in_array($attribute, $this->ignoredAttributes, true)) {
             return false;
         }
 
@@ -472,7 +489,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
      */
     protected function isGroupAllowed(DataInterface $object, $attribute, array $context)
     {
-        if (!$this->classMetadataFactory || !isset($context[static::GROUPS]) || !\is_array($context[static::GROUPS])) {
+        if (!$this->classMetadataFactory || !isset($context[static::GROUPS]) || !is_array($context[static::GROUPS])) {
             return true;
         }
 
@@ -480,7 +497,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
         foreach ($attributesMetadatas as $attributeMetadata) {
             // Alright, it's completely inefficient...
             if ($attributeMetadata->getName() === $attribute) {
-                return 0 < \count(array_intersect($attributeMetadata->getGroups(), $context[static::GROUPS]));
+                return 0 < count(array_intersect($attributeMetadata->getGroups(), $context[static::GROUPS]));
             }
         }
 

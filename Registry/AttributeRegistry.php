@@ -16,6 +16,7 @@ use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\VarDumper\Caster\Caster;
 use UnexpectedValueException;
+use function in_array;
 
 /**
  * Container for all global attributes.
@@ -45,8 +46,6 @@ class AttributeRegistry
     protected static $reservedCodes = [
         'id',
         'identifier',
-        'parent',
-        'children',
         'values',
         'value',
         'valueData',
@@ -173,7 +172,7 @@ class AttributeRegistry
      */
     protected function addAttribute(AttributeInterface $attribute)
     {
-        if (\in_array($attribute->getCode(), static::$reservedCodes, true)) {
+        if (in_array($attribute->getCode(), static::$reservedCodes, true)) {
             throw new AttributeConfigurationException("Attribute code '{$attribute->getCode()}' is a reserved code");
         }
         $this->attributes[$attribute->getCode()] = $attribute;

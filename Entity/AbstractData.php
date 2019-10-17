@@ -10,12 +10,17 @@
 
 namespace Sidus\EAVModelBundle\Entity;
 
+use BadMethodCallException;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
+use LogicException;
 use Sidus\BaseBundle\Utilities\DebugInfoUtility;
 use Sidus\BaseBundle\Utilities\SleepUtility;
 use Sidus\EAVModelBundle\Exception\ContextException;
+use Sidus\EAVModelBundle\Exception\EAVExceptionInterface;
 use Sidus\EAVModelBundle\Exception\InvalidValueDataException;
 use Sidus\EAVModelBundle\Exception\MissingAttributeException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
@@ -27,6 +32,14 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\VarDumper\Caster\Caster;
 use Symfony\Component\VarDumper\Caster\CutStub;
+use Traversable;
+use UnexpectedValueException;
+use function count;
+use function get_class;
+use function gettype;
+use function is_array;
+use function is_object;
+use function strlen;
 
 /**
  * Base logic to handle the EAV data
@@ -47,22 +60,6 @@ abstract class AbstractData implements ContextualDataInterface
     protected $id;
 
     /**
-     * @var DataInterface
-     *
-     * @ORM\ManyToOne(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", inversedBy="children")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="cascade")
-     */
-    protected $parent;
-
-    /**
-     * @var DataInterface[]
-     *
-     * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\DataInterface", mappedBy="parent",
-     *                                                    cascade={"all"}, orphanRemoval=true)
-     */
-    protected $children;
-
-    /**
      * @var ValueInterface[]|Collection
      *
      * @ORM\OneToMany(targetEntity="Sidus\EAVModelBundle\Entity\ValueInterface", mappedBy="data",
@@ -80,14 +77,14 @@ abstract class AbstractData implements ContextualDataInterface
     protected $refererValues;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
      */
     protected $createdAt;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      *
      * @ORM\Column(name="updated_at", type="datetime")
      */
@@ -126,19 +123,18 @@ abstract class AbstractData implements ContextualDataInterface
      *
      * @param FamilyInterface $family
      *
-     * @throws \LogicException
+     * @throws LogicException
      * @throws InvalidValueDataException
      */
     public function __construct(FamilyInterface $family)
     {
         if (!$family->isInstantiable()) {
-            throw new \LogicException("Family {$family->getCode()} is not instantiable");
+            throw new LogicException("Family {$family->getCode()} is not instantiable");
         }
         $this->family = $family;
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
+        $this->createdAt = new DateTime();
+        $this->updatedAt = new DateTime();
         $this->values = new ArrayCollection();
-        $this->children = new ArrayCollection();
         $this->refererValues = new ArrayCollection();
 
         foreach ($family->getAttributes() as $attribute) {
@@ -167,7 +163,7 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
     public function getCreatedAt()
     {
@@ -175,9 +171,9 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @param \DateTime $createdAt
+     * @param DateTime $createdAt
      *
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      *
      * @return DataInterface
      */
@@ -189,7 +185,7 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
     public function getUpdatedAt()
     {
@@ -197,35 +193,15 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @param \DateTime $updatedAt
+     * @param DateTime $updatedAt
      *
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      *
      * @return DataInterface
      */
     public function setUpdatedAt($updatedAt)
     {
         $this->updatedAt = DateTimeUtility::parse($updatedAt, false);
-
-        return $this;
-    }
-
-    /**
-     * @return DataInterface
-     */
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    /**
-     * @param DataInterface $parent
-     *
-     * @return DataInterface
-     */
-    public function setParent(DataInterface $parent = null)
-    {
-        $this->parent = $parent;
 
         return $this;
     }
@@ -310,7 +286,7 @@ abstract class AbstractData implements ContextualDataInterface
         $label = null;
         try {
             $label = $this->getLabelValue($context);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
         if (null === $label && $this->getIdentifier()) {
             $label = "[{$this->getIdentifier()}]";
@@ -335,7 +311,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $valuesData = $this->getValuesData($attribute, $context);
 
-        return 0 === \count($valuesData) ? null : $valuesData->first();
+        return 0 === count($valuesData) ? null : $valuesData->first();
     }
 
     /**
@@ -392,7 +368,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         try {
             return $this->getLabelValue();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return '';
         }
     }
@@ -403,7 +379,7 @@ abstract class AbstractData implements ContextualDataInterface
      * @param string $methodName
      * @param array  $arguments
      *
-     * @throws \BadMethodCallException
+     * @throws BadMethodCallException
      * @throws InvalidValueDataException
      * @throws MissingAttributeException
      * @throws ContextException
@@ -412,7 +388,7 @@ abstract class AbstractData implements ContextualDataInterface
      */
     public function __call($methodName, $arguments)
     {
-        $class = \get_class($this);
+        $class = get_class($this);
 
         $context = array_key_exists(0, $arguments) ? $arguments[0] : null;
 
@@ -427,16 +403,16 @@ abstract class AbstractData implements ContextualDataInterface
         foreach (['set', 'add', 'remove'] as $action) {
             if (0 === strpos($methodName, $action)) {
                 if (!array_key_exists(0, $arguments)) {
-                    throw new \BadMethodCallException("{$baseErrorMsg} requires at least one argument");
+                    throw new BadMethodCallException("{$baseErrorMsg} requires at least one argument");
                 }
                 $context = array_key_exists(1, $arguments) ? $arguments[1] : null;
-                $attributeCode = lcfirst(substr($methodName, \strlen($action)));
+                $attributeCode = lcfirst(substr($methodName, strlen($action)));
 
                 return $this->$action($attributeCode, $arguments[0], $context);
             }
         }
 
-        throw new \BadMethodCallException("{$baseErrorMsg} does not exist");
+        throw new BadMethodCallException("{$baseErrorMsg} does not exist");
     }
 
     /**
@@ -601,7 +577,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $values = $this->getValues($attribute, $context);
 
-        return 0 === \count($values) ? null : $values->first();
+        return 0 === count($values) ? null : $values->first();
     }
 
     /**
@@ -620,7 +596,7 @@ abstract class AbstractData implements ContextualDataInterface
     {
         $values = $this->getInternalValues($attribute, $context);
 
-        if ($attribute && 0 === \count($values) && null !== $attribute->getDefault()) {
+        if ($attribute && 0 === count($values) && null !== $attribute->getDefault()) {
             return $this->createDefaultValues($attribute, $context);
         }
 
@@ -745,7 +721,7 @@ abstract class AbstractData implements ContextualDataInterface
      * Set the values' data of a given attribute for multiple fields
      *
      * @param AttributeInterface $attribute
-     * @param array|\Traversable $dataValues
+     * @param array|Traversable  $dataValues
      * @param array|null         $context
      *
      * @throws InvalidValueDataException
@@ -872,8 +848,8 @@ abstract class AbstractData implements ContextualDataInterface
      * Remove id on clone and clean values
      *
      * @throws InvalidValueDataException
-     * @throws \UnexpectedValueException
-     * @throws \LogicException
+     * @throws UnexpectedValueException
+     * @throws LogicException
      */
     public function __clone()
     {
@@ -916,7 +892,7 @@ abstract class AbstractData implements ContextualDataInterface
     /**
      * Custom debugInfo to prevent profiler from crashing
      *
-     * @throws \Sidus\EAVModelBundle\Exception\EAVExceptionInterface
+     * @throws EAVExceptionInterface
      *
      * @return array
      */
@@ -925,7 +901,6 @@ abstract class AbstractData implements ContextualDataInterface
         $a = DebugInfoUtility::debugInfo(
             $this,
             [
-                Caster::PREFIX_PROTECTED.'children',
                 Caster::PREFIX_PROTECTED.'values',
                 Caster::PREFIX_PROTECTED.'refererValues',
                 Caster::PREFIX_PROTECTED.'valuesByAttributes',
@@ -1045,7 +1020,7 @@ abstract class AbstractData implements ContextualDataInterface
 
     /**
      * @param AttributeInterface $attribute
-     * @param array|\Traversable $dataValues
+     * @param array|Traversable  $dataValues
      * @param array|null         $context
      *
      * @throws InvalidValueDataException
@@ -1062,7 +1037,7 @@ abstract class AbstractData implements ContextualDataInterface
 
         foreach ($this->getInternalValues($attribute, $context) as $value) {
             // If there values to replace
-            if (\count($dataValues)) {
+            if (count($dataValues)) {
                 // Extract new values and replaces them one by one
                 $dataValue = array_shift($dataValues);
                 $value->setPosition(++$position);
@@ -1213,7 +1188,7 @@ abstract class AbstractData implements ContextualDataInterface
      * @deprecated Use ensureNativeArray
      *
      * @param AttributeInterface $attribute
-     * @param \Traversable|array $dataValues
+     * @param Traversable|array $dataValues
      *
      * @throws InvalidValueDataException
      *
@@ -1229,8 +1204,8 @@ abstract class AbstractData implements ContextualDataInterface
     }
 
     /**
-     * @param array|\Traversable $dataValues
-     * @param string             $path
+     * @param array|Traversable $dataValues
+     * @param string            $path
      *
      * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
      *
@@ -1238,12 +1213,12 @@ abstract class AbstractData implements ContextualDataInterface
      */
     protected function ensureNativeArray($dataValues, $path)
     {
-        if (\is_array($dataValues)) {
+        if (is_array($dataValues)) {
             return $dataValues;
         }
 
         // Converting traversable to standard array
-        if ($dataValues instanceof \Traversable) {
+        if ($dataValues instanceof Traversable) {
             $arrayDataValues = [];
             foreach ($dataValues as $key => $dataValue) {
                 $arrayDataValues[$key] = $dataValue;
@@ -1252,7 +1227,7 @@ abstract class AbstractData implements ContextualDataInterface
             return $arrayDataValues;
         }
 
-        $type = \is_object($dataValues) ? \get_class($dataValues) : \gettype($dataValues);
+        $type = is_object($dataValues) ? get_class($dataValues) : gettype($dataValues);
         throw new InvalidValueDataException(
             "Value for collection for path '{$path}' must be an array, '{$type}' given"
         );

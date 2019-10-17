@@ -10,12 +10,15 @@
 
 namespace Sidus\EAVModelBundle\PropertyInfo;
 
+use Doctrine\Common\Collections\Collection;
+use ReflectionException;
+use Sidus\EAVModelBundle\Model\AttributeInterface;
+use UnexpectedValueException;
 use function array_key_exists;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use function count;
 use function in_array;
 use function is_a;
-use Sidus\EAVModelBundle\Annotation\Family as FamilyAnnotation;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
@@ -36,31 +39,25 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
-    /** @var AnnotationReader */
-    protected $annotationReader;
-
     /** @var string */
     protected $dataClass;
 
     /**
-     * @param ManagerRegistry  $doctrine
-     * @param FamilyRegistry   $familyRegistry
-     * @param AnnotationReader $annotationReader
-     * @param string           $dataClass
+     * @param ManagerRegistry $doctrine
+     * @param FamilyRegistry  $familyRegistry
+     * @param string          $dataClass
      */
     public function __construct(
         ManagerRegistry $doctrine,
         FamilyRegistry $familyRegistry,
-        AnnotationReader $annotationReader,
         string $dataClass
     ) {
         $this->doctrine = $doctrine;
         $this->familyRegistry = $familyRegistry;
-        $this->annotationReader = $annotationReader;
         $this->dataClass = $dataClass;
         $entityManager = $doctrine->getManagerForClass($dataClass);
         if (!$entityManager) {
-            throw new \UnexpectedValueException("No manager found for class {$dataClass}");
+            throw new UnexpectedValueException("No manager found for class {$dataClass}");
         }
         parent::__construct($entityManager->getMetadataFactory());
     }
@@ -68,7 +65,7 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
     /**
      * {@inheritdoc}
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function getProperties($class, array $context = [])
     {
@@ -92,7 +89,7 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
     /**
      * {@inheritdoc}
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function getTypes($class, $property, array $context = [])
     {
@@ -112,17 +109,36 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
 
         $types = parent::getTypes($family->getValueClass(), $attribute->getType()->getDatabaseType());
         foreach ($types as $key => $type) {
-            if ($type instanceof Type && $attribute->isRequired()) {
-                $newType = new Type(
-                    $type->getBuiltinType(),
-                    false, // Replace nullable for required attributes
-                    $type->getClassName(),
-                    $type->isCollection(), // @todo handle multiple attributes
-                    $type->getCollectionKeyType(),
-                    $type->getCollectionValueType()
-                );
-                $types[$key] = $newType;
+            if (!$type instanceof Type) {
+                throw new UnexpectedValueException('Unexpected type list');
             }
+            if (is_a($type->getClassName(), DataInterface::class, true)) {
+                $allowedFamilies = $attribute->getOption('allowed_families', []);
+                if (count($allowedFamilies) > 0) {
+                    return $this->handleDataRelation($attribute, $allowedFamilies);
+                }
+            }
+
+            $type = new Type(
+                $type->getBuiltinType(),
+                !$attribute->isRequired(), // Replace nullable for required attributes
+                $type->getClassName(),
+                $type->isCollection(),
+                $type->getCollectionKeyType(),
+                $type->getCollectionValueType()
+            );
+            // If not a relation to an other DataInterface, just resolve collection and required attributes properly
+            if ($attribute->isCollection()) {
+                $type = new Type(
+                    Type::BUILTIN_TYPE_OBJECT,
+                    false,
+                    Collection::class,
+                    true,
+                    new Type(Type::BUILTIN_TYPE_INT),
+                    $type
+                );
+            }
+            $types[$key] = $type;
         }
 
         return $types;
@@ -131,7 +147,7 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
     /**
      * {@inheritDoc}
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function isReadable($class, $property, array $context = [])
     {
@@ -150,14 +166,14 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
     /**
      * {@inheritDoc}
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function isWritable($class, $property, array $context = [])
     {
         if (!is_a($class, DataInterface::class, true)) {
             return null;
         }
-        if (in_array($property, ['id', 'updatedAt', 'updatedBy', 'createdAt', 'createdBy', 'parent'], true)) {
+        if (in_array($property, ['id', 'updatedAt', 'updatedBy', 'createdAt', 'createdBy'], true)) {
             return false;
         }
         $family = $this->getFamily($class, $context);
@@ -170,25 +186,51 @@ class EAVExtractor extends DoctrineExtractor implements PropertyAccessExtractorI
     }
 
     /**
-     * @param $class
+     * @param string $class
+     * @param array  $context
      *
-     * @throws \ReflectionException
-     *
-     * @return FamilyInterface|null
+     * @return FamilyInterface
      */
     protected function getFamily($class, array $context = [])
     {
         if (array_key_exists('family', $context)) {
             return $this->familyRegistry->getFamily($context['family']);
         }
-        $annotation = $this->annotationReader->getClassAnnotation(
-            new \ReflectionClass($class),
-            FamilyAnnotation::class
-        );
-        if ($annotation instanceof FamilyAnnotation) {
-            return $this->familyRegistry->getFamily($annotation->familyCode);
+
+        return $this->familyRegistry->getFamilyByDataClass($class);
+    }
+
+    /**
+     * @param AttributeInterface $attribute
+     * @param array              $allowedFamilies
+     *
+     * @return Type[]
+     */
+    protected function handleDataRelation(
+        AttributeInterface $attribute,
+        array $allowedFamilies
+    ) {
+        $types = [];
+        foreach ($allowedFamilies as $allowedFamilyCode) {
+            $allowedFamily = $this->familyRegistry->getFamily($allowedFamilyCode);
+            $type = new Type(
+                Type::BUILTIN_TYPE_OBJECT,
+                !$attribute->isRequired(),
+                $allowedFamily->getDataClass()
+            );
+            if ($attribute->isCollection()) {
+                $type = new Type(
+                    Type::BUILTIN_TYPE_OBJECT,
+                    false,
+                    Collection::class,
+                    true,
+                    new Type(Type::BUILTIN_TYPE_INT),
+                    $type
+                );
+            }
+            $types[] = $type;
         }
 
-        return null;
+        return $types;
     }
 }

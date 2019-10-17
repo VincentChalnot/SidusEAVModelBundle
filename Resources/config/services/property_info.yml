@@ -4,7 +4,6 @@ services:
         arguments:
             - '@doctrine'
             - '@Sidus\EAVModelBundle\Registry\FamilyRegistry'
-            - '@annotations.reader'
             - '%sidus_eav_model.entity.data.class%'
         tags:
             - { name: property_info.list_extractor, priority: -500 }

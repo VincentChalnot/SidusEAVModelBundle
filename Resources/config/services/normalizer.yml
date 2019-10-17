@@ -23,9 +23,6 @@ parameters:
         - matchingCodes
         - valueClass
         - context
-        # pass children and parent families by references ?
-        - parent
-        - children
 
     sidus_eav_model.normalizer.attribute.ignored_attributes:
         - family # Prevent circular reference
