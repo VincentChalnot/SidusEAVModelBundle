@@ -123,6 +123,9 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         unset($context['family'], $context['family_code'], $context['familyCode']); // Removing family info from context
 
         $entity = $this->entityProvider->getEntity($family, $data, $this->nameConverter);
+        if (!$entity instanceof DataInterface) {
+            throw new \UnexpectedValueException('Entity should be a DataInterface');
+        }
 
         if ($entity instanceof ContextualDataInterface
             && isset($context['context'])
