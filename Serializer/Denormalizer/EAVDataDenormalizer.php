@@ -29,6 +29,7 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\ObjectToPopulateTrait;
 
 /**
  * Denormalize EAV Data
@@ -37,6 +38,8 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
  */
 class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInterface
 {
+    use ObjectToPopulateTrait;
+
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
@@ -122,7 +125,19 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         $family = $this->getFamily($data, $class, $context);
         unset($context['family'], $context['family_code'], $context['familyCode']); // Removing family info from context
 
-        $entity = $this->entityProvider->getEntity($family, $data, $this->nameConverter);
+        $entity = $this->extractObjectToPopulate(DataInterface::class, $context);
+        if ($entity) {
+            // TODO this is some cleanup from JSON-LD data ; find the most generic way to cleanup this
+            $data = array_diff_key($data, [
+                '@id' => null,
+                '@type' => null,
+                '@context' => null,
+                'id' => null,
+                'originId' => null,
+            ]);
+        } else {
+            $entity = $this->entityProvider->getEntity($family, $data, $this->nameConverter);
+        }
 
         if ($entity instanceof ContextualDataInterface
             && isset($context['context'])
