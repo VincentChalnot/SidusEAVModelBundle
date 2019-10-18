@@ -34,6 +34,7 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\ObjectToPopulateTrait;
 use Traversable;
 use function count;
 use function in_array;
@@ -46,6 +47,8 @@ use function is_array;
  */
 class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInterface
 {
+    use ObjectToPopulateTrait;
+
     /** @var FamilyRegistry */
     protected $familyRegistry;
 
@@ -131,7 +134,11 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         $family = $this->getFamily($data, $class, $context);
         unset($context['family'], $context['family_code'], $context['familyCode']); // Removing family info from context
 
-        $entity = $this->entityProvider->getEntity($family, $data, $this->nameConverter);
+        $entity = $this->extractObjectToPopulate(DataInterface::class, $context);
+        if (!$entity) {
+            $entity = $this->entityProvider->getEntity($family, $data, $this->nameConverter);
+        }
+
         if (!$entity instanceof DataInterface) {
             throw new UnexpectedValueException(
                 'EntityProvider::getEntity MUST ALWAYS return a DataInterface, check your custom code'
