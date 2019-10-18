@@ -1,0 +1,6 @@
+eav:
+    validation:
+        invalid_data: Ongeldige gegevens
+        invalid_family: Ongeldige familie
+        unique: Dezelfde waarde bestaat al
+        required: Dit veld is verplicht
