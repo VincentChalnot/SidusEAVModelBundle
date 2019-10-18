@@ -10,17 +10,21 @@
 
 namespace Sidus\EAVModelBundle\Serializer;
 
+use ArrayAccess;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\NonUniqueResultException;
+use Exception;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\DataRepository;
+use Sidus\EAVModelBundle\Exception\InvalidValueDataException;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
+use function is_array;
 
 /**
  * Tries to find an existing entity based on the provided data, fallback to create a new entity
@@ -55,7 +59,7 @@ class EntityProvider implements PurgeableEntityProviderInterface
      *
      * @throws SerializerExceptionInterface
      *
-     * @return DataInterface|null
+     * @return DataInterface This method MUST ALWAYS return an entity
      */
     public function getEntity(FamilyInterface $family, $data, NameConverterInterface $nameConverter = null)
     {
@@ -72,7 +76,7 @@ class EntityProvider implements PurgeableEntityProviderInterface
         if ($family->isSingleton()) {
             try {
                 return $repository->getInstance($family);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 throw new UnexpectedValueException("Unable to get singleton for family {$family->getCode()}", 0, $e);
             }
         }
@@ -80,24 +84,25 @@ class EntityProvider implements PurgeableEntityProviderInterface
         // In case we are trying to resolve a simple reference
         if (is_scalar($data)) {
             $entity = $repository->findByIdentifier($family, $data, true);
-            if (!$entity) {
-                throw new UnexpectedValueException(
-                    "No entity found for {$family->getCode()} with identifier '{$data}'"
-                );
+            if ($entity instanceof DataInterface) {
+                return $entity;
             }
-
-            return $entity;
+            throw new UnexpectedValueException(
+                "No entity found for {$family->getCode()} with identifier '{$data}'"
+            );
         }
 
-        if (!\is_array($data) && !$data instanceof \ArrayAccess) {
+        if (!is_array($data) && !$data instanceof ArrayAccess) {
             throw new UnexpectedValueException('Unable to denormalize data from unknown format');
         }
 
         // If the id is set (and not null), don't even look for the identifier
         if (isset($data['id'])) {
-            /** @noinspection PhpIncompatibleReturnTypeInspection */
-
-            return $repository->find($data['id']);
+            $entity = $repository->find($data['id']);
+            if ($entity instanceof DataInterface) {
+                return $entity;
+            }
+            throw new UnexpectedValueException("Unable to resolve id {$data['id']}");
         }
 
         // Try to resolve the identifier
@@ -106,7 +111,7 @@ class EntityProvider implements PurgeableEntityProviderInterface
         if (null !== $reference) {
             try {
                 $entity = $repository->findByIdentifier($family, $reference);
-                if ($entity) {
+                if ($entity instanceof DataInterface) {
                     return $entity;
                 }
             } catch (NonUniqueResultException $e) {
@@ -115,7 +120,7 @@ class EntityProvider implements PurgeableEntityProviderInterface
                     0,
                     $e
                 );
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 throw new UnexpectedValueException(
                     "Unable to resolve identifier {$reference} for family {$family->getCode()}",
                     0,
@@ -126,7 +131,13 @@ class EntityProvider implements PurgeableEntityProviderInterface
 
         // Maybe the entity already exists but is not yet persisted
         if (null !== $reference && $this->hasCreatedEntity($family, $reference)) {
-            return $this->getCreatedEntity($family, $reference);
+            $entity = $this->getCreatedEntity($family, $reference);
+            if ($entity instanceof DataInterface) {
+                return $entity;
+            }
+            throw new UnexpectedValueException(
+                "Internal cache error with identifier {$reference} for family {$family->getCode()}"
+            );
         }
 
         $entity = $family->createData();
@@ -153,7 +164,7 @@ class EntityProvider implements PurgeableEntityProviderInterface
      *
      * @param OnFlushEventArgs $event
      *
-     * @throws \Sidus\EAVModelBundle\Exception\InvalidValueDataException
+     * @throws InvalidValueDataException
      */
     public function onFlush(OnFlushEventArgs $event)
     {
@@ -172,7 +183,7 @@ class EntityProvider implements PurgeableEntityProviderInterface
     }
 
     /**
-     * @param array|\ArrayAccess     $data
+     * @param array|ArrayAccess      $data
      * @param FamilyInterface        $family
      * @param NameConverterInterface $nameConverter
      *

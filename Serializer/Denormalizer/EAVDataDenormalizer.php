@@ -10,11 +10,16 @@
 
 namespace Sidus\EAVModelBundle\Serializer\Denormalizer;
 
+use ArrayAccess;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use InvalidArgumentException;
 use Sidus\EAVModelBundle\Entity\ContextualDataInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
+use Sidus\EAVModelBundle\Exception\MissingAttributeException;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
@@ -29,6 +34,10 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Traversable;
+use function count;
+use function in_array;
+use function is_array;
 
 /**
  * Denormalize EAV Data
@@ -104,8 +113,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param string $format  format the given data was extracted from
      * @param array  $context options available to the denormalizer
      *
-     * @throws \InvalidArgumentException
-     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
+     * @throws InvalidArgumentException
+     * @throws MissingAttributeException
      * @throws SerializerExceptionInterface
      *
      * @return DataInterface
@@ -123,10 +132,15 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         unset($context['family'], $context['family_code'], $context['familyCode']); // Removing family info from context
 
         $entity = $this->entityProvider->getEntity($family, $data, $this->nameConverter);
+        if (!$entity instanceof DataInterface) {
+            throw new UnexpectedValueException(
+                'EntityProvider::getEntity MUST ALWAYS return a DataInterface, check your custom code'
+            );
+        }
 
         if ($entity instanceof ContextualDataInterface
             && isset($context['context'])
-            && \is_array($context['context'])
+            && is_array($context['context'])
         ) {
             $entity->setCurrentContext($context['context']);
         }
@@ -136,7 +150,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
 
         if ($entity instanceof ContextualDataInterface
             && isset($data['currentContext'])
-            && \is_array($data['currentContext'])
+            && is_array($data['currentContext'])
         ) {
             $entity->setCurrentContext($data['currentContext']);
         }
@@ -178,8 +192,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param array           $context
      *
      * @throws SerializerExceptionInterface
-     * @throws \Sidus\EAVModelBundle\Exception\MissingAttributeException
-     * @throws \InvalidArgumentException
+     * @throws MissingAttributeException
+     * @throws InvalidArgumentException
      */
     protected function handleAttributeValue(
         FamilyInterface $family,
@@ -194,7 +208,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         } elseif ($family->hasAttribute($attributeCode)) {
             $attribute = $family->getAttribute($attributeCode);
             if ($attribute->isCollection()) {
-                if (!\is_array($normalizedValue) && !$normalizedValue instanceof \Traversable) {
+                if (!is_array($normalizedValue) && !$normalizedValue instanceof Traversable) {
                     throw new UnexpectedValueException(
                         "Given data should be an array of values for attribute '{$attributeCode}'"
                     );
@@ -243,7 +257,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      */
     protected function getFamily($data, $class, array $context)
     {
-        if (\is_array($data) || $data instanceof \ArrayAccess) {
+        if (is_array($data) || $data instanceof ArrayAccess) {
             foreach (['familyCode', 'family_code', 'family'] as $property) {
                 if (array_key_exists($property, $data) && $data[$property]) {
                     /** @noinspection PhpIncompatibleReturnTypeInspection */
@@ -269,7 +283,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         }
 
         // If there is only ONE family exactly matching the data class, let's use this one
-        if (1 === \count($matchingFamilies)) {
+        if (1 === count($matchingFamilies)) {
             return array_pop($matchingFamilies);
         }
 
@@ -288,7 +302,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             return true;
         }
 
-        return !\in_array($attributeCode, $this->ignoredAttributes, true);
+        return !in_array($attributeCode, $this->ignoredAttributes, true);
     }
 
     /**
@@ -298,7 +312,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param string             $format
      * @param array              $context
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws SerializerExceptionInterface
      *
      * @return mixed
@@ -322,7 +336,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             $targetClass = $valueMetadata->getAssociationTargetClass($attributeType->getDatabaseType());
             $context['relatedAttribute'] = $attribute; // Add attribute info
             $allowedFamilies = $attribute->getOption('allowed_families', []);
-            if (1 === \count($allowedFamilies)) {
+            if (1 === count($allowedFamilies)) {
                 $context['family'] = array_pop($allowedFamilies);
             }
 
@@ -333,7 +347,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             $type = $valueMetadata->getTypeOfField($storageField);
 
             if ('datetime' === $type || 'date' === $type) {
-                return $this->denormalizeRelation($value, \DateTime::class, $format, $context, $attributeReference);
+                return $this->denormalizeRelation($value, DateTime::class, $format, $context, $attributeReference);
             }
 
             return $value;
@@ -350,7 +364,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
      * @param string          $format
      * @param array           $context
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws SerializerExceptionInterface
      *
      * @return mixed
@@ -378,7 +392,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         if ($classMetadata->hasField($attributeCode)) {
             $type = $classMetadata->getTypeOfField($attributeCode);
             if ('datetime' === $type || 'date' === $type) {
-                return $this->denormalizeRelation($value, \DateTime::class, $format, $context, $attributeReference);
+                return $this->denormalizeRelation($value, DateTime::class, $format, $context, $attributeReference);
             }
         }
 
@@ -407,7 +421,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         }
         try {
             return $this->denormalizer->denormalize($value, $targetClass, $format, $context);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if (!is_scalar($value)) {
                 $value = '['.gettype($value).']';
             }
