@@ -132,12 +132,20 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
                 $entity->setCurrentContext($context['context']);
             }
         }
+
+        $familyAttributeCodes = array_map(function(AttributeInterface $attribute) {
+            return $attribute->getCode();
+        }, $family->getAttributes());
+
         /** @var array $data At this point we know for sure data is a \ArrayAccess or a PHP array */
         foreach ($data as $attributeCode => $value) {
             if ($this->nameConverter) {
                 $attributeCode = $this->nameConverter->denormalize($attributeCode);
             }
             if (!$this->isAllowedAttributes($family, $attributeCode)) {
+                continue;
+            }
+            if (!in_array($attributeCode, $familyAttributeCodes)) {
                 continue;
             }
             $this->handleAttributeValue($family, $attributeCode, $entity, $value, $format, $context);
