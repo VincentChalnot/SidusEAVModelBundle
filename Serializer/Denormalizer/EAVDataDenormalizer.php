@@ -24,6 +24,7 @@ use Sidus\EAVModelBundle\Model\AttributeInterface;
 use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Sidus\EAVModelBundle\Serializer\EntityProviderInterface;
+use Sidus\EAVModelBundle\Serializer\Normalizer\EAVDataNormalizer;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
@@ -339,6 +340,13 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         $valueMetadata = $entityManager->getClassMetadata($family->getValueClass());
         $storageField = $attributeType->getDatabaseType();
         $attributeReference = "{$family->getCode()}.{$attribute->getCode()}";
+
+        $options = $attribute->getOption(EAVDataNormalizer::SERIALIZER_OPTIONS, []);
+        $additionalContext = [];
+        if (array_key_exists(EAVDataNormalizer::CONTEXT_KEY, $options)) {
+            $additionalContext = $options[EAVDataNormalizer::CONTEXT_KEY];
+        }
+
         if ($valueMetadata->hasAssociation($storageField)) {
             $targetClass = $valueMetadata->getAssociationTargetClass($attributeType->getDatabaseType());
             $context['relatedAttribute'] = $attribute; // Add attribute info
@@ -346,6 +354,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             if (1 === count($allowedFamilies)) {
                 $context['family'] = array_pop($allowedFamilies);
             }
+            $context = array_merge($context, $additionalContext);
 
             return $this->denormalizeRelation($value, $targetClass, $format, $context, $attributeReference);
         }
@@ -354,6 +363,8 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             $type = $valueMetadata->getTypeOfField($storageField);
 
             if ('datetime' === $type || 'date' === $type) {
+                $context = array_merge($context, $additionalContext);
+
                 return $this->denormalizeRelation($value, DateTime::class, $format, $context, $attributeReference);
             }
 

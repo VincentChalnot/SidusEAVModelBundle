@@ -51,6 +51,7 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
     const SERIALIZER_OPTIONS = 'serializer';
     const EXPOSE_KEY = 'expose';
     const MINIMAL_KEY = 'minimal';
+    const CONTEXT_KEY = 'context';
 
     /** @var ClassMetadataFactoryInterface */
     protected $classMetadataFactory;
@@ -286,6 +287,11 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
             $maxDepth = $options[MaxDepthHandler::MAX_DEPTH_KEY];
         }
 
+        $additionalContext = [];
+        if (array_key_exists(self::CONTEXT_KEY, $options)) {
+            $additionalContext = $options[self::CONTEXT_KEY];
+        }
+
         return array_merge(
             $context,
             [
@@ -295,7 +301,8 @@ class EAVDataNormalizer implements NormalizerInterface, NormalizerAwareInterface
                 'parent' => $object,
                 'attribute' => $attribute->getCode(),
                 'eav_attribute' => $attribute,
-            ]
+            ],
+            $additionalContext
         );
     }
 
