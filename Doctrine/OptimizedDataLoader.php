@@ -88,6 +88,9 @@ class OptimizedDataLoader implements DataLoaderInterface
             if (!$entity instanceof DataInterface) {
                 throw new \InvalidArgumentException(self::E_MSG);
             }
+            if (null === $entity->getId()) {
+                continue;
+            }
             $entitiesByValueClassByIds[$entity->getFamily()->getValueClass()][$entity->getId()] = $entity;
         }
 
