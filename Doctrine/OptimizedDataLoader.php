@@ -12,6 +12,7 @@ namespace Sidus\EAVModelBundle\Doctrine;
 
 use Doctrine\ORM\PersistentCollection;
 use Sidus\BaseBundle\Doctrine\RepositoryFinder;
+use Sidus\EAVModelBundle\Entity\ContextualDataInterface;
 use Sidus\EAVModelBundle\Entity\DataInterface;
 use Sidus\EAVModelBundle\Entity\ValueInterface;
 use Sidus\EAVModelBundle\Model\AttributeInterface;
@@ -23,12 +24,16 @@ use Sidus\EAVModelBundle\Model\AttributeInterface;
  *
  * @author Vincent Chalnot <vincent@sidus.fr>
  */
-class OptimizedDataLoader implements DataLoaderInterface
+class OptimizedDataLoader implements ContextualizedDataLoaderInterface
 {
-    const E_MSG = '$entities argument must be an array of DataInterface';
-
     /** @var RepositoryFinder */
     protected $repositoryFinder;
+
+    /** @var array */
+    protected $currentContext;
+
+    /** @var array */
+    protected $loadedEntityIds = [];
 
     /**
      * @param RepositoryFinder $repositoryFinder
@@ -36,6 +41,14 @@ class OptimizedDataLoader implements DataLoaderInterface
     public function __construct(RepositoryFinder $repositoryFinder)
     {
         $this->repositoryFinder = $repositoryFinder;
+    }
+
+    /**
+     * @param array $context
+     */
+    public function setCurrentContext(array $context)
+    {
+        $this->currentContext = $context;
     }
 
     /**
@@ -51,12 +64,25 @@ class OptimizedDataLoader implements DataLoaderInterface
             throw new \InvalidArgumentException(self::E_MSG);
         }
 
-        $entitiesByValueClassByIds = $this->sortEntitiesByValueClass($entities);
+        $entitiesToLoad = [];
+        foreach ($entities as $entity) {
+            if (array_key_exists($entity->getId(), $this->loadedEntityIds)) {
+                continue;
+            }
+            $entitiesToLoad[] = $entity;
+            $this->loadedEntityIds[$entity->getId()] = null;
+
+            if (null !== $this->currentContext && $entity instanceof ContextualDataInterface) {
+                $entity->setCurrentContext($this->currentContext);
+            }
+        }
+
+        $entitiesByValueClassByIds = $this->sortEntitiesByValueClass($entitiesToLoad);
         foreach ($entitiesByValueClassByIds as $valueClass => $entitiesById) {
             $this->loadEntityValues($valueClass, $entitiesById);
         }
 
-        $this->loadRelatedEntities($entities, $depth);
+        $this->loadRelatedEntities($entitiesToLoad, $depth);
     }
 
     /**
@@ -68,6 +94,10 @@ class OptimizedDataLoader implements DataLoaderInterface
      */
     public function loadSingle(DataInterface $entity = null, $depth = 2)
     {
+        if (null === $entity) {
+            return;
+        }
+
         $this->load([$entity], $depth);
     }
 
@@ -162,7 +192,9 @@ class OptimizedDataLoader implements DataLoaderInterface
             }
             $family = $entity->getFamily();
             foreach ($family->getAttributes() as $attribute) {
-                $this->appendRelatedEntities($relatedEntities, $attribute, $entity);
+                foreach ($this->appendRelatedEntities($attribute, $entity) as $relatedEntity) {
+                    $relatedEntities[] = $relatedEntity;
+                }
             }
         }
 
@@ -170,18 +202,19 @@ class OptimizedDataLoader implements DataLoaderInterface
     }
 
     /**
-     * @param array              $relatedEntities
      * @param AttributeInterface $attribute
      * @param DataInterface      $entity
+     *
+     * @return array
      */
     protected function appendRelatedEntities(
-        array &$relatedEntities,
         AttributeInterface $attribute,
         DataInterface $entity
     ) {
         if (!$attribute->getOption('autoload', false) && !$attribute->getType()->isEmbedded()) {
-            return;
+            return [];
         }
+        $relatedEntities = [];
         try {
             $relatedEntity = $entity->get($attribute->getCode());
             if (\is_array($relatedEntity) || $relatedEntity instanceof \Traversable) {
@@ -196,5 +229,7 @@ class OptimizedDataLoader implements DataLoaderInterface
         } catch (\Exception $e) {
             // Ignore exception
         }
+
+        return $relatedEntities;
     }
 }

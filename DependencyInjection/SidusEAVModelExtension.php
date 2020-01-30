@@ -68,7 +68,6 @@ class SidusEAVModelExtension extends Extension
         $loader->load('command.yml');
         $loader->load('configuration.yml');
         $loader->load('context.yml');
-        $loader->load('debug.yml');
         $loader->load('deprecated.yml');
         $loader->load('doctrine.yml');
         $loader->load('entities.yml');
@@ -103,6 +102,10 @@ class SidusEAVModelExtension extends Extension
         $attributeConfiguration->addMethodCall('parseGlobalConfig', [$config['attributes']]);
 
         $this->createFamilyServices($config, $container);
+
+        if ($container->hasDefinition('profiler') && $container->getParameter('kernel.debug')) {
+            $loader->load('debug.yml'); // Loading debug services
+        }
     }
 
     /**

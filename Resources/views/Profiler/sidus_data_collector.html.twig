@@ -1,0 +1,71 @@
+{# @ var collector \Sidus\EAVModelBundle\Profiler\DataLoaderCollector #}
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set icon %}
+        {{ include('@SidusEAVModel/Profiler/icon.svg') }}
+        <span class="sf-toolbar-value">EAV Data</span>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>Loaded EAV data</b>
+            <span class="sf-toolbar-status">{{ collector.count }}</span>
+        </div>
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { 'link': true }) }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label">
+        <span class="icon">{{ include('@SidusEAVModel/Profiler/icon.svg') }}</span>
+        <strong>EAV Data</strong>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>Loaded EAV Data</h2>
+    <div id="eav_graph" style="position:absolute;width:100%;height:100%;"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/1.2.1/sigma.min.js"
+            integrity="sha256-ii2D7w2jthCadZtIl2OjRn2vu1iEtGWcOrmd+UOZorc=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/1.2.1/plugins/sigma.layout.forceAtlas2.min.js"
+            integrity="sha256-yuvmGZKRyQEMbH7+Spnf0tIikmGAnN5mmbdqfwzBVnc=" crossorigin="anonymous"></script>
+    <script>
+        // Let's first initialize sigma:
+        var s = new sigma('eav_graph');
+
+        {% for node in collector.nodes %}
+        // Then, let's add some data to display:
+        s.graph.addNode({
+            id: 'n{{ node.id }}',
+            label: '{{ node.label|escape('js') }} ({{ node.familyCode }})',
+            x: Math.random(),
+            y: Math.random(),
+            size: {{ node.duration ? node.duration * 1000 : 1 }},
+            color: '#f00'
+        });
+        {% endfor %}
+
+        {% for node in collector.nodes %}
+        {% for relatedId in node.relatedNodes %}
+        s.graph.addEdge({
+            id: 'e{{ node.id }}_{{ relatedId }}',
+            source: 'n{{ node.id }}',
+            target: 'n{{ relatedId }}'
+        });
+        {% endfor %}
+        {% endfor %}
+
+        s.settings({
+            edgeColor: 'default',
+            defaultEdgeColor: '#999',
+            barnesHutOptimize: true
+        });
+        s.startForceAtlas2();
+        window.setTimeout(function() {s.killForceAtlas2()}, 2000);
+        // Finally, let's ask our sigma instance to refresh:
+        s.refresh();
+    </script>
+{% endblock %}

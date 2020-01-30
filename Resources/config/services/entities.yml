@@ -3,7 +3,7 @@ parameters:
 
 services:
     Sidus\EAVModelBundle\Doctrine\DataLoaderInterface:
-        alias: Sidus\EAVModelBundle\Doctrine\ContextualizedOptimizedDataLoader
+        alias: Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader
 
     Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader:
         class: Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader
@@ -11,8 +11,4 @@ services:
             - '@Sidus\BaseBundle\Doctrine\RepositoryFinder'
 
     Sidus\EAVModelBundle\Doctrine\ContextualizedDataLoaderInterface:
-        alias: Sidus\EAVModelBundle\Doctrine\ContextualizedOptimizedDataLoader
-
-    Sidus\EAVModelBundle\Doctrine\ContextualizedOptimizedDataLoader:
-        class: Sidus\EAVModelBundle\Doctrine\ContextualizedOptimizedDataLoader
-        parent: Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader
+        alias: Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader

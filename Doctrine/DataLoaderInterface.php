@@ -19,6 +19,8 @@ use Sidus\EAVModelBundle\Entity\DataInterface;
  */
 interface DataLoaderInterface
 {
+    const E_MSG = '$entities argument must be an array of DataInterface';
+
     /**
      * @param DataInterface[] $entities
      * @param int             $depth
