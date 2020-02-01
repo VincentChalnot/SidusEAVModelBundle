@@ -103,7 +103,7 @@ class SidusEAVModelExtension extends Extension
 
         $this->createFamilyServices($config, $container);
 
-        if ($container->hasDefinition('profiler') && $container->getParameter('kernel.debug')) {
+        if ($container->getParameter('kernel.debug')) {
             $loader->load('debug.yml'); // Loading debug services
         }
     }
