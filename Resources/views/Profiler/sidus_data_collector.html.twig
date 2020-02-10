@@ -4,7 +4,7 @@
 {% block toolbar %}
     {% set icon %}
         {{ include('@SidusEAVModel/Profiler/icon.svg') }}
-        <span class="sf-toolbar-value">EAV Data</span>
+        <span class="sf-toolbar-value">{{ collector.count }} EAV Data</span>
     {% endset %}
 
     {% set text %}

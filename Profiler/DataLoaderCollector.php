@@ -6,12 +6,19 @@ use Sidus\EAVModelBundle\Doctrine\Debug\CollectedDataNode;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
+use Symfony\Component\VarDumper\Cloner\Data;
 
 /**
  * @method reset()
  */
 class DataLoaderCollector extends DataCollector
 {
+    /** @var array|Data */
+    protected $data = [
+        'nodes' => [],
+        'count' => null,
+    ];
+
     /** @var array */
     protected $builtNodeIds = [];
 
