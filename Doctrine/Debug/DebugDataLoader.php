@@ -22,7 +22,9 @@ class DebugDataLoader extends OptimizedDataLoader
         /** @var CollectedDataNode[] $collectedNodes */
         $collectedNodes = [];
         foreach ($entities as $entity) {
-            $collectedNodes[] = CollectedDataNode::createOrGetNode($entity, true);
+            if ($entity instanceof DataInterface) {
+                $collectedNodes[] = CollectedDataNode::createOrGetNode($entity, true);
+            }
         }
 
         parent::load($entities, $depth);

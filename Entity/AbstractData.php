@@ -873,9 +873,9 @@ abstract class AbstractData implements ContextualDataInterface
         /** @noinspection ImplicitMagicMethodCallInspection */
         $this->__construct($this->getFamily());
 
+        $this->values = new ArrayCollection(); // Overrides all default values
         foreach ($newValues as $newValue) {
-            $this->values->add($newValue);
-            $newValue->setData($this);
+            $this->addValue($newValue);
         }
     }
 

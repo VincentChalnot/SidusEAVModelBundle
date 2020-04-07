@@ -66,6 +66,9 @@ class OptimizedDataLoader implements ContextualizedDataLoaderInterface
 
         $entitiesToLoad = [];
         foreach ($entities as $entity) {
+            if (!$entity instanceof DataInterface) {
+                throw new \InvalidArgumentException(self::E_MSG);
+            }
             if (array_key_exists($entity->getId(), $this->loadedEntityIds)) {
                 continue;
             }

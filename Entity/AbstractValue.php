@@ -559,8 +559,7 @@ abstract class AbstractValue implements ContextualValueInterface
     public function __clone()
     {
         $this->id = null;
-        $attribute = $this->getAttribute();
-        if ($this->dataValue && $attribute->getType()->isEmbedded()) {
+        if ($this->dataValue && $this->getAttribute()->getType()->isEmbedded()) {
             $this->dataValue = clone $this->dataValue;
         }
     }
