@@ -43,8 +43,8 @@
             label: '{{ node.label|escape('js') }} ({{ node.familyCode }})',
             x: Math.random(),
             y: Math.random(),
-            size: {{ node.duration ? node.duration * 1000 : 1 }},
-            color: '#f00'
+            size: {{ node.duration ? node.duration * 1000 : 1000 }},
+            color: '{{ node.rootNode ? '#0f0' : '#f00' }}'
         });
         {% endfor %}
 

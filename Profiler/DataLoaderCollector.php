@@ -37,7 +37,7 @@ class DataLoaderCollector extends DataCollector
             $relatedNodes = array_unique($relatedNodes);
             $duration = null;
             if ($node->getEndTime()) {
-                $duration = $node->getEndTime()->getTimestamp() - $node->getStartTime()->getTimestamp();
+                $duration = $node->getEndTime() - $node->getStartTime();
             }
             $this->data['nodes'][$dataId] = [
                 'familyCode' => $data->getFamilyCode(),

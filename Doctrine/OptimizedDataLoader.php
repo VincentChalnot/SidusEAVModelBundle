@@ -185,7 +185,7 @@ class OptimizedDataLoader implements ContextualizedDataLoaderInterface
      */
     protected function loadRelatedEntities($entities, $depth)
     {
-        if (0 >= $depth) {
+        if ($depth <= 0) {
             return;
         }
         $relatedEntities = [];

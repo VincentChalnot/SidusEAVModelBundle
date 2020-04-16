@@ -22,10 +22,10 @@ class CollectedDataNode
     /** @var CollectedDataNode[] */
     protected $relatedNodes = [];
 
-    /** @var \DateTimeInterface */
+    /** @var int */
     protected $startTime;
 
-    /** @var \DateTimeInterface|null */
+    /** @var int|null */
     protected $endTime;
 
     /** @var bool */
@@ -38,7 +38,7 @@ class CollectedDataNode
     protected function __construct(DataInterface $data, $rootNode = false)
     {
         $this->data = $data;
-        $this->startTime = new \DateTime();
+        $this->startTime = hrtime(true);
         $this->rootNode = $rootNode;
         if ($data->getId()) {
             self::$index[$data->getId()] = $this;
@@ -104,7 +104,7 @@ class CollectedDataNode
     }
 
     /**
-     * @return \DateTimeInterface
+     * @return int
      */
     public function getStartTime()
     {
@@ -112,7 +112,7 @@ class CollectedDataNode
     }
 
     /**
-     * @return \DateTimeInterface|null
+     * @return int|null
      */
     public function getEndTime()
     {
@@ -133,7 +133,7 @@ class CollectedDataNode
     public function terminate(): void
     {
         if (null === $this->endTime) {
-            $this->endTime = new \DateTime();
+            $this->endTime = hrtime(true);
         }
     }
 }
