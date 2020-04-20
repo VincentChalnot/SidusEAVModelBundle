@@ -38,7 +38,7 @@ class CollectedDataNode
     protected function __construct(DataInterface $data, $rootNode = false)
     {
         $this->data = $data;
-        $this->startTime = hrtime(true);
+        $this->startTime = function_exists('hrtime') ? hrtime(true) : microtime(true);
         $this->rootNode = $rootNode;
         if ($data->getId()) {
             self::$index[$data->getId()] = $this;
@@ -133,7 +133,7 @@ class CollectedDataNode
     public function terminate(): void
     {
         if (null === $this->endTime) {
-            $this->endTime = hrtime(true);
+            $this->endTime = function_exists('hrtime') ? hrtime(true) : microtime(true);
         }
     }
 }
