@@ -209,9 +209,7 @@ abstract class AbstractValue implements ContextualValueInterface
     public function setBoolValue($boolValue)
     {
         if (\is_array($boolValue) || \is_object($boolValue)) {
-            $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}, ";
-            $m .= 'expecting boolean, got'.gettype($boolValue);
-            throw new \UnexpectedValueException($m);
+            $this->throwInvalidTypeException('expecting boolean, got'.gettype($boolValue));
         }
         $this->boolValue = null === $boolValue ? null : (bool) $boolValue;
 
@@ -234,9 +232,7 @@ abstract class AbstractValue implements ContextualValueInterface
     public function setIntegerValue($integerValue)
     {
         if (\is_array($integerValue) || \is_object($integerValue)) {
-            $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}, ";
-            $m .= 'expecting integer, got '.gettype($integerValue);
-            throw new \UnexpectedValueException($m);
+            $this->throwInvalidTypeException('expecting integer, got '.gettype($integerValue));
         }
         $this->integerValue = null === $integerValue ? null : (int) $integerValue;
 
@@ -259,9 +255,7 @@ abstract class AbstractValue implements ContextualValueInterface
     public function setDecimalValue($decimalValue)
     {
         if (\is_array($decimalValue) || \is_object($decimalValue)) {
-            $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}, ";
-            $m .= 'expecting float, got '.gettype($decimalValue);
-            throw new \UnexpectedValueException($m);
+            $this->throwInvalidTypeException('expecting float, got '.gettype($decimalValue));
         }
         $this->decimalValue = null === $decimalValue ? null : (float) $decimalValue;
 
@@ -328,12 +322,10 @@ abstract class AbstractValue implements ContextualValueInterface
     public function setStringValue($stringValue)
     {
         if (\is_array($stringValue) || \is_object($stringValue)) {
-            $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}, ";
-            $m .= 'expecting string, got '.gettype($stringValue);
-            throw new \UnexpectedValueException($m);
+            $this->throwInvalidTypeException('expecting string, got '.gettype($stringValue));
         }
-        if (null !== $stringValue && 255 < \mb_strlen($stringValue)) {
-            $stringValue = \mb_substr($stringValue, 0, 255);
+        if (null !== $stringValue && \mb_strlen($stringValue) > 255) {
+            $this->throwInvalidTypeException('max string length is 255 characters, got '.\mb_strlen($stringValue));
         }
         $this->stringValue = null === $stringValue ? null : (string) $stringValue;
 
@@ -356,13 +348,11 @@ abstract class AbstractValue implements ContextualValueInterface
     public function setTextValue($textValue)
     {
         if (\is_array($textValue) || \is_object($textValue)) {
-            $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}, ";
-            $m .= 'expecting string, got '.gettype($textValue);
-            throw new \UnexpectedValueException($m);
+            $this->throwInvalidTypeException('expecting string, got '.gettype($textValue));
         }
-        $limit = 2**16-1; // Default limit for TEXT types
-        if (null !== $textValue && $limit < \mb_strlen($textValue)) {
-            $textValue = \mb_substr($textValue, 0, $limit);
+        $limit = 2**32-1; // Default limit for LONGTEXT types
+        if (null !== $textValue && \mb_strlen($textValue) > $limit) {
+            $this->throwInvalidTypeException("max string length is {$limit} characters, got ".\mb_strlen($textValue));
         }
         $this->textValue = null === $textValue ? null : (string) $textValue;
 
@@ -574,5 +564,16 @@ abstract class AbstractValue implements ContextualValueInterface
         if (!\in_array($key, $this::getContextKeys(), true)) {
             throw new ContextException("Trying to get a non-allowed context key {$key}");
         }
+    }
+
+    /**
+     * @param string $message
+     *
+     * @throws \UnexpectedValueException
+     */
+    protected function throwInvalidTypeException($message)
+    {
+        $m = "Invalid value type for attribute {$this->getFamilyCode()}.{$this->getAttributeCode()}: ";
+        throw new \UnexpectedValueException($m.$message);
     }
 }
