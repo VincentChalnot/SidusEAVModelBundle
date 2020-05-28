@@ -238,7 +238,7 @@ class DataValidator extends ConstraintValidator
                 $path = $attribute->getCode();
                 // If attribute is a relation this can lead to some weird error reporting but at least the path is right
                 if ($attribute->getType()->isEmbedded() || $attribute->getType()->isRelation()) {
-                    if (!$attribute->isCollection()) {
+                    if ($violation->getPropertyPath() && !$attribute->isCollection()) {
                         $path .= '.';
                     }
                     $path .= $violation->getPropertyPath();
