@@ -52,16 +52,19 @@ class DataRepository extends EntityRepository
     public function findByIdentifier(FamilyInterface $family, $reference, $idFallback = false, $partialLoad = false)
     {
         $identifierAttribute = $family->getAttributeAsIdentifier();
-        if (!$identifierAttribute) {
-            if (!$idFallback) {
-                $m = "Cannot find data with no identifier attribute for family: '{$family->getCode()}'";
-                throw new \UnexpectedValueException($m);
-            }
+        $entity = null;
+        if ($identifierAttribute) {
+            $entity = $this->findByUniqueAttribute($family, $identifierAttribute, $reference, $partialLoad);
+        } elseif (!$idFallback) {
+            $m = "Cannot find data with no identifier attribute for family: '{$family->getCode()}'";
+            throw new \UnexpectedValueException($m);
+        }
 
+        if (null === $entity && $idFallback) {
             return $this->findByPrimaryKey($family, $reference, $partialLoad);
         }
 
-        return $this->findByUniqueAttribute($family, $identifierAttribute, $reference, $partialLoad);
+        return $entity;
     }
 
     /**
@@ -73,7 +76,7 @@ class DataRepository extends EntityRepository
      * @param bool               $partialLoad
      *
      * @throws \LogicException
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      * @throws NonUniqueResultException
      *
      * @return DataInterface|null
@@ -115,7 +118,7 @@ class DataRepository extends EntityRepository
      * @param string|int      $reference
      * @param bool            $partialLoad
      *
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      *
      * @return Proxy|DataInterface|null
      */
@@ -175,7 +178,7 @@ class DataRepository extends EntityRepository
      * @param FamilyInterface $family
      *
      * @throws \LogicException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      *
      * @return DataInterface
      */
