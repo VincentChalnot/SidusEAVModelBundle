@@ -20,8 +20,14 @@ use Sidus\EAVModelBundle\Model\AttributeInterface;
  */
 class EAVQueryBuilder implements EAVQueryBuilderInterface
 {
+    /** @var EAVQueryBuilderInterface[] */
+    protected static $queryBuilders = [];
+
     /** @var QueryBuilder */
     protected $queryBuilder;
+
+    /** @var AttributeQueryBuilderInterface|null */
+    protected $parentAttributeQueryBuilder;
 
     /** @var string */
     protected $alias;
@@ -40,6 +46,15 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
     {
         $this->queryBuilder = $queryBuilder;
         $this->alias = $alias;
+        self::$queryBuilders[] = $this;
+    }
+
+    /**
+     * @return EAVQueryBuilderInterface[]
+     */
+    public static function getQueryBuilders()
+    {
+        return self::$queryBuilders;
     }
 
     /**
@@ -141,6 +156,22 @@ class EAVQueryBuilder implements EAVQueryBuilderInterface
     public function setContext(array $context = null)
     {
         $this->context = $context;
+    }
+
+    /**
+     * @return AttributeQueryBuilderInterface|null
+     */
+    public function getParentAttributeQueryBuilder()
+    {
+        return $this->parentAttributeQueryBuilder;
+    }
+
+    /**
+     * @param AttributeQueryBuilderInterface $attributeQueryBuilder
+     */
+    public function setParentAttributeQueryBuilder(AttributeQueryBuilderInterface $attributeQueryBuilder)
+    {
+        $this->parentAttributeQueryBuilder = $attributeQueryBuilder;
     }
 
     /**

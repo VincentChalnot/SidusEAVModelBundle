@@ -10,6 +10,11 @@ services:
         tags:
             - { name: data_collector, id: sidus_data_loader, template: "@SidusEAVModel/Profiler/sidus_data_collector.html.twig" }
 
+    # Let's keep this disable for the moment until we have a nice UI to show the data
+#    Sidus\EAVModelBundle\Profiler\QueryBuilderCollector:
+#        tags:
+#        - { name: data_collector, id: sidus_query_builder_collector, template: "@SidusEAVModel/Profiler/sidus_query_builder_collector.html.twig" }
+
     # Overrides base DataLoader services
     Sidus\EAVModelBundle\Doctrine\OptimizedDataLoader:
         class: Sidus\EAVModelBundle\Doctrine\Debug\DebugDataLoader

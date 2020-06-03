@@ -71,4 +71,14 @@ interface EAVQueryBuilderInterface
      * @param array|null $context
      */
     public function setContext(array $context = null);
+
+    /**
+     * @return AttributeQueryBuilderInterface|null
+     */
+    public function getParentAttributeQueryBuilder();
+
+    /**
+     * @param AttributeQueryBuilderInterface $attributeQueryBuilder
+     */
+    public function setParentAttributeQueryBuilder(AttributeQueryBuilderInterface $attributeQueryBuilder);
 }

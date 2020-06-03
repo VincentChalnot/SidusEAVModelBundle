@@ -10,6 +10,8 @@
 
 namespace Sidus\EAVModelBundle\Doctrine;
 
+use Sidus\EAVModelBundle\Model\AttributeInterface;
+
 /**
  * Applies logical conditions on attributes in the EAV Model for the Doctrine Query Builder
  *
@@ -138,6 +140,11 @@ interface AttributeQueryBuilderInterface extends DQLHandlerInterface
     public function join($alias = null);
 
     /**
+     * @return bool
+     */
+    public function isJoinApplied();
+
+    /**
      * @return string
      */
     public function getColumn();
@@ -155,4 +162,14 @@ interface AttributeQueryBuilderInterface extends DQLHandlerInterface
      * @return AttributeQueryBuilderInterface
      */
     public function setContext(array $context = null);
+
+    /**
+     * @return EAVQueryBuilderInterface
+     */
+    public function getEavQueryBuilder();
+
+    /**
+     * @return AttributeInterface
+     */
+    public function getAttribute();
 }

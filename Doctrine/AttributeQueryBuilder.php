@@ -23,6 +23,9 @@ use Sidus\EAVModelBundle\Model\AttributeInterface;
  */
 class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderInterface
 {
+    /** @var AttributeQueryBuilderInterface */
+    protected static $builtJoins = [];
+
     /** @var EAVQueryBuilderInterface */
     protected $eavQueryBuilder;
 
@@ -41,7 +44,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     /** @var bool */
     protected $skipJoin = false;
 
-    /** @var bool */
+    /** @var string|bool */
     protected $joinRelation = false;
 
     /** @var array|null */
@@ -61,6 +64,30 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
         $this->attribute = $attribute;
         $this->enforceFamilyCondition = $enforceFamilyCondition;
         $this->prepareJoin();
+    }
+
+    /**
+     * @return AttributeQueryBuilderInterface[]
+     */
+    public static function getBuiltJoins()
+    {
+        return self::$builtJoins;
+    }
+
+    /**
+     * @return EAVQueryBuilderInterface
+     */
+    public function getEavQueryBuilder()
+    {
+        return $this->eavQueryBuilder;
+    }
+
+    /**
+     * @return AttributeInterface
+     */
+    public function getAttribute()
+    {
+        return $this->attribute;
     }
 
     /**
@@ -329,8 +356,17 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
 
         $joinedEAVQb = new EAVQueryBuilder($this->eavQueryBuilder->getQueryBuilder(), $alias);
         $joinedEAVQb->setContext($this->context);
+        $joinedEAVQb->setParentAttributeQueryBuilder($this);
 
         return $joinedEAVQb;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isJoinApplied()
+    {
+        return $this->joinApplied;
     }
 
     /**
@@ -469,6 +505,7 @@ class AttributeQueryBuilder extends DQLHandler implements AttributeQueryBuilderI
     protected function prepareJoin()
     {
         $this->joinAlias = $this->generateUniqueId('join');
+        self::$builtJoins[$this->joinAlias] = $this;
     }
 
     /**
