@@ -10,11 +10,11 @@
     {% set text %}
         <div class="sf-toolbar-info-piece">
             <b>Attribute types</b>
-            <span class="sf-toolbar-status">{{ collector.attributeTypeRegistry.types|length }}</span>
+            <span class="sf-toolbar-status">{{ collector.attributeTypes|length }}</span>
         </div>
         <div class="sf-toolbar-info-piece">
             <b>Families</b>
-            <span class="sf-toolbar-status">{{ collector.familyRegistry.familyCodes|length }}</span>
+            <span class="sf-toolbar-status">{{ collector.families|length }}</span>
         </div>
     {% endset %}
 
@@ -61,7 +61,7 @@
         <div class="tab">
             <h3 class="tab-title">
                 Families
-                <span class="badge">{{ collector.familyRegistry.familyCodes|length }}</span>
+                <span class="badge">{{ collector.families|length }}</span>
             </h3>
             <div class="tab-content">
                 <table>
@@ -75,17 +75,17 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for family in collector.familyRegistry.families %}
+                    {% for family in collector.families %}
                         {# @var family \Sidus\EAVModelBundle\Model\FamilyInterface #}
                         <tr class="{{ not family.instantiable ? 'text-muted' }}">
                             <td class="font-normal text-bold">
                                 <span class="colored text-bold">{{ family.code }}</span>
-                                <span class="text-muted newline">{{ family }}</span>
+                                <span class="text-muted newline">{{ family.label }}</span>
                             </td>
                             <td class="font-normal text-small" nowrap="">
                                 {% if family.parent %}
                                     <span class="colored text-bold">{{ family.parent.code }}</span>
-                                    <span class="text-muted newline">{{ family.parent }}</span>
+                                    <span class="text-muted newline">{{ family.parent.label }}</span>
                                 {% endif %}
                             </td>
                             <td class="font-normal text-small" nowrap="">
@@ -147,7 +147,7 @@
                                             <tr>
                                                 <td class="font-normal text-bold">
                                                     <span class="colored text-bold">{{ attribute.code }}</span>
-                                                    <span class="text-muted newline">{{ attribute }}</span>
+                                                    <span class="text-muted newline">{{ attribute.label }}</span>
                                                 </td>
                                                 <td class="font-normal text-small" nowrap="">
                                                     {{ attribute.group }}
@@ -176,18 +176,16 @@
                                                         <dd>{{ attribute.contextMask|join(', ') }}</dd>
                                                         <dt>Validation Rules:</dt>
                                                         <dd>
-                                                            {% for validationRule in attribute.validationRules %}
-                                                                {{ profiler_dump(collector.wrapData(validationRule), maxDepth=1) }}
-                                                            {% endfor %}
+                                                            {{ profiler_dump(attribute.validationRules, maxDepth=2) }}
                                                         </dd>
                                                     </dl>
                                                 </td>
                                                 <td class="font-normal text-small">
                                                     <dl class="sidus-properties">
                                                         <dt>Options:</dt>
-                                                        <dd>{{ profiler_dump(collector.wrapData(attribute.options), maxDepth=1) }}</dd>
+                                                        <dd>{{ profiler_dump(attribute.options, maxDepth=1) }}</dd>
                                                         <dt>Form options:</dt>
-                                                        <dd>{{ profiler_dump(collector.wrapData(attribute.formOptions), maxDepth=1) }}</dd>
+                                                        <dd>{{ profiler_dump(attribute.formOptions, maxDepth=1) }}</dd>
                                                     </dl>
                                                 </td>
                                             </tr>
@@ -206,7 +204,7 @@
         <div class="tab">
             <h3 class="tab-title">
                 Attribute Types
-                <span class="badge">{{ collector.attributeTypeRegistry.types|length }}</span>
+                <span class="badge">{{ collector.attributeTypes|length }}</span>
             </h3>
             <div class="tab-content">
                 <table>
@@ -219,7 +217,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for attributeType in collector.attributeTypeRegistry.types %}
+                    {% for attributeType in collector.attributeTypes %}
                         <tr>
                             <td>{{ attributeType.code }}</td>
                             <td>{{ attributeType.databaseType }}</td>

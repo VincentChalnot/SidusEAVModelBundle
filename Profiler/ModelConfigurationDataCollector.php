@@ -10,12 +10,14 @@
 
 namespace Sidus\EAVModelBundle\Profiler;
 
+use Sidus\EAVModelBundle\Model\AttributeInterface;
+use Sidus\EAVModelBundle\Model\AttributeTypeInterface;
+use Sidus\EAVModelBundle\Model\FamilyInterface;
 use Sidus\EAVModelBundle\Registry\AttributeTypeRegistry;
 use Sidus\EAVModelBundle\Registry\FamilyRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
-use Symfony\Component\VarDumper\Cloner\Data;
 
 /**
  * Display model configuration in the debug toolbar
@@ -24,16 +26,26 @@ use Symfony\Component\VarDumper\Cloner\Data;
  */
 class ModelConfigurationDataCollector extends DataCollector
 {
+    /** @var array[] */
+    protected $data = [
+        'families' => [],
+        'attributeTypes' => [],
+    ];
+
+    /** @var FamilyRegistry */
+    protected $familyRegistry;
+
+    /** @var AttributeTypeRegistry */
+    protected $attributeTypeRegistry;
+
     /**
      * @param FamilyRegistry        $familyRegistry
      * @param AttributeTypeRegistry $attributeTypeRegistry
      */
     public function __construct(FamilyRegistry $familyRegistry, AttributeTypeRegistry $attributeTypeRegistry)
     {
-        $this->data = [
-            'familyRegistry' => $familyRegistry,
-            'attributeTypeRegistry' => $attributeTypeRegistry,
-        ];
+        $this->familyRegistry = $familyRegistry;
+        $this->attributeTypeRegistry = $attributeTypeRegistry;
     }
 
     /**
@@ -45,6 +57,12 @@ class ModelConfigurationDataCollector extends DataCollector
      */
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
+        foreach ($this->familyRegistry->getFamilies() as $family) {
+            $this->data['families'][$family->getCode()] = $this->parseFamily($family);
+        }
+        foreach ($this->attributeTypeRegistry->getTypes() as $attributeType) {
+            $this->data['attributeTypes'][$attributeType->getCode()] = $this->parseAttributeType($attributeType);
+        }
     }
 
     /**
@@ -52,22 +70,26 @@ class ModelConfigurationDataCollector extends DataCollector
      */
     public function reset()
     {
+        $this->data = [
+            'families' => [],
+            'attributeTypes' => [],
+        ];
     }
 
     /**
-     * @return FamilyRegistry
+     * @return array[]
      */
-    public function getFamilyRegistry()
+    public function getFamilies()
     {
-        return $this->data['familyRegistry'];
+        return $this->data['families'];
     }
 
     /**
-     * @return AttributeTypeRegistry
+     * @return array[]
      */
-    public function getAttributeTypeRegistry()
+    public function getAttributeTypes()
     {
-        return $this->data['attributeTypeRegistry'];
+        return $this->data['attributeTypes'];
     }
 
     /**
@@ -81,12 +103,78 @@ class ModelConfigurationDataCollector extends DataCollector
     }
 
     /**
-     * @param array $data
+     * @param FamilyInterface|null $family
      *
-     * @return Data|array
+     * @return array|null
      */
-    public function wrapData(array $data)
+    protected function parseFamily(FamilyInterface $family = null)
     {
-        return $this->cloneVar($data);
+        if (null === $family) {
+            return null;
+        }
+
+        return [
+            'code' => $family->getCode(),
+            'label' => $family->getLabel(),
+            'instantiable' => $family->isInstantiable(),
+            'singleton' => $family->isSingleton(),
+            'parent' => $family->getParent() ? [
+                'code' => $family->getParent()->getCode(),
+                'label' => $family->getParent()->getLabel(),
+            ] : null,
+            'dataClass' => $family->getDataClass(),
+            'valueClass' => $family->getValueClass(),
+            'attributeAsIdentifier' => $this->parseAttribute($family->getAttributeAsIdentifier()),
+            'attributeAsLabel' => $this->parseAttribute($family->getAttributeAsLabel()),
+            'attributes' => array_map([$this, 'parseAttribute'], $family->getAttributes()),
+            'data_class' => $family->getDataClass(),
+        ];
+    }
+
+    /**
+     * @param AttributeInterface|null $attribute
+     *
+     * @return array|null
+     */
+    protected function parseAttribute(AttributeInterface $attribute = null)
+    {
+        if (null === $attribute) {
+            return null;
+        }
+
+        return [
+            'code' => $attribute->getCode(),
+            'label' => $attribute->getLabel(),
+            'group' => $attribute->getGroup(),
+            'type' => $this->parseAttributeType($attribute->getType()),
+            'required' => $attribute->isRequired(),
+            'unique' => $attribute->isUnique(),
+            'multiple' => $attribute->isMultiple(),
+            'collection' => $attribute->isCollection(),
+            'contextMask' => $attribute->getContextMask(),
+            'validationRules' => $this->cloneVar($attribute->getValidationRules()),
+            'options' => $this->cloneVar($attribute->getOptions()),
+            'formOptions' => $this->cloneVar($attribute->getFormOptions()),
+        ];
+    }
+
+    /**
+     * @param AttributeTypeInterface|null $attributeType
+     *
+     * @return array|null
+     */
+    protected function parseAttributeType(AttributeTypeInterface $attributeType = null)
+    {
+        if (null === $attributeType) {
+            return null;
+        }
+
+        return [
+            'code' => $attributeType->getCode(),
+            'relation' => $attributeType->isRelation(),
+            'embedded' => $attributeType->isEmbedded(),
+            'databaseType' => $attributeType->getDatabaseType(),
+            'formType' => $attributeType->getFormType(),
+        ];
     }
 }
