@@ -33,6 +33,7 @@ use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectToPopulateTrait;
@@ -49,6 +50,8 @@ use function is_array;
 class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInterface
 {
     use ObjectToPopulateTrait;
+
+    public const ORIGINAL_DATA = 'original_data';
 
     /** @var FamilyRegistry */
     protected $familyRegistry;
@@ -211,6 +214,7 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         $format,
         array $context
     ) {
+        $context[static::ORIGINAL_DATA] = $entity;
         if (null === $normalizedValue) {
             $value = null;
         } elseif ($family->hasAttribute($attributeCode)) {
@@ -355,6 +359,16 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
                 $context['family'] = array_pop($allowedFamilies);
             }
             $context = array_merge($context, $additionalContext);
+            if (array_key_exists('merge_with_existing', $options)
+                && $options['merge_with_existing']
+                && array_key_exists(static::ORIGINAL_DATA, $context)
+            ) {
+                $entity = $context[static::ORIGINAL_DATA];
+                if ($entity instanceof DataInterface) {
+                    // EAV Context is already set in entity
+                    $context[AbstractNormalizer::OBJECT_TO_POPULATE] = $entity->get($attribute->getCode());
+                }
+            }
 
             return $this->denormalizeRelation($value, $targetClass, $format, $context, $attributeReference);
         }
