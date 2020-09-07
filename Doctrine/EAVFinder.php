@@ -268,6 +268,17 @@ class EAVFinder
 
     /**
      * @param FamilyInterface $family
+     * @param string|int      $identifier
+     *
+     * @return DataInterface|null
+     */
+    public function findByIdOrIdentifier(FamilyInterface $family, $identifier)
+    {
+        return $this->getRepository($family)->findByIdOrIdentifier($family, $identifier);
+    }
+
+    /**
+     * @param FamilyInterface $family
      *
      * @return DataRepository
      */

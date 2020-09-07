@@ -72,7 +72,7 @@ class DataParamConverter extends AbstractParamConverter
             if ($family->isSingleton()) {
                 $data = $this->repository->getInstance($family);
             } else {
-                $data = $this->repository->findByIdentifier($family, $value, true);
+                $data = $this->repository->findByIdOrIdentifier($family, $value);
             }
         } else {
             $data = $this->repository->find($value);

@@ -68,6 +68,30 @@ class DataRepository extends EntityRepository
     }
 
     /**
+     * Find data based on it's Doctrine ID or it's family identifier
+     *
+     * @param FamilyInterface $family
+     * @param int|string      $reference
+     * @param bool            $partialLoad
+     *
+     * @throws NonUniqueResultException
+     * @throws \UnexpectedValueException
+     * @throws ORMException
+     * @throws \LogicException
+     *
+     * @return DataInterface|null
+     */
+    public function findByIdOrIdentifier(FamilyInterface $family, $reference, $partialLoad = false)
+    {
+        $entity = $this->findByPrimaryKey($family, $reference, $partialLoad);
+        if ($entity) {
+            return $entity;
+        }
+
+        return $this->findByIdentifier($family, $reference, false, $partialLoad);
+    }
+
+    /**
      * Find a data based on a unique attribute
      *
      * @param FamilyInterface    $family
@@ -206,14 +230,14 @@ class DataRepository extends EntityRepository
     }
 
     /**
-     * @deprecated Do not use this function anymore, use the OptimizedDataLoader on your query results instead
-     *
      * @param string            $alias
      * @param string            $indexBy
      * @param QueryBuilder|null $qb
      * @param bool              $associations
      *
      * @return QueryBuilder
+     * @deprecated Do not use this function anymore, use the OptimizedDataLoader on your query results instead
+     *
      */
     public function createOptimizedQueryBuilder($alias, $indexBy = null, QueryBuilder $qb = null, $associations = false)
     {
@@ -262,11 +286,11 @@ class DataRepository extends EntityRepository
     }
 
     /**
-     * @deprecated Use DataManager::getQbForFamiliesAndLabel instead
-     *
+     * @throws \RuntimeException
      * @see        DataManager::getQbForFamiliesAndLabel
      *
-     * @throws \RuntimeException
+     * @deprecated Use DataManager::getQbForFamiliesAndLabel instead
+     *
      */
     public function getQbForFamiliesAndLabel()
     {
@@ -322,11 +346,11 @@ class DataRepository extends EntityRepository
     }
 
     /**
-     * @deprecated This method does not work as expected anymore, please use the DataLoader service instead
-     *
      * @param int $id
      *
      * @return DataInterface
+     * @deprecated This method does not work as expected anymore, please use the DataLoader service instead
+     *
      */
     public function loadFullEntity($id)
     {
@@ -340,11 +364,11 @@ class DataRepository extends EntityRepository
     }
 
     /**
-     * @deprecated This method does not work as expected anymore, please use the DataLoader service instead
-     *
      * @param DataInterface $data
      *
      * @return DataInterface[]
+     * @deprecated This method does not work as expected anymore, please use the DataLoader service instead
+     *
      */
     public function fetchEAVAssociations(DataInterface $data)
     {

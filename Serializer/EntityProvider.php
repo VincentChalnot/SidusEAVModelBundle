@@ -83,7 +83,7 @@ class EntityProvider implements PurgeableEntityProviderInterface
 
         // In case we are trying to resolve a simple reference
         if (is_scalar($data)) {
-            $entity = $repository->findByIdentifier($family, $data, true);
+            $entity = $repository->findByIdOrIdentifier($family, $data);
             if ($entity instanceof DataInterface) {
                 return $entity;
             }
