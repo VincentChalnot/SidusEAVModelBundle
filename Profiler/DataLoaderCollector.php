@@ -27,6 +27,7 @@ class DataLoaderCollector extends DataCollector
     protected $data = [
         'nodes' => [],
         'count' => null,
+        'valuesCount' => null,
     ];
 
     /** @var array */
@@ -38,6 +39,7 @@ class DataLoaderCollector extends DataCollector
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
         $this->data['count'] = count(CollectedDataNode::getIndex());
+        $this->data['valuesCount'] = CollectedDataNode::getValuesCount();
         foreach (CollectedDataNode::getIndex() as $dataId => $node) {
             $data = $node->getData();
             $relatedNodes = [];
@@ -71,6 +73,7 @@ class DataLoaderCollector extends DataCollector
         $this->data = [
             'nodes' => [],
             'count' => null,
+            'valuesCount' => null,
         ];
     }
 
@@ -88,6 +91,14 @@ class DataLoaderCollector extends DataCollector
     public function getNodes()
     {
         return $this->data['nodes'];
+    }
+
+    /**
+     * @return int
+     */
+    public function getValuesCount()
+    {
+        return $this->data['valuesCount'];
     }
 
     /**

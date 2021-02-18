@@ -3,6 +3,7 @@
 namespace Sidus\EAVModelBundle\Doctrine\Debug;
 
 use Sidus\EAVModelBundle\Entity\DataInterface;
+use Sidus\EAVModelBundle\Entity\ValueInterface;
 
 /**
  * Used for debug purposes to collect data hydration times, using a static index for convenience because it's just a
@@ -12,6 +13,9 @@ class CollectedDataNode
 {
     /** @var array */
     protected static $index = [];
+
+    /** @var int[] */
+    protected static $valueIds = [];
 
     /** @var CollectedDataNode|null */
     protected $parentNode;
@@ -46,6 +50,15 @@ class CollectedDataNode
     }
 
     /**
+     * @param ValueInterface $value
+     */
+    public static function addValueLoadingStatistics(ValueInterface $value)
+    {
+        self::createOrGetNode($value->getData())->terminate();
+        self::$valueIds[$value->getIdentifier()] = null;
+    }
+
+    /**
      * @param DataInterface $data
      * @param bool          $rootNode
      *
@@ -66,6 +79,14 @@ class CollectedDataNode
     public static function getIndex()
     {
         return self::$index;
+    }
+
+    /**
+     * @return int
+     */
+    public static function getValuesCount()
+    {
+        return count(self::$valueIds);
     }
 
     /**

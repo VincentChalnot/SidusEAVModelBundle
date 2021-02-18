@@ -26,6 +26,7 @@
 
 {% block panel %}
     <h2>Loaded EAV Data</h2>
+    <p>{{ collector.count }} data loaded, {{ collector.valuesCount }} associated values loaded</p>
     <div id="eav_graph" style="position:absolute;width:100%;height:100%;"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/1.2.1/sigma.min.js"

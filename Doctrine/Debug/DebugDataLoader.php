@@ -60,7 +60,7 @@ class DebugDataLoader extends OptimizedDataLoader
     {
         $values = parent::getValues($valueClass, $entitiesById);
         foreach ($values as $value) {
-            CollectedDataNode::createOrGetNode($value->getData())->terminate();
+            CollectedDataNode::addValueLoadingStatistics($value);
         }
 
         return $values;
