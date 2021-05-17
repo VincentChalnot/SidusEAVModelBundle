@@ -369,6 +369,9 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
                     $context[AbstractNormalizer::OBJECT_TO_POPULATE] = $entity->get($attribute->getCode());
                 }
             }
+            if ($valueMetadata->isCollectionValuedAssociation($storageField)) {
+                $targetClass .= '[]';
+            }
 
             return $this->denormalizeRelation($value, $targetClass, $format, $context, $attributeReference);
         }
@@ -417,6 +420,9 @@ class EAVDataDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
         $classMetadata = $entityManager->getClassMetadata($family->getDataClass());
         if ($classMetadata->hasAssociation($attributeCode)) {
             $targetClass = $classMetadata->getAssociationTargetClass($attributeCode);
+            if ($classMetadata->isCollectionValuedAssociation($attributeCode)) {
+                $targetClass .= '[]';
+            }
 
             return $this->denormalizeRelation($value, $targetClass, $format, $context, $attributeReference);
         }
