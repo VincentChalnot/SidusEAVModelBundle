@@ -1,3 +1,22 @@
-/composer.lock
-/vendor
-/.couscous
+# Dependencies
+/vendor/
+composer.lock
+
+# IDE
+/.idea/
+/.vscode/
+*.iml
+
+# Testing
+/.phpunit.cache/
+/.phpunit.result.cache
+/phpunit.xml
+/coverage/
+
+# Build artifacts
+/.couscous/
+/var/
+
+# OS files
+.DS_Store
+Thumbs.db

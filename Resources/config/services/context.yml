@@ -1,8 +1,0 @@
-services:
-    Sidus\EAVModelBundle\Context\ContextManagerInterface:
-        alias: Sidus\EAVModelBundle\Context\ContextManager
-
-    Sidus\EAVModelBundle\Context\ContextManager:
-        class: Sidus\EAVModelBundle\Context\ContextManager
-        arguments:
-            - '%sidus_eav_model.context.default_context%'
