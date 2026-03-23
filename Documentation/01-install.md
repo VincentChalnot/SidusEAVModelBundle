@@ -1,107 +1,110 @@
 ## Installation
 
-This bundle can be installed with a few easy steps.
+This guide covers installing and setting up the Sidus EAV Model Bundle.
 
-### Bundle installation
+> **Version 2.0**: This documentation is for version 2.0+, which requires PHP 8.3+, Symfony 7.0/8.0, and Doctrine ORM 3.0+. For older versions, see the v1.3 branch documentation.
 
-The bundle installation covers four steps:
-- Requiring the library with composer
-- Enabling the bundle in your kernel,
-- Declaring some required classes
-- Defining the default minimum configuration.
+### Requirements
 
-#### Require the bundle with composer:
+- PHP 8.3 or higher
+- Symfony 7.0 or 8.0
+- Doctrine ORM 3.0+ (optional, but required for the Doctrine Bridge)
 
-````bash
-$ composer require sidus/eav-model-bundle "~1.2"
-````
+### Step 1: Install via Composer
 
-#### Add the bundle to AppKernel.php
+```bash
+composer require sidus/eav-model-bundle "^2.0"
+```
 
-````php
+### Step 2: Create Your Entity Classes
+
+Create two entities that extend the abstract base classes. These will store your EAV data.
+
+#### Data Entity
+
+```php
 <?php
-/**
- * app/AppKernel.php
- */
-class AppKernel
-{
-    public function registerBundles()
-    {
-        $bundles = [
-            // ...
-            new Sidus\EAVModelBundle\SidusEAVModelBundle(),
-            // ...
-        ];
-    }
-}
-````
-
-#### Create your Data and Value classes
-
-In a dedicated bundle or in one of your bundle, create two new Doctrine entities:
-
-````php
-<?php
-
-namespace MyNamespace\EAVModelBundle\Entity;
+// src/Entity/Data.php
+namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Sidus\EAVModelBundle\Entity\AbstractData;
+use Sidus\EAVModelBundle\Bridge\Doctrine\Entity\AbstractData;
 
-/**
- * @ORM\Table(name="mynamespace_data", indexes={
- *     @ORM\Index(name="family", columns={"family_code"}),
- *     @ORM\Index(name="updated_at", columns={"updated_at"}),
- *     @ORM\Index(name="created_at", columns={"created_at"})
- * })
- * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\DataRepository")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'eav_data')]
+#[ORM\Index(name: 'family_idx', columns: ['family_code'])]
+#[ORM\Index(name: 'updated_at_idx', columns: ['updated_at'])]
+#[ORM\Index(name: 'created_at_idx', columns: ['created_at'])]
 class Data extends AbstractData
 {
+    // Add any custom properties or methods here
 }
-````
+```
 
-````php
+#### Value Entity
+
+```php
 <?php
-
-namespace MyNamespace\EAVModelBundle\Entity;
+// src/Entity/Value.php
+namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Sidus\EAVModelBundle\Entity\AbstractValue;
+use Sidus\EAVModelBundle\Bridge\Doctrine\Entity\AbstractValue;
 
-/**
- * @ORM\Table(name="mynamespace_value", indexes={
- *     @ORM\Index(name="attribute", columns={"attribute_code"}),
- *     @ORM\Index(name="family", columns={"family_code"}),
- *     @ORM\Index(name="string_search", columns={"attribute_code", "string_value"}),
- *     @ORM\Index(name="int_search", columns={"attribute_code", "integer_value"}),
- *     @ORM\Index(name="bool_search", columns={"attribute_code", "bool_value"}),
- *     @ORM\Index(name="position", columns={"position"})
- * })
- * @ORM\Entity(repositoryClass="Sidus\EAVModelBundle\Entity\ValueRepository")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'eav_value')]
+#[ORM\Index(name: 'attribute_idx', columns: ['attribute_code'])]
+#[ORM\Index(name: 'family_idx', columns: ['family_code'])]
+#[ORM\Index(name: 'string_search_idx', columns: ['attribute_code', 'string_value'])]
+#[ORM\Index(name: 'int_search_idx', columns: ['attribute_code', 'integer_value'])]
+#[ORM\Index(name: 'bool_search_idx', columns: ['attribute_code', 'bool_value'])]
+#[ORM\Index(name: 'position_idx', columns: ['position'])]
 class Value extends AbstractValue
 {
+    // Add any custom properties or methods here
 }
-````
+```
 
-Note that you're in charge of defining the mysql indexes of theses two classes, the indexes provided in the example are
-not mandatory but strongly advised for performances.
+> **Note**: The indexes are optional but strongly recommended for performance. Adjust them based on your query patterns.
 
-Single table inheritance can be configured to allow different classes for different families, see this chapter for more
-information:
-[Custom classes](12-custom_classes.md)
+### Step 3: Configure the Bundle
 
-#### Base configuration
+Create a configuration file for the bundle:
 
-You will need at least the following configuration:
-
-````yaml
+```yaml
+# config/packages/sidus_eav_model.yaml
 sidus_eav_model:
-    data_class: MyNamespace\EAVModelBundle\Entity\Data
-    value_class: MyNamespace\EAVModelBundle\Entity\Value
-````
+    data_class: App\Entity\Data
+    value_class: App\Entity\Value
+    
+    # Optional: Default context values
+    default_context: []
+    
+    # Optional: Context keys that apply to all attributes
+    global_context_mask: []
+```
 
-This will declare the classes used by the bundle to instantiate EAV data.
+### Step 4: Create the Database Schema
 
-You're now ready to [configure your model](02-model.md)
+```bash
+# Generate migration
+php bin/console doctrine:migrations:diff
+
+# Run migration
+php bin/console doctrine:migrations:migrate
+
+# Or directly update schema (not recommended for production)
+php bin/console doctrine:schema:update --force
+```
+
+### Step 5: Clear Cache
+
+```bash
+php bin/console cache:clear
+```
+
+You're now ready to [configure your model](02-model.md)!
+
+### Using Custom Classes (Optional)
+
+If you need different Data classes for different families, see [Custom Classes](12-custom_classes.md).
