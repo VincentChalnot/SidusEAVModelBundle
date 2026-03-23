@@ -20,8 +20,6 @@ namespace Sidus\EAVModelBundle\Attribute;
  */
 class EAVRelationAttributeType extends RelationAttributeType
 {
-    public function setAttributeDefaults(AttributeInterface $attribute): void
-    {
-        // EAV relations might need specific defaults configured
-    }
+    // Inherits all behavior from RelationAttributeType
+    // Exists for semantic distinction and future extensibility
 }

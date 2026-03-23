@@ -24,7 +24,9 @@ class IdentifierAttributeType extends AttributeType
 {
     public function setAttributeDefaults(AttributeInterface $attribute): void
     {
-        // Identifiers must be unique and required
-        // This is enforced at configuration level, but we can add hints here
+        // Identifiers must be unique, required, and non-contextual
+        $attribute->setUnique(true);
+        $attribute->setRequired(true);
+        $attribute->setContextMask([]);
     }
 }
