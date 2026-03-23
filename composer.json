@@ -1,13 +1,14 @@
 {
     "name": "sidus/eav-model-bundle",
-    "description": "Symfony & Doctrine implementation of a Entity-Attribute-Value model, easily extendable",
+    "description": "Symfony & Doctrine implementation of an Entity-Attribute-Value model, easily extendable",
     "keywords": [
         "eav",
         "doctrine",
-        "model"
+        "model",
+        "symfony"
     ],
     "homepage": "https://github.com/VincentChalnot/SidusEAVModelBundle",
-    "type": "library",
+    "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
         {
@@ -19,23 +20,51 @@
     ],
     "autoload": {
         "psr-4": {
-            "Sidus\\EAVModelBundle\\": ""
+            "Sidus\\EAVModelBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Sidus\\EAVModelBundle\\Tests\\": "tests/"
         }
     },
     "require": {
-        "php": ">=7.2",
-        "symfony/dependency-injection": "^4.1",
-        "symfony/config": "~4.1",
-        "symfony/validator": "^4.1",
-        "symfony/yaml": "^4.1",
-        "symfony/property-access": "^4.1",
-        "symfony/translation": "^4.1",
-        "doctrine/orm": "^2.6",
-        "doctrine/doctrine-bundle": "^1.9",
-        "sidus/base-bundle": "~1.0"
+        "php": ">=8.3",
+        "symfony/config": "^7.0|^8.0",
+        "symfony/dependency-injection": "^7.0|^8.0",
+        "symfony/http-kernel": "^7.0|^8.0",
+        "symfony/property-access": "^7.0|^8.0",
+        "symfony/translation-contracts": "^3.0",
+        "symfony/validator": "^7.0|^8.0",
+        "psr/log": "^3.0"
+    },
+    "require-dev": {
+        "doctrine/dbal": "^4.0",
+        "doctrine/doctrine-bundle": "^2.12",
+        "doctrine/orm": "^3.0",
+        "phpunit/phpunit": "^11.0",
+        "symfony/console": "^7.0|^8.0",
+        "symfony/framework-bundle": "^7.0|^8.0",
+        "symfony/yaml": "^7.0|^8.0"
     },
     "suggest": {
-        "sidus/eav-form-bundle": "Symfony form support",
-        "sidus/eav-bootstrap-bundle": "Easy Twitter Bootstrap integration"
+        "doctrine/orm": "Required to use the Doctrine ORM bridge (^3.0)",
+        "doctrine/doctrine-bundle": "Required to use the Doctrine ORM bridge (^2.12)",
+        "sidus/eav-form-bundle": "Symfony form support (v2.0+)"
+    },
+    "conflict": {
+        "doctrine/orm": "<3.0"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.0.x-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true
     }
 }
